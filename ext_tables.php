@@ -6,8 +6,8 @@ if (!defined('TYPO3_MODE')) {
 $_EXTCONF = unserialize($_EXTCONF);
 
 
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile($_EXTKEY, 'Configuration/TypoScript/',
-    'Gridelements');
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile($_EXTKEY, 'Configuration/TypoScript/', 'Gridelements');
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile($_EXTKEY, 'Configuration/TypoScript/DataProcessing', 'Gridelements w/DataProcessing');
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPlugin(array(
     'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tt_content.CType_pi1',
