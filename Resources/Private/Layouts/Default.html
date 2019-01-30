@@ -4,7 +4,7 @@
         <f:then>
 
             <div id="c{data.uid}"
-                 class="ge-container frame frame-{data.frame_class} frame-type-{data.CType} frame-layout-{data.layout} {f:if(
+                 class="grid-container ge-container frame frame-{data.frame_class} frame-type-{data.CType} frame-layout-{data.layout} {f:if(
                         condition: data.space_before_class,
                         then: ' frame-space-before-{data.space_before_class}'
                     )}{f:if(
@@ -34,7 +34,7 @@
         </f:then>
         <f:else>
 
-            <div id="c{data.uid}" class="ge-container">
+            <div id="c{data.uid}" class="grid-container ge-container">
                 <f:if condition="{data._LOCALIZED_UID}">
                     <a id="c{data._LOCALIZED_UID}"></a>
                 </f:if>

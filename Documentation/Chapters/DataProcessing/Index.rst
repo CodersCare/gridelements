@@ -23,18 +23,18 @@ special **Gridelements w/DataProcessing** setup in your TS template editor:
 
 ::
 
-  lib.gridelements.defaultGridSetup = FLUIDTEMPLATE
+  lib.gridelements.defaultGridSetup =< lib.contentElement
   lib.gridelements.defaultGridSetup {
     templateName.field = tx_gridelements_backend_layout
-    templateName.ifEmpty = default
+    templateName.ifEmpty = GridElement
     layoutRootPaths {
-      10 = EXT:gridelements/Resources/Private/Layouts/
+      1 = EXT:gridelements/Resources/Private/Layouts/
     }
     partialRootPaths {
-      10 = EXT:gridelements/Resources/Private/Partials/
+      1 = EXT:gridelements/Resources/Private/Partials/
     }
     templateRootPaths {
-      10 = EXT:gridelements/Resources/Private/Templates/
+      1 = EXT:gridelements/Resources/Private/Templates/
     }
     dataProcessing {
       10 = GridElementsTeam\Gridelements\DataProcessing\GridChildrenProcessor
