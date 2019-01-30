@@ -118,18 +118,17 @@ class PageRenderer implements SingletonInterface
                 'shortcut',
                     $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode']
             ) ? 'true' : 'false') . ';
-            top.skipDraggableDetails = ' . ($this->getBackendUser()->uc['dragAndDropHideNewElementWizardInfoOverlay'] ? 'true' : 'false') . ";
-            top.backPath = '" . $GLOBALS['BACK_PATH'] . "';
-            top.browserUrl = '" . htmlspecialchars($uriBuilder->buildUriFromRoute('wizard_element_browser')) . "';";
+            top.skipDraggableDetails = ' . ($this->getBackendUser()->uc['dragAndDropHideNewElementWizardInfoOverlay'] ? 'true' : 'false') . ';
+            top.browserUrl = ' . json_encode((string)$uriBuilder->buildUriFromRoute('wizard_element_browser')) . ';';
 
             if (!empty($clipBoard) && !empty($clipBoard['el'])) {
                 $clipBoardElement = GeneralUtility::trimExplode('|', key($clipBoard['el']));
                 if ($clipBoardElement[0] === 'tt_content') {
                     $clipBoardElementData = BackendUtility::getRecord('tt_content', (int)$clipBoardElement[1]);
-                    $pAddExtOnReadyCode .= "
-            top.clipBoardElementCType = '" . $clipBoardElementData['CType'] . "';
-            top.clipBoardElementTxGridelementsBackendLayout = '" . (($clipBoardElementData['CType'] == 'gridelements_pi1') ? $clipBoardElementData['tx_gridelements_backend_layout'] : '') . "';
-            top.clipBoardElementListType = '" . $clipBoardElementData['list_type'] . "';";
+                    $pAddExtOnReadyCode .= '
+            top.clipBoardElementCType = ' . json_encode($clipBoardElementData['CType']) . ';
+            top.clipBoardElementTxGridelementsBackendLayout = ' . json_encode(($clipBoardElementData['CType'] === 'gridelements_pi1') ? $clipBoardElementData['tx_gridelements_backend_layout'] : '') . ';
+            top.clipBoardElementListType = ' . json_encode($clipBoardElementData['list_type']) . ';';
                 } else {
                     $pAddExtOnReadyCode .= "
             top.clipBoardElementCType = '';

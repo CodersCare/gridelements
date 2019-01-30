@@ -18,8 +18,6 @@
 define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDrop'], function ($, Droppable, DragDrop) {
     'use strict';
 
-    console.log(DragDrop);
-
     /**
      * @exports TYPO3/CMS/Gridelements/DragDrop
      */
