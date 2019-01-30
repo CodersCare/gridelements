@@ -55,12 +55,24 @@ $GLOBALS['TYPO3_USER_SETTINGS']['columns']['showGridInformation'] = [
     'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:showGridInformation',
 ];
 
+$GLOBALS['TYPO3_USER_SETTINGS']['columns']['disableDragInWizard'] = [
+    'type'  => 'check',
+    'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:disableDragInWizard',
+];
+
+$GLOBALS['TYPO3_USER_SETTINGS']['columns']['disableCopyFromPageButton'] = [
+    'type'  => 'check',
+    'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:disableCopyFromPageButton',
+];
+
 $GLOBALS['TYPO3_USER_SETTINGS']['showitem'] .= ',
     --div--;LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:gridElements,
         dragAndDropHideNewElementWizardInfoOverlay,
         hideColumnHeaders,
         hideContentPreview,
-        showGridInformation
+        showGridInformation,
+        disableDragInWizard,
+        disableCopyFromPageButton
         ';
 
 // Hooks
