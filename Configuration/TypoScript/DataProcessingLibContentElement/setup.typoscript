@@ -1,17 +1,13 @@
-lib.gridelements.defaultGridSetup = FLUIDTEMPLATE
-lib.gridelements.defaultGridSetup {
-    templateName.field = tx_gridelements_backend_layout
-    templateName.ifEmpty = default
-    layoutRootPaths {
-        10 = EXT:gridelements/Resources/Private/Layouts/
+tt_content.gridelements_pi1 =< lib.contentElement
+tt_content.gridelements_pi1 {
+    templateName = GridElement
+    templateName.override.field = tx_gridelements_backend_layout
+    templateRootPaths {
+        1 = EXT:gridelements/Resources/Private/Templates/
     }
 
     partialRootPaths {
-        10 = EXT:gridelements/Resources/Private/Partials/
-    }
-
-    templateRootPaths {
-        10 = EXT:gridelements/Resources/Private/Templates/
+        1 = EXT:gridelements/Resources/Private/Partials/
     }
 
     dataProcessing {
@@ -35,8 +31,6 @@ lib.gridelements.defaultGridSetup {
         }
     }
 }
-
-tt_content.gridelements_pi1 < lib.gridelements.defaultGridSetup
 
 lib.tt_content.shortcut.pages = COA
 lib.tt_content.shortcut.pages {
