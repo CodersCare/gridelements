@@ -44,6 +44,7 @@ use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 use TYPO3\CMS\Core\Versioning\VersionState;
@@ -776,7 +777,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             $parentObject->id,
             'mod.web_layout.allowInconsistentLanguageHandling'
         );
-        if ($language === 0 || $language === -1 || $allowInconsistentLanguageHandling['value'] === '1') {
+        if ($language === 0 || $language === -1 || (isset($allowInconsistentLanguageHandling['value']) && $allowInconsistentLanguageHandling['value'] === '1')) {
             return false;
         }
         /**
