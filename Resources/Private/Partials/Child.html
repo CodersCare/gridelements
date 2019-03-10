@@ -1,0 +1,18 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:if condition="{children}">
+    <f:then>
+        <a id="c{data.uid}"></a>
+        <f:if condition="{data._LOCALIZED_UID}">
+            <a id="c{data._LOCALIZED_UID}"></a>
+        </f:if>
+        <f:render partial="Container" arguments="{_all}" optional="true"/>
+    </f:then>
+    <f:else>
+        <f:if condition="{data.CType}">
+            <f:cObject typoscriptObjectPath="tt_content.{data.CType}" data="{data}"/>
+        </f:if>
+    </f:else>
+</f:if>
+
+</html>

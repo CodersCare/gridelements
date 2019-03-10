@@ -18,8 +18,6 @@
 define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDrop'], function ($, Droppable, DragDrop) {
     'use strict';
 
-    console.log(DragDrop);
-
     /**
      * @exports TYPO3/CMS/Gridelements/DragDrop
      */
@@ -207,7 +205,7 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
             var targetPid = 0;
             if (typeof targetFound === 'undefined') {
                 // the actual page is needed
-                targetPid = $('[data-page]').first().data('page');
+                targetPid = $('.t3js-page-ce[data-page]').first().data('page');
             } else {
                 // the negative value of the content element after where it should be moved
                 targetPid = 0 - parseInt(targetFound);

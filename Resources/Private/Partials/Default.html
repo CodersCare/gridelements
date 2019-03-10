@@ -3,7 +3,7 @@
 <f:switch expression="{data.CType}">
     <f:case value="gridelements_pi1">
         <div id="c{data.uid}"
-             class="ge-container frame frame-{data.frame_class} frame-type-{data.CType} frame-layout-{data.layout} {f:if(
+             class="grid-container ge-container frame frame-{data.frame_class} frame-type-{data.CType} frame-layout-{data.layout} {f:if(
                         condition: data.space_before_class,
                         then: ' frame-space-before-{data.space_before_class}'
                     )}{f:if(
@@ -46,7 +46,7 @@
 <f:section name="Columns">
     <f:if condition="{children}">
         <f:for each="{children}" as="column" key="columnNumber">
-            <div id="c{data.uid}-{columnNumber} ge-column">
+            <div id="c{data.uid}-{columnNumber}" class="grid-column grid-column-{columnNumber}">
                 <f:for each="{column}" as="child">
                     <f:render partial="Default"
                               arguments="{data: child.data, children: child.children, options: options}"/>
@@ -59,9 +59,9 @@
 <f:section name="Rows">
     <f:if condition="{children}">
         <f:for each="{children}" as="row" key="rowNumber">
-            <div id="c{data.uid}-{rowNumber} ge-row">
+            <div id="c{data.uid}-{rowNumber}" class="grid-row grid-row-{rowNumber}">
                 <f:for each="{row}" as="column" key="columnNumber">
-                    <div id="c{data.uid}-{rowNumber}-{columnNumber} ge-column">
+                    <div id="c{data.uid}-{rowNumber}-{columnNumber}" class="grid-column grid-column-{columnNumber}">
                         <f:for each="{column}" as="child">
                             <f:render partial="Default"
                                       arguments="{data: child.data, children: child.children, options: options}"/>

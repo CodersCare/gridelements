@@ -169,8 +169,9 @@ dataProcessing.123.default.options.recursive
    Description
          Determines the depth to fetch even children of child records
          recursively. This way you can use complex nested data structures
-         within a single FLUIDTEMPLATE. The whole tree will be handed over
-         to the variable as a data array.
+         within a single FLUIDTEMPLATE. The whole tree of children will be handed
+         over to the variable as a data array.
+         **Be aware of the fact that this ignores different setups of child elements**
 
    Default
          0
