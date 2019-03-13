@@ -10,7 +10,7 @@
     </f:then>
     <f:else>
         <f:if condition="{data.CType}">
-            <f:cObject typoscriptObjectPath="tt_content.{data.CType}" data="{data}"/>
+            <f:cObject typoscriptObjectPath="tt_content.{data.CType}" data="{data}" table="tt_content" />
         </f:if>
     </f:else>
 </f:if>
