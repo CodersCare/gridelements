@@ -18,6 +18,9 @@
 			<trans-unit id="disableCopyFromPageButton" xml:space="preserve">
 				<source>Disable the "Copy from page" button.</source>
 			</trans-unit>
+			<trans-unit id="disableAutomaticUnusedColumnCorrection" xml:space="preserve">
+				<source>Disable the automatic correction of elements in unused columns to colPos -2. So elements will keep their colPos values even though that column is not available anymore.</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
