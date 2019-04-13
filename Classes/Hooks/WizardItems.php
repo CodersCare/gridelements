@@ -28,6 +28,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider;
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
 use TYPO3\CMS\Core\Imaging\IconRegistry;
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 use TYPO3\CMS\Lang\LanguageService;
@@ -362,6 +363,10 @@ class WizardItems implements NewContentElementWizardHookInterface
                 }
                 $wizardItems[$key]['tt_content_defValues']['tx_gridelements_columns'] = (int)$column;
                 $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_columns]=' . (int)$column;
+            }
+            if ($wizardItems[$key]['tt_content_defValues']['CType'] = 'table') {
+                $wizardItems[$key]['tt_content_defValues']['bodytext'] = '';
+                $wizardItems[$key]['params'] .= '&defVals[tt_content][bodytext]=';
             }
         }
     }
