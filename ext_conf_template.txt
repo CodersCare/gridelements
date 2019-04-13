@@ -12,3 +12,6 @@ disableDragInWizard = 0
 
 # cat=basic; type=boolean; label=LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:disableCopyFromPageButton
 disableCopyFromPageButton = 0
+
+# cat=basic; type=boolean; label=LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:disableAutomaticUnusedColumnCorrection
+disableAutomaticUnusedColumnCorrection = 0
