@@ -4,8 +4,6 @@ if (!defined('TYPO3_MODE')) {
     die('Access denied.');
 }
 
-$_EXTCONF = unserialize($_EXTCONF);
-
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1488914437] = [
     'nodeName' => 'belayoutwizard',
     'priority' => 50,
@@ -13,7 +11,7 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1488914437] = [
 ];
 
 // XCLASS
-if ($_EXTCONF['nestingInListModule']) {
+if ($GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['gridelements']['nestingInListModule']) {
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Recordlist\RecordList\DatabaseRecordList::class] = ['className' => \GridElementsTeam\Gridelements\Xclass\DatabaseRecordList::class];
 }
 
