@@ -22,7 +22,6 @@ namespace GridElementsTeam\Gridelements\DataHandler;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -54,7 +53,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
         if ($table === 'tt_content' || $table === 'pages') {
             $this->init($table, $uid, $parentObj);
             if (!$this->getTceMain()->isImporting) {
-                $extensionConfiguration =  GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+                $extensionConfiguration = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['gridelements']);
                 if((boolean)$extensionConfiguration['disableAutomaticUnusedColumnCorrection'] !== true) {
                     $this->saveCleanedUpFieldArray($fieldArray);
                 }
