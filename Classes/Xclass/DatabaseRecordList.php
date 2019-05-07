@@ -2678,7 +2678,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                                         'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
                                     ]
                                 );
-                                $icon = '<a href="#" data-url="' . htmlspecialchars($url) . '"'
+                                $icon = '<a href="' . htmlspecialchars($url) . '"'
                                     . ' data-title="' . htmlspecialchars($lang->getLL('new')) . '"'
                                     . ' class="btn btn-default t3js-toggle-new-content-element-wizard">'
                                     . $spriteIcon->render()

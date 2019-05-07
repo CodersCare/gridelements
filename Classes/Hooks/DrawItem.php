@@ -623,8 +623,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         if ($colPos !== '' && $colPos !== null && $colPos < 32768 && $url) {
             $iconsArray = [
                 'new' => '<a 
-                            href="#" 
-                            data-url="' . htmlspecialchars($url) . '" 
+                            href="' . htmlspecialchars($url) . '" 
                             data-title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '" 
                             title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '" 
                             class="btn btn-default btn-sm t3js-toggle-new-content-element-wizard">' .
@@ -727,8 +726,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                         }
                         $iconsArray = [
                             'new' => '<a 
-                                href="#"
-                                data-url="' . htmlspecialchars($url) . '" 
+                                href="' . htmlspecialchars($url) . '"
                                 data-title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '" 
                                 title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '" 
                                 class="btn btn-default btn-sm btn t3js-toggle-new-content-element-wizard">' .
