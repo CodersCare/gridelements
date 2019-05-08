@@ -40,8 +40,8 @@ define(['jquery', 'TYPO3/CMS/Gridelements/GridElementsDragDrop', 'jquery-ui/drag
      */
     DragInWizard.getWizardUrl = function () {
         var $newCeLink = $('.t3js-toggle-new-content-element-wizard').first();
-        if (typeof $newCeLink.data('url') !== 'undefined') {
-            var originalWizardUrl = $newCeLink.data('url').split('\&', 4);
+        if (typeof $newCeLink.attr('href') !== 'undefined') {
+            var originalWizardUrl = $newCeLink.attr('href').split('\&', 4);
         }
         if (typeof originalWizardUrl !== 'undefined') {
             DragInWizard.wizardUrl = originalWizardUrl[0] + '&' + originalWizardUrl[1] + '&' + originalWizardUrl[2];
