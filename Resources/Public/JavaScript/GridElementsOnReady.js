@@ -273,8 +273,8 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
      */
     OnReady.setAllowedParameters = function (pageColumn, colPos) {
         pageColumn.find('.t3js-page-new-ce:not(".t3js-page-new-ce-allowed") a').each(function () {
-            if (typeof $(this).data('url') !== 'undefined') {
-                $(this).data('url', $(this).data('url').replace(
+            if (typeof $(this).attr('href') !== 'undefined') {
+                $(this).attr('href', $(this).attr('href').replace(
                     '&uid_pid',
                     (top.pageColumnsAllowed[colPos] ? ('&tx_gridelements_allowed=' + window.btoa(JSON.stringify(top.pageColumnsAllowed[colPos]))) : '') +
                     (top.pageColumnsDisallowed[colPos] ? ('&tx_gridelements_disallowed=' + window.btoa(JSON.stringify(top.pageColumnsDisallowed[colPos]))) : '') +
