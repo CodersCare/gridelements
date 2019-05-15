@@ -316,7 +316,7 @@ class WizardItems implements NewContentElementWizardHookInterface
                 $wizardItems[$key]['tt_content_defValues']['tx_gridelements_columns'] = (int)$column;
                 $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_columns]=' . (int)$column;
             }
-            if ($wizardItems[$key]['tt_content_defValues']['CType'] = 'table') {
+            if ($wizardItems[$key]['tt_content_defValues']['CType'] === 'table') {
                 $wizardItems[$key]['tt_content_defValues']['bodytext'] = '';
                 $wizardItems[$key]['params'] .= '&defVals[tt_content][bodytext]=';
             }
