@@ -93,7 +93,7 @@ class Gridelements extends ContentObjectRenderer
         // now we have to find the children of this grid container regardless of their column
         // so we can get them within a single DB query instead of doing a query per column
         // but we will only fetch those columns that are used by the current grid layout
-        if ($this->languageAspect->getLegacyOverlayType() && $this->cObj->data['l18n_parent']) {
+        if ($this->languageAspect->getLegacyOverlayType() && $this->cObj->data['l18n_parent'] && $this->cObj->data['sys_language_uid'] > 0) {
             $element = $this->cObj->data['l18n_parent'];
         } else {
             $element = $this->cObj->data['uid'];
