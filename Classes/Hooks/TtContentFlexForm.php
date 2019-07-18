@@ -20,8 +20,9 @@ namespace GridElementsTeam\Gridelements\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use GridElementsTeam\Gridelements\Backend\LayoutSetup;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 
 /**
  * Manipulate and find flex forms for gridelements tt_content plugin
@@ -46,6 +47,7 @@ class TtContentFlexForm
     {
         if ($tableName === 'tt_content' && $fieldName === 'pi_flexform' && $row['CType'] === 'gridelements_pi1') {
             if (!empty($row['tx_gridelements_backend_layout'])) {
+                BackendUtility::fixVersioningPid($tableName, $row);
                 $pageUid = $row['pid'];
                 $layoutId = $row['tx_gridelements_backend_layout'];
                 /** @var $layoutSetupInstance LayoutSetup */
