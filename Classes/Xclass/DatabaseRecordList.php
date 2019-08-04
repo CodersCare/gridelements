@@ -73,7 +73,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * element without the wizards!).
      *
      * @var bool
-     * @deprecated and unused since v9, will be removed in v10
+     * @deprecated and unused since TYPO3 v9, will be removed in TYPO3 v10.0
      */
     public $newWizards = false;
     /**
@@ -215,7 +215,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * @var array
      */
     protected $deprecatedPublicProperties = [
-        'newWizards' => 'Using $newWizards of class DatabaseRecordList from outside is discouraged, property will be removed in v10.',
+        'newWizards' => 'Using $newWizards of class DatabaseRecordList from outside is discouraged, property will be removed in TYPO3 v10.0.',
     ];
     /**
      * Used to accumulate CSV lines for CSV export.
@@ -819,9 +819,15 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         }
         // If any records was selected, render the list:
         if ($dbCount) {
+            $tableIdentifier = $table;
             // Use a custom table title for translated pages
             if ($table == 'pages' && $this->showOnlyTranslatedRecords) {
+                // pages records in list module are split into two own sections, one for pages with
+                // sys_language_uid = 0 "Page" and an own section for sys_language_uid > 0 "Page Translation".
+                // This if sets the different title for the page translation case and a unique table identifier
+                // which is used in DOM as id.
                 $tableTitle = htmlspecialchars($lang->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:pageTranslation'));
+                $tableIdentifier = 'pages_translated';
             } else {
                 $tableTitle = htmlspecialchars($lang->sL($GLOBALS['TCA'][$table]['ctrl']['title']));
                 if ($tableTitle === '') {
@@ -862,7 +868,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                             ($tableCollapsed ? 'actions-view-list-expand' : 'actions-view-list-collapse'),
                             Icon::SIZE_SMALL
                         )->render() . '</span>';
-                    $collapseIcon = '<a href="' . $href . '" title="' . $title . '" class="pull-right t3js-toggle-recordlist" data-table="' . htmlspecialchars($table) . '" data-toggle="collapse" data-target="#recordlist-' . htmlspecialchars($table) . '">' . $icon . '</a>';
+                    $collapseIcon = '<a href="' . $href . '" title="' . $title . '" class="pull-right t3js-toggle-recordlist" data-table="' . htmlspecialchars($tableIdentifier) . '" data-toggle="collapse" data-target="#recordlist-' . htmlspecialchars($tableIdentifier) . '">' . $icon . '</a>';
                 }
                 $tableHeader .= $theData[$titleCol] . $collapseIcon;
             }
@@ -971,7 +977,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                         // If no search happened it means that the selected
                         // records are either default or All language and here we will not select translations
                         // which point to the main record:
-                        if ($this->l10nEnabled && $this->searchString === '') {
+                        if ($this->l10nEnabled && $this->searchString === '' && !($this->hideTranslations === '*' || GeneralUtility::inList($this->hideTranslations, $table))) {
                             // For each available translation, render the record:
                             if (is_array($this->translations)) {
                                 foreach ($this->translations as $lRow) {
@@ -1048,7 +1054,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                             ? count($this->fieldArray) + 1 + $this->maxDepth
                             : count($this->fieldArray);
                         $rowOutput .= '<tr><td colspan="' . $colspan . '">
-								<a href="' . htmlspecialchars(($this->listURL() . '&table=' . rawurlencode($table)))
+								<a href="' . htmlspecialchars(($this->listURL() . '&table=' . rawurlencode($tableIdentifier)))
                             . '" class="btn btn-default">'
                             . '<span class="t3-icon fa fa-chevron-down"></span> <i>[1 - '
                             . $countOnFirstPage . ($hasMore ? '+' : '') . ']</i></a>
@@ -1068,15 +1074,15 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
 
 
 			<!--
-				DB listing of elements:	"' . htmlspecialchars($table) . '"
+				DB listing of elements:	"' . htmlspecialchars($tableIdentifier) . '"
 			-->
 				<div class="panel panel-space panel-default recordlist">
 					<div class="panel-heading">
 					' . $tableHeader . '
 					</div>
-					<div class="' . $collapseClass . '" data-state="' . $dataState . '" id="recordlist-' . htmlspecialchars($table) . '">
+					<div class="' . $collapseClass . '" data-state="' . $dataState . '" id="recordlist-' . htmlspecialchars($tableIdentifier) . '">
 						<div class="table-fit">
-							<table data-table="' . htmlspecialchars($table) . '" class="table table-striped table-hover' . ($listOnlyInSingleTableMode ? ' typo3-dblist-overview' : '') . '">
+							<table data-table="' . htmlspecialchars($tableIdentifier) . '" class="table table-striped table-hover' . ($listOnlyInSingleTableMode ? ' typo3-dblist-overview' : '') . '">
 								' . $out . '
 							</table>
 						</div>
@@ -1107,7 +1113,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             return '';
         }
         $content = '';
-        $listURL = $this->listURL('', $this->table);
+        $listURL = $this->listURL('', $this->table, 'firstElementNumber');
         // 1 = first page
         // 0 = first element
         $currentPage = floor($this->firstElementNumber / $this->iLimit) + 1;
@@ -1323,6 +1329,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * @param int $triggerContainer
      * @param string $expanded
      * @return string Table row for the element
+     * @throws RouteNotFoundException
+     * @internal
      * @see getTable()
      */
     public function renderListRow($table, $row, $cc, $titleCol, $thumbsCol, $indent = 0, $level = 0, $triggerContainer = 0, $expanded = '')
@@ -1704,16 +1712,23 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         // If the listed table is 'pages' we have to request the permission settings for each page:
         $localCalcPerms = 0;
         if ($table === 'pages') {
+            // If the listed table is 'pages' we have to request the permission settings for each page.
             $localCalcPerms = $this->getBackendUserAuthentication()->calcPerms(BackendUtility::getRecord(
                 'pages',
                 $row['uid']
+            ));
+        } else {
+            // If the listed table is not 'pages' we have to request the permission settings from the parent page
+            $localCalcPerms = $this->getBackendUserAuthentication()->calcPerms(BackendUtility::getRecord(
+                'pages',
+                $row['pid']
             ));
         }
         $permsEdit = $table === 'pages'
             && $this->getBackendUserAuthentication()->checkLanguageAccess(0)
             && $localCalcPerms & Permission::PAGE_EDIT
             || $table !== 'pages'
-            && $this->calcPerms & Permission::CONTENT_EDIT
+            && $localCalcPerms & Permission::CONTENT_EDIT
             && $this->getBackendUserAuthentication()->recordEditAccessInternals($table, $row);
         $permsEdit = $this->overlayEditLockPermissions($table, $row, $permsEdit);
         // "Show" link (only pages and tt_content elements)
@@ -1739,6 +1754,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             $params = '&edit[' . $table . '][' . $row['uid'] . ']=edit';
             $iconIdentifier = 'actions-open';
             if ($table === 'pages') {
+                // Disallow manual adjustment of the language field for pages
+                $params .= '&overrideVals[pages][sys_language_uid]=' . (int)$row[$GLOBALS['TCA']['pages']['ctrl']['languageField']];
                 $iconIdentifier = 'actions-page-open';
             }
             $overlayIdentifier = !$this->isEditable($table) ? 'overlay-readonly' : null;
@@ -1899,7 +1916,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             $disableDelete = (bool)\trim($userTsConfig['options.']['disableDelete.'][$table] ?? $userTsConfig['options.']['disableDelete'] ?? '0');
             if ($permsEdit && !$disableDelete && ($table === 'pages' && $localCalcPerms & Permission::PAGE_DELETE || $table !== 'pages' && $this->calcPerms & Permission::CONTENT_EDIT)) {
                 // Check if the record version is in "deleted" state, because that will switch the action to "restore"
-                if ($this->getBackendUserAuthentication()->workspace > 0 && isset($row['t3ver_state']) && (int)$row['t3ver_state'] === 2) {
+                if ($this->getBackendUserAuthentication()->workspace > 0 && isset($row['t3ver_state']) && VersionState::cast($row['t3ver_state'])->equals(VersionState::DELETE_PLACEHOLDER)) {
                     $actionName = 'restore';
                     $refCountMsg = '';
                 } else {
@@ -2522,10 +2539,13 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * @throws \UnexpectedValueException
      * @throws RouteNotFoundException
      * @return string Header table row
+     * @internal
      * @see getTable()
      */
     public function renderListHeader($table, $currentIdList)
     {
+        $tsConfig = BackendUtility::getPagesTSconfig($this->id);
+        $tsConfigOfTable = is_array($tsConfig['TCEFORM.'][$table . '.']) ? $tsConfig['TCEFORM.'][$table . '.'] : null;
         $lang = $this->getLanguageService();
         // Init:
         $theData = [];
@@ -2736,8 +2756,22 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     // at the end
                     $sortLabel = BackendUtility::getItemLabel($table, $fCol);
                     if ($sortLabel !== null) {
-                        $sortLabel = htmlspecialchars($lang->sL($sortLabel));
-                        $sortLabel = rtrim(trim($sortLabel), ':');
+                        $sortLabel = rtrim(trim($lang->sL($sortLabel)), ':');
+
+                        // Field label
+                        $fieldTSConfig = [];
+                        if (isset($tsConfigOfTable[$fCol . '.'])
+                            && is_array($tsConfigOfTable[$fCol . '.'])
+                        ) {
+                            $fieldTSConfig = $tsConfigOfTable[$fCol . '.'];
+                        }
+                        if (!empty($fieldTSConfig['label'])) {
+                            $sortLabel = $lang->sL($fieldTSConfig['label']);
+                        }
+                        if (!empty($fieldTSConfig['label.'][$lang->lang])) {
+                            $sortLabel = $lang->sL($fieldTSConfig['label.'][$lang->lang]);
+                        }
+                        $sortLabel = htmlspecialchars($sortLabel);
                     } else {
                         // No TCA field, only output the $fCol variable with square brackets []
                         $sortLabel = htmlspecialchars($fCol);
