@@ -2452,7 +2452,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         // Show icon and lines
         if ($this->showIcon) {
             $out .= '
-			<' . $colType . ' nowrap="nowrap" class="col-icon"' . ($colType === 'th' ? ' colspan="' . ($this->maxDepth - $level) . '"' : '') . '>';
+			<' . $colType . ' nowrap="nowrap" class="col-icon">';
             if (!$h) {
                 $out .= '&nbsp;';
             } else {
@@ -2511,6 +2511,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 $colsp = ' colspan="2"';
             } elseif ($ccount === 1 && $colType === 'td') {
                 $colsp = ' colspan="' . ($this->maxDepth - $level - 1) . '"';
+            } elseif ($ccount === 1 && $colType === 'th') {
+                $colsp = ' colspan="' . ($this->maxDepth - $level) . '"';
             } else {
                 $colsp = '';
             }
