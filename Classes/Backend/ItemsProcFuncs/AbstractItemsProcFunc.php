@@ -25,7 +25,7 @@ use GridElementsTeam\Gridelements\Helper\Helper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Lang\LanguageService;
+use TYPO3\CMS\Core\Localization\LanguageService;
 
 /**
  * Class/Function which offers TCE main hook functions.
