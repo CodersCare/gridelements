@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\Backend;
 
 use GridElementsTeam\Gridelements\Helper\Helper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DefaultRestrictionContainer;
@@ -139,7 +140,7 @@ class LayoutSetup
                     foreach ($icons as &$icon) {
                         $icon = trim($icon);
                         if (strpos($icon, 'EXT:') === 0) {
-                            $icon = str_replace(PATH_site, '../', GeneralUtility::getFileAbsFileName($icon));
+                            $icon = str_replace(Environment::getPublicPath(), '../', GeneralUtility::getFileAbsFileName($icon));
                         }
                     }
                     $item['icon'] = $icons;
@@ -468,7 +469,7 @@ class LayoutSetup
                     $icon = $item['icon'];
                 }
                 if (StringUtility::beginsWith($icon, '../')) {
-                    $icon = PATH_site . str_replace('../', '', $icon);
+                    $icon = Environment::getPublicPath() . str_replace('../', '', $icon);
                 }
             }
             $selectItems[] = [$this->languageService->sL($item['title']), $layoutId, $icon];
