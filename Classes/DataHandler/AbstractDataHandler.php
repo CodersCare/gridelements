@@ -168,10 +168,6 @@ abstract class AbstractDataHandler
                 $queryBuilder->expr()->eq(
                     't3ver_wsid',
                     $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
-                ),
-                $queryBuilder->expr()->gt(
-                    't3ver_id',
-                    $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
                 )
             ),
         ];
