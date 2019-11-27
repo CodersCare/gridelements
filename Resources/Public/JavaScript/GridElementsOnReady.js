@@ -16,14 +16,14 @@
  * based on jQuery UI
  */
 
-define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storage', 'TYPO3/CMS/Gridelements/GridElementsDragDrop', 'TYPO3/CMS/Backend/LayoutModule/Paste', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Severity'], function ($, AjaxDataHandler, Storage, DragDrop, Paste, Modal, Severity) {
+define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storage/Persistent', 'TYPO3/CMS/Gridelements/GridElementsDragDrop', 'TYPO3/CMS/Backend/LayoutModule/Paste', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Severity'], function ($, AjaxDataHandler, PersistentStorage, DragDrop, Paste, Modal, Severity) {
 
     var OnReady = {
-        openedPopupWindow: []
-    },
-    AllGridelementsToggle = '.t3js-toggle-gridelements-all',
-    GridelementsToggle = '.t3js-toggle-gridelements-list',
-    GridelementsColumnToggle = '.t3js-toggle-gridelements-column';
+            openedPopupWindow: []
+        },
+        AllGridelementsToggle = '.t3js-toggle-gridelements-all',
+        GridelementsToggle = '.t3js-toggle-gridelements-list',
+        GridelementsColumnToggle = '.t3js-toggle-gridelements-column';
 
     /**
      * initializes Drag+Drop for all content elements on the page
@@ -312,8 +312,8 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
             // Store collapse state in UC
             var storedModuleDataPage = {};
 
-            if (Storage.Persistent.isset('moduleData.page.gridelementsCollapsedColumns')) {
-                storedModuleDataPage = Storage.Persistent.get('moduleData.list.gridelementsExpanded');
+            if (PersistentStorage.isset('moduleData.page.gridelementsCollapsedColumns')) {
+                storedModuleDataPage = PersistentStorage.get('moduleData.list.gridelementsExpanded');
             }
 
             var collapseConfig = {};
@@ -324,7 +324,7 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
             });
 
             storedModuleDataPage = $.extend(true, storedModuleDataPage, collapseConfig);
-            Storage.Persistent.set('moduleData.page.gridelementsCollapsedColumns', storedModuleDataPage);
+            PersistentStorage.set('moduleData.page.gridelementsCollapsedColumns', storedModuleDataPage);
 
         });
     };
@@ -343,15 +343,15 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
             // Store collapse state in UC
             var storedModuleDataPage = {};
 
-            if (Storage.Persistent.isset('moduleData.page.gridelementsCollapsedColumns')) {
-                storedModuleDataPage = Storage.Persistent.get('moduleData.page.gridelementsCollapsedColumns');
+            if (PersistentStorage.isset('moduleData.page.gridelementsCollapsedColumns')) {
+                storedModuleDataPage = PersistentStorage.get('moduleData.page.gridelementsCollapsedColumns');
             }
 
             var expandConfig = {};
             expandConfig[columnKey] = isExpanded ? 1 : 0;
 
             storedModuleDataPage = $.extend(true, storedModuleDataPage, expandConfig);
-            Storage.Persistent.set('moduleData.page.gridelementsCollapsedColumns', storedModuleDataPage).done(function () {
+            PersistentStorage.set('moduleData.page.gridelementsCollapsedColumns', storedModuleDataPage).done(function () {
                 $me.data('state', isExpanded ? 'collapsed' : 'expanded');
             });
 
@@ -403,8 +403,8 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
             // Store collapse state in UC
             var storedModuleDataList = {};
 
-            if (Storage.Persistent.isset('moduleData.list.gridelementsExpanded')) {
-                storedModuleDataList = Storage.Persistent.get('moduleData.list.gridelementsExpanded');
+            if (PersistentStorage.isset('moduleData.list.gridelementsExpanded')) {
+                storedModuleDataList = PersistentStorage.get('moduleData.list.gridelementsExpanded');
             }
 
             var expandConfig = {};
@@ -422,7 +422,7 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
             });
 
             storedModuleDataList = $.extend(true, storedModuleDataList, expandConfig);
-            Storage.Persistent.set('moduleData.list.gridelementsExpanded', storedModuleDataList);
+            PersistentStorage.set('moduleData.list.gridelementsExpanded', storedModuleDataList);
 
         });
 
@@ -442,15 +442,15 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
             // Store collapse state in UC
             var storedModuleDataList = {};
 
-            if (Storage.Persistent.isset('moduleData.list.gridelementsExpanded')) {
-                storedModuleDataList = Storage.Persistent.get('moduleData.list.gridelementsExpanded');
+            if (PersistentStorage.isset('moduleData.list.gridelementsExpanded')) {
+                storedModuleDataList = PersistentStorage.get('moduleData.list.gridelementsExpanded');
             }
 
             var expandConfig = {};
             expandConfig[container] = isExpanded ? 0 : 1;
 
             storedModuleDataList = $.extend(true, storedModuleDataList, expandConfig);
-            Storage.Persistent.set('moduleData.list.gridelementsExpanded', storedModuleDataList).done(function () {
+            PersistentStorage.set('moduleData.list.gridelementsExpanded', storedModuleDataList).done(function () {
                 $me.data('state', isExpanded ? 'collapsed' : 'expanded');
             });
 
