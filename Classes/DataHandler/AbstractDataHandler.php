@@ -247,15 +247,17 @@ abstract class AbstractDataHandler
                 ->execute()
                 ->fetch();
 
-            $updateArray = $currentValues;
-            unset($updateArray['uid']);
-            unset($updateArray['sys_language_uid']);
-            unset($updateArray['l18n_parent']);
-            $this->getConnection()->update(
-                'tt_content',
-                $updateArray,
-                ['uid' => (int)$originalUid]
-            );
+            if (is_array($currentValues)) {
+                $updateArray = $currentValues;
+                unset($updateArray['uid']);
+                unset($updateArray['sys_language_uid']);
+                unset($updateArray['l18n_parent']);
+                $this->getConnection()->update(
+                    'tt_content',
+                    $updateArray,
+                    ['uid' => (int)$originalUid]
+                );
+            }
         }
         if (empty($currentValues['uid'])) {
             return;
