@@ -38,7 +38,6 @@ use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
 use TYPO3\CMS\Core\Database\QueryGenerator;
-use TYPO3\CMS\Core\Database\ReferenceIndex;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
@@ -162,9 +161,6 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 case 'gridelements_pi1':
                     $drawItem = false;
                     $itemContent .= $this->renderCTypeGridelements($parentObject, $row);
-                    $refIndexObj = GeneralUtility::makeInstance(ReferenceIndex::class);
-                    /* @var $refIndexObj \TYPO3\CMS\Core\Database\ReferenceIndex */
-                    $refIndexObj->updateRefIndexTable('tt_content', (int)$row['uid']);
                     break;
                 case 'shortcut':
                     $drawItem = false;
