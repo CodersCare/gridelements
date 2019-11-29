@@ -28,6 +28,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\FrontendRestrictionContainer;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Service\FlexFormService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
@@ -162,11 +163,19 @@ class Gridelements extends ContentObjectRenderer
                 if (!is_array($child[$field])) {
                     $child[$field] = [];
                 }
+                $child[$field . '_content'] = GeneralUtility::makeInstance(FlexFormService::class)->convertFlexFormContentToArray($child[$field]);
+                if (!is_array($child[$field . '_content'])) {
+                    $child[$field . '_content'] = [];
+                }
             }
         } elseif (!is_array($this->cObj->data[$field]) && $this->cObj->data[$field]) {
             $this->cObj->data[$field] = GeneralUtility::xml2array($this->cObj->data[$field]);
             if (!is_array($this->cObj->data[$field])) {
                 $this->cObj->data[$field] = [];
+            }
+            $this->cObj->data[$field . 'content'] = GeneralUtility::makeInstance(FlexFormService::class)->convertFlexFormContentToArray($this->cObj->data[$field]);
+            if (!is_array($this->cObj->data[$field . '_content'])) {
+                $this->cObj->data[$field . '_content'] = [];
             }
         }
     }
@@ -305,14 +314,6 @@ class Gridelements extends ContentObjectRenderer
     }
 
     /**
-     * @return TypoScriptFrontendController
-     */
-    public function getTSFE()
-    {
-        return $GLOBALS['TSFE'];
-    }
-
-    /**
      * fetches all available children for a certain grid container
      *
      * @param int $element The uid of the grid container
@@ -355,7 +356,8 @@ class Gridelements extends ContentObjectRenderer
                 }
                 if ($element) {
                     $translationOverlay = $queryBuilder->expr()->andX(
-                        $queryBuilder->expr()->eq('tx_gridelements_container', $queryBuilder->createNamedParameter((int)$element, \PDO::PARAM_INT)),
+                        $queryBuilder->expr()->eq('tx_gridelements_container',
+                            $queryBuilder->createNamedParameter((int)$element, \PDO::PARAM_INT)),
                         $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, \PDO::PARAM_INT)),
                         $queryBuilder->expr()->eq(
                             'pid',
@@ -472,6 +474,14 @@ class Gridelements extends ContentObjectRenderer
             ->getQueryBuilderForTable('tt_content');
         $queryBuilder->setRestrictions(GeneralUtility::makeInstance(FrontendRestrictionContainer::class));
         return $queryBuilder;
+    }
+
+    /**
+     * @return TypoScriptFrontendController
+     */
+    public function getTSFE()
+    {
+        return $GLOBALS['TSFE'];
     }
 
     /**
