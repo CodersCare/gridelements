@@ -76,20 +76,22 @@ class GridChildrenProcessor implements DataProcessorInterface
      * @var array
      */
     protected $registeredOptions = [
-        'sortingDirection'      => 'asc',
-        'sortingDirection.'     => [],
-        'sortingField'          => 'sorting',
-        'sortingField.'         => [],
-        'recursive'             => 0,
-        'recursive.'            => [],
-        'resolveFlexFormData'   => 1,
-        'resolveFlexFormData.'  => [],
-        'resolveBackendLayout'  => 1,
-        'resolveBackendLayout.' => [],
-        'respectColumns'        => 1,
-        'respectColumns.'       => [],
-        'respectRows'           => 1,
-        'respectRows.'          => [],
+        'sortingDirection'          => 'asc',
+        'sortingDirection.'         => [],
+        'sortingField'              => 'sorting',
+        'sortingField.'             => [],
+        'recursive'                 => 0,
+        'recursive.'                => [],
+        'resolveFlexFormData'       => 1,
+        'resolveFlexFormData.'      => [],
+        'resolveChildFlexFormData'  => 1,
+        'resolveChildFlexFormData.' => [],
+        'resolveBackendLayout'      => 1,
+        'resolveBackendLayout.'     => [],
+        'respectColumns'            => 1,
+        'respectColumns.'           => [],
+        'respectRows'               => 1,
+        'respectRows.'              => [],
     ];
 
     /**
@@ -189,9 +191,10 @@ class GridChildrenProcessor implements DataProcessorInterface
     }
 
     /**
-     * @param $data
+     * @param array $data
+     * @param bool $isChild
      */
-    protected function checkOptions(&$data)
+    protected function checkOptions(&$data, $isChild = false)
     {
         if (
             (
@@ -203,7 +206,12 @@ class GridChildrenProcessor implements DataProcessorInterface
             $this->layoutSetup->init((int)$data['pid'], $this->contentObjectConfiguration);
         }
 
-        if ($this->options['resolveFlexFormData'] && !empty($data['pi_flexform'])) {
+        if (
+            (
+                !$isChild && $this->options['resolveFlexFormData']
+                || $isChild && $this->options['resolveChildFlexFormData']
+            ) && !empty($data['pi_flexform'])
+        ) {
             $this->gridelements->initPluginFlexForm('pi_flexform', $data);
             $this->gridelements->getPluginFlexFormData($data);
         }
@@ -224,7 +232,7 @@ class GridChildrenProcessor implements DataProcessorInterface
     protected function processChildRecord($record)
     {
         $id = (int)$record['uid'];
-        $this->checkOptions($record);
+        $this->checkOptions($record, true);
         /* @var $recordContentObjectRenderer ContentObjectRenderer */
         $recordContentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
         $recordContentObjectRenderer->start($record, 'tt_content');

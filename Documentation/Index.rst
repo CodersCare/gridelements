@@ -65,6 +65,7 @@ Table Of Content
        Chapters/Flexform/Index
        Chapters/Tsconfig/Index
        Chapters/Typoscript/Index
+       Chapters/DataProcessing/Index
        Chapters/Faq/Index
        Chapters/Sponsoring/Index
        Chapters/Notes/Index
