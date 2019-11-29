@@ -388,9 +388,11 @@ abstract class AbstractDataHandler
             if (!empty($currentContainers)) {
                 foreach ($currentContainers as $fieldArray) {
                     $fieldArray['tx_gridelements_children'] = (int)$fieldArray['tx_gridelements_children'] + (int)$containerUpdateArray[$fieldArray['uid']];
+                    $updateArray = $fieldArray;
+                    unset($updateArray['uid']);
                     $this->getConnection()->update(
                         'tt_content',
-                        $fieldArray,
+                        $updateArray,
                         ['uid' => (int)$fieldArray['uid']]
                     );
                     $this->getTceMain()->updateRefIndex('tt_content', (int)$fieldArray['uid']);
