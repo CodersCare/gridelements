@@ -23,6 +23,7 @@ tt_content.gridelements_pi1 {
                 #    sortingField = sorting
                 #    recursive = 0
                 #    resolveFlexFormData = 1
+                #    resolveChildFlexFormData = 1
                 #    resolveBackendLayout = 1
                 #    respectColumns = 1
                 #    respectRows = 1

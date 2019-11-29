@@ -191,6 +191,27 @@ dataProcessing.123.default.options.resolveFlexFormData
          Boolean / stdWrap
 
    Description
+         Determines if FlexForms of containers should be resolved and assigned
+         to virtual fields named **flexform\_my\_fieldname**.
+
+   Default
+         1
+
+
+.. _typoscript-dataprocessing-default-options-resolveChildFlexFormData:
+
+dataProcessing.123.default.options.resolveChildFlexFormData
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. container:: table-row
+
+   Property
+         resolveChildFlexFormData
+
+   Data type
+         Boolean / stdWrap
+
+   Description
          Determines if FlexForms of children should be resolved and assigned
          to virtual fields named **flexform\_my\_fieldname**.
 
