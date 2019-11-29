@@ -49,6 +49,7 @@ special **Gridelements w/DataProcessing** setup in your TS template editor:
             # sortingField = sorting
             # recursive = 0
             # resolveFlexFormData = 1
+            # resolveChildFlexFormData = 1
             # resolveBackendLayout = 1
             # respectColumns = 1
             # respectRows = 1
