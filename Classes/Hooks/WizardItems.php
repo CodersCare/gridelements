@@ -71,8 +71,9 @@ class WizardItems implements NewContentElementWizardHookInterface
         )) {
             return;
         }
-        $pageID = $parentObject->id;
-        $this->init($pageID);
+        $pageInfo = $parentObject->getPageInfo();
+        $pageId = (int)$pageInfo['uid'];
+        $this->init($pageId);
 
         $container = (int)GeneralUtility::_GP('tx_gridelements_container');
         $column = (int)GeneralUtility::_GP('tx_gridelements_columns');
@@ -109,10 +110,10 @@ class WizardItems implements NewContentElementWizardHookInterface
         ) {
             $allowedGridTypes = $allowed['tx_gridelements_backend_layout'] ?: [];
             $disallowedGridTypes = $disallowed['tx_gridelements_backend_layout'] ?: [];
-            $excludeLayouts = $this->getExcludeLayouts($container, $parentObject);
+            $excludeLayouts = $this->getExcludeLayouts($container, $pageId);
 
             $gridItems = $this->layoutSetup->getLayoutWizardItems(
-                $parentObject->colPos,
+                $parentObject->getColPos(),
                 $excludeLayouts,
                 $allowedGridTypes,
                 $disallowedGridTypes
@@ -184,18 +185,16 @@ class WizardItems implements NewContentElementWizardHookInterface
      * retrieve layouts to exclude from pageTSconfig
      *
      * @param int $container
-     * @param NewContentElementController $parentObject The parent object that triggered this hook
+     * @param int $pageId The ID of the page that triggered this hook
      *
      * @return array
      */
-    public function getExcludeLayouts($container, NewContentElementController $parentObject)
+    public function getExcludeLayouts($container, $pageId)
     {
         $excludeLayouts = 0;
         $excludeArray = [];
 
-        $pageID = $parentObject->id;
-
-        $TSconfig = BackendUtility::getPagesTSconfig($pageID);
+        $TSconfig = BackendUtility::getPagesTSconfig($pageId);
 
         if ($container && $TSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['itemsProcFunc.']['topLevelLayouts']) {
             $excludeArray[] = trim($TSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['itemsProcFunc.']['topLevelLayouts']);
