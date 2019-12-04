@@ -486,6 +486,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     't3ver_wsid',
                     $queryBuilder->createNamedParameter((int)$row['t3ver_wsid'], \PDO::PARAM_INT)
                 );
+                $constraints[] = $queryBuilder->expr()->neq(
+                    't3ver_state',
+                    $queryBuilder->createNamedParameter(VersionState::NEW_PLACEHOLDER_VERSION, \PDO::PARAM_INT)
+                );
             } else {
                 $constraints[] = $queryBuilder->expr()->orX(
                     $queryBuilder->expr()->eq(
