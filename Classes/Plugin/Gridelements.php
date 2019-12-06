@@ -159,23 +159,23 @@ class Gridelements extends ContentObjectRenderer
         // Converting flexform data into array:
         if (!empty($child)) {
             if (!is_array($child[$field]) && $child[$field]) {
-                $child[$field] = GeneralUtility::xml2array($child[$field]);
-                if (!is_array($child[$field])) {
-                    $child[$field] = [];
-                }
                 $child[$field . '_content'] = GeneralUtility::makeInstance(FlexFormService::class)->convertFlexFormContentToArray($child[$field]);
                 if (!is_array($child[$field . '_content'])) {
                     $child[$field . '_content'] = [];
                 }
+                $child[$field] = GeneralUtility::xml2array($child[$field]);
+                if (!is_array($child[$field])) {
+                    $child[$field] = [];
+                }
             }
         } elseif (!is_array($this->cObj->data[$field]) && $this->cObj->data[$field]) {
-            $this->cObj->data[$field] = GeneralUtility::xml2array($this->cObj->data[$field]);
-            if (!is_array($this->cObj->data[$field])) {
-                $this->cObj->data[$field] = [];
-            }
             $this->cObj->data[$field . 'content'] = GeneralUtility::makeInstance(FlexFormService::class)->convertFlexFormContentToArray($this->cObj->data[$field]);
             if (!is_array($this->cObj->data[$field . '_content'])) {
                 $this->cObj->data[$field . '_content'] = [];
+            }
+            $this->cObj->data[$field] = GeneralUtility::xml2array($this->cObj->data[$field]);
+            if (!is_array($this->cObj->data[$field])) {
+                $this->cObj->data[$field] = [];
             }
         }
     }
