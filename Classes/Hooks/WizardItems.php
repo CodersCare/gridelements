@@ -389,9 +389,13 @@ class WizardItems implements NewContentElementWizardHookInterface
     {
         $headersWithElements = [];
         foreach ($wizardItems as $key => $wizardItem) {
-            $isElement = strpos($key, '_', 1);
-            if ($isElement) {
-                $headersWithElements[substr($key, 0, $isElement)] = true;
+            $keyParts = GeneralUtility::trimExplode('_', $key);
+            if ($keyParts[1]) {
+                $keyChunk = '';
+                foreach($keyParts as $keyPart) {
+                    $keyChunk .= $keyChunk ? '_' . $keyPart : $keyPart;
+                    $headersWithElements[$keyChunk] = true;
+                }
             }
         }
         foreach ($wizardItems as $key => $wizardItem) {
