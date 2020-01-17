@@ -1367,6 +1367,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 }
             }
             if ($this->helper->getBackendUser()->workspace > 0) {
+                unset($item['inSet']);
                 BackendUtility::workspaceOL('tt_content', $item, $this->helper->getBackendUser()->workspace);
             }
             $item['tx_gridelements_reference_container'] = $item['pid'];
