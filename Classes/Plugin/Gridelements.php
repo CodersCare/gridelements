@@ -161,7 +161,7 @@ class Gridelements extends ContentObjectRenderer
                 }
             }
         } elseif (!is_array($this->cObj->data[$field]) && $this->cObj->data[$field]) {
-            $this->cObj->data[$field . 'content'] = GeneralUtility::makeInstance(FlexFormService::class)->convertFlexFormContentToArray($this->cObj->data[$field]);
+            $this->cObj->data[$field . '_content'] = GeneralUtility::makeInstance(FlexFormService::class)->convertFlexFormContentToArray($this->cObj->data[$field]);
             if (!is_array($this->cObj->data[$field . '_content'])) {
                 $this->cObj->data[$field . '_content'] = [];
             }
