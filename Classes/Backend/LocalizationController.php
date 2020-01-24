@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\Backend;
 
@@ -23,7 +23,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Imaging\IconFactory;;
+use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Versioning\VersionState;
 
@@ -81,6 +81,7 @@ class LocalizationController
         $languageId = (int)$params['languageId'];
 
         $records = [];
+        $filteredRecords = [];
         $containers = [];
         $result = $this->localizationRepository->getRecordsToCopyDatabaseResult(
             $pageId,
@@ -105,25 +106,30 @@ class LocalizationController
             }
             if (!isset($containers[$container])) {
                 $records[$colPos][] = [
-                    'icon'  => $this->iconFactory->getIconForRecord('tt_content', $row, Icon::SIZE_SMALL)->render(),
-                    'title' => $row[$GLOBALS['TCA']['tt_content']['ctrl']['label']],
-                    'uid'   => $uid
+                    'icon'      => $this->iconFactory->getIconForRecord('tt_content', $row, Icon::SIZE_SMALL)->render(),
+                    'title'     => $row[$GLOBALS['TCA']['tt_content']['ctrl']['label']],
+                    'uid'       => $uid,
+                    'container' => $row['tx_gridelements_container'],
                 ];
             }
         }
 
         // keep only those items, that are not translated by their parent container anyway
-        foreach ($records as $colPos => &$columnRecords) {
-            foreach ($columnRecords as $index => $record) {
-                if (isset($containers[$record['tx_gridelements_container']])) {
-                    unset($columnRecords[$index]);
+        foreach ($records as $colPos => $columnRecords) {
+            foreach ($columnRecords as $record) {
+                if (!isset($containers[$record['container']])) {
+                    if (!isset($filteredRecords[$colPos])) {
+                        $filteredRecords[$colPos] = [];
+                    }
+                    $filteredRecords[$colPos][] = $record;
                 }
             }
         }
 
         return (new JsonResponse())->setPayload([
-            'records' => $records,
-            'columns' => $this->getPageColumns($pageId),
+            'records'    => $filteredRecords,
+            'columns'    => $this->getPageColumns($pageId),
+            'containers' => $containers,
         ]);
     }
 
@@ -146,7 +152,7 @@ class LocalizationController
         $backendLayouts['__colPosList'][] = -1;
 
         return [
-            'columns' => $columns,
+            'columns'    => $columns,
             'columnList' => $backendLayouts['__colPosList'],
         ];
     }
