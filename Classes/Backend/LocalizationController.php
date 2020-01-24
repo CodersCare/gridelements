@@ -81,6 +81,7 @@ class LocalizationController
         $languageId = (int)$params['languageId'];
 
         $records = [];
+        $containers = [];
         $result = $this->localizationRepository->getRecordsToCopyDatabaseResult(
             $pageId,
             $destLanguageId,
@@ -93,15 +94,31 @@ class LocalizationController
             if (!$row || VersionState::cast($row['t3ver_state'])->equals(VersionState::DELETE_PLACEHOLDER)) {
                 continue;
             }
+            if ($row['CType'] === 'gridelements_pi1') {
+                $containers[$row['uid']] = true;
+            }
             $colPos = $row['colPos'];
-            if (!isset($records[$colPos])) {
+            $container = $row['tx_gridelements_container'];
+            $uid = $row['uid'];
+            if (!isset($records[$colPos]) && !isset($containers[$container])) {
                 $records[$colPos] = [];
             }
-            $records[$colPos][] = [
-                'icon' => $this->iconFactory->getIconForRecord('tt_content', $row, Icon::SIZE_SMALL)->render(),
-                'title' => $row[$GLOBALS['TCA']['tt_content']['ctrl']['label']],
-                'uid' => $row['uid']
-            ];
+            if (!isset($containers[$container])) {
+                $records[$colPos][] = [
+                    'icon'  => $this->iconFactory->getIconForRecord('tt_content', $row, Icon::SIZE_SMALL)->render(),
+                    'title' => $row[$GLOBALS['TCA']['tt_content']['ctrl']['label']],
+                    'uid'   => $uid
+                ];
+            }
+        }
+
+        // keep only those items, that are not translated by their parent container anyway
+        foreach ($records as $colPos => &$columnRecords) {
+            foreach ($columnRecords as $index => $record) {
+                if (isset($containers[$record['tx_gridelements_container']])) {
+                    unset($columnRecords[$index]);
+                }
+            }
         }
 
         return (new JsonResponse())->setPayload([
