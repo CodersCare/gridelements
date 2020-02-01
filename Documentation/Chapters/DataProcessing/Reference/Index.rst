@@ -193,6 +193,7 @@ dataProcessing.123.default.options.resolveFlexFormData
    Description
          Determines if FlexForms of containers should be resolved and assigned
          to virtual fields named **flexform\_my\_fieldname**.
+         Setting this option to 0 will disable resolving of child FlexForms too, unless you will explicitely allow them using resolveChildFlexFormData
 
    Default
          1
@@ -214,6 +215,7 @@ dataProcessing.123.default.options.resolveChildFlexFormData
    Description
          Determines if FlexForms of children should be resolved and assigned
          to virtual fields named **flexform\_my\_fieldname**.
+         The default will be overriden by setting resolveFlexFormData to 0
 
    Default
          1
