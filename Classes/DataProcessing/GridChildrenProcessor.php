@@ -143,14 +143,19 @@ class GridChildrenProcessor implements DataProcessorInterface
 
         $targetVariableName = $cObj->stdWrapValue('as', $this->containerProcessorConfiguration, 'children');
         $options = $this->containerProcessorConfiguration['options.'] ? $this->containerProcessorConfiguration['options.'] : [];
+        foreach ($options as $key => &$option) {
+            $option = $cObj->stdWrapValue($key, $options, $option);
+        }
+        if (isset($options['resolveFlexFormData']) && !isset($options['resolveChildFlexFormData'])) {
+            if ((int)$options['resolveFlexFormData'] === 0) {
+                $options['resolveChildFlexFormData'] = 0;
+            }
+        }
         $this->options = array_merge(
             $this->registeredOptions,
             array_intersect_key($options, $this->registeredOptions)
         );
         unset($options);
-        foreach ($this->options as $key => &$option) {
-            $option = $cObj->stdWrapValue($key, $this->options, $option);
-        }
 
         $this->checkOptions($this->processedData['data']);
         if (isset($this->processorConfiguration['recursive'])) {
