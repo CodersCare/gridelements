@@ -137,12 +137,6 @@ class LayoutSetup
                 // Parse icon path for records.
                 if ($item['icon']) {
                     $icons = explode(',', $item['icon']);
-                    foreach ($icons as &$icon) {
-                        $icon = trim($icon);
-                        if (strpos($icon, 'EXT:') === 0) {
-                            $icon = str_replace(Environment::getPublicPath(), '../', GeneralUtility::getFileAbsFileName($icon));
-                        }
-                    }
                     $item['icon'] = $icons;
                 }
 
