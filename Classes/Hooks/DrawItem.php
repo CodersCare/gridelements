@@ -781,8 +781,8 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         // Also, you may override this strict behavior via user TS Config
         // If you do so, you're on your own and cannot rely on any support by the TYPO3 core
         // We jump out here since we don't need to do the expensive loop operations
-        $allowInconsistentLanguageHandling = BackendUtility::getPagesTSconfig($parentObject->id)['mod.']['web_layout.']['allowInconsistentLanguageHandling'] ?? [];
-        if ($language === 0 || $language === -1 || (isset($allowInconsistentLanguageHandling['value']) && $allowInconsistentLanguageHandling['value'] === '1')) {
+        $allowInconsistentLanguageHandling = (bool)BackendUtility::getPagesTSconfig($parentObject->id)['mod.']['web_layout.']['allowInconsistentLanguageHandling'];
+        if ($language === 0 || $language === -1 || $allowInconsistentLanguageHandling === true) {
             return false;
         }
         /**
