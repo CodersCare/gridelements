@@ -663,7 +663,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     $theData[$fCol] = htmlspecialchars($lang->getLL('Localize'));
                     break;
                 case '_CLIPBOARD_':
-                    if (!$this->getModule()->MOD_SETTINGS['clipBoard']) {
+                    if (!$this->moduleData['clipBoard']) {
                         break;
                     }
                     // Clipboard:
@@ -1269,7 +1269,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         $this->addElement_tdCssClass[$titleCol] = 'col-title col-responsive' . $localizationMarkerClass;
         $this->addElement_tdCssClass['__label'] = $this->addElement_tdCssClass[$titleCol];
         $this->addElement_tdCssClass['_CONTROL_'] = 'col-control';
-        if ($this->getModule()->MOD_SETTINGS['clipBoard']) {
+        if ($this->moduleData['clipBoard']) {
             $this->addElement_tdCssClass['_CLIPBOARD_'] = 'col-clipboard';
         }
         $this->addElement_tdCssClass['_PATH_'] = 'col-path';
@@ -1428,7 +1428,6 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      */
     public function makeControl($table, $row)
     {
-        $module = $this->getModule();
         $rowUid = $row['uid'];
         if (ExtensionManagementUtility::isLoaded('workspaces') && isset($row['_ORIG_uid'])) {
             $rowUid = $row['_ORIG_uid'];
@@ -1775,7 +1774,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         }
         $output = '<!-- CONTROL PANEL: ' . $table . ':' . $row['uid'] . ' -->';
         foreach ($cells as $classification => $actions) {
-            $visibilityClass = ($classification !== 'primary' && !$module->MOD_SETTINGS['bigControlPanel'] ? 'collapsed' : 'expanded');
+            $visibilityClass = ($classification !== 'primary' && !$this->moduleData['bigControlPanel'] ? 'collapsed' : 'expanded');
             if ($visibilityClass === 'collapsed') {
                 $cellOutput = '';
                 foreach ($actions as $action) {
