@@ -6,20 +6,23 @@
 			<trans-unit id="additionalStylesheet" xml:space="preserve">
 				<source>Path to folder containing additional stylesheets</source>
 			</trans-unit>
+			<trans-unit id="disableAutomaticUnusedColumnCorrection" xml:space="preserve">
+				<source>Disable the automatic correction of elements in unused columns to colPos -2. So elements will keep their colPos values even though that column is not available anymore.</source>
+			</trans-unit>
+			<trans-unit id="disableCopyFromPageButton" xml:space="preserve">
+				<source>Disable the "Copy from page" button.</source>
+			</trans-unit>
+			<trans-unit id="disableDragInWizard" xml:space="preserve">
+				<source>Disable the drag-in wizard.</source>
+			</trans-unit>
+			<trans-unit id="fluidBasedPageModule" xml:space="preserve">
+				<source>Use the rewritten page layout backend module which is based on Fluid if enabled in the global configuration. Default setting is "off" to use the legacy PageLayoutView on installations which require the hooks etc. which are associated with PageLayoutView.</source>
+			</trans-unit>
 			<trans-unit id="nestingInListModule" xml:space="preserve">
 				<source>Enable nesting in list module</source>
 			</trans-unit>
 			<trans-unit id="overlayShortcutTranslation" xml:space="preserve">
 				<source>Use language overlay for content and page records referenced in shortcut elements.</source>
-			</trans-unit>
-			<trans-unit id="disableDragInWizard" xml:space="preserve">
-				<source>Disable the drag-in wizard.</source>
-			</trans-unit>
-			<trans-unit id="disableCopyFromPageButton" xml:space="preserve">
-				<source>Disable the "Copy from page" button.</source>
-			</trans-unit>
-			<trans-unit id="disableAutomaticUnusedColumnCorrection" xml:space="preserve">
-				<source>Disable the automatic correction of elements in unused columns to colPos -2. So elements will keep their colPos values even though that column is not available anymore.</source>
 			</trans-unit>
 		</body>
 	</file>
