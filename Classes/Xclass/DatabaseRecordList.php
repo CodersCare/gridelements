@@ -39,6 +39,7 @@ use TYPO3\CMS\Core\Utility\CsvUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\HttpUtility;
+use TYPO3\CMS\Core\Versioning\VersionState;
 use TYPO3\CMS\Frontend\Page\PageRepository;
 use TYPO3\CMS\Recordlist\RecordList\RecordListHookInterface;
 
