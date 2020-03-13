@@ -168,7 +168,7 @@ return [
             'exclude' => 1,
             'label' => $l10n . ':tx_gridelements_backend_layout.pi_flexform_ds_file',
             'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
-                'icon',
+                'pi_flexform_ds_file',
                 [
                     'maxitems' => 1,
                     'appearance' => [
