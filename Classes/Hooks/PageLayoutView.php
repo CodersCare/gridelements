@@ -2,6 +2,8 @@
 
 namespace GridElementsTeam\Gridelements\Hooks;
 
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+
 /***************************************************************
  *  Copyright notice
  *  (c) 2018 Jo Hasenau <info@cybercraft.de>
@@ -19,7 +21,6 @@ namespace GridElementsTeam\Gridelements\Hooks;
  *  GNU General Public License for more details.
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-
 class PageLayoutView
 {
     public function contentIsUsed(array $params, \TYPO3\CMS\Backend\View\PageLayoutView $parentObject): bool
@@ -29,5 +30,14 @@ class PageLayoutView
         }
         $record = $params['record'];
         return ((int) $record['colPos']) === -1 && !empty($record['tx_gridelements_container']);
+    }
+
+    public function modifyQuery($parameters, $table, $pageId, $additionalConstraints, $fields, QueryBuilder $queryBuilder)
+    {
+        $queryBuilder->andWhere(
+            $queryBuilder->expr()->notIn(
+                'tt_content.colPos', [-1]
+            )
+        );
     }
 }
