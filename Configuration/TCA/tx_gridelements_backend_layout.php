@@ -22,9 +22,6 @@ return [
         ],
         'iconfile' => 'EXT:gridelements/Resources/Public/Icons/gridelements.svg',
     ],
-    'interface' => [
-        'showRecordFieldList' => 'title,frame,config,pi_flexform_ds,description,hidden,icon'
-    ],
     'columns' => [
         't3ver_label' => [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.versionLabel',
