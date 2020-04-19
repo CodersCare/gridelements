@@ -17,7 +17,6 @@ return [
         'thumbnail' => 'resources',
         'dividers2tabs' => true,
         'selicon_field' => 'icon',
-        'selicon_field_path' => 'uploads/tx_gridelements',
         'enablecolumns' => [
             'disabled' => 'hidden',
         ],
@@ -90,15 +89,16 @@ return [
         'icon' => [
             'exclude' => 1,
             'label' => $l10n . ':tx_gridelements_backend_layout.icon',
-            'config' => [
-                'type' => 'group',
-                'internal_type' => 'file',
-                'allowed' => 'jpg,gif,png,svg',
-                'uploadfolder' => 'uploads/tx_gridelements',
-                'size' => 5,
-                'minitems' => 0,
-                'maxitems' => 2,
-            ]
+            'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
+                'icon',
+                [
+                    'maxitems' => 1,
+                    'appearance' => [
+                        'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference'
+                    ],
+                ],
+                $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+            )
         ],
         'frame' => [
             'exclude' => 1,
@@ -167,13 +167,16 @@ return [
         'pi_flexform_ds_file' => [
             'exclude' => 1,
             'label' => $l10n . ':tx_gridelements_backend_layout.pi_flexform_ds_file',
-            'config' => [
-                'type' => 'group',
-                'internal_type' => 'file',
-                'allowed' => 'xml',
-                'maxitems' => 1,
-                'size' => 1,
-            ],
+            'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
+                'pi_flexform_ds_file',
+                [
+                    'maxitems' => 1,
+                    'appearance' => [
+                        'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:media.addFileReference'
+                    ],
+                ],
+                'xml'
+            )
         ],
     ],
     'palettes' => [
