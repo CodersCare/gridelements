@@ -31,6 +31,7 @@ use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\HttpUtility;
@@ -1322,55 +1323,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         }
         $rowOutput .= $this->addElement(1, $theIcon, $theData, GeneralUtility::implodeAttributes($tagAttributes, true));
 
-        if ($this->l10nEnabled) {
-            // For each available translation, render the record:
-            if (is_array($this->translations)) {
-                foreach ($this->translations as $lRow) {
-                    // $lRow isn't always what we want - if record was moved we've to work with the
-                    // placeholder records otherwise the list is messed up a bit
-                    if ($row['_MOVE_PLH_uid'] && $row['_MOVE_PLH_pid']) {
-                        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-                            ->getQueryBuilderForTable($table);
-                        $queryBuilder->getRestrictions()
-                            ->removeAll()
-                            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-                        $predicates = [
-                            $queryBuilder->expr()->eq(
-                                't3ver_move_id',
-                                $queryBuilder->createNamedParameter((int)$lRow['uid'], \PDO::PARAM_INT)
-                            ),
-                            $queryBuilder->expr()->eq(
-                                'pid',
-                                $queryBuilder->createNamedParameter((int)$row['_MOVE_PLH_pid'], \PDO::PARAM_INT)
-                            ),
-                            $queryBuilder->expr()->eq(
-                                't3ver_wsid',
-                                $queryBuilder->createNamedParameter((int)$row['t3ver_wsid'], \PDO::PARAM_INT)
-                            ),
-                        ];
-
-                        $tmpRow = $queryBuilder
-                            ->select(...$this->selFieldList)
-                            ->from($table)
-                            ->andWhere(...$predicates)
-                            ->execute()
-                            ->fetch();
-
-                        $lRow = is_array($tmpRow) ? $tmpRow : $lRow;
-                    }
-                    // In offline workspace, look for alternative record:
-                    BackendUtility::workspaceOL($table, $lRow, $this->getBackendUserAuthentication()->workspace, true);
-                    if (is_array($lRow) && $this->getBackendUserAuthentication()->checkLanguageAccess((int)$lRow[$GLOBALS['TCA'][$table]['ctrl']['languageField']])) {
-                        $this->currentIdList[] = $lRow['uid'];
-                        if ($row['tx_gridelements_container']) {
-                            $lRow['_CSSCLASS'] = 't3-gridelements-child' . $expanded;
-                        }
-                        $rowOutput .= $this->renderListRow($table, $lRow, $cc, $titleCol, $thumbsCol, 20, $level,
-                            $row['tx_gridelements_container'], $expanded);
-                    }
-                }
-            }
-        }
+        $translations = $this->translations;
 
         if ($theData['_EXPANDABLE_'] && $level < 8 && ($row['l18n_parent'] == 0 || !$this->localizationView) && !empty($theData['_CHILDREN_'])) {
             $expanded = $this->expandedGridelements[$row['uid']] && (($this->expandedGridelements[$row['tx_gridelements_container']] && $expanded) || $row['tx_gridelements_container'] === 0) ? ' expanded' : '';
@@ -1422,6 +1375,57 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             }
             $this->showMoveUp = $originalMoveUp;
             $this->showMoveDown = $originalMoveDown;
+        }
+
+        if ($this->l10nEnabled) {
+            // For each available translation, render the record:
+            if (is_array($translations)) {
+                $expanded = $this->expandedGridelements[$row['uid']] && (($this->expandedGridelements[$row['tx_gridelements_container']] && $expanded) || $row['tx_gridelements_container'] === 0) ? ' expanded' : '';
+                foreach ($translations as $lRow) {
+                    // $lRow isn't always what we want - if record was moved we've to work with the
+                    // placeholder records otherwise the list is messed up a bit
+                    if ($row['_MOVE_PLH_uid'] && $row['_MOVE_PLH_pid']) {
+                        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+                            ->getQueryBuilderForTable($table);
+                        $queryBuilder->getRestrictions()
+                            ->removeAll()
+                            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+                        $predicates = [
+                            $queryBuilder->expr()->eq(
+                                't3ver_move_id',
+                                $queryBuilder->createNamedParameter((int)$lRow['uid'], \PDO::PARAM_INT)
+                            ),
+                            $queryBuilder->expr()->eq(
+                                'pid',
+                                $queryBuilder->createNamedParameter((int)$row['_MOVE_PLH_pid'], \PDO::PARAM_INT)
+                            ),
+                            $queryBuilder->expr()->eq(
+                                't3ver_wsid',
+                                $queryBuilder->createNamedParameter((int)$row['t3ver_wsid'], \PDO::PARAM_INT)
+                            ),
+                        ];
+
+                        $tmpRow = $queryBuilder
+                            ->select(...$this->selFieldList)
+                            ->from($table)
+                            ->andWhere(...$predicates)
+                            ->execute()
+                            ->fetch();
+
+                        $lRow = is_array($tmpRow) ? $tmpRow : $lRow;
+                    }
+                    // In offline workspace, look for alternative record:
+                    BackendUtility::workspaceOL($table, $lRow, $this->getBackendUserAuthentication()->workspace, true);
+                    if (is_array($lRow) && $this->getBackendUserAuthentication()->checkLanguageAccess((int)$lRow[$GLOBALS['TCA'][$table]['ctrl']['languageField']])) {
+                        $this->currentIdList[] = $lRow['uid'];
+                        if ($row['tx_gridelements_container']) {
+                            $lRow['_CSSCLASS'] = 't3-gridelements-child' . $expanded;
+                        }
+                        $rowOutput .= $this->renderListRow($table, $lRow, $cc, $titleCol, $thumbsCol, 20, $level,
+                            $row['tx_gridelements_container'], $expanded);
+                    }
+                }
+            }
         }
 
         // Finally, return table row element:
