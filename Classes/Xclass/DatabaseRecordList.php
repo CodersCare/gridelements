@@ -1373,7 +1373,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             $this->showMoveDown = $originalMoveDown;
         }
 
-        if ($this->l10nEnabled) {
+        if ($this->l10nEnabled && $level === 0) {
             // For each available translation, render the record:
             if (is_array($translations)) {
                 $expanded = $this->expandedGridelements[$row['uid']] && (($this->expandedGridelements[$row['tx_gridelements_container']] && $expanded) || $row['tx_gridelements_container'] === 0) ? ' expanded' : '';
