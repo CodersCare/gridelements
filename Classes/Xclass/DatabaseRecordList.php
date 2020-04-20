@@ -465,7 +465,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 $cc = 0;
                 $lastColPos = 0;
                 // The header row for the table is now created:
-                $out .= $this->renderListHeader($table, $this->currentIdList);
+                $out .= '###REPLACE_LIST_HEADER###';
                 foreach ($accRows as $key => $row) {
                     // Render item row if counter < limit
                     if ($cc < $this->iLimit) {
@@ -615,6 +615,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             }
         }
         // Return content:
+        $out = str_replace('###REPLACE_LIST_HEADER###', $this->renderListHeader($table, $this->currentIdList), $out);
         return $out;
     }
 
@@ -720,11 +721,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                             $lang->getLL('clip_deleteMarked')
                         );
                         // The "Select all" link:
-                        $onClick = htmlspecialchars(('checkOffCB(' . GeneralUtility::quoteJSvalue(implode(
-                                ',',
-                                $this->CBnames
-                            )) . ', this); return false;'));
-                        $cells['markAll'] = '<a class="btn btn-default" rel="" href="#" onclick="' . $onClick . '" title="'
+                        $cells['markAll'] = '<a class="btn btn-default t3js-toggle-all-checkboxes" data-checkboxes-names="' . htmlspecialchars(implode(',', $this->CBnames)) . '" rel="" href="#" title="'
                             . htmlspecialchars($lang->getLL('clip_markRecords')) . '">'
                             . $this->iconFactory->getIcon(
                                 'actions-document-select',
