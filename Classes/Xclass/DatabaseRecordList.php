@@ -462,7 +462,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 $cc = 0;
                 $lastColPos = 0;
                 // The header row for the table is now created:
-                $out .= $this->renderListHeader($table, $this->currentIdList);
+                $out .= '###REPLACE_LIST_HEADER###';
                 foreach ($accRows as $key => $row) {
                     // Render item row if counter < limit
                     if ($cc < $this->iLimit) {
@@ -608,6 +608,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 $this->outputCSV($table);
             }
         }
+        $out = str_replace('###REPLACE_LIST_HEADER###', $this->renderListHeader($table, $this->currentIdList), $out);
         // Return content:
         return $out;
     }
