@@ -66,9 +66,16 @@ you should go to the Template module, edit your main TypoScript
 template record and include the static template there. This will be
 providing the basic TypoScript setup for the Grid Elements frontend
 plugin. You will find it in the select box at the  *Include static
-(from extensions)* section of the  *Includes* tab. Currently there is
-only one static template  *gridelements(gridelements)* available.
-There might be more in future releases.
+(from extensions)* section of the  *Includes* tab. There are
+usually between one and three static templates for
+*gridelements(gridelements)* available.  
+Important is that you need only one template - if at all.  
+If you're firm with :ref:`TypoScript <TypoScript>` you can make a whole
+template by yourself and include it i.e. in an own sitepackage-extension.
+The names for the static templates shall summarize shortly the behavior.
+If any questions arise, the best is to look in the provided template-files
+and verify the differences and the kind how they connect data and
+functionality.
 
 .. figure:: ../../Images/Installation/IncludeStaticTemplate.png
    :alt: Include static template
