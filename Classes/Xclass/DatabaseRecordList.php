@@ -268,6 +268,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             }
             $hookObject->getDBlistQuery($table, $id, $addWhere, $selFieldList, $this);
         }
+        if ($table == 'pages' && $this->showOnlyTranslatedRecords) {
+            $addWhere .= ' AND ' . $GLOBALS['TCA']['pages']['ctrl']['languageField'] . ' IN(' . implode(',', array_keys($this->languagesAllowedForUser)) . ')';
+        }
         $additionalConstraints = empty($addWhere) ? [] : [QueryHelper::stripLogicalOperatorPrefix($addWhere)];
         if ($table === 'tt_content') {
             $additionalConstraints[] = (string)$queryBuilder->expr()->andX(
@@ -537,7 +540,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                                     }
                                     // In offline workspace, look for alternative record:
                                     BackendUtility::workspaceOL($table, $lRow, $backendUser->workspace, true);
-                                    if (is_array($lRow) && $backendUser->checkLanguageAccess($lRow[$GLOBALS['TCA'][$table]['ctrl']['languageField']])) {
+                                    if (is_array($lRow) && $backendUser->checkLanguageAccess((int)$lRow[$GLOBALS['TCA'][$table]['ctrl']['languageField']])) {
                                         $this->currentIdList[] = $lRow['uid'];
                                         $rowOutput .= $this->renderListRow(
                                             $table,
@@ -1357,7 +1360,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     }
                     // In offline workspace, look for alternative record:
                     BackendUtility::workspaceOL($table, $lRow, $this->getBackendUserAuthentication()->workspace, true);
-                    if (is_array($lRow) && $this->getBackendUserAuthentication()->checkLanguageAccess($lRow[$GLOBALS['TCA'][$table]['ctrl']['languageField']])) {
+                    if (is_array($lRow) && $this->getBackendUserAuthentication()->checkLanguageAccess((int)$lRow[$GLOBALS['TCA'][$table]['ctrl']['languageField']])) {
                         $this->currentIdList[] = $lRow['uid'];
                         if ($row['tx_gridelements_container']) {
                             $lRow['_CSSCLASS'] = 't3-gridelements-child' . $expanded;
@@ -1496,7 +1499,6 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 $params .= '&overrideVals[pages][sys_language_uid]=' . (int)$row[$GLOBALS['TCA']['pages']['ctrl']['languageField']];
                 $iconIdentifier = 'actions-page-open';
             }
-            $overlayIdentifier = !$this->isEditable($table) ? 'overlay-readonly' : null;
             $editAction = '<a class="btn btn-default" href="#" onclick="' . htmlspecialchars(BackendUtility::editOnClick(
                     $params,
                     '',
