@@ -532,6 +532,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
 
                                         $lRow = is_array($tmpRow) ? $tmpRow : $lRow;
                                     }
+                                    if (!$this->isRowListingConditionFulfilled($table, $lRow)) {
+                                        continue;
+                                    }
                                     // In offline workspace, look for alternative record:
                                     BackendUtility::workspaceOL($table, $lRow, $backendUser->workspace, true);
                                     if (is_array($lRow) && $backendUser->checkLanguageAccess($lRow[$GLOBALS['TCA'][$table]['ctrl']['languageField']])) {
@@ -835,6 +838,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                         }
                         // Add an empty entry, so column count fits again after moving this into $icon
                         $theData[$fCol] = '&nbsp;';
+                    } else {
+                        $icon = $this->spaceIcon;
                     }
                     break;
                 default:
@@ -1126,7 +1131,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         }
 
         $tagAttributes = [
-            'class'      => ['t3js-entity'],
+            'class'      => [],
             'data-table' => $table,
             'title'      => 'id=' . $row['uid'],
         ];
@@ -1150,6 +1155,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         if (!empty($row['_CSSCLASS'])) {
             $tagAttributes['class'] = [$row['_CSSCLASS']];
         }
+
+        $tagAttributes['class'][] = 't3js-entity';
+
         // Incr. counter.
         $this->counter++;
         // The icon with link
@@ -1226,7 +1234,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             } elseif ($fCol === '_CLIPBOARD_') {
                 $theData[$fCol] = $this->makeClip($table, $row);
             } elseif ($fCol === '_LOCALIZATION_') {
-                list($lC1, $lC2) = $this->makeLocalizationPanel($table, $row);
+                [$lC1, $lC2] = $this->makeLocalizationPanel($table, $row);
                 $theData[$fCol] = $lC1;
             } elseif ($fCol !== '_LOCALIZATION_b') {
                 $tmpProc = BackendUtility::getProcessedValueExtra($table, $fCol, $row[$fCol], 100, $row['uid']);
@@ -1455,7 +1463,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             ));
         }
         $permsEdit = $table === 'pages'
-            && $this->getBackendUserAuthentication()->checkLanguageAccess(0)
+            && $this->getBackendUserAuthentication()->checkLanguageAccess((int)$row[$GLOBALS['TCA']['pages']['ctrl']['languageField']])
             && $localCalcPerms & Permission::PAGE_EDIT
             || $table !== 'pages'
             && $localCalcPerms & Permission::CONTENT_EDIT
@@ -1480,7 +1488,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             $this->addActionToCellGroup($cells, $viewAction, 'view');
         }
         // "Edit" link: ( Only if permissions to edit the page-record of the content of the parent page ($this->id)
-        if ($permsEdit) {
+        if ($permsEdit && $this->isEditable($table)) {
             $params = '&edit[' . $table . '][' . $row['uid'] . ']=edit';
             $iconIdentifier = 'actions-open';
             if ($table === 'pages') {
@@ -1496,8 +1504,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 ))
                 . '" title="' . htmlspecialchars($this->getLanguageService()->getLL('edit')) . '">' . $this->iconFactory->getIcon(
                     $iconIdentifier,
-                    Icon::SIZE_SMALL,
-                    $overlayIdentifier
+                    Icon::SIZE_SMALL
                 )->render() . '</a>';
         } else {
             $editAction = $this->spaceIcon;
@@ -1509,7 +1516,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             . $this->iconFactory->getIcon('actions-document-info', Icon::SIZE_SMALL)->render() . '</a>';
         $this->addActionToCellGroup($cells, $viewBigAction, 'viewBig');
         // "Move" wizard link for pages/tt_content elements:
-        if ($permsEdit && ($table === 'tt_content' || $table === 'pages')) {
+        if ($permsEdit && ($table === 'tt_content' || $table === 'pages') && $this->isEditable($table)) {
             if ($isL10nOverlay) {
                 $moveAction = $this->spaceIcon;
             } else {
@@ -1674,6 +1681,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     $linkTitle = htmlspecialchars($this->getLanguageService()->getLL($actionName));
                     $l10nParentField = $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] ?? '';
                     $deleteAction = '<a class="btn btn-default t3js-record-delete" href="#" '
+                        . ' data-button-ok-text="' . htmlspecialchars($linkTitle) . '"'
                         . ' data-l10parent="' . ($l10nParentField ? htmlspecialchars($row[$l10nParentField]) : '') . '"'
                         . ' data-params="' . htmlspecialchars($params) . '" data-title="' . htmlspecialchars($title) . '"'
                         . ' data-message="' . htmlspecialchars($warningText) . '" title="' . $linkTitle . '"'
