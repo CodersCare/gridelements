@@ -191,9 +191,9 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                         $gridType['label'] = $lang->sL($item['title']);
                         if (!empty($item['icon']) && is_array($item['icon']) && !empty($item['icon'][0])) {
                             if (strpos($item['icon'][0], 'EXT:') === 0) {
-                                $gridType['icon'] = GeneralUtility::getFileAbsFileName($item['icon']);
+                                $gridType['icon'] = GeneralUtility::getFileAbsFileName($item['icon'][0]);
                             } elseif (strpos($item['icon'][0], '/typo3') === 0) {
-                                $gridType['icon'] = '../../../' . $item['icon'];
+                                $gridType['icon'] = '../../../' . $item['icon'][0];
                             } else {
                                 $gridType['icon'] = '../../../' . '../typo3/sysext/core/Resources/Public/Icons/T3Icons/content/' . $item['icon'][0];
                             }
