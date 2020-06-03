@@ -1205,7 +1205,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     trim($row[$thumbsCol]) &&
                     preg_match('/(^|(.*(;|,)?))' . $thumbsCol . '(((;|,).*)|$)/', $visibleColumns) === 1
                 ) {
-                    $thumbCode = '<br />' . $this->thumbCode($row, $table, $thumbsCol);
+                    $thumbCode = '<br />' . BackendUtility::thumbCode($row, $table, $thumbsCol);
                     $theData[$fCol] .= $thumbCode;
                     $theData['__label'] .= $thumbCode;
                 }
