@@ -21,6 +21,12 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 class ItemProvider extends RecordProvider
 {
     protected $itemsConfiguration = [
+        'pasteafter' => [
+            'type'           => 'item',
+            'label'          => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_js.pasteafter',
+            'iconIdentifier' => 'actions-document-paste-after',
+            'callbackAction' => 'pasteAfter',
+        ],
         'pastereference' => [
             'type'           => 'item',
             'label'          => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_clickmenu_pastereference',
@@ -45,7 +51,7 @@ class ItemProvider extends RecordProvider
             $end = array_slice($items, $position + 1, null, true);
 
             $items = $beginning + $localItems + $end;
-            $items['pasteAfter']['additioanlAttributes'] = $this->getAdditionalAttributes('pasteAfter');
+            $items['pasteAfter']['additionalAttributes'] = $this->getAdditionalAttributes('pasteAfter');
         }
         return $items;
     }
@@ -96,7 +102,7 @@ class ItemProvider extends RecordProvider
         if ($itemName === 'pastereference') {
             $canRender = $this->canBePastedAfter() && $this->clipboard->currentMode() === 'copy' && $this->backendUser->checkAuthMode(
                 'tt_content',
-                    'CType',
+                'CType',
                 'shortcut',
                 $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode']
             );
