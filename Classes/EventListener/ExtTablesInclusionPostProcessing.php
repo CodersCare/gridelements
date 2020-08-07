@@ -1,6 +1,6 @@
 <?php
 
-namespace GridElementsTeam\Gridelements\Slots;
+namespace GridElementsTeam\Gridelements\EventListener;
 
 /***************************************************************
  *  Copyright notice
@@ -20,6 +20,7 @@ namespace GridElementsTeam\Gridelements\Slots;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Core\Configuration\Event\AfterTcaCompilationEvent;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 /**
@@ -31,22 +32,17 @@ class ExtTablesInclusionPostProcessing
      * Function which may process data created / registered by extTables
      * scripts (f.e. modifying TCA data of all extensions)
      *
-     * @param array $tca
-     *
-     * @return array
+     * @param AfterTcaCompilationEvent $event
+     * @return void
      */
-    public function processData($tca)
+    public function __invoke(AfterTcaCompilationEvent $event): void
     {
-        // Move the local $tca to global variable to use general modification functions like addToAllTCAtypes
-        $GLOBALS['TCA'] = $tca;
-
         ExtensionManagementUtility::addToAllTCAtypes('tt_content', 'recursive', 'shortcut', 'after:records');
         ExtensionManagementUtility::addToAllTCAtypes(
             'tt_content',
             '--div--;LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:gridElements,tx_gridelements_container,tx_gridelements_columns'
         );
 
-        // return the modified global TCA definition
-        return [$GLOBALS['TCA']];
+        $event->setTca($GLOBALS['TCA']);
     }
 }
