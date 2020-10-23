@@ -451,6 +451,13 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 )
             ),
             $queryBuilder->expr()->eq('colPos', $queryBuilder->createNamedParameter(-1, \PDO::PARAM_INT)),
+            $queryBuilder->expr()->notIn(
+                'uid',
+                $queryBuilder->createNamedParameter(
+                    [(int)$row['uid'], $specificIds['uid']],
+                    Connection::PARAM_INT_ARRAY
+                )
+            ),
             $queryBuilder->expr()->in(
                 'tx_gridelements_container',
                 $queryBuilder->createNamedParameter(
@@ -618,10 +625,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
 
         if ($colPos !== '' && $colPos !== null && $colPos < 32768 && $url) {
             $iconsArray = [
-                'new' => '<a 
-                            href="' . htmlspecialchars($url) . '" 
-                            data-title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '" 
-                            title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '" 
+                'new' => '<a
+                            href="' . htmlspecialchars($url) . '"
+                            data-title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '"
+                            title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '"
                             class="btn btn-default btn-sm t3js-toggle-new-content-element-wizard">' .
                                 $this->iconFactory->getIcon('actions-add', 'small') . ' ' .
                                 $this->languageService->getLL('content') .
@@ -634,13 +641,13 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             '</div>';
 
         $gridContent[$colPos] .= '
-			<div data-colpos="' . $colPos . '" 
-			     data-language-uid="' . $row['sys_language_uid'] . '" 
+			<div data-colpos="' . $colPos . '"
+			     data-language-uid="' . $row['sys_language_uid'] . '"
 			     class="t3js-sortable t3js-sortable-lang t3js-sortable-lang-' . $row['sys_language_uid'] . ' t3-page-ce-wrapper ui-sortable">
-			    <div class="t3-page-ce t3js-page-ce" 
-			         data-container="' . $row['uid'] . '" 
+			    <div class="t3-page-ce t3js-page-ce"
+			         data-container="' . $row['uid'] . '"
 			         id="' . str_replace('.', '', uniqid('', true)) . '">
-					<div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce btn-group btn-group-sm" 
+					<div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce btn-group btn-group-sm"
 					     id="colpos-' . $colPos . '-' . str_replace('.', '', uniqid('', true)) . '">' .
             implode('', $iconsArray) . '
 					</div>
@@ -669,10 +676,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     $maxItemsReached = $counter > $maxItems && $maxItems > 0 ? ' t3-page-ce-danger' : '';
 
                     $gridContent[$colPos] .= '
-				<div class="t3-page-ce t3js-page-ce t3js-page-ce-sortable' . $statusHidden . $maxItemsReached . '" 
-				     data-table="tt_content" id="element-tt_content-' . $uid . '" 
-				     data-uid="' . $uid . '" 
-				     data-container="' . $container . '" 
+				<div class="t3-page-ce t3js-page-ce t3js-page-ce-sortable' . $statusHidden . $maxItemsReached . '"
+				     data-table="tt_content" id="element-tt_content-' . $uid . '"
+				     data-uid="' . $uid . '"
+				     data-container="' . $container . '"
 				     data-ctype="' . $item['CType'] . '">' .
                         $this->renderSingleElementHTML($parentObject, $item) .
                         '</div>';
@@ -721,10 +728,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                             $url = (string)$uriBuilder->buildUriFromRoute('record_edit', $urlParameters);
                         }
                         $iconsArray = [
-                            'new' => '<a 
+                            'new' => '<a
                                 href="' . htmlspecialchars($url) . '"
-                                data-title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '" 
-                                title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '" 
+                                data-title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '"
+                                title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '"
                                 class="btn btn-default btn-sm btn t3js-toggle-new-content-element-wizard">' .
                                     $this->iconFactory->getIcon('actions-add', 'small') . ' ' .
                                     $this->languageService->getLL('content') .
@@ -734,7 +741,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
 
                     $gridContent[$colPos] .= '
                         <div class="t3-page-ce">
-                            <div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce btn-group btn-group-sm" 
+                            <div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce btn-group btn-group-sm"
                                  id="colpos-' . $gridColumn .
                         '-page-' . $pid .
                         '-gridcontainer-' . $container .
@@ -977,10 +984,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         if ($parentObject->tt_contentConfig['showCommands']) {
             // Edit whole of column:
             if ($editParams) {
-                $iconsArr['edit'] = '<a 
-                    class="btn btn-default" 
-                    href="#" 
-                    onclick="' . htmlspecialchars(BackendUtility::editOnClick($editParams)) . '" 
+                $iconsArr['edit'] = '<a
+                    class="btn btn-default"
+                    href="#"
+                    onclick="' . htmlspecialchars(BackendUtility::editOnClick($editParams)) . '"
                     title="' . $this->getLanguageService()->getLL('editColumn') . '">' .
                     $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render() .
                 '</a>';
