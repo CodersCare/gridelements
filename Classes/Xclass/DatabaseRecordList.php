@@ -1228,7 +1228,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             } elseif ($fCol === '_PATH_') {
                 $theData[$fCol] = $this->recPath($row['pid']);
             } elseif ($fCol === '_REF_') {
-                $theData[$fCol] = $this->createReferenceHtml($table, $row['uid']);
+                $theData[$fCol] = $this->generateReferenceToolTip($table, $row['uid']);
             } elseif ($fCol === '_CONTROL_') {
                 $theData[$fCol] = $this->makeControl($table, $row);
             } elseif ($fCol === '_CLIPBOARD_') {
