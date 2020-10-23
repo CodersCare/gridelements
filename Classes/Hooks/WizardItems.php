@@ -117,6 +117,7 @@ class WizardItems implements NewContentElementWizardHookInterface
                 isset($allowed['CType']['gridelements_pi1']) ||
                 isset($allowed['CType']['*'])
             ) &&
+            !isset($disallowed['CType']['gridelements_pi1']) &&
             !isset($disallowed['tx_gridelements_backend_layout']['*'])
         ) {
             $allowedGridTypes = $allowed['tx_gridelements_backend_layout'] ?: [];
