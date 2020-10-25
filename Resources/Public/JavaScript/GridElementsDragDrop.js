@@ -34,6 +34,10 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
     DragDrop.default.ownDropZone = {};
     DragDrop.default.column = {};
 
+    DragDrop.getContentType = function (closestColumn, identifier) {
+        return closestColumn.data(identifier) ? $.map(closestColumn.data(identifier).toString().split(','), $.trim) : null;
+    };
+
     /**
      * initializes Drag+Drop for all content elements on the page
      */
@@ -121,12 +125,12 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
         gridType = gridType ? gridType.toString() : '';
         $(DragDrop.default.dropZoneIdentifier).not(DragDrop.default.ownDropZone).each(function () {
             var closestColumn = $(this).closest(DragDrop.default.columnIdentifier);
-            var allowedContentType = closestColumn.data('allowed-ctype') ? closestColumn.data('allowed-ctype').toString().split(',') : null;
-            var disallowedContentType = closestColumn.data('disallowed-ctype') ? closestColumn.data('disallowed-ctype').toString().split(',') : null;
-            var allowedListType = closestColumn.data('allowed-list_type') ? closestColumn.data('allowed-list_type').toString().split(',') : null;
-            var disallowedListType = closestColumn.data('disallowed-list_type') ? closestColumn.data('disallowed-list_type').toString().split(',') : null;
-            var allowedGridType = closestColumn.data('allowed-tx_gridelements_backend_layout') ? closestColumn.data('allowed-tx_gridelements_backend_layout').toString().split(',') : null;
-            var disallowedGridType = closestColumn.data('disallowed-tx_gridelements_backend_layout') ? closestColumn.data('disallowed-tx_gridelements_backend_layout').toString().split(',') : null;
+            var allowedContentType = DragDrop.getContentType(closestColumn, 'allowed-ctype');
+            var disallowedContentType = DragDrop.getContentType(closestColumn, 'disallowed-ctype');
+            var allowedListType = DragDrop.getContentType(closestColumn, 'allowed-list_type');
+            var disallowedListType = DragDrop.getContentType(closestColumn, 'disallowed-list_type');
+            var allowedGridType = DragDrop.getContentType(closestColumn, 'allowed-tx_gridelements_backend_layout');
+            var disallowedGridType = DragDrop.getContentType(closestColumn, 'disallowed-tx_gridelements_backend_layout');
             if ((
                     (!allowedContentType || $.inArray('*', allowedContentType) > -1 || $.inArray(contentType, allowedContentType) > -1) &&
                     (!disallowedContentType || ($.inArray('*', disallowedContentType) === -1 && $.inArray(contentType, disallowedContentType) === -1))
