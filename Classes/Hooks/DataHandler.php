@@ -82,17 +82,19 @@ class DataHandler implements SingletonInterface
         &$fieldArray,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
     ) {
+        // create a copy of $id which is passed by reference
+        $recordUid = $id;
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
             /** @var AfterDatabaseOperations $hook */
             $hook = GeneralUtility::makeInstance(AfterDatabaseOperations::class);
-            if (strpos($id, 'NEW') !== false) {
-                $id = $parentObj->substNEWwithIDs[$id];
+            if (strpos($recordUid, 'NEW') !== false) {
+                $recordUid = $parentObj->substNEWwithIDs[$recordUid];
             } else {
                 if ($table === 'tt_content' && $status === 'update') {
-                    $hook->adjustValuesAfterWorkspaceOperations($fieldArray, $id, $parentObj);
+                    $hook->adjustValuesAfterWorkspaceOperations($fieldArray, $recordUid, $parentObj);
                 }
             }
-            $hook->execute_afterDatabaseOperations($fieldArray, $table, $id, $parentObj);
+            $hook->execute_afterDatabaseOperations($fieldArray, $table, $recordUid, $parentObj);
         }
     }
 
