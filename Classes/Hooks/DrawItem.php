@@ -1200,7 +1200,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 $expanded = $this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$row['uid'] . '_' . $columnKey] ? 'collapsed' : 'expanded';
                 if (!empty($columnConfig['name']) && $columnKey === 32768) {
                     $columnHead = $this->tt_content_drawColHeader(
-                        htmlspecialchars($columnConfig['name']) . ' (' . $this->languageService->getLL('notAssigned') . ')',
+                        $this->languageService->sL($columnConfig['name']) . ' (' . $this->languageService->getLL('notAssigned') . ')',
                         '',
                         $parentObject
                     );
