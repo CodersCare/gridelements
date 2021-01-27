@@ -37,6 +37,7 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\WorkspaceRestriction;
 use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
@@ -480,32 +481,6 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 $queryBuilder->createNamedParameter((int)$row['sys_language_uid'], \PDO::PARAM_INT)
             );
         }
-        if ($this->helper->getBackendUser()->workspace > 0) {
-            if ($row['t3ver_wsid'] > 0) {
-                $constraints[] = $queryBuilder->expr()->eq(
-                    't3ver_wsid',
-                    $queryBuilder->createNamedParameter((int)$row['t3ver_wsid'], \PDO::PARAM_INT)
-                );
-                $constraints[] = $queryBuilder->expr()->neq(
-                    't3ver_state',
-                    $queryBuilder->createNamedParameter(VersionState::NEW_PLACEHOLDER_VERSION, \PDO::PARAM_INT)
-                );
-            } else {
-                $constraints[] = $queryBuilder->expr()->orX(
-                    $queryBuilder->expr()->eq(
-                        't3ver_wsid',
-                        $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
-                    ),
-                    $queryBuilder->expr()->eq(
-                        't3ver_wsid',
-                        $queryBuilder->createNamedParameter(
-                            $this->helper->getBackendUser()->workspace,
-                            \PDO::PARAM_INT
-                        )
-                    )
-                );
-            }
-        }
 
         $queryBuilder
             ->select('*')
@@ -521,6 +496,8 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         }
         $restrictions->removeByType(StartTimeRestriction::class);
         $restrictions->removeByType(EndTimeRestriction::class);
+        $workspaceRestriction = GeneralUtility::makeInstance(WorkspaceRestriction::class, (int)$this->helper->getBackendUser()->workspace);
+        $restrictions->add($workspaceRestriction);
         $queryBuilder->setRestrictions($restrictions);
 
         return $queryBuilder->execute()->fetchAll();
