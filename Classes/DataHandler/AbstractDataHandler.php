@@ -300,6 +300,10 @@ abstract class AbstractDataHandler
                             (int)$currentValues['tx_gridelements_container'],
                             \PDO::PARAM_INT
                         )
+                    ),
+                    $queryBuilder->expr()->eq(
+                        't3ver_oid',
+                        $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
                     )
                 )
                 ->execute();
