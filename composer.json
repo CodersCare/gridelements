@@ -17,6 +17,11 @@
     "typo3/cms-recordlist": "^11 || dev-master",
     "typo3/cms-frontend": "^11 || dev-master"
   },
+  "extra": {
+    "typo3-cms": {
+      "extension-key": "gridelements"
+    }
+  },
   "replace": {
     "gridelementsteam/gridelements": "self.version",
     "typo3-ter/gridelements": "self.version"
