@@ -18,7 +18,7 @@
     "typo3/cms-frontend": "^11 || dev-master"
   },
   "extra": {
-    "typo3-cms": {
+    "typo3/cms": {
       "extension-key": "gridelements"
     }
   },
