@@ -594,7 +594,7 @@ class LayoutSetup
             ) {
                 continue;
             }
-            if (isset($excludeLayouts[$item['uid']]) || (int)$colPos === -1 && $item['top_level_layout']) {
+            if (isset($excludeLayouts[$layoutId]) || (int)$colPos === -1 && $item['top_level_layout']) {
                 continue;
             }
 
