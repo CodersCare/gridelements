@@ -164,6 +164,7 @@ class GridChildrenProcessor implements DataProcessorInterface
 
         $queryConfiguration = [
             'pidInList' => (int)$cObj->data['pid'],
+            'languageField'     => 0,
             'orderBy'   => (
                 $this->options['sortingField'] ? htmlspecialchars($this->options['sortingField']) : 'sorting'
                 ) . ' ' . (
