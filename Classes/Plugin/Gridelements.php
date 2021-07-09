@@ -340,10 +340,6 @@ class Gridelements extends ContentObjectRenderer
             $queryBuilder->expr()->in(
                 'tx_gridelements_columns',
                 $queryBuilder->createNamedParameter($csvColumns, Connection::PARAM_INT_ARRAY)
-            ),
-            $queryBuilder->expr()->in(
-                'sys_language_uid',
-                $queryBuilder->createNamedParameter([-1, 0], Connection::PARAM_INT_ARRAY)
             )
         );
         $translationOverlay = [];
