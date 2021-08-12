@@ -1432,6 +1432,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      */
     public function makeControl($table, $row)
     {
+        $userTsConfig = $this->getBackendUserAuthentication()->getTSConfig();
         $module = $this->getModule();
         $rowUid = $row['uid'];
         if (ExtensionManagementUtility::isLoaded('workspaces') && isset($row['_ORIG_uid'])) {
