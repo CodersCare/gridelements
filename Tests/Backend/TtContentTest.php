@@ -4,7 +4,6 @@ use TYPO3\CMS\Core\Tests\UnitTestCase;
 
 class TtContentTest extends UnitTestCase
 {
-
     /**
      * test columns items proc func
      *

@@ -1,4 +1,5 @@
 <?php
+
 use GridElementsTeam\Gridelements\Wizard\GridelementsBackendLayoutWizardElement;
 
 /**
@@ -15,6 +16,6 @@ return [
     // Register backend_layout wizard
     'wizard_gridelements_backend_layout' => [
         'path' => '/wizard',
-        'target' => GridelementsBackendLayoutWizardElement::class . '::mainAction'
-    ]
+        'target' => GridelementsBackendLayoutWizardElement::class . '::mainAction',
+    ],
 ];

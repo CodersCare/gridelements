@@ -41,33 +41,37 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  */
 class Gridelements extends ContentObjectRenderer
 {
-
     /**
      * Same as class name
      *
      * @var string
      */
     public $prefixId = 'Gridelements';
+
     /**
      * Path to this script relative to the extension dir
      *
      * @var string
      */
     public $scriptRelPath = 'Classes/Plugin/Gridelements.php';
+
     /**
      * The extension key
      *
      * @var string
      */
     public $extKey = 'gridelements';
+
     /**
      * @var ContentObjectRenderer
      */
     protected $cObj;
+
     /**
      * @var PageRenderer
      */
     protected $pageRenderer;
+
     /**
      * @var LanguageAspect
      */
@@ -354,8 +358,10 @@ class Gridelements extends ContentObjectRenderer
                 }
                 if ($element) {
                     $translationOverlay = $queryBuilder->expr()->andX(
-                        $queryBuilder->expr()->eq('tx_gridelements_container',
-                            $queryBuilder->createNamedParameter((int)$element, \PDO::PARAM_INT)),
+                        $queryBuilder->expr()->eq(
+                            'tx_gridelements_container',
+                            $queryBuilder->createNamedParameter((int)$element, \PDO::PARAM_INT)
+                        ),
                         $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, \PDO::PARAM_INT)),
                         $queryBuilder->expr()->eq(
                             'pid',
@@ -556,8 +562,8 @@ class Gridelements extends ContentObjectRenderer
     public function copyCurrentParentGrid()
     {
         return [
-            'record'             => $this->cObj->currentRecord,
-            'data'               => $this->cObj->data,
+            'record' => $this->cObj->currentRecord,
+            'data' => $this->cObj->data,
             'parentRecordNumber' => $this->cObj->parentRecordNumber,
         ];
     }

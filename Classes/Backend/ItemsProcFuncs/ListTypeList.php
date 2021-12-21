@@ -31,7 +31,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class ListTypeList extends AbstractItemsProcFunc
 {
-
     /**
      * @var LayoutSetup
      */
@@ -103,10 +102,10 @@ class ListTypeList extends AbstractItemsProcFunc
         if (isset($layout) && (!empty($allowed) || !empty($disallowed))) {
             foreach ($items as $key => $item) {
                 if ((
-                        !empty($allowed) &&
+                    !empty($allowed) &&
                         !isset($allowed['*']) &&
                         !isset($allowed[$item[1]])
-                    ) ||
+                ) ||
                     (
                         !empty($disallowed) &&
                         (

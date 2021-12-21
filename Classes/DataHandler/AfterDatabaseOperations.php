@@ -93,8 +93,8 @@ class AfterDatabaseOperations extends AbstractDataHandler
         if ($table === 'tt_content' || $table === 'pages') {
             $this->init($table, $uid, $parentObj);
             if (!$this->getTceMain()->isImporting) {
-                $extensionConfiguration =  GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
-                if((boolean)$extensionConfiguration['disableAutomaticUnusedColumnCorrection'] !== true) {
+                $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+                if ((bool)$extensionConfiguration['disableAutomaticUnusedColumnCorrection'] !== true) {
                     $this->saveCleanedUpFieldArray($fieldArray);
                 }
                 if ($table === 'tt_content' && (int)$uid > 0) {

@@ -23,8 +23,8 @@ class ItemProvider extends RecordProvider
 {
     protected $itemsConfiguration = [
         'pastereference' => [
-            'type'           => 'item',
-            'label'          => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_clickmenu_pastereference',
+            'type' => 'item',
+            'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_clickmenu_pastereference',
             'iconIdentifier' => 'actions-document-paste-after',
             'callbackAction' => 'pasteReference',
         ],
@@ -54,14 +54,14 @@ class ItemProvider extends RecordProvider
     protected function getAdditionalAttributes(string $itemName): array
     {
         $urlParameters = [
-            'prErr'      => 1,
-            'uPT'        => 1,
-            'CB[paste]'  => $this->table . '|' . -$this->record['uid'],
-            'CB[pad]'    => 'normal',
+            'prErr' => 1,
+            'uPT' => 1,
+            'CB[paste]' => $this->table . '|' . -$this->record['uid'],
+            'CB[pad]' => 'normal',
             'CB[update]' => [
-                'colPos'                    => $this->record['colPos'],
+                'colPos' => $this->record['colPos'],
                 'tx_gridelements_container' => (int)$this->record['tx_gridelements_container'],
-                'tx_gridelements_columns'   => (int)$this->record['tx_gridelements_columns'],
+                'tx_gridelements_columns' => (int)$this->record['tx_gridelements_columns'],
             ],
         ];
         if ($itemName === 'pastereference') {
@@ -72,7 +72,7 @@ class ItemProvider extends RecordProvider
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $attributes += [
             'data-callback-module' => 'TYPO3/CMS/Gridelements/ClickMenuActions',
-            'data-action-url'      => htmlspecialchars($uriBuilder->buildUriFromRoute('tce_db', $urlParameters)),
+            'data-action-url' => htmlspecialchars($uriBuilder->buildUriFromRoute('tce_db', $urlParameters)),
         ];
         return $attributes;
     }
@@ -98,7 +98,7 @@ class ItemProvider extends RecordProvider
         if ($itemName === 'pastereference') {
             $canRender = $this->canBePastedAfter() && $this->clipboard->currentMode() === 'copy' && $this->backendUser->checkAuthMode(
                 'tt_content',
-                    'CType',
+                'CType',
                 'shortcut',
                 $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode']
             );

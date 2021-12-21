@@ -1,5 +1,7 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Updates;
 
 /**
@@ -118,7 +120,7 @@ class GridelementsBackendLayoutIconUpdateWizard implements UpgradeWizardInterfac
     public function getPrerequisites(): array
     {
         return [
-            DatabaseUpdatedPrerequisite::class
+            DatabaseUpdatedPrerequisite::class,
         ];
     }
 

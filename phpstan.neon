@@ -1,0 +1,19 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    parallel:
+        maximumNumberOfProcesses: 5
+
+    level: 2
+
+    bootstrapFiles:
+        - .Build/vendor/autoload.php
+
+    scanFiles:
+        - ext_localconf.php
+    scanDirectories:
+        - public
+
+    paths:
+        - Classes

@@ -76,22 +76,22 @@ class GridChildrenProcessor implements DataProcessorInterface
      * @var array
      */
     protected $registeredOptions = [
-        'sortingDirection'          => 'asc',
-        'sortingDirection.'         => [],
-        'sortingField'              => 'sorting',
-        'sortingField.'             => [],
-        'recursive'                 => 0,
-        'recursive.'                => [],
-        'resolveFlexFormData'       => 1,
-        'resolveFlexFormData.'      => [],
-        'resolveChildFlexFormData'  => 1,
+        'sortingDirection' => 'asc',
+        'sortingDirection.' => [],
+        'sortingField' => 'sorting',
+        'sortingField.' => [],
+        'recursive' => 0,
+        'recursive.' => [],
+        'resolveFlexFormData' => 1,
+        'resolveFlexFormData.' => [],
+        'resolveChildFlexFormData' => 1,
         'resolveChildFlexFormData.' => [],
-        'resolveBackendLayout'      => 1,
-        'resolveBackendLayout.'     => [],
-        'respectColumns'            => 1,
-        'respectColumns.'           => [],
-        'respectRows'               => 1,
-        'respectRows.'              => [],
+        'resolveBackendLayout' => 1,
+        'resolveBackendLayout.' => [],
+        'respectColumns' => 1,
+        'respectColumns.' => [],
+        'respectRows' => 1,
+        'respectRows.' => [],
     ];
 
     /**
@@ -164,13 +164,13 @@ class GridChildrenProcessor implements DataProcessorInterface
 
         $queryConfiguration = [
             'pidInList' => (int)$cObj->data['pid'],
-            'languageField'     => 0,
-            'orderBy'   => (
+            'languageField' => 0,
+            'orderBy' => (
                 $this->options['sortingField'] ? htmlspecialchars($this->options['sortingField']) : 'sorting'
-                ) . ' ' . (
+            ) . ' ' . (
                 strtolower($this->options['sortingDirection']) === 'desc' ? 'DESC' : 'ASC'
-                ),
-            'where'     => 'tx_gridelements_container = ' . (int)$cObj->data['uid'],
+            ),
+            'where' => 'tx_gridelements_container = ' . (int)$cObj->data['uid'],
         ];
         $records = $cObj->getRecords('tt_content', $queryConfiguration);
         foreach ($records as $record) {

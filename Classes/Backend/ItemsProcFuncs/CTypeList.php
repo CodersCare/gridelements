@@ -31,7 +31,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class CTypeList extends AbstractItemsProcFunc
 {
-
     /**
      * @var LayoutSetup
      */
@@ -100,13 +99,13 @@ class CTypeList extends AbstractItemsProcFunc
                 $disallowed = $layout['disallowed'][$column]['CType'];
             }
         }
-        if (isset($layout) &&  (!empty($allowed) || !empty($disallowed))) {
+        if (isset($layout) && (!empty($allowed) || !empty($disallowed))) {
             foreach ($items as $key => $item) {
                 if ((
-                        !empty($allowed) &&
+                    !empty($allowed) &&
                         !isset($allowed['*']) &&
                         !isset($allowed[$item[1]])
-                    ) ||
+                ) ||
                     (
                         !empty($disallowed) &&
                         (
