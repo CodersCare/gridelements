@@ -194,7 +194,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         } else {
             $originalRecord = $row;
         }
-        /** @var $layoutSetup LayoutSetup */
+        /** @var LayoutSetup $layoutSetup */
         $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($originalRecord['pid']);
         $gridElement = $layoutSetup->cacheCurrentParent($gridContainerId, true);
         $layoutUid = $gridElement['tx_gridelements_backend_layout'];
@@ -288,7 +288,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     {
         $specificIds = $this->helper->getSpecificIds($row);
 
-        /** @var $expressionBuilder ExpressionBuilder */
+        /** @var ExpressionBuilder $expressionBuilder */
         $expressionBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tt_content')
             ->expr();
@@ -511,9 +511,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      */
     public function getQueryBuilder()
     {
-        /**
-         * @var $queryBuilder QueryBuilder
-         */
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tt_content');
         return $queryBuilder;
@@ -527,7 +525,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param int $colPos : The column position we want to get the content for
      * @param array $values : The layout configuration values for the grid column
      * @param array $gridContent : The rendered content data of the grid column
-     * @param $row
+     * @param array $row
      * @param array $editUidList : determines if we will get edit icons or not
      */
     protected function renderSingleGridColumn(
@@ -779,21 +777,23 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             if ($this->languageHasTranslationsCache[$language]['hasStandAloneContent']
                 && $this->languageHasTranslationsCache[$language]['hasTranslations']
             ) {
-                /** @var $message FlashMessage */
+                /** @var FlashMessage $message */
                 $message = GeneralUtility::makeInstance(
                     FlashMessage::class,
                     sprintf(
                         $this->getLanguageService()->getLL('staleTranslationWarning'),
-                        $parentObject->languageIconTitles[$language]['title']
+                        ''
+                        // $parentObject->languageIconTitles[$language]['title']
                     ),
                     sprintf(
                         $this->getLanguageService()->getLL('staleTranslationWarningTitle'),
-                        $parentObject->languageIconTitles[$language]['title']
+                        ''
+                        // $parentObject->languageIconTitles[$language]['title']
                     ),
                     FlashMessage::WARNING
                 );
                 $service = GeneralUtility::makeInstance(FlashMessageService::class);
-                /** @var $queue FlashMessageQueue */
+                /** @var FlashMessageQueue $queue */
                 $queue = $service->getMessageQueueByIdentifier();
                 $queue->enqueue($message);
             }

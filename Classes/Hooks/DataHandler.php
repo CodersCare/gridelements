@@ -58,7 +58,7 @@ class DataHandler implements SingletonInterface
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
     ) {
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
-            /** @var $hook PreProcessFieldArray */
+            /** @var PreProcessFieldArray $hook */
             $hook = GeneralUtility::makeInstance(PreProcessFieldArray::class);
             $hook->execute_preProcessFieldArray($fieldArray, $table, $id, $parentObj);
         }

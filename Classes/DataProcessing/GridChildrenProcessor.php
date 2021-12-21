@@ -233,7 +233,7 @@ class GridChildrenProcessor implements DataProcessorInterface
     /**
      * Processes child records recursively to get other children into the same array
      *
-     * @param $record
+     * @param array $record
      */
     protected function processChildRecord($record)
     {

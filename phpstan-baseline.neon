@@ -1,2 +1,10 @@
 parameters:
 	ignoreErrors:
+		-
+			message: "#^Constant TYPO3_MODE not found\\.$#"
+			count: 1
+			path: Classes/Backend/LayoutSetup.php
+		-
+			message: "#^Constant LF not found\\.$#"
+			count: 1
+			path: Classes/Wizard/GridelementsBackendLayoutWizardElement.php
