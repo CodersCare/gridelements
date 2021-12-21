@@ -953,10 +953,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         if ($parentObject->tt_contentConfig['showCommands']) {
             // Edit whole of column:
             if ($editParams) {
+                $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
                 $iconsArr['edit'] = '<a
                     class="btn btn-default"
-                    href="#"
-                    onclick="' . htmlspecialchars(BackendUtility::editOnClick($editParams)) . '"
+                    href="' . htmlspecialchars($uriBuilder->buildUriFromRoute('record_edit') . $editParams . '&returnUrl=' . rawurlencode(GeneralUtility::getIndpEnv('REQUEST_URI'))) . '"
                     title="' . $this->getLanguageService()->getLL('editColumn') . '">' .
                     $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render() .
                 '</a>';
