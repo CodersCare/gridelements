@@ -255,7 +255,7 @@ class LayoutSetup
      */
     public function getQueryBuilder()
     {
-        /** @var $queryBuilder QueryBuilder */
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tx_gridelements_backend_layout');
         $queryBuilder->getRestrictions()

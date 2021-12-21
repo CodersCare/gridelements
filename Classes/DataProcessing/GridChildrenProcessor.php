@@ -168,8 +168,8 @@ class GridChildrenProcessor implements DataProcessorInterface
             'orderBy' => (
                 $this->options['sortingField'] ? htmlspecialchars($this->options['sortingField']) : 'sorting'
             ) . ' ' . (
-                    strtolower($this->options['sortingDirection']) === 'desc' ? 'DESC' : 'ASC'
-                ),
+                strtolower($this->options['sortingDirection']) === 'desc' ? 'DESC' : 'ASC'
+            ),
             'where' => 'tx_gridelements_container = ' . (int)$cObj->data['uid'],
         ];
         $records = $cObj->getRecords('tt_content', $queryConfiguration);
@@ -233,7 +233,7 @@ class GridChildrenProcessor implements DataProcessorInterface
     /**
      * Processes child records recursively to get other children into the same array
      *
-     * @param $record
+     * @param array $record
      */
     protected function processChildRecord($record)
     {

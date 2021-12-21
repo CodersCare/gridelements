@@ -99,6 +99,16 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     protected $l10nEnabled;
 
     /**
+     * @var bool
+     */
+    protected $no_noWrap;
+
+    /**
+     * @var bool
+     */
+    protected $localizationView;
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -133,7 +143,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         $lang = $this->getLanguageService();
         // Init
         $addWhere = '';
-        /** @var $queryBuilder QueryBuilder */
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
         $titleCol = $GLOBALS['TCA'][$table]['ctrl']['label'];
         $thumbsCol = $GLOBALS['TCA'][$table]['ctrl']['thumbnail'];
@@ -255,9 +265,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 FlashMessage::WARNING,
                 true
             );
-            /** @var $flashMessageService FlashMessageService */
+            /** @var FlashMessageService $flashMessageService */
             $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-            /** @var $defaultFlashMessageQueue FlashMessageQueue */
+            /** @var FlashMessageQueue $defaultFlashMessageQueue */
             $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
             $defaultFlashMessageQueue->enqueue($flashMessage);
         }
@@ -781,9 +791,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                             )->render() . '</a><a
                 class="btn btn-default t3js-toggle-gridelements-all" href="#t3-gridelements-expand-all" id="t3-gridelements-expand-all"
                 title="' . $expandTitle . '" data-container-ids="' . $containerIds . '">' . $this->iconFactory->getIcon(
-                                    'actions-view-list-expand',
-                                    'small'
-                                )->render() . '</a>';
+                                'actions-view-list-expand',
+                                'small'
+                            )->render() . '</a>';
                         }
                         if ($this->calcPerms & $permsAdditional && $this->showNewRecLink($table)) {
                             $spriteIcon = $table === 'pages'
@@ -1695,10 +1705,10 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                         ' ' . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.referencesToRecord'),
                         $this->getReferenceCount($table, $row['uid'])
                     ) . BackendUtility::translationCount(
-                            $table,
-                            $row['uid'],
-                            ' ' . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.translationsOfRecord')
-                        );
+                        $table,
+                        $row['uid'],
+                        ' ' . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.translationsOfRecord')
+                    );
                 }
 
                 if ($this->isRecordCurrentBackendUser($table, $row)) {

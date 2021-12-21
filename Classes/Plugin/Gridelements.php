@@ -123,7 +123,6 @@ class Gridelements extends ContentObjectRenderer
         $sortColumns = explode(',', $csvColumns);
 
         $this->renderChildrenIntoParentColumns($typoScriptSetup, $sortColumns);
-        unset($children);
         unset($sortColumns);
 
         // if there are any columns available, we can go on with the render process
@@ -297,7 +296,7 @@ class Gridelements extends ContentObjectRenderer
     }
 
     /**
-     * @param $dataArr
+     * @param array $dataArr
      * @param string $valueKey
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return array
@@ -474,7 +473,7 @@ class Gridelements extends ContentObjectRenderer
      */
     public function getQueryBuilder()
     {
-        /** @var $queryBuilder QueryBuilder */
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tt_content');
         $queryBuilder->setRestrictions(GeneralUtility::makeInstance(FrontendRestrictionContainer::class));
@@ -587,7 +586,7 @@ class Gridelements extends ContentObjectRenderer
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return array

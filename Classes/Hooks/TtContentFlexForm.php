@@ -38,19 +38,19 @@ class TtContentFlexForm
      * content element.
      *
      * @param array $tca
-     * @param $tableName
-     * @param $fieldName
+     * @param string $tableName
+     * @param string $fieldName
      * @param array $row
      * @return array
      */
-    public function getDataStructureIdentifierPreProcess(array $tca, $tableName, $fieldName, array $row)
+    public function getDataStructureIdentifierPreProcess(array $tca, string $tableName, string $fieldName, array $row)
     {
         if ($tableName === 'tt_content' && $fieldName === 'pi_flexform' && $row['CType'] === 'gridelements_pi1') {
             if (!empty($row['tx_gridelements_backend_layout'])) {
                 BackendUtility::fixVersioningPid($tableName, $row);
                 $pageUid = $row['pid'];
                 $layoutId = $row['tx_gridelements_backend_layout'];
-                /** @var $layoutSetupInstance LayoutSetup */
+                /** @var LayoutSetup $layoutSetupInstance */
                 $layoutSetupInstance = GeneralUtility::makeInstance(LayoutSetup::class)->init($pageUid);
                 $layoutSetup = $layoutSetupInstance->getLayoutSetup($layoutId);
                 if ($layoutSetup['pi_flexform_ds_file']) {

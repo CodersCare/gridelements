@@ -116,7 +116,7 @@ class Helper implements SingletonInterface
     }
 
     /**
-     * @param $backendLayout
+     * @param array $backendLayout
      * @param bool $csvValues
      * @return mixed
      */
@@ -124,7 +124,7 @@ class Helper implements SingletonInterface
     {
         if (!empty($backendLayout['allowed'])) {
             foreach ($backendLayout['allowed'] as $column => &$allowedFields) {
-                if (isset($fields['CType']) && $allowedFields['CType'] !== '*') {
+                if (isset($allowedFields['CType']) && $allowedFields['CType'] !== '*') {
                     if (!empty($allowedFields['list_type']) && strpos($allowedFields['CType'], 'list') === false) {
                         $allowedFields['CType'] .= ',list';
                     }
@@ -194,7 +194,7 @@ class Helper implements SingletonInterface
      */
     public function getQueryBuilder()
     {
-        /** @var $queryBuilder QueryBuilder  */
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tt_content');
         $queryBuilder->getRestrictions()
@@ -228,7 +228,7 @@ class Helper implements SingletonInterface
     }
 
     /**
-     * @param $pageId
+     * @param int $pageId
      * @return mixed
      */
     public function getSelectedBackendLayout($pageId)
