@@ -56,10 +56,10 @@ class ProcessCmdmap extends AbstractDataHandler
 
         if ($command === 'copy' && $reference === 1 && !$commandIsProcessed && $table === 'tt_content' && !$this->getTceMain()->isImporting) {
             $dataArray = [
-                'pid'     => $value,
-                'CType'   => 'shortcut',
+                'pid' => $value,
+                'CType' => 'shortcut',
                 'records' => $id,
-                'header'  => 'Reference',
+                'header' => 'Reference',
             ];
 
             // used for overriding container and column with real target values

@@ -2,13 +2,12 @@
 
 use GridElementsTeam\Gridelements\Hooks\PageRenderer;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Tests\UnitTestCase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Localization\LanguageService;
 
 class PageRendererTest extends UnitTestCase
 {
-
     /**
      * test get backend user
      *
@@ -19,7 +18,7 @@ class PageRendererTest extends UnitTestCase
         $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
         $GLOBALS['BE_USER'] = GeneralUtility::makeInstance(BackendUserAuthentication::class);
         $result = $pageRenderer->getBackendUser();
-        $this->assertEquals($GLOBALS['BE_USER'], $result);
+        self::assertEquals($GLOBALS['BE_USER'], $result);
     }
 
     /**
@@ -32,7 +31,7 @@ class PageRendererTest extends UnitTestCase
         $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);
         $result = $pageRenderer->getLanguageService();
-        $this->assertEquals($GLOBALS['LANG'], $result);
+        self::assertEquals($GLOBALS['LANG'], $result);
     }
 
     /**

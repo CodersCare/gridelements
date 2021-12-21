@@ -6,7 +6,7 @@
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPlugin([
     'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tt_content.CType_pi1',
     'gridelements_pi1',
-    'gridelements-default'
+    'gridelements-default',
 ], 'CType', 'gridelements');
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns(
@@ -21,14 +21,14 @@
                 'itemsProcFunc' => 'GridElementsTeam\Gridelements\Backend\TtContent->layoutItemsProcFunc',
                 'fieldWizard' => [
                     'selectIcons' => [
-                        'disabled' => ''
-                    ]
+                        'disabled' => '',
+                    ],
                 ],
                 'size' => 1,
                 'maxitems' => 1,
-                'default' => 0
+                'default' => 0,
             ],
-            'onChange' => 'reload'
+            'onChange' => 'reload',
         ],
         'tx_gridelements_children' => [
             'exclude' => 1,
@@ -49,7 +49,7 @@
                         'hide' => true,
                         'delete' => true,
                         'localize' => true,
-                    ]
+                    ],
                 ],
                 'inline' => [
                     'inlineNewButtonStyle' => 'display: inline-block;',
@@ -60,15 +60,15 @@
                     'columns' => [
                         'colPos' => [
                             'config' => [
-                                'default' => -1
-                            ]
-                        ]
-                    ]
+                                'default' => -1,
+                            ],
+                        ],
+                    ],
                 ],
                 'foreign_sortby' => 'sorting',
                 'size' => 5,
                 'autoSizeMax' => 20,
-            ]
+            ],
         ],
         'tx_gridelements_container' => [
             'exclude' => 1,
@@ -79,7 +79,7 @@
                 'items' => [
                     [
                         '',
-                        0
+                        0,
                     ],
                 ],
                 'default' => 0,
@@ -91,7 +91,7 @@
                 'minitems' => 0,
                 'maxitems' => 1,
             ],
-            'onChange' => 'reload'
+            'onChange' => 'reload',
         ],
         'tx_gridelements_columns' => [
             'exclude' => 1,
@@ -104,8 +104,8 @@
                 'maxitems' => 1,
                 'default' => 0,
             ],
-            'onChange' => 'reload'
-        ]
+            'onChange' => 'reload',
+        ],
     ]
 );
 

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\Backend;
@@ -106,9 +107,9 @@ class LocalizationController
             }
             if (!isset($containers[$container])) {
                 $records[$colPos][] = [
-                    'icon'      => $this->iconFactory->getIconForRecord('tt_content', $row, Icon::SIZE_SMALL)->render(),
-                    'title'     => $row[$GLOBALS['TCA']['tt_content']['ctrl']['label']],
-                    'uid'       => $uid,
+                    'icon' => $this->iconFactory->getIconForRecord('tt_content', $row, Icon::SIZE_SMALL)->render(),
+                    'title' => $row[$GLOBALS['TCA']['tt_content']['ctrl']['label']],
+                    'uid' => $uid,
                     'container' => $row['tx_gridelements_container'],
                 ];
             }
@@ -127,8 +128,8 @@ class LocalizationController
         }
 
         return (new JsonResponse())->setPayload([
-            'records'    => $filteredRecords,
-            'columns'    => $this->getPageColumns($pageId),
+            'records' => $filteredRecords,
+            'columns' => $this->getPageColumns($pageId),
             'containers' => $containers,
         ]);
     }
@@ -152,7 +153,7 @@ class LocalizationController
         $backendLayouts['__colPosList'][] = -1;
 
         return [
-            'columns'    => $columns,
+            'columns' => $columns,
             'columnList' => $backendLayouts['__colPosList'],
         ];
     }

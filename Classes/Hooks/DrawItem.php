@@ -41,6 +41,7 @@ use TYPO3\CMS\Core\Database\Query\Restriction\WorkspaceRestriction;
 use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
@@ -49,7 +50,6 @@ use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 use TYPO3\CMS\Core\Versioning\VersionState;
-use TYPO3\CMS\Core\Localization\LanguageService;
 
 /**
  * Class/Function which manipulates the rendering of item example content and replaces it with a grid of child elements.
@@ -58,7 +58,6 @@ use TYPO3\CMS\Core\Localization\LanguageService;
  */
 class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterface
 {
-
     /**
      * @var array
      */
@@ -103,7 +102,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
 
     public function __construct()
     {
-        $this->extentensionConfiguration =  GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+        $this->extentensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
         $this->setLanguageService($GLOBALS['LANG']);
         $this->helper = Helper::getInstance();
         $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
@@ -145,8 +144,6 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param string $headerContent : The content of the item header
      * @param string $itemContent : The content of the item itself
      * @param array $row : The current data row for this item
-     *
-     * @return void
      */
     public function preProcess(PageLayoutView &$parentObject, &$drawItem, &$headerContent, &$itemContent, array &$row)
     {
@@ -248,7 +245,6 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param array $parserRows : The parsed rows of the gridelement layout
      * @param array $colPosValues : The column positions that have been found for that layout
      * @param array $layout
-     * @return void
      */
     protected function setMultipleColPosValues($parserRows, &$colPosValues, $layout)
     {
@@ -260,17 +256,17 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                         if (isset($parserColumns['colPos']) && $parserColumns['colPos'] !== '') {
                             $columnKey = (int)$parserColumns['colPos'];
                             $colPosValues[$columnKey] = [
-                                'name'       => $name,
-                                'allowed'    => $layout['allowed'][$columnKey],
+                                'name' => $name,
+                                'allowed' => $layout['allowed'][$columnKey],
                                 'disallowed' => $layout['disallowed'][$columnKey],
-                                'maxitems'   => $layout['maxitems'][$columnKey],
+                                'maxitems' => $layout['maxitems'][$columnKey],
                             ];
                         } else {
                             $colPosValues[32768] = [
-                                'name'       => $this->languageService->getLL('notAssigned'),
-                                'allowed'    => '',
+                                'name' => $this->languageService->getLL('notAssigned'),
+                                'allowed' => '',
                                 'disallowed' => '*',
-                                'maxitems'   => 0,
+                                'maxitems' => 0,
                             ];
                         }
                     }
@@ -327,8 +323,6 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param array $editUidList : determines if we will get edit icons or not
      * @param bool $singleColumn : Determines if we are in single column mode or not
      * @param array $head : An array of headers for each of the columns
-     *
-     * @return void
      */
     protected function renderGridColumns(
         PageLayoutView $parentObject,
@@ -559,15 +553,15 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             ) {
                 if ($parentObject->option_newWizard) {
                     $urlParameters = [
-                        'id'                         => $parentObject->id,
-                        'sys_language_uid'           => $row['sys_language_uid'],
-                        'tx_gridelements_allowed'    => $allowed,
+                        'id' => $parentObject->id,
+                        'sys_language_uid' => $row['sys_language_uid'],
+                        'tx_gridelements_allowed' => $allowed,
                         'tx_gridelements_disallowed' => $disallowed,
-                        'tx_gridelements_container'  => $specificIds['uid'],
-                        'tx_gridelements_columns'    => $colPos,
-                        'colPos'                     => -1,
-                        'uid_pid'                    => $parentObject->id,
-                        'returnUrl'                  => GeneralUtility::getIndpEnv('REQUEST_URI'),
+                        'tx_gridelements_container' => $specificIds['uid'],
+                        'tx_gridelements_columns' => $colPos,
+                        'colPos' => -1,
+                        'uid_pid' => $parentObject->id,
+                        'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
                     ];
                     $routeName = BackendUtility::getPagesTSconfig($parentObject->id)['mod.']['newContentElementWizard.']['override']
                         ?? 'new_content_element_wizard';
@@ -575,19 +569,19 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     $url = (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
                 } else {
                     $urlParameters = [
-                        'edit'      => [
+                        'edit' => [
                             'tt_content' => [
                                 $parentObject->id => 'new',
                             ],
                         ],
-                        'defVals'   => [
+                        'defVals' => [
                             'tt_content' => [
-                                'sys_language_uid'           => $row['sys_language_uid'],
-                                'tx_gridelements_allowed'    => $allowed,
+                                'sys_language_uid' => $row['sys_language_uid'],
+                                'tx_gridelements_allowed' => $allowed,
                                 'tx_gridelements_disallowed' => $disallowed,
-                                'tx_gridelements_container'  => $specificIds['uid'],
-                                'tx_gridelements_columns'    => $colPos,
-                                'colPos'                     => -1,
+                                'tx_gridelements_container' => $specificIds['uid'],
+                                'tx_gridelements_columns' => $colPos,
+                                'colPos' => -1,
                             ],
                         ],
                         'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
@@ -668,15 +662,15 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                         $specificIds = $this->helper->getSpecificIds($item);
                         if ($parentObject->option_newWizard) {
                             $urlParameters = [
-                                'id'                         => $parentObject->id,
-                                'sys_language_uid'           => $language,
-                                'tx_gridelements_allowed'    => $allowed,
+                                'id' => $parentObject->id,
+                                'sys_language_uid' => $language,
+                                'tx_gridelements_allowed' => $allowed,
                                 'tx_gridelements_disallowed' => $disallowed,
-                                'tx_gridelements_container'  => $container,
-                                'tx_gridelements_columns'    => $gridColumn,
-                                'colPos'                     => -1,
-                                'uid_pid'                    => -$specificIds['uid'],
-                                'returnUrl'                  => GeneralUtility::getIndpEnv('REQUEST_URI'),
+                                'tx_gridelements_container' => $container,
+                                'tx_gridelements_columns' => $gridColumn,
+                                'colPos' => -1,
+                                'uid_pid' => -$specificIds['uid'],
+                                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
                             ];
                             $routeName = BackendUtility::getPagesTSconfig($pid)['mod.']['newContentElementWizard.']['override']
                                 ?? 'new_content_element_wizard';
@@ -684,19 +678,19 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                             $url = (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
                         } else {
                             $urlParameters = [
-                                'edit'      => [
+                                'edit' => [
                                     'tt_content' => [
                                         -$specificIds['uid'] => 'new',
                                     ],
                                 ],
-                                'defVals'   => [
+                                'defVals' => [
                                     'tt_content' => [
-                                        'sys_language_uid'           => $language,
-                                        'tx_gridelements_allowed'    => $allowed,
+                                        'sys_language_uid' => $language,
+                                        'tx_gridelements_allowed' => $allowed,
                                         'tx_gridelements_disallowed' => $disallowed,
-                                        'tx_gridelements_container'  => $container,
-                                        'tx_gridelements_columns'    => $gridColumn,
-                                        'colPos'                     => -1,
+                                        'tx_gridelements_container' => $container,
+                                        'tx_gridelements_columns' => $gridColumn,
+                                        'colPos' => -1,
                                     ],
                                 ],
                                 'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
@@ -824,8 +818,6 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * setter for LanguageService object
      *
      * @param LanguageService $languageService
-     *
-     * @return void
      */
     public function setLanguageService(LanguageService $languageService)
     {
@@ -983,14 +975,14 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
 
         $iconsArr['toggleContent'] = '<a href="#" class="btn btn-default t3js-toggle-gridelements-column toggle-content" title="' . $title . '" data-toggle-title="' . $toggleTitle . '" data-state="' . $state . '">' . $this->iconFactory->getIcon(
             'actions-view-list-collapse',
-                'small'
+            'small'
         ) . $this->iconFactory->getIcon(
-                    'actions-view-list-expand',
-                'small'
-                ) . '</a>';
+            'actions-view-list-expand',
+            'small'
+        ) . '</a>';
         $icons = '<div class="t3-page-column-header-icons btn-group btn-group-sm">' . implode(
             '',
-                $iconsArr
+            $iconsArr
         ) . '</div>';
         // Create header row:
         $out = '<div class="t3-page-column-header">
@@ -1023,7 +1015,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     'title',
                     $this->languageService->sL($layout['title']),
                     [
-                        'title'       => $this->languageService->sL($layout['title']),
+                        'title' => $this->languageService->sL($layout['title']),
                         'description' => $this->languageService->sL($layout['description']),
                     ]
                 ) . '</h4>';
@@ -1196,23 +1188,23 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     ) : '*') . '"' .
                     (!empty($disallowedContentTypes) ? ' data-disallowed-ctype="' . implode(
                         ',',
-                            $disallowedContentTypes
+                        $disallowedContentTypes
                     ) . '"' : '') .
                     (!empty($allowedListTypes) ? ' data-allowed-list_type="' . implode(
                         ',',
-                            $allowedListTypes
+                        $allowedListTypes
                     ) . '"' : '') .
                     (!empty($disallowedListTypes) ? ' data-disallowed-list_type="' . implode(
                         ',',
-                            $disallowedListTypes
+                        $disallowedListTypes
                     ) . '"' : '') .
                     (!empty($allowedGridTypes) ? ' data-allowed-tx_gridelements_backend_layout="' . implode(
                         ',',
-                            $allowedGridTypes
+                        $allowedGridTypes
                     ) . '"' : '') .
                     (!empty($disallowedGridTypes) ? ' data-disallowed-tx_gridelements_backend_layout="' . implode(
                         ',',
-                            $disallowedGridTypes
+                        $disallowedGridTypes
                     ) . '"' : '') .
                     (!empty($maxItems) ? ' data-maxitems="' . $maxItems . '"' : '') .
                     ' data-state="' . $expanded . '">';
@@ -1294,8 +1286,6 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param int $recursive : The number of levels for the recursion
      * @param int $parentUid : uid of the referencing tt_content record
      * @param int $language : sys_language_uid of the referencing tt_content record
-     *
-     * @return void
      */
     protected function collectContentDataFromPages(
         $shortcutItem,
@@ -1319,7 +1309,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             ->select('*')
             ->addSelectLiteral($queryBuilder->expr()->inSet(
                 'pid',
-                    $queryBuilder->createNamedParameter($itemList, Connection::PARAM_INT_ARRAY)
+                $queryBuilder->createNamedParameter($itemList, Connection::PARAM_INT_ARRAY)
             ) . ' AS inSet')
             ->from('tt_content')
             ->where(
@@ -1366,8 +1356,6 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param array $collectedItems : The collected item data row
      * @param int $parentUid : uid of the referencing tt_content record
      * @param int $language : sys_language_uid of the referencing tt_content record
-     *
-     * @return void
      */
     protected function collectContentData($shortcutItem, &$collectedItems, $parentUid, $language)
     {
@@ -1435,7 +1423,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     /**
      * Check if content can be edited by current user
      *
-     * @param integer $id
+     * @param int $id
      * @return bool
      */
     protected function contentIsNotLockedForEditors($id): bool
@@ -1445,8 +1433,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             $pageinfo = BackendUtility::readPageAccess($id, $perms_clause);
 
             return $this->isContentEditable($pageinfo);
-        } else {
-            return true;
         }
+        return true;
     }
 }

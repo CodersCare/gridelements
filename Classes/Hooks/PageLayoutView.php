@@ -28,6 +28,6 @@ class PageLayoutView
             return true;
         }
         $record = $params['record'];
-        return ((int) $record['colPos']) === -1 && !empty($record['tx_gridelements_container']);
+        return ((int)$record['colPos']) === -1 && !empty($record['tx_gridelements_container']);
     }
 }

@@ -34,7 +34,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class TtContent
 {
-
     /**
      * @var LayoutSetup
      */
@@ -244,10 +243,10 @@ class TtContent
                 $disallowed = $layoutSetups[$backendLayout]['disallowed'][$gridColumn];
                 if ($container[1] > 0 && (!empty($allowed) || !empty($disallowed))) {
                     if ((
-                            !empty($allowed) &&
+                        !empty($allowed) &&
                             !isset($allowed['CType']['*']) &&
                             !isset($allowed['CType'][$contentType])
-                        ) ||
+                    ) ||
                         (
                             !empty($disallowed) &&
                             (
@@ -259,13 +258,13 @@ class TtContent
                     }
                     if (!empty($listType)) {
                         if ((
-                                !empty($allowed) &&
+                            !empty($allowed) &&
                                 !isset($allowed['CType']['*']) &&
                                 !(
                                     isset($allowed['list_type']['*']) ||
                                     isset($allowed['list_type'][$listType])
                                 )
-                            ) ||
+                        ) ||
                             (
                                 !empty($disallowed) &&
                                 (

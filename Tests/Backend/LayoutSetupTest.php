@@ -2,13 +2,12 @@
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Tests\UnitTestCase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Localization\LanguageService;
 
 class LayoutSetupTest extends UnitTestCase
 {
-
     /**
      * test get database connection
      *
@@ -20,7 +19,7 @@ class LayoutSetupTest extends UnitTestCase
         $languageService = GeneralUtility::makeInstance(LanguageService::class);
         $layoutSetup->setLanguageService($languageService);
         $result = $layoutSetup->getLanguageService();
-        $this->assertEquals($languageService, $result);
+        self::assertEquals($languageService, $result);
     }
 
     /**
@@ -34,7 +33,7 @@ class LayoutSetupTest extends UnitTestCase
         $backendUserAuthentication = GeneralUtility::makeInstance(BackendUserAuthentication::class);
         $GLOBALS['BE_USER'] = $backendUserAuthentication;
         $result = $layoutSetup->getBackendUser();
-        $this->assertEquals($backendUserAuthentication, $result);
+        self::assertEquals($backendUserAuthentication, $result);
     }
 
     /**

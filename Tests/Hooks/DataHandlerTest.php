@@ -4,7 +4,6 @@ use TYPO3\CMS\Core\Tests\UnitTestCase;
 
 class DataHandlerTest extends UnitTestCase
 {
-
     /**
      * test process data map preprocess field array
      *

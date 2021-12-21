@@ -171,7 +171,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                         // Check if file ending exists, therefore compare pos of last slash to pos of last dot
                         if (!empty($listType['icon']) && strrpos($listType['icon'], '/') > strrpos(
                             $listType['icon'],
-                                '.'
+                            '.'
                         )) {
                             $listType['icon'] .= '.svg';
                         }
@@ -200,7 +200,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                             // Check if file ending exists, therefore compare pos of last slash to pos of last dot
                             if (!empty($gridType['icon']) && strrpos($gridType['icon'], '/') > strrpos(
                                 $gridType['icon'],
-                                    '.'
+                                '.'
                             )) {
                                 $gridType['icon'] .= '.svg';
                             }

@@ -14,7 +14,7 @@ return [
     // Get summary of records to localize
     'records_localize_summary' => [
         'path' => '/records/localize/summary',
-        'target' => Backend\LocalizationController::class . '::getRecordLocalizeSummary'
-    ]
+        'target' => Backend\LocalizationController::class . '::getRecordLocalizeSummary',
+    ],
 
 ];

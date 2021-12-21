@@ -8,7 +8,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class PreProcessFieldArrayTest extends UnitTestCase
 {
-
     /**
      * test inject layout setup
      *
@@ -38,7 +37,7 @@ class PreProcessFieldArrayTest extends UnitTestCase
         $table = 'tt_content';
         $hook->setTable($table);
         $result = $hook->getTable();
-        $this->assertEquals($table, $result);
+        self::assertEquals($table, $result);
     }
 
     /**
@@ -52,7 +51,7 @@ class PreProcessFieldArrayTest extends UnitTestCase
         $pageUid = 123;
         $hook->setPageUid($pageUid);
         $result = $hook->getPageUid();
-        $this->assertEquals($pageUid, $result);
+        self::assertEquals($pageUid, $result);
     }
 
     /**
@@ -66,7 +65,7 @@ class PreProcessFieldArrayTest extends UnitTestCase
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $hook->setTceMain($dataHandler);
         $result = $hook->getTceMain();
-        $this->assertEquals($dataHandler, $result);
+        self::assertEquals($dataHandler, $result);
     }
 
     /**
@@ -143,6 +142,6 @@ class PreProcessFieldArrayTest extends UnitTestCase
         $backendUserAuthentication = GeneralUtility::makeInstance(BackendUserAuthentication::class);
         $GLOBALS['BE_USER'] = $backendUserAuthentication;
         $result = $hook->getBackendUser();
-        $this->assertEquals($backendUserAuthentication, $result);
+        self::assertEquals($backendUserAuthentication, $result);
     }
 }

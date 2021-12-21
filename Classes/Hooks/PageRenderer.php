@@ -53,7 +53,7 @@ class PageRenderer implements SingletonInterface
 
     public function __construct()
     {
-        $this->extensionConfiguration =  GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+        $this->extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
         $this->helper = Helper::getInstance();
     }
 
@@ -67,19 +67,19 @@ class PageRenderer implements SingletonInterface
     {
         if (!empty($GLOBALS['SOBE']) && (get_class($GLOBALS['SOBE']) === RecordListController::class || is_subclass_of(
             $GLOBALS['SOBE'],
-                    RecordListController::class
+            RecordListController::class
         ))) {
             $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsOnReady');
             return;
         }
         if (!empty($GLOBALS['SOBE']) && (get_class($GLOBALS['SOBE']) === PageLayoutController::class || is_subclass_of(
             $GLOBALS['SOBE'],
-                    PageLayoutController::class
+            PageLayoutController::class
         ))) {
             $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
             $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsOnReady');
             $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragDrop');
-            if((boolean)$this->extensionConfiguration['disableDragInWizard'] !== true
+            if ((boolean)$this->extensionConfiguration['disableDragInWizard'] !== true
                 && (boolean)$this->helper->getBackendUser()->uc['disableDragInWizard'] !== true) {
                 $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard');
             }
@@ -137,7 +137,7 @@ class PageRenderer implements SingletonInterface
                 'tt_content',
                 'CType',
                 'shortcut',
-                    $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode']
+                $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode']
             ) ? 'true' : 'false') . ';
             top.skipDraggableDetails = ' . ($this->getBackendUser()->uc['dragAndDropHideNewElementWizardInfoOverlay'] ? 'true' : 'false') . ';
             top.browserUrl = ' . json_encode((string)$uriBuilder->buildUriFromRoute('wizard_element_browser')) . ';';
@@ -158,7 +158,7 @@ class PageRenderer implements SingletonInterface
                 }
             }
 
-            if((boolean)$this->extensionConfiguration['disableCopyFromPageButton'] !== true
+            if ((boolean)$this->extensionConfiguration['disableCopyFromPageButton'] !== true
                 && (boolean)$this->helper->getBackendUser()->uc['disableCopyFromPageButton'] !== true) {
                 $pAddExtOnReadyCode .= '
                     top.copyFromAnotherPageLinkTemplate = ' . json_encode('<a class="t3js-paste-new btn btn-default" title="' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.copyfrompage') . '">' . $iconFactory->getIcon(

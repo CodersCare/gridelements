@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 namespace GridElementsTeam\Gridelements\Updates;
 
 /**
@@ -118,7 +119,7 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
     public function getPrerequisites(): array
     {
         return [
-            DatabaseUpdatedPrerequisite::class
+            DatabaseUpdatedPrerequisite::class,
         ];
     }
 

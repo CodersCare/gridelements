@@ -4,7 +4,6 @@ use TYPO3\CMS\Core\Tests\UnitTestCase;
 
 class BackendLayoutWizardControllerTest extends UnitTestCase
 {
-
     /**
      * test get backend user
      *

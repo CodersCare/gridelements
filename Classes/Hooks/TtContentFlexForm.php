@@ -20,9 +20,9 @@ namespace GridElementsTeam\Gridelements\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 
 /**
  * Manipulate and find flex forms for gridelements tt_content plugin
@@ -56,18 +56,18 @@ class TtContentFlexForm
                 if ($layoutSetup['pi_flexform_ds_file']) {
                     // Our data structure is in a record. Re-use core internal syntax to resolve that.
                     $identifier = [
-                        'type'       => 'record',
-                        'tableName'  => 'tx_gridelements_backend_layout',
-                        'uid'        => $layoutId,
-                        'fieldName'  => 'pi_flexform_ds_file',
+                        'type' => 'record',
+                        'tableName' => 'tx_gridelements_backend_layout',
+                        'uid' => $layoutId,
+                        'fieldName' => 'pi_flexform_ds_file',
                         'flexformDS' => 'FILE:' . $layoutSetup['pi_flexform_ds_file'],
                     ];
                 } elseif ($layoutSetup['pi_flexform_ds']) {
                     $identifier = [
-                        'type'       => 'record',
-                        'tableName'  => 'tx_gridelements_backend_layout',
-                        'uid'        => $layoutId,
-                        'fieldName'  => 'pi_flexform_ds',
+                        'type' => 'record',
+                        'tableName' => 'tx_gridelements_backend_layout',
+                        'uid' => $layoutId,
+                        'fieldName' => 'pi_flexform_ds',
                         'flexformDS' => $layoutSetup['pi_flexform_ds'],
                     ];
                 } else {

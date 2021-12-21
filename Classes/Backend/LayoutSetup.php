@@ -28,11 +28,11 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DefaultRestrictionContainer;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
-use TYPO3\CMS\Core\Localization\LanguageService;
 
 /**
  * Utilities for gridelements.
@@ -41,7 +41,6 @@ use TYPO3\CMS\Core\Localization\LanguageService;
  */
 class LayoutSetup
 {
-
     /**
      * @var DefaultRestrictionContainer
      */
@@ -398,8 +397,6 @@ class LayoutSetup
      * Sets the flexformConfigurationPathAndFileName
      *
      * @param string $flexformConfigurationPathAndFileName
-     *
-     * @return void
      */
     public function setFlexformConfigurationPathAndFileName($flexformConfigurationPathAndFileName)
     {
@@ -436,9 +433,9 @@ class LayoutSetup
         }
         foreach ($this->layoutSetup as $layoutId => $item) {
             if ((
-                    (int)$colPos === -1 &&
+                (int)$colPos === -1 &&
                     $item['top_level_layout']
-                ) ||
+            ) ||
                 (
                     !empty($allowed) &&
                     !isset($allowed['*']) &&
@@ -587,9 +584,9 @@ class LayoutSetup
         $excludeLayouts = array_flip(explode(',', $excludeLayouts));
         foreach ($this->layoutSetup as $layoutId => $item) {
             if ((
-                    !empty($allowedGridTypes) &&
+                !empty($allowedGridTypes) &&
                     !isset($allowedGridTypes[$layoutId])
-                ) ||
+            ) ||
                 isset($disallowedGridTypes[$layoutId])
             ) {
                 continue;
@@ -599,12 +596,12 @@ class LayoutSetup
             }
 
             $wizardItems[] = [
-                'uid'            => $layoutId,
-                'title'          => $this->languageService->sL($item['title']),
-                'description'    => $this->languageService->sL($item['description']),
-                'icon'           => $item['icon'],
+                'uid' => $layoutId,
+                'title' => $this->languageService->sL($item['title']),
+                'description' => $this->languageService->sL($item['description']),
+                'icon' => $item['icon'],
                 'iconIdentifier' => $item['iconIdentifier'],
-                'tll'            => $item['top_level_layout'],
+                'tll' => $item['top_level_layout'],
                 'tt_content_defValues' => $item['tt_content_defValues.'],
             ];
         }
