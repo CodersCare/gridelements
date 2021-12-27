@@ -71,7 +71,7 @@ class ItemProvider extends RecordProvider
         $attributes = $this->getPasteAdditionalAttributes('after');
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $attributes += [
-            'data-callback-module' => 'TYPO3/CMS/Gridelements/ClickMenuActions',
+            'data-callback-module' => 'TYPO3/CMS/Gridelements/ContextMenuActions',
             'data-action-url' => htmlspecialchars($uriBuilder->buildUriFromRoute('tce_db', $urlParameters)),
         ];
         return $attributes;
