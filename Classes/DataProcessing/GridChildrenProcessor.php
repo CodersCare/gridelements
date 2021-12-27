@@ -142,7 +142,7 @@ class GridChildrenProcessor implements DataProcessorInterface
         unset($processedData);
 
         $targetVariableName = $cObj->stdWrapValue('as', $this->containerProcessorConfiguration, 'children');
-        $options = $this->containerProcessorConfiguration['options.'] ? $this->containerProcessorConfiguration['options.'] : [];
+        $options = $this->containerProcessorConfiguration['options.'] ?: [];
         foreach ($options as $key => &$option) {
             $option = $cObj->stdWrapValue($key, $options, $option);
         }
@@ -282,10 +282,14 @@ class GridChildrenProcessor implements DataProcessorInterface
             $this->options['respectColumns'] = 1;
             $processedRows = [];
             if (!empty($this->processedData['data']['tx_gridelements_backend_layout_resolved'])) {
-                foreach ($this->processedData['data']['tx_gridelements_backend_layout_resolved']['config']['rows.'] as $rowNumber => $row) {
-                    foreach ($row['columns.'] as $column) {
-                        $key = substr($rowNumber, 0, -1);
-                        $processedRows[$key][$column['colPos']] = $processedColumns[$column['colPos']];
+                if (!empty($this->processedData['data']['tx_gridelements_backend_layout_resolved']['config']['rows.'])) {
+                    foreach ($this->processedData['data']['tx_gridelements_backend_layout_resolved']['config']['rows.'] as $rowNumber => $row) {
+                        if (!empty($row['columns.'])) {
+                            foreach ($row['columns.'] as $column) {
+                                $key = substr($rowNumber, 0, -1);
+                                $processedRows[$key][$column['colPos']] = $processedColumns[$column['colPos']];
+                            }
+                        }
                     }
                 }
             }
