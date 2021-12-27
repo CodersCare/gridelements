@@ -581,7 +581,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 // Record navigation is added to the beginning and end of the table if in single
                 // table mode
                 if ($this->table) {
-                    $rowOutput = $this->renderListNavigation('top') . $rowOutput . $this->renderListNavigation('bottom');
+                    $rowOutput = '###REPLACE_LIST_NAVIGATION_TOP###' . $rowOutput . '###REPLACE_LIST_NAVIGATION_BOTTOM###';
                 } else {
                     // Show that there are more records than shown
                     if ($this->totalItems > $this->itemsLimitPerTable) {
@@ -636,6 +636,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         }
         // Return content:
         $out = str_replace('###REPLACE_LIST_HEADER###', $this->renderListHeader($table, $this->currentIdList), $out);
+        $out = str_replace('###REPLACE_LIST_NAVIGATION_TOP###', $this->renderListNavigation('top'), $out);
+        $out = str_replace('###REPLACE_LIST_NAVIGATION_BOTTOM###', $this->renderListNavigation('bottom'), $out);
         return $out;
     }
 
