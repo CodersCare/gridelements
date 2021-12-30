@@ -11,10 +11,13 @@
 .. role::   ts(typoscript)
     :class:  typoscript
 .. role::   php(code)
+
 Sponsoring
 ^^^^^^^^^^
+
 Inspiring people to share
 -------------------------
+
 We strongly believe in the principles of Open-source software, which is why we share this TYPO3 extension with you completely free of charge.
 
 Still even contributors to Open-source projects have to make a living somehow, so even though you are not obliged to do so, you should consider sharing a small part of the money you might be earning with this extension in return. This way we can make sure to still provide the TYPO3 community with better extensions and services in the future.
@@ -49,6 +52,7 @@ How to support our efforts?
 .. |text2| replace:: Pay any amount monthly on this service and it gets spread even around the people you want to support! We would be Flattr'ed to have you.
 .. |text3| replace:: You don't want to sponsor monthly? Dont worry you can also support us via Paypal with any desired amount you find reasonable.
 .. |text4| replace:: Sometimes you want to give it a personal touch. When you want to thank Joey and Petra with a nice Single Malt you should take a look here. Slàinte mhath!
+
 +-------+-------------------+
 +-------+-------------------+
 ||logo0|||text0|            |
@@ -66,14 +70,18 @@ How to support our efforts?
 ||logo4|||text4|            |
 +-------+-------------------+
 +-------+-------------------+
+
 The Agreement
 -------------
+
 Excerpt from the coders.care blog post `Service Level Agreements for TYPO3 Extensions <https://coders.care/blog/article/service-level-agreements-for-typo3-extensions/>`_
 
 .. image:: ../../Images/Sponsoring/Why.jpg
     :width: 480px
+
 Enabling companies, developers and the community to join forces and thrive
 ==========================================================================
+
 There is one particular thing, that should be different to most of the variants of service level agreements provided by other open-source projects though. Having to buy a so called "enterprise" or "professional" edition of the extensions or TYPO3 itself just to become entitled for an SLA is a No-Go, since it will create two classes in the community and contradict the principles of free software implied by the GPL.
 
 The benefit for the people agreeing to a certain service level should be defined by reliability and responsiveness, not by getting access to something, that is unavailable for the rest of the community. So there must be an agreement to still share the improved public extensions with everybody in the community while getting a personal early or immediate access depending on the level and the priority you paid for.

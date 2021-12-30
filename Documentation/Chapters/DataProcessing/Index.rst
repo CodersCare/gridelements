@@ -12,7 +12,7 @@
    :class:  typoscript
 .. role::   php(code)
 
-.. _TypoScript:
+.. _typoscript-dataprocessing:
 
 
 DataProcessing
@@ -102,6 +102,7 @@ to hassle with any other extension specific parameters.
 As described in the commented part, there are some default settings for
 those parameters, that will be used if you don't set any values yourself.
 Just use the the debug viewhelper in the dummy templates to get an overview of the different behaviours.
+
 ::
   <f:debug>{_all}</f:debug>
 
