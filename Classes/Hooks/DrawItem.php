@@ -643,9 +643,12 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     $language = (int)$item['sys_language_uid'];
                     $statusHidden = $parentObject->isDisabled('tt_content', $item) ? ' t3-page-ce-hidden' : '';
                     $maxItemsReached = $counter > $maxItems && $maxItems > 0 ? ' t3-page-ce-danger' : '';
-
+                    $highlightHeader = '';
+                    if ($this->checkIfTranslationsExistInLanguage([], (int)$item['sys_language_uid'], $parentObject) && (int)$item['l18n_parent'] === 0) {
+                        $highlightHeader = ' t3-page-ce-danger';
+                    }
                     $gridContent[$colPos] .= '
-				<div class="t3-page-ce t3js-page-ce t3js-page-ce-sortable' . $statusHidden . $maxItemsReached . '"
+				<div class="t3-page-ce t3js-page-ce t3js-page-ce-sortable' . $statusHidden . $maxItemsReached . $highlightHeader . '"
 				     data-table="tt_content" id="element-tt_content-' . $uid . '"
 				     data-uid="' . $uid . '"
 				     data-container="' . $container . '"
