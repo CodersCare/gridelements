@@ -12,7 +12,7 @@ parameters:
 
     scanFiles:
         - ext_localconf.php
-        
+
     scanDirectories:
         - public
 
@@ -20,5 +20,6 @@ parameters:
         - Classes
 
     excludePaths:
+        - Classes/Backend/LayoutSetup.php
         - Classes/Updates/GridelementsBackendLayoutIconUpdateWizard.php
         - Classes/Updates/GridelementsBackendLayoutPiFlexformDsFileUpdateWizard.php
