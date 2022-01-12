@@ -106,13 +106,13 @@ define(['jquery', 'TYPO3/CMS/Gridelements/GridElementsDragDrop', 'jquery-ui/drag
         }
     };
 
-    /**
-     * make wizard items draggable so they can be dragged into content columns
-     */
-    DragInWizard.makeItemsDraggable = function () {
-        $('#' + DragInWizard.wizardIdentifier + ' .panel-body .media').attr('language-uid', 0).find('.media-left img').addClass('t3js-page-ce-draghandle').parent().addClass('t3-page-ce-dragitem t3-page-ce-header-draggable').closest('.media').addClass('t3js-page-ce t3js-page-ce-draggable');
-        DragDrop.default.initialize();
-    };
+  /**
+   * make wizard items draggable so they can be dragged into content columns
+   */
+  DragInWizard.makeItemsDraggable = function () {
+    $('#' + DragInWizard.wizardIdentifier + ' .panel-body .media').attr('language-uid', 0).find('.media-left img, .media-left svg').addClass('t3js-page-ce-draghandle').parent().addClass('t3-page-ce-dragitem t3-page-ce-header-draggable').closest('.media').addClass('t3js-page-ce t3js-page-ce-draggable');
+    DragDrop.default.initialize();
+  };
 
     /**
      * rearrange wizard items, so only icons will remain as the draggable part
