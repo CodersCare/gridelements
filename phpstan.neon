@@ -21,5 +21,6 @@ parameters:
 
     excludePaths:
         - Classes/Backend/LayoutSetup.php
+        - Classes/Hooks/TtContentFlexForm.php
         - Classes/Updates/GridelementsBackendLayoutIconUpdateWizard.php
         - Classes/Updates/GridelementsBackendLayoutPiFlexformDsFileUpdateWizard.php
