@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\Hooks;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -55,13 +56,27 @@ class TtContentFlexForm
                 $layoutSetup = $layoutSetupInstance->getLayoutSetup($layoutId);
                 if ($layoutSetup['pi_flexform_ds_file']) {
                     // Our data structure is in a record. Re-use core internal syntax to resolve that.
-                    $identifier = [
-                        'type' => 'record',
-                        'tableName' => 'tx_gridelements_backend_layout',
-                        'uid' => $layoutId,
-                        'fieldName' => 'pi_flexform_ds_file',
-                        'flexformDS' => 'FILE:' . $layoutSetup['pi_flexform_ds_file'],
-                    ];
+                    // Get path of referenced file
+                    $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
+                    $fileReferences = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'pi_flexform_ds_file', $layoutSetup['uid']);
+                    if (count($fileReferences) > 0) {
+                        $file = $fileReferences[0]->getOriginalFile();
+                        $storageBasePath = rtrim($file->getStorage()->getConfiguration()['basePath'], '/');
+                        $filePath = $storageBasePath . $file->getProperties()['identifier'];
+                        $identifier = [
+                            'type' => 'record',
+                            'tableName' => 'tx_gridelements_backend_layout',
+                            'uid' => $layoutId,
+                            'fieldName' => 'pi_flexform_ds_file',
+                            'flexformDS' => 'FILE:' . $filePath,
+                        ];
+                    } else {
+                        // This could be an additional core patch that allows referencing a DS file directly.
+                        // If so, the second hook below would be obsolete.
+                        $identifier = [
+                            'type' => 'gridelements-dummy',
+                        ];
+                    }
                 } elseif ($layoutSetup['pi_flexform_ds']) {
                     $identifier = [
                         'type' => 'record',
