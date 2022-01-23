@@ -34,6 +34,7 @@ if (true === \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Cor
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTypoScript(
         'gridelements',
         'setup',
-        '@import \'EXT:gridelements/Configuration/TypoScript/backend.typoscript\''
+        'module.tx_backend.view.templateRootPaths.100 = EXT:gridelements/Resources/Private/Templates/
+        module.tx_backend.view.partialRootPaths.100 = EXT:gridelements/Resources/Private/Partials/'
     );
 }
