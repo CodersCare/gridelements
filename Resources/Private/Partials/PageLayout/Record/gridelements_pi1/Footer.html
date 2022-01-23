@@ -1,1 +1,7 @@
-Gridelements Footer
+<f:if condition="{item.footerInfo}">
+    <div class="t3-page-ce-footer">
+        <div class="t3-page-ce-info">
+            {item.footerInfo -> f:format.raw()}
+        </div>
+    </div>
+</f:if>
