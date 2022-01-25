@@ -2,12 +2,15 @@
 
 namespace GridElementsTeam\Gridelements\PageLayoutView;
 
+use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\Helper;
 use TYPO3\CMS\Backend\Preview\PreviewRendererInterface;
 use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\Grid;
+use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumn;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
+use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridRow;
 use TYPO3\CMS\Backend\View\PageLayoutView;
 use TYPO3\CMS\Backend\View\PageLayoutViewDrawItemHookInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -15,6 +18,7 @@ use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class GridelementsPreviewRenderer extends StandardContentPreviewRenderer implements PreviewRendererInterface
 {
@@ -156,7 +160,55 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         $context = $item->getContext();
         $record = $item->getRecord();
         $grid = GeneralUtility::makeInstance(Grid::class, $context);
+        $helper = GeneralUtility::makeInstance(Helper::class);
         $rendered = '';
+        $gridContainerId = $record['uid'];
+        $pageId = $record['pid'];
+        if ($pageId < 0) {
+            $originalRecord = BackendUtility::getRecord('tt_content', $record['t3ver_oid']);
+        } else {
+            $originalRecord = $record;
+        }
+        $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($originalRecord['pid']);
+        $gridElement = $layoutSetup->cacheCurrentParent($gridContainerId, true);
+        $layoutUid = $gridElement['tx_gridelements_backend_layout'];
+        $layout = $layoutSetup->getLayoutSetup($layoutUid);
+
+        if (isset($layout['config']['rows.'])) {
+            $children = $helper->getChildren('tt_content', $gridContainerId, $pageId, 'sorting', 0, '*');
+            $childColumns = [];
+            foreach ($children as $childRecord) {
+                $childColumns[$childRecord['tx_gridelements_columns']][] = $childRecord;
+            }
+            foreach ($layout['config']['rows.'] as $row) {
+                $gridRow = GeneralUtility::makeInstance(GridRow::class, $context);
+                if (isset($row['columns.'])) {
+                    foreach ($row['columns.'] as $column) {
+                        $gridColumn = GeneralUtility::makeInstance(GridColumn::class, $context, $column);
+                        $gridRow->addColumn($gridColumn);
+                        if (isset($column['colPos']) && isset($childColumns[$column['colPos']])) {
+                            foreach ($childColumns[$column['colPos']] as $child) {
+                                $gridColumnItem = GeneralUtility::makeInstance(GridColumnItem::class, $context, $gridColumn, $child);
+                                $gridColumn->addItem($gridColumnItem);
+                            }
+                        }
+                    }
+                }
+                $grid->addRow($gridRow);
+            }
+        }
+
+        $view = GeneralUtility::makeInstance(StandaloneView::class);
+        $rootPaths = [
+            0 => 'EXT:backend/Resources/Private/Partials/',
+            100 => 'EXT:gridelements/Resources/Private/Partials/',
+        ];
+        $view->setPartialRootPaths($rootPaths);
+        $view->setTemplatePathAndFilename('EXT:gridelements/Resources/Private/Templates/Grid/Container.html');
+        $view->assign('hideRestrictedColumns', (bool)(BackendUtility::getPagesTSconfig($context->getPageId())['mod.']['web_layout.']['hideRestrictedCols'] ?? false));
+        $view->assign('allowEditContent', $this->getBackendUser()->check('tables_modify', 'tt_content'));
+        $view->assign('container', $grid);
+        $rendered = $view->render();
 
         return $content . $rendered;
     }
