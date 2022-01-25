@@ -4,12 +4,12 @@ namespace GridElementsTeam\Gridelements\PageLayoutView;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\Helper;
+use GridElementsTeam\Gridelements\View\BackendLayout\Grid\GridelementsGridColumn;
 use GridElementsTeam\Gridelements\View\BackendLayout\Grid\GridelementsGridColumnItem;
 use TYPO3\CMS\Backend\Preview\PreviewRendererInterface;
 use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\Grid;
-use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumn;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridRow;
 use TYPO3\CMS\Backend\View\PageLayoutView;
@@ -175,6 +175,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         $layoutId = $gridElement['tx_gridelements_backend_layout'];
         $layout = $layoutSetup->getLayoutSetup($layoutId);
         $layoutColumns = $layoutSetup->getLayoutColumns($layoutId);
+        $specificIds = $this->helper->getSpecificIds($gridElement);
 
         if (isset($layout['config']['rows.'])) {
             $children = $helper->getChildren('tt_content', $gridContainerId, $pageId, 'sorting', 0, '*');
@@ -186,7 +187,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
                 $gridRow = GeneralUtility::makeInstance(GridRow::class, $context);
                 if (isset($row['columns.'])) {
                     foreach ($row['columns.'] as $column) {
-                        $gridColumn = GeneralUtility::makeInstance(GridColumn::class, $context, $column);
+                        $gridColumn = GeneralUtility::makeInstance(GridelementsGridColumn::class, $context, $column, $gridContainerId);
                         $gridRow->addColumn($gridColumn);
                         if (isset($column['colPos']) && isset($childColumns[$column['colPos']])) {
                             foreach ($childColumns[$column['colPos']] as $child) {
