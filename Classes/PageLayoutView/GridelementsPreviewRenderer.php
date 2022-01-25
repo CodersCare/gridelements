@@ -4,6 +4,7 @@ namespace GridElementsTeam\Gridelements\PageLayoutView;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\Helper;
+use GridElementsTeam\Gridelements\View\BackendLayout\Grid\GridelementsGridColumnItem;
 use TYPO3\CMS\Backend\Preview\PreviewRendererInterface;
 use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -171,8 +172,9 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         }
         $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($originalRecord['pid']);
         $gridElement = $layoutSetup->cacheCurrentParent($gridContainerId, true);
-        $layoutUid = $gridElement['tx_gridelements_backend_layout'];
-        $layout = $layoutSetup->getLayoutSetup($layoutUid);
+        $layoutId = $gridElement['tx_gridelements_backend_layout'];
+        $layout = $layoutSetup->getLayoutSetup($layoutId);
+        $layoutColumns = $layoutSetup->getLayoutColumns($layoutId);
 
         if (isset($layout['config']['rows.'])) {
             $children = $helper->getChildren('tt_content', $gridContainerId, $pageId, 'sorting', 0, '*');
@@ -188,7 +190,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
                         $gridRow->addColumn($gridColumn);
                         if (isset($column['colPos']) && isset($childColumns[$column['colPos']])) {
                             foreach ($childColumns[$column['colPos']] as $child) {
-                                $gridColumnItem = GeneralUtility::makeInstance(GridColumnItem::class, $context, $gridColumn, $child);
+                                $gridColumnItem = GeneralUtility::makeInstance(GridelementsGridColumnItem::class, $context, $gridColumn, $child, $layoutColumns);
                                 $gridColumn->addItem($gridColumnItem);
                             }
                         }

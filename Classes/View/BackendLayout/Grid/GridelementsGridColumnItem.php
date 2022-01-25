@@ -2,11 +2,22 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the TYPO3 CMS project.
+ *
+ * It is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, either version 2
+ * of the License, or any later version.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE.txt file that was distributed with this source code.
+ *
+ * The TYPO3 project - inspiring people to share!
+ */
+
 namespace GridElementsTeam\Gridelements\View\BackendLayout\Grid;
 
-use GridElementsTeam\Gridelements\Helper\Helper;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumn;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\PageLayoutContext;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -26,16 +37,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class GridelementsGridColumnItem extends GridColumnItem
 {
     /**
-     * @var GridelementsGridColumn
-     */
-    protected $column;
-
-    /**
      * @var array
      */
     protected $layoutColumns;
 
-    public function __construct(PageLayoutContext $context, GridelementsGridColumn $column, array $record, array $layoutColumns)
+    public function __construct(PageLayoutContext $context, GridColumn $column, array $record, array $layoutColumns)
     {
         parent::__construct($context, $column, $record);
         $this->layoutColumns = $layoutColumns;
@@ -56,44 +62,5 @@ class GridelementsGridColumnItem extends GridColumnItem
         }
 
         return implode(' ', $wrapperClassNames);
-    }
-
-    public function getNewContentAfterUrlWithRestrictions(): string
-    {
-        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        $pageId = $this->context->getPageId();
-
-        $specificIds = GeneralUtility::makeInstance(Helper::class)->getSpecificIds($this->record);
-        $allowed = base64_encode(json_encode($this->column->getAllowed()));
-        $disallowed = base64_encode(json_encode($this->column->getDisallowed()));
-
-        if ($this->context->getDrawingConfiguration()->getShowNewContentWizard()) {
-            $urlParameters = [
-                'id' => $pageId,
-                'sys_language_uid' => $this->context->getSiteLanguage()->getLanguageId(),
-                'tx_gridelements_allowed' => $allowed,
-                'tx_gridelements_disallowed' => $disallowed,
-                'tx_gridelements_container' => $specificIds['uid'],
-                'tx_gridelements_columns' => $this->column->getColumnNumber(),
-                'colPos' => -1,
-                'uid_pid' => -$this->record['uid'],
-                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
-
-            ];
-            $routeName = BackendUtility::getPagesTSconfig($pageId)['mod.']['newContentElementWizard.']['override']
-                ?? 'new_content_element_wizard';
-        } else {
-            $urlParameters = [
-                'edit' => [
-                    'tt_content' => [
-                        -$this->record['uid'] => 'new',
-                    ],
-                ],
-                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
-            ];
-            $routeName = 'record_edit';
-        }
-
-        return (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
     }
 }
