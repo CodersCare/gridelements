@@ -68,20 +68,9 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
     public function __construct()
     {
         $this->extentensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
-        $this->setLanguageService($GLOBALS['LANG']);
         $this->helper = Helper::getInstance();
         $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
         $this->cleanupCollapsedStatesInUC();
-    }
-
-    /**
-     * setter for LanguageService object
-     *
-     * @param LanguageService $languageService
-     */
-    public function setLanguageService(LanguageService $languageService)
-    {
-        $this->languageService = $languageService;
     }
 
     /**
@@ -162,7 +151,6 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         $record = $item->getRecord();
         $grid = GeneralUtility::makeInstance(Grid::class, $context);
         $helper = GeneralUtility::makeInstance(Helper::class);
-        $rendered = '';
         $gridContainerId = $record['uid'];
         $pageId = $record['pid'];
         if ($pageId < 0) {
@@ -209,6 +197,8 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         $view->setPartialRootPaths($rootPaths);
         $view->setTemplatePathAndFilename('EXT:gridelements/Resources/Private/Templates/Grid/Container.html');
         $view->assign('hideRestrictedColumns', (bool)(BackendUtility::getPagesTSconfig($context->getPageId())['mod.']['web_layout.']['hideRestrictedCols'] ?? false));
+        $view->assign('newContentTitle', $this->getLanguageService()->getLL('newContentElement') . 'Test');
+        $view->assign('newContentTitleShort', $this->getLanguageService()->getLL('content'));
         $view->assign('allowEditContent', $this->getBackendUser()->check('tables_modify', 'tt_content'));
         $view->assign('container', $grid);
         $rendered = $view->render();
