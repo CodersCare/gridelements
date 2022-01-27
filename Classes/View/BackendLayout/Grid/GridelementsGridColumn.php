@@ -41,6 +41,11 @@ class GridelementsGridColumn extends GridColumn
      */
     protected $gridContainerId;
 
+    /**
+     * @var bool
+     */
+    protected $collapsed;
+
     public function __construct(PageLayoutContext $context, array $columnDefinition, int $gridContainerId)
     {
         parent::__construct($context, $columnDefinition);
@@ -50,5 +55,15 @@ class GridelementsGridColumn extends GridColumn
     public function getGridContainerId(): ?int
     {
         return $this->gridContainerId;
+    }
+
+    public function setCollapsed($collapsed)
+    {
+        $this->collapsed = (bool)$collapsed;
+    }
+
+    public function getCollapsed(): ?bool
+    {
+        return $this->collapsed;
     }
 }
