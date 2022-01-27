@@ -19,6 +19,7 @@ use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Configuration\BackendConfigurationManager;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class GridelementsPreviewRenderer extends StandardContentPreviewRenderer implements PreviewRendererInterface
@@ -191,12 +192,12 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         }
 
         $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $rootPaths = [
-            0 => 'EXT:backend/Resources/Private/Partials/',
-            100 => 'EXT:gridelements/Resources/Private/Partials/',
-        ];
-        $view->setPartialRootPaths($rootPaths);
-        $view->setTemplatePathAndFilename('EXT:gridelements/Resources/Private/Templates/Grid/Container.html');
+        $configurationManager = GeneralUtility::makeInstance(BackendConfigurationManager::class);
+        $configuration = $configurationManager->getConfiguration('gridelements');
+        $view->setTemplate($configuration['backendContainer']['view']['defaultTemplate']);
+        $view->setLayoutRootPaths($configuration['backendContainer']['view']['layoutRootPaths']);
+        $view->setTemplateRootPaths($configuration['backendContainer']['view']['templateRootPaths']);
+        $view->setPartialRootPaths($configuration['backendContainer']['view']['partialRootPaths']);
         $view->assign('hideRestrictedColumns', (bool)(BackendUtility::getPagesTSconfig($context->getPageId())['mod.']['web_layout.']['hideRestrictedCols'] ?? false));
         $view->assign('newContentTitle', $this->getLanguageService()->getLL('newContentElement') . 'Test');
         $view->assign('newContentTitleShort', $this->getLanguageService()->getLL('content'));

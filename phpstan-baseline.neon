@@ -10,3 +10,7 @@ parameters:
 			message: "#^Class TYPO3\\\\CMS\\\\Fluid\\\\View\\\\StandaloneView not found\\.$#"
 			count: 1
 			path: Classes/PageLayoutView/GridelementsPreviewRenderer.php
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Extbase\\\\Configuration\\\\BackendConfigurationManager not found\\.$#"
+			count: 1
+			path: Classes/PageLayoutView/GridelementsPreviewRenderer.php
