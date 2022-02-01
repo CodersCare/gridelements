@@ -1,8 +1,12 @@
 <td valign="top" colspan="{column.colSpan}" rowspan="{column.rowSpan}"
     data-colpos="{column.columnNumber}" data-columnkey="{column.gridContainerId}_{column.columnNumber}" data-language-uid="{column.context.siteLanguage.languageId}"
+    data-allowed-ctype="{column.allowedContentType}" data-allowed-list_type="{column.allowedListType}" data-allowed-tx_gridelements_backend_layout="{column.allowedGridType}"
+    data-disallowed-ctype="{column.disallowedContentType}" data-disallowed-list_type="{column.disallowedListType}" data-disallowed-tx_gridelements_backend_layout="{column.disallowedGridType}"
+    data-maxitems="{column.maxitems}" data-state="{f:if(condition: column.collapsed, then: 'collapsed', else: 'expanded')}"
     class="t3js-page-lang-column-{column.context.siteLanguage.languageId} t3js-page-column t3-grid-cell t3-page-column t3-page-column-{column.columnNumber}
+        {f:if(condition: column.gridContainerId, then: 't3-grid-container-cell')}
         {f:if(condition: column.active, else: 't3-grid-cell-unassigned')}
-        {f:if(condition: column.collapsed, then: 'collapsed')}
+        {f:if(condition: column.collapsed, then: 'collapsed', else: 'expanded')}
         t3-gridCell-width{column.colSpan}
         t3-gridCell-height{column.rowSpan}">
     <f:render partial="PageLayout/Grid/ColumnHeader" arguments="{_all}" />

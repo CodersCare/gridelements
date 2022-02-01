@@ -49,12 +49,32 @@ class GridelementsGridColumn extends GridColumn
     /**
      * @var string
      */
-    protected $allowed = '';
+    protected $allowedContentType = '';
 
     /**
      * @var string
      */
-    protected $disallowed = '';
+    protected $allowedListType = '';
+
+    /**
+     * @var string
+     */
+    protected $allowedGridType = '';
+
+    /**
+     * @var string
+     */
+    protected $disallowedContentType = '';
+
+    /**
+     * @var string
+     */
+    protected $disallowedListType = '';
+
+    /**
+     * @var string
+     */
+    protected $disallowedGridType = '';
 
     /**
      * @var int
@@ -82,24 +102,64 @@ class GridelementsGridColumn extends GridColumn
         return $this->collapsed;
     }
 
-    public function setDisallowed(string $disallowed)
+    public function setDisallowedContentType(string $disallowedContentType)
     {
-        $this->disallowed = $disallowed;
+        $this->disallowedContentType = $disallowedContentType;
     }
 
-    public function getDisallowed(): ?string
+    public function getDisallowedContentType(): ?string
     {
-        return $this->disallowed;
+        return $this->disallowedContentType;
     }
 
-    public function setAllowed(string $allowed)
+    public function setDisallowedListType(string $disallowedListType)
     {
-        $this->allowed = $allowed;
+        $this->disallowedListType = $disallowedListType;
     }
 
-    public function getAllowed(): ?string
+    public function getDisallowedListType(): ?string
     {
-        return $this->allowed;
+        return $this->disallowedListType;
+    }
+
+    public function setDisallowedGridType(string $disallowedGridType)
+    {
+        $this->disallowedGridType = $disallowedGridType;
+    }
+
+    public function getDisallowedGridType(): ?string
+    {
+        return $this->disallowedGridType;
+    }
+
+    public function setAllowedContentType(string $allowedContentType)
+    {
+        $this->allowedContentType = $allowedContentType;
+    }
+
+    public function getAllowedContentType(): ?string
+    {
+        return $this->allowedContentType;
+    }
+
+    public function setAllowedListType(string $allowedListType)
+    {
+        $this->allowedListType = $allowedListType;
+    }
+
+    public function getAllowedListType(): ?string
+    {
+        return $this->allowedListType;
+    }
+
+    public function setAllowedGridType(string $allowedGridType)
+    {
+        $this->allowedGridType = $allowedGridType;
+    }
+
+    public function getAllowedGridType(): ?string
+    {
+        return $this->disallowedGridType;
     }
 
     public function setMaxitems(int $maxitems)
@@ -236,23 +296,23 @@ class GridelementsGridColumn extends GridColumn
         }
 
         if (!empty($disallowedContentTypes)) {
-            $this->setDisallowed(' data-disallowed-ctype="' . implode(',', $disallowedContentTypes) . '"');
+            $this->setDisallowedContentType(implode(',', $disallowedContentTypes));
         }
         if (!empty($disallowedListTypes)) {
-            $this->setDisallowed($this->getDisallowed() . ' data-disallowed-list_type="' . implode(',', $disallowedListTypes) . '"');
+            $this->setDisallowedListType(implode(',', $disallowedListTypes));
         }
         if (!empty($disallowedGridTypes)) {
-            $this->setDisallowed($this->getDisallowed() . ' data-disallowed-tx_gridelements_backend_layout="' . implode(',', $disallowedGridTypes) . '"');
+            $this->setDisallowedGridType(implode(',', $disallowedGridTypes));
         }
 
         if (!empty($allowedContentTypes)) {
-            $this->setAllowed(' data-allowed-ctype="' . implode(',', $allowedContentTypes) . '"');
+            $this->setAllowedContentType(implode(',', $allowedContentTypes));
         }
         if (!empty($allowedListTypes)) {
-            $this->setAllowed($this->getAllowed() . ' data-allowed-list_type="' . implode(',', $allowedListTypes) . '"');
+            $this->setAllowedListType(implode(',', $allowedListTypes));
         }
         if (!empty($allowedGridTypes)) {
-            $this->setAllowed($this->getAllowed() . ' data-allowed-tx_gridelements_backend_layout="' . implode(',', $allowedGridTypes) . '"');
+            $this->setAllowedGridType(implode(',', $allowedGridTypes));
         }
 
         if (isset($layoutColumns['maxitems']) && isset($layoutColumns['maxitems'][$this->columnNumber])) {
