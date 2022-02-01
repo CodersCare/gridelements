@@ -1,4 +1,12 @@
 module {
+  tx_backend {
+    view {
+      partialRootPaths {
+        0 = EXT:backend/Resources/Private/Partials/
+        100 = EXT:gridelements/Resources/Private/Partials/
+      }
+    }
+  }
   tx_gridelements {
     backendContainer {
       view {
