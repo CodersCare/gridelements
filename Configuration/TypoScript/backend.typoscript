@@ -3,7 +3,7 @@ module {
     view {
       partialRootPaths {
         0 = EXT:backend/Resources/Private/Partials/
-        100 = EXT:gridelements/Resources/Private/Partials/
+        100 = EXT:gridelements/Resources/Private/Backend/PageModule/Partials/
       }
     }
   }
@@ -13,15 +13,15 @@ module {
         defaultTemplate = BackendContainer
         layoutRootPaths {
           0  = EXT:backend/Resources/Private/Layouts/
-          100  = EXT:gridelements/Resources/Private/Layouts/
+          100  = EXT:gridelements/Resources/Private/Backend/Gridelements/Layouts/
         }
         templateRootPaths {
           0 = EXT:backend/Resources/Private/Templates/
-          100 = EXT:gridelements/Resources/Private/Templates/
+          100 = EXT:gridelements/Resources/Private/Backend/Gridelements/Templates/
         }
         partialRootPaths {
           0 = EXT:backend/Resources/Private/Partials/
-          100 = EXT:gridelements/Resources/Private/Partials/
+          100 = EXT:gridelements/Resources/Private/Backend/Gridelements/Partials/
         }
       }
     }
