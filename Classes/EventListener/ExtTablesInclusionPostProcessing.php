@@ -42,6 +42,11 @@ class ExtTablesInclusionPostProcessing
             '--div--;LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:gridElements,tx_gridelements_container,tx_gridelements_columns'
         );
 
+        if (true === \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\Features::class)->isFeatureEnabled('fluidBasedPageModule')) {
+            $GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['previewRenderer'] = \GridElementsTeam\Gridelements\PageLayoutView\GridelementsPreviewRenderer::class;
+            $GLOBALS['TCA']['tt_content']['types']['shortcut']['previewRenderer'] = \GridElementsTeam\Gridelements\PageLayoutView\ShortcutPreviewRenderer::class;
+        }
+
         $event->setTca($GLOBALS['TCA']);
     }
 }

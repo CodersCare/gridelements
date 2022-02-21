@@ -230,7 +230,7 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
      * sets the classes for allowed element types to the cells of the original page module
      */
     OnReady.setAllowedData = function () {
-        $('table.t3js-page-columns > tbody > tr > td').each(function () {
+        $('table.t3js-page-columns > tbody > tr > td:not(.t3-grid-container-cell)').each(function () {
             var colPos = $(this).data('colpos') ? $(this).data('colpos') : $(this).find('> .t3-page-ce-wrapper').data('colpos');
             if (typeof colPos !== 'undefined') {
                 if (typeof top.pageColumnsAllowed[colPos] !== 'undefined') {

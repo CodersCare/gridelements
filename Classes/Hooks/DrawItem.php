@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\Hooks;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\Helper;
+use PDO;
 use TYPO3\CMS\Backend\Controller\PageLayoutController;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -39,6 +40,7 @@ use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\WorkspaceRestriction;
 use TYPO3\CMS\Core\Database\QueryGenerator;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -50,6 +52,7 @@ use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 use TYPO3\CMS\Core\Versioning\VersionState;
+use UnexpectedValueException;
 
 /**
  * Class/Function which manipulates the rendering of item example content and replaces it with a grid of child elements.
@@ -445,7 +448,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     Connection::PARAM_INT_ARRAY
                 )
             ),
-            $queryBuilder->expr()->eq('colPos', $queryBuilder->createNamedParameter(-1, \PDO::PARAM_INT)),
+            $queryBuilder->expr()->eq('colPos', $queryBuilder->createNamedParameter(-1, PDO::PARAM_INT)),
             $queryBuilder->expr()->notIn(
                 'uid',
                 $queryBuilder->createNamedParameter(
@@ -467,19 +470,19 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         ];
         if (!$parentObject->tt_contentConfig['languageMode']) {
             $constraints[] = $queryBuilder->expr()->orX(
-                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter(-1, \PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter(-1, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq(
                     'sys_language_uid',
                     $queryBuilder->createNamedParameter(
                         (int)$parentObject->tt_contentConfig['sys_language_uid'],
-                        \PDO::PARAM_INT
+                        PDO::PARAM_INT
                     )
                 )
             );
         } elseif ($row['sys_language_uid'] > 0) {
             $constraints[] = $queryBuilder->expr()->eq(
                 'sys_language_uid',
-                $queryBuilder->createNamedParameter((int)$row['sys_language_uid'], \PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter((int)$row['sys_language_uid'], PDO::PARAM_INT)
             );
         }
 
@@ -733,11 +736,45 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     }
 
     /**
+     * Check if content can be edited by current user
+     *
+     * @param int $id
+     * @return bool
+     */
+    protected function contentIsNotLockedForEditors($id): bool
+    {
+        if (!empty($this->getPageLayoutController()) && get_class($this->getPageLayoutController()) === PageLayoutController::class) {
+            $perms_clause = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
+            $pageinfo = BackendUtility::readPageAccess($id, $perms_clause);
+
+            return $this->isContentEditable($pageinfo);
+        }
+        return true;
+    }
+
+    /**
      * @return PageLayoutController
      */
     public function getPageLayoutController()
     {
         return $GLOBALS['SOBE'];
+    }
+
+    /**
+     * Check if content can be edited by current user
+     *
+     * @param array $pageinfo
+     * @return bool
+     */
+    protected function isContentEditable(array $pageinfo): bool
+    {
+        if ($this->getBackendUser()->isAdmin()) {
+            return true;
+        }
+        return !$pageinfo['editlock'] && $this->getBackendUser()->doesUserHaveAccess(
+            $pageinfo,
+            Permission::CONTENT_EDIT
+        );
     }
 
     /**
@@ -749,7 +786,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param PageLayoutView $parentObject
      *
      * @return bool
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws Exception
      */
     protected function checkIfTranslationsExistInLanguage(
         array $contentElements,
@@ -875,14 +912,19 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param PageLayoutView $parentObject : The parent object that triggered this hook
      * @param array $row Record array
      * @return string HTML of the footer
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      */
     protected function tt_content_drawFooter(PageLayoutView $parentObject, array $row)
     {
         $content = '';
         // Get processed values:
         $info = [];
-        $parentObject->getProcessedValue('tt_content', 'starttime,endtime,fe_group,space_before_class,space_after_class', $row, $info);
+        $parentObject->getProcessedValue(
+            'tt_content',
+            'starttime,endtime,fe_group,space_before_class,space_after_class',
+            $row,
+            $info
+        );
 
         // Content element annotation
         if (!empty($GLOBALS['TCA']['tt_content']['ctrl']['descriptionColumn']) && !empty($row[$GLOBALS['TCA']['tt_content']['ctrl']['descriptionColumn']])) {
@@ -944,7 +986,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      *
      * @param string $colName Column name
      * @param string $editParams Edit params (Syntax: &edit[...] for FormEngine)
-     * @param \TYPO3\CMS\Backend\View\PageLayoutView $parentObject
+     * @param PageLayoutView $parentObject
      * @param bool $expanded
      *
      * @return string HTML table
@@ -962,7 +1004,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     onclick="' . htmlspecialchars(BackendUtility::editOnClick($editParams)) . '"
                     title="' . $this->getLanguageService()->getLL('editColumn') . '">' .
                     $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render() .
-                '</a>';
+                    '</a>';
             }
         }
 
@@ -1318,13 +1360,13 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             ->where(
                 $queryBuilder->expr()->neq(
                     'uid',
-                    $queryBuilder->createNamedParameter((int)$parentUid, \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter((int)$parentUid, PDO::PARAM_INT)
                 ),
                 $queryBuilder->expr()->in(
                     'pid',
                     $queryBuilder->createNamedParameter($itemList, Connection::PARAM_INT_ARRAY)
                 ),
-                $queryBuilder->expr()->gte('colPos', $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)),
+                $queryBuilder->expr()->gte('colPos', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)),
                 $queryBuilder->expr()->in(
                     'sys_language_uid',
                     $queryBuilder->createNamedParameter([0, -1], Connection::PARAM_INT_ARRAY)
@@ -1374,7 +1416,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 ->where(
                     $queryBuilder->expr()->eq(
                         'uid',
-                        $queryBuilder->createNamedParameter((int)$shortcutItem, \PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter((int)$shortcutItem, PDO::PARAM_INT)
                     )
                 )
                 ->setMaxResults(1)
@@ -1407,36 +1449,5 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     public function getIconFactory()
     {
         return $this->iconFactory;
-    }
-
-    /**
-     * Check if content can be edited by current user
-     *
-     * @param array $pageinfo
-     * @return bool
-     */
-    protected function isContentEditable(array $pageinfo): bool
-    {
-        if ($this->getBackendUser()->isAdmin()) {
-            return true;
-        }
-        return !$pageinfo['editlock'] && $this->getBackendUser()->doesUserHaveAccess($pageinfo, Permission::CONTENT_EDIT);
-    }
-
-    /**
-     * Check if content can be edited by current user
-     *
-     * @param int $id
-     * @return bool
-     */
-    protected function contentIsNotLockedForEditors($id): bool
-    {
-        if (!empty($this->getPageLayoutController()) && get_class($this->getPageLayoutController()) === PageLayoutController::class) {
-            $perms_clause = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
-            $pageinfo = BackendUtility::readPageAccess($id, $perms_clause);
-
-            return $this->isContentEditable($pageinfo);
-        }
-        return true;
     }
 }

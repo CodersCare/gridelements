@@ -128,6 +128,16 @@ class WizardItems implements NewContentElementWizardHookInterface
     }
 
     /**
+     * Gets the current backend user.
+     *
+     * @return BackendUserAuthentication
+     */
+    public function getBackendUser()
+    {
+        return $GLOBALS['BE_USER'];
+    }
+
+    /**
      * initializes this class
      *
      * @param int $pageUid
@@ -406,15 +416,5 @@ class WizardItems implements NewContentElementWizardHookInterface
                 }
             }
         }
-    }
-
-    /**
-     * Gets the current backend user.
-     *
-     * @return BackendUserAuthentication
-     */
-    public function getBackendUser()
-    {
-        return $GLOBALS['BE_USER'];
     }
 }
