@@ -7,6 +7,7 @@
         {f:if(condition: column.gridContainerId, then: 't3-grid-container-cell')}
         {f:if(condition: column.active, else: 't3-grid-cell-unassigned')}
         {f:if(condition: column.collapsed, then: 'collapsed', else: 'expanded')}
+        {f:if(condition: column.disableNewContent, then: 't3-page-ce-disable-new-ce', else: '')}
         t3-gridCell-width{column.colSpan}
         t3-gridCell-height{column.rowSpan}">
     <f:render partial="PageLayout/Grid/ColumnHeader" arguments="{_all}" />

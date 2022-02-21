@@ -20,6 +20,7 @@ namespace GridElementsTeam\Gridelements\View\BackendLayout\Grid;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumn;
+use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\PageLayoutContext;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -93,6 +94,21 @@ class GridelementsGridColumn extends GridColumn
      * @var int
      */
     protected $maxitems = 0;
+
+    /**
+     * @var bool
+     */
+    protected $disableNewContent = false;
+
+    /**
+     * @var bool
+     */
+    protected $tooManyItems = false;
+
+    /**
+     * @var string
+     */
+    protected $maxItemsClass = '';
 
     public function __construct(PageLayoutContext $context, array $columnDefinition, int $gridContainerId)
     {
@@ -203,6 +219,41 @@ class GridelementsGridColumn extends GridColumn
     public function getMaxitems(): ?int
     {
         return $this->maxitems;
+    }
+
+    public function getNumberOfItems(): ?int
+    {
+        return count($this->items);
+    }
+
+    public function setDisableNewContent(bool $disableNewContent)
+    {
+        $this->disableNewContent = $disableNewContent;
+    }
+
+    public function getDisableNewContent(): ?bool
+    {
+        return $this->disableNewContent;
+    }
+
+    public function setTooManyItems(bool $tooManyItems)
+    {
+        $this->tooManyItems = $tooManyItems;
+    }
+
+    public function getTooManyItems(): ?bool
+    {
+        return $this->tooManyItems;
+    }
+
+    public function setMaxItemsClass(string $maxItemsClass)
+    {
+        $this->maxItemsClass = $maxItemsClass;
+    }
+
+    public function getMaxItemsClass(): ?string
+    {
+        return $this->maxItemsClass;
     }
 
     public function setRestrictions(array $layoutColumns)
@@ -349,6 +400,15 @@ class GridelementsGridColumn extends GridColumn
         if (isset($layoutColumns['maxitems']) && isset($layoutColumns['maxitems'][$this->columnNumber])) {
             $this->setMaxitems((int)$layoutColumns['maxitems'][$this->columnNumber]);
         }
+    }
+
+    public function addItem(GridColumnItem $item): void
+    {
+        $this->items[] = $item;
+        $this->setDisableNewContent($this->getNumberOfItems() >= $this->getMaxitems() && $this->getMaxitems() > 0);
+        $this->setTooManyItems($this->getNumberOfItems() > $this->maxitems && $this->maxitems > 0);
+        $this->setMaxItemsClass($this->getDisableNewContent() ? ' warning' : ' success');
+        $this->setMaxItemsClass($this->getTooManyItems() ? ' danger' : $this->getMaxItemsClass());
     }
 
     public function getNewContentUrlWithRestrictions(): string

@@ -40,17 +40,20 @@
         </f:else>
     </f:if>
 </div>
+<f:if condition="{column.maxItems}">
+    <span class="t3-grid-cell-number-of-items {column.maxItemsClass}">{column.numberOfItems}/{column.maxItems}</span>
+</f:if>
 <f:if condition="{allowEditContent} && {column.contentEditable} && {column.context.allowNewContent}">
     <f:if condition="{column.gridContainerId}">
         <f:then>
             <div class="t3-page-ce t3js-page-ce" data-container="{column.gridContainerId}" id="{column.uniqueId}">
-                <div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce" id="colpos-{column.columnNumber}-container-{column.gridContainerId}-{column.uniqueId}">
-                    <a href="{column.newContentUrlWithRestrictions}" title="{newContentTitle}" data-title="{newContentTitle}"
-                       class="btn btn-default btn-sm {f:if(condition:column.context.drawingConfiguration.showNewContentWizard, then: 't3js-toggle-new-content-element-wizard disabled')}">
-                        <core:icon identifier="actions-add" />
-                        {newContentTitleShort}
-                    </a>
-                </div>
+                    <div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce" id="colpos-{column.columnNumber}-container-{column.gridContainerId}-{column.uniqueId}">
+                        <a href="{column.newContentUrlWithRestrictions}" title="{newContentTitle}" data-title="{newContentTitle}"
+                           class="btn btn-default btn-sm {f:if(condition:column.context.drawingConfiguration.showNewContentWizard, then: 't3js-toggle-new-content-element-wizard disabled')}">
+                            <core:icon identifier="actions-add" />
+                            {newContentTitleShort}
+                        </a>
+                    </div>
                 <div class="t3-page-ce-dropzone-available t3js-page-ce-dropzone-available"></div>
             </div>
         </f:then>
