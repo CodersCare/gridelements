@@ -21,7 +21,7 @@ namespace GridElementsTeam\Gridelements\Wizard;
  ***************************************************************/
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
-use TYPO3\CMS\Backend\View\Wizard\Element\BackendLayoutWizardElement;
+use TYPO3\CMS\Backend\Form\Element\BackendLayoutWizardElement;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
