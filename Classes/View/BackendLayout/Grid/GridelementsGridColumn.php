@@ -106,6 +106,11 @@ class GridelementsGridColumn extends GridColumn
     protected $tooManyItems = false;
 
     /**
+     * @var bool
+     */
+    protected $active = false;
+
+    /**
      * @var string
      */
     protected $maxItemsClass = '';
@@ -116,9 +121,19 @@ class GridelementsGridColumn extends GridColumn
         $this->gridContainerId = $gridContainerId;
     }
 
+    public function isActive(): bool
+    {
+        return $this->columnNumber !== null && $this->active === true;
+    }
+
     public function getGridContainerId(): ?int
     {
         return $this->gridContainerId;
+    }
+
+    public function setActive()
+    {
+        $this->active = true;
     }
 
     public function setCollapsed($collapsed)

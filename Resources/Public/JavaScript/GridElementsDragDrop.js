@@ -15,7 +15,7 @@
  * this JS code does the drag+drop logic for the Layout module (Web => Page)
  * based on jQuery UI
  */
-define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDrop'], function ($, Droppable, DragDrop) {
+define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDrop', 'TYPO3/CMS/Backend/LayoutModule/Paste'], function ($, Droppable, DragDrop, Paste) {
     'use strict';
 
     /**
@@ -199,10 +199,11 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
         }
 
         $droppableElement.removeClass(DragDrop.default.dropPossibleHoverClass);
-        var $pasteAction = typeof $draggableElement === 'number';
+        var $pasteAction = typeof $draggableElement === 'number' || typeof $draggableElement === 'undefined';
+        var $pasteElement = typeof Paste.itemOnClipboardUid === 'number' ? Paste.itemOnClipboardUid : $draggableElement;
 
         // send an AJAX request via the AjaxDataHandler
-        var contentElementUid = $pasteAction ? $draggableElement : parseInt($draggableElement.data('uid'));
+        var contentElementUid = $pasteAction ? $pasteElement : parseInt($draggableElement.data('uid'));
         if (contentElementUid > 0 || (DragDrop.default.newContentElementDefaultValues.CType && !$pasteAction)) {
             var parameters = {};
             // add the information about a possible column position change

@@ -164,7 +164,10 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         $layoutId = $gridElement['tx_gridelements_backend_layout'];
         $layout = $layoutSetup->getLayoutSetup($layoutId);
         $layoutColumns = $layoutSetup->getLayoutColumns($layoutId);
-        $specificIds = $this->helper->getSpecificIds($gridElement);
+        $activeColumns = [];
+        if ($layoutColumns['CSV']) {
+            $activeColumns = array_flip(GeneralUtility::intExplode(',', $layoutColumns['CSV']));
+        }
 
         if (isset($layout['config']['rows.'])) {
             $children = $helper->getChildren('tt_content', $gridContainerId, $pageId, 'sorting', 0, '*');
@@ -177,6 +180,9 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
                 if (isset($row['columns.'])) {
                     foreach ($row['columns.'] as $column) {
                         $gridColumn = GeneralUtility::makeInstance(GridelementsGridColumn::class, $context, $column, $gridContainerId);
+                        if (isset($activeColumns[$column['colPos']])) {
+                            $gridColumn->setActive();
+                        }
                         $gridRow->addColumn($gridColumn);
                         if (isset($column['colPos']) && isset($childColumns[$column['colPos']])) {
                             $gridColumn->setRestrictions($layoutColumns);

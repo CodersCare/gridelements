@@ -41,6 +41,11 @@ class GridelementsGridColumnItem extends GridColumnItem
         $this->layoutColumns = $layoutColumns;
     }
 
+    public function getColumn(): GridelementsGridColumn
+    {
+        return $this->column;
+    }
+
     public function getWrapperClassName(): string
     {
         $wrapperClassNames = [];
@@ -50,6 +55,8 @@ class GridelementsGridColumnItem extends GridColumnItem
             $wrapperClassNames[] = 't3-page-ce-warning';
         } elseif (!GeneralUtility::inList($this->layoutColumns['CSV'], $this->record['tx_gridelements_columns'])) {
             $wrapperClassNames[] = 't3-page-ce-warning';
+        } else {
+            $this->getColumn()->setActive();
         }
         if ($this->isInconsistentLanguage()) {
             $wrapperClassNames[] = 't3-page-ce-danger';
@@ -73,7 +80,7 @@ class GridelementsGridColumnItem extends GridColumnItem
                 'sys_language_uid' => $this->context->getSiteLanguage()->getLanguageId(),
                 'tx_gridelements_allowed' => $allowed,
                 'tx_gridelements_disallowed' => $disallowed,
-                'tx_gridelements_container' => $specificIds['uid'],
+                'tx_gridelements_container' => $this->column->getGridContainerId(),
                 'tx_gridelements_columns' => $this->column->getColumnNumber(),
                 'colPos' => -1,
                 'uid_pid' => -$this->record['uid'],
