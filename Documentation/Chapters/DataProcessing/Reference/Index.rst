@@ -15,7 +15,7 @@ TypoScript
 .. _typoscript-grid-children-processor:
 
 setup
-""""""""""""""""
+"""""
 
 .. container:: table-row
 
@@ -189,7 +189,7 @@ dataProcessing.123.default.options.resolveFlexFormData
 .. _typoscript-dataprocessing-default-options-resolveChildFlexFormData:
 
 dataProcessing.123.default.options.resolveChildFlexFormData
-""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. container:: table-row
 

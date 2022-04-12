@@ -101,6 +101,7 @@ virtual fields in your data, that will contain stuff that has been
 used during the rendering process. These come in handy, when you want
 to use a TEMPLATE or FLUIDTEMPLATE element to produce your output.
 Just use the the debug viewhelper in your template to get an overview of the available fields.
+
 ::
   <f:debug>{_all}</f:debug>
 

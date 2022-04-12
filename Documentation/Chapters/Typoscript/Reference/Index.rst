@@ -9,13 +9,13 @@ Reference
 .. _typoscript:
 
 TypoScript
-^^^^^^^^
+^^^^^^^^^^
 
 
 .. _typoscript-setup:
 
 setup
-""""""""""""""""
+"""""
 
 .. container:: table-row
 
@@ -36,7 +36,7 @@ setup
 .. _typoscript-setup-default:
 
 setup.default
-""""""""""""""""
+"""""""""""""
 
 .. container:: table-row
 
@@ -62,7 +62,7 @@ setup.default
 .. _typoscript-setup-123:
 
 setup.123
-""""""""""""""""
+"""""""""
 
 .. container:: table-row
 
@@ -83,7 +83,7 @@ setup.123
 .. _typoscript-columns:
 
 columns
-""""""""""""""""
+"""""""
 
 .. container:: table-row
 
@@ -105,7 +105,7 @@ columns
 .. _typoscript-columns-default:
 
 columns.default
-""""""""""""""""
+"""""""""""""""
 
 .. container:: table-row
 
@@ -126,7 +126,7 @@ columns.default
 .. _typoscript-columns-123:
 
 columns.123
-""""""""""""""""
+"""""""""""
 
 .. container:: table-row
 
@@ -146,7 +146,7 @@ columns.123
 .. _typoscript-renderObj:
 
 renderObj
-""""""""""""""""
+"""""""""
 
 .. container:: table-row
 
@@ -166,7 +166,7 @@ renderObj
 .. _typoscript-flexform-fieldname:
 
 flexform\_fieldname
-""""""""""""""""
+"""""""""""""""""""
 
 .. container:: table-row
 
@@ -187,7 +187,7 @@ flexform\_fieldname
 .. _typoscript-parentgrid-fieldname:
 
 parentgrid\_fieldname
-""""""""""""""""
+"""""""""""""""""""""
 
 .. container:: table-row
 
@@ -207,7 +207,7 @@ parentgrid\_fieldname
 .. _typoscript-tx-gridelements-view-children:
 
 tx\_gridelements\_view\_children
-""""""""""""""""
+""""""""""""""""""""""""""""""""
 
 .. container:: table-row
 
@@ -226,7 +226,7 @@ tx\_gridelements\_view\_children
 .. _typoscript-tx-gridelements-view-columns:
 
 tx\_gridelements\_view\_columns
-""""""""""""""""
+"""""""""""""""""""""""""""""""
 
 .. container:: table-row
 
@@ -246,7 +246,7 @@ tx\_gridelements\_view\_columns
 .. _typoscript-tx-gridelements-view-column-123:
 
 tx\_gridelements\_view\_column\_123
-""""""""""""""""
+"""""""""""""""""""""""""""""""""""
 
 .. container:: table-row
 
@@ -266,7 +266,7 @@ tx\_gridelements\_view\_column\_123
 .. _typoscript-tx-gridelements-view-child-123:
 
 tx\_gridelements\_view\_child\_123
-""""""""""""""""
+""""""""""""""""""""""""""""""""""
 
 .. container:: table-row
 

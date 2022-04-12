@@ -24,13 +24,13 @@ Grid Elements completely without grid records:
 .. _tsconfig:
 
 tx\_gridelements
-^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 
 .. _tsconfig-tx-gridelements-setup:
 
 tx\_gridelements.setup
-""""""""""""""""
+""""""""""""""""""""""
 
 .. container:: table-row
 
@@ -49,7 +49,7 @@ tx\_gridelements.setup
 .. _tsconfig-tx-gridelements-setup-123:
 
 tx\_gridelements.setup.123
-""""""""""""""""
+""""""""""""""""""""""""""
 
 .. container:: table-row
 
@@ -70,7 +70,7 @@ tx\_gridelements.setup.123
 .. _tsconfig-tx-gridelements-overrulerecords:
 
 tx\_gridelements.overruleRecords
-""""""""""""""""
+""""""""""""""""""""""""""""""""
 
 .. container:: table-row
 
@@ -90,7 +90,7 @@ tx\_gridelements.overruleRecords
 .. _tsconfig-tx-gridelements-excludelayoutids:
 
 tx\_gridelements.excludeLayoutIds
-""""""""""""""""
+"""""""""""""""""""""""""""""""""
 
 .. container:: table-row
 
@@ -110,7 +110,7 @@ tx\_gridelements.excludeLayoutIds
 .. _tsconfig-TCEFORM-tt-content-tx-gridelements-backend-layout-PAGE-TSCONFIG-ID:
 
 TCEFORM.tt\_content.tx\_gridelements\_backend\_layout.PAGE\_TSCONFIG\_ID
-""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. container:: table-row
 
