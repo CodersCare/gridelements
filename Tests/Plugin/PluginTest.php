@@ -7,7 +7,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class PluginTest extends UnitTestCase
 {
-
     /**
      * test get page renderer
      *
@@ -18,7 +17,7 @@ class PluginTest extends UnitTestCase
         $gridelements = GeneralUtility::makeInstance(Gridelements::class);
         $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
         $result = $gridelements->getPageRenderer();
-        $this->assertEquals($pageRenderer, $result);
+        self::assertEquals($pageRenderer, $result);
     }
 
     /**

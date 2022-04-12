@@ -6,7 +6,6 @@ use TYPO3\CMS\Core\Tests\UnitTestCase;
 
 class HelperTest extends UnitTestCase
 {
-
     /**
      * test get children
      *
@@ -36,14 +35,14 @@ class HelperTest extends UnitTestCase
         $record = [
             'uid' => '1',
             'pid' => '2',
-            't3ver_oid' => '0'
+            't3ver_oid' => '0',
         ];
         $expected = [
             'uid' => 1,
-            'pid' => 2
+            'pid' => 2,
         ];
         $result = $helper->getSpecificIds($record);
-        $this->assertEquals($expected, $result);
+        self::assertEquals($expected, $result);
     }
 
     /**
@@ -57,14 +56,14 @@ class HelperTest extends UnitTestCase
         $record = [
             'uid' => '1',
             'pid' => '2',
-            't3ver_oid' => '3'
+            't3ver_oid' => '3',
         ];
         $expected = [
             'uid' => 1,
-            'pid' => 2
+            'pid' => 2,
         ];
         $result = $helper->getSpecificIds($record);
-        $this->assertEquals($expected, $result);
+        self::assertEquals($expected, $result);
     }
 
     /**
@@ -80,14 +79,14 @@ class HelperTest extends UnitTestCase
         $record = [
             'uid' => '1',
             'pid' => '2',
-            't3ver_oid' => '3'
+            't3ver_oid' => '3',
         ];
         $expected = [
             'uid' => 3,
-            'pid' => -1
+            'pid' => -1,
         ];
         $result = $helper->getSpecificIds($record);
-        $this->assertEquals($expected, $result);
+        self::assertEquals($expected, $result);
     }
 
     /**
@@ -103,13 +102,13 @@ class HelperTest extends UnitTestCase
         $record = [
             'uid' => '1',
             'pid' => '2',
-            't3ver_oid' => '0'
+            't3ver_oid' => '0',
         ];
         $expected = [
             'uid' => 1,
-            'pid' => 2
+            'pid' => 2,
         ];
         $result = $helper->getSpecificIds($record);
-        $this->assertEquals($expected, $result);
+        self::assertEquals($expected, $result);
     }
 }

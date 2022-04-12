@@ -2,13 +2,12 @@
 
 use GridElementsTeam\Gridelements\Hooks\DatabaseRecordList;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Tests\UnitTestCase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Localization\LanguageService;
 
 class DatabaseRecordListTest extends UnitTestCase
 {
-
     /**
      * test get language service
      *
@@ -19,7 +18,7 @@ class DatabaseRecordListTest extends UnitTestCase
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);
         $databaseRecordList = GeneralUtility::makeInstance(DatabaseRecordList::class);
         $result = $databaseRecordList->getLanguageService();
-        $this->assertEquals($GLOBALS['LANG'], $result);
+        self::assertEquals($GLOBALS['LANG'], $result);
     }
 
     /**
@@ -32,7 +31,7 @@ class DatabaseRecordListTest extends UnitTestCase
         $databaseRecordList = GeneralUtility::makeInstance(DatabaseRecordList::class);
         $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
         $result = $databaseRecordList->getIconFactory();
-        $this->assertEquals($iconFactory, $result);
+        self::assertEquals($iconFactory, $result);
     }
 
     /**

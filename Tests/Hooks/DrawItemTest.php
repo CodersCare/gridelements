@@ -4,13 +4,12 @@ use GridElementsTeam\Gridelements\Hooks\DrawItem;
 use TYPO3\CMS\Backend\Controller\PageLayoutController;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Tests\UnitTestCase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Localization\LanguageService;
 
 class DrawItemTest extends UnitTestCase
 {
-
     /**
      * test get language service
      *
@@ -21,7 +20,7 @@ class DrawItemTest extends UnitTestCase
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);
         $drawItem = GeneralUtility::makeInstance(DrawItem::class);
         $result = $drawItem->getLanguageService();
-        $this->assertEquals($GLOBALS['LANG'], $result);
+        self::assertEquals($GLOBALS['LANG'], $result);
     }
 
     /**
@@ -34,7 +33,7 @@ class DrawItemTest extends UnitTestCase
         $drawItem = GeneralUtility::makeInstance(DrawItem::class);
         $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
         $result = $drawItem->getIconFactory();
-        $this->assertEquals($iconFactory, $result);
+        self::assertEquals($iconFactory, $result);
     }
 
     /**
@@ -47,7 +46,7 @@ class DrawItemTest extends UnitTestCase
         $drawItem = GeneralUtility::makeInstance(DrawItem::class);
         $GLOBALS['SOBE'] = GeneralUtility::makeInstance(PageLayoutController::class);
         $result = $drawItem->getPageLayoutController();
-        $this->assertEquals($GLOBALS['SOBE'], $result);
+        self::assertEquals($GLOBALS['SOBE'], $result);
     }
 
     /**
@@ -60,7 +59,7 @@ class DrawItemTest extends UnitTestCase
         $drawItem = GeneralUtility::makeInstance(DrawItem::class);
         $GLOBALS['BE_USER'] = GeneralUtility::makeInstance(BackendUserAuthentication::class);
         $result = $drawItem->getBackendUser();
-        $this->assertEquals($GLOBALS['BE_USER'], $result);
+        self::assertEquals($GLOBALS['BE_USER'], $result);
     }
 
     /**

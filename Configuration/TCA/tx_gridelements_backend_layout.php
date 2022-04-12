@@ -29,7 +29,7 @@ return [
                 'type' => 'input',
                 'size' => '30',
                 'max' => '30',
-            ]
+            ],
         ],
         'hidden' => [
             'exclude' => 1,
@@ -50,8 +50,8 @@ return [
                 'type' => 'input',
                 'size' => '25',
                 'max' => '256',
-                'eval' => 'required'
-            ]
+                'eval' => 'required',
+            ],
         ],
         'alias' => [
             'exclude' => 1,
@@ -61,7 +61,7 @@ return [
                 'size' => '25',
                 'max' => '256',
                 'eval' => 'nospace,alphanum_x,lower',
-            ]
+            ],
         ],
         'description' => [
             'exclude' => 1,
@@ -69,7 +69,7 @@ return [
             'config' => [
                 'type' => 'text',
                 'rows' => '5',
-            ]
+            ],
         ],
         'horizontal' => [
             'exclude' => 1,
@@ -91,11 +91,11 @@ return [
                 [
                     'maxitems' => 1,
                     'appearance' => [
-                        'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference'
+                        'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference',
                     ],
                 ],
                 $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
-            )
+            ),
         ],
         'frame' => [
             'exclude' => 1,
@@ -106,28 +106,28 @@ return [
                 'items' => [
                     [
                         $l10n . ':tx_gridelements_backend_layout.frame.I.0',
-                        '0'
+                        '0',
                     ],
                     [
                         $l10n . ':tx_gridelements_backend_layout.frame.I.-1',
-                        '-1'
+                        '-1',
                     ],
                     [
                         $l10n . ':tx_gridelements_backend_layout.frame.I.1',
-                        '1'
+                        '1',
                     ],
                     [
                         $l10n . ':tx_gridelements_backend_layout.frame.I.2',
-                        '2'
+                        '2',
                     ],
                     [
                         $l10n . ':tx_gridelements_backend_layout.frame.I.3',
-                        '3'
+                        '3',
                     ],
                 ],
                 'size' => 1,
                 'maxitems' => 1,
-            ]
+            ],
         ],
         'top_level_layout' => [
             'exclude' => 1,
@@ -149,8 +149,8 @@ return [
                 'renderType' => 'belayoutwizard',
                 'cols' => '25',
                 'rows' => '5',
-                'fixedFont' => true
-            ]
+                'fixedFont' => true,
+            ],
         ],
         'pi_flexform_ds' => [
             'exclude' => 1,
@@ -169,29 +169,29 @@ return [
                 [
                     'maxitems' => 1,
                     'appearance' => [
-                        'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:media.addFileReference'
+                        'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:media.addFileReference',
                     ],
                 ],
                 'xml'
-            )
+            ),
         ],
     ],
     'palettes' => [
         'general' => [
             'canNotCollapse' => 1,
-            'showitem' => 'title, --linebreak--, description'
+            'showitem' => 'title, --linebreak--, description',
         ],
         'appearance' => [
             'canNotCollapse' => 1,
-            'showitem' => 'icon, horizontal, frame'
+            'showitem' => 'icon, horizontal, frame',
         ],
         'visibility' => [
             'canNotCollapse' => 1,
-            'showitem' => 'hidden'
+            'showitem' => 'hidden',
         ],
         'flexform' => [
             'canNotCollapse' => 1,
-            'showitem' => 'pi_flexform_ds, --linebreak--, pi_flexform_ds_file'
+            'showitem' => 'pi_flexform_ds, --linebreak--, pi_flexform_ds_file',
         ],
     ],
     'types' => [
@@ -200,7 +200,7 @@ return [
 					--palette--;' . $l10n . ':tx_gridelements_backend_layout.palette.appearance;appearance,
 					--div--;' . $l10n . ':tx_gridelements_backend_layout.div.configuration, top_level_layout, alias, config,
 					--palette--;' . $l10n . ':tx_gridelements_backend_layout.ce_configuration;flexform,
-					--div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access,--palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:palette.visibility;visibility'
+					--div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access,--palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:palette.visibility;visibility',
         ],
     ],
 

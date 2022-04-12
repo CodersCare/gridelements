@@ -1,13 +1,12 @@
 <?php
 
 use GridElementsTeam\Gridelements\Hooks\WizardItems;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Tests\UnitTestCase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Localization\LanguageService;
 
 class WizardItemmsTest extends UnitTestCase
 {
-
     /**
      * test get data base
      *
@@ -27,7 +26,7 @@ class WizardItemmsTest extends UnitTestCase
         $wizardItems = GeneralUtility::makeInstance(WizardItems::class);
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);
         $result = $wizardItems->getLanguageService();
-        $this->assertEquals($GLOBALS['LANG'], $result);
+        self::assertEquals($GLOBALS['LANG'], $result);
     }
 
     /**

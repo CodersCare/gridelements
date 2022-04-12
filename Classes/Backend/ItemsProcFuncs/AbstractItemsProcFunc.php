@@ -24,8 +24,8 @@ namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
 use GridElementsTeam\Gridelements\Helper\Helper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\QueryGenerator;
-use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\SingletonInterface;
 
 /**
  * Class/Function which offers TCE main hook functions.
@@ -90,8 +90,6 @@ abstract class AbstractItemsProcFunc implements SingletonInterface
      * setter for languageService object
      *
      * @param LanguageService $languageService
-     *
-     * @return void
      */
     public function setLanguageService(LanguageService $languageService)
     {

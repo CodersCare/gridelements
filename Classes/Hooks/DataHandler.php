@@ -50,8 +50,6 @@ class DataHandler implements SingletonInterface
      * @param string $table : The name of the table the data should be saved to
      * @param int $id : The uid of the page we are currently working on
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj : The parent object that triggered this hook
-     *
-     * @return void
      */
     public function processDatamap_preProcessFieldArray(
         &$fieldArray,
@@ -60,7 +58,7 @@ class DataHandler implements SingletonInterface
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
     ) {
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
-            /** @var $hook PreProcessFieldArray */
+            /** @var PreProcessFieldArray $hook */
             $hook = GeneralUtility::makeInstance(PreProcessFieldArray::class);
             $hook->execute_preProcessFieldArray($fieldArray, $table, $id, $parentObj);
         }
@@ -72,8 +70,6 @@ class DataHandler implements SingletonInterface
      * @param int $id : The uid of the page we are currently working on
      * @param array $fieldArray : The array of fields and values that have been saved to the datamap
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj : The parent object that triggered this hook
-     *
-     * @return void
      */
     public function processDatamap_afterDatabaseOperations(
         &$status,

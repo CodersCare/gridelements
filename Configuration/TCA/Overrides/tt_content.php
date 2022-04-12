@@ -6,7 +6,7 @@
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPlugin([
     'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tt_content.CType_pi1',
     'gridelements_pi1',
-    'gridelements-default'
+    'gridelements-default',
 ], 'CType', 'gridelements');
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns(
@@ -21,14 +21,14 @@
                 'itemsProcFunc' => 'GridElementsTeam\Gridelements\Backend\TtContent->layoutItemsProcFunc',
                 'fieldWizard' => [
                     'selectIcons' => [
-                        'disabled' => ''
-                    ]
+                        'disabled' => '',
+                    ],
                 ],
                 'size' => 1,
                 'maxitems' => 1,
-                'default' => 0
+                'default' => 0,
             ],
-            'onChange' => 'reload'
+            'onChange' => 'reload',
         ],
         'tx_gridelements_children' => [
             'exclude' => 1,
@@ -49,7 +49,7 @@
                         'hide' => true,
                         'delete' => true,
                         'localize' => true,
-                    ]
+                    ],
                 ],
                 'inline' => [
                     'inlineNewButtonStyle' => 'display: inline-block;',
@@ -60,15 +60,15 @@
                     'columns' => [
                         'colPos' => [
                             'config' => [
-                                'default' => -1
-                            ]
-                        ]
-                    ]
+                                'default' => -1,
+                            ],
+                        ],
+                    ],
                 ],
                 'foreign_sortby' => 'sorting',
                 'size' => 5,
                 'autoSizeMax' => 20,
-            ]
+            ],
         ],
         'tx_gridelements_container' => [
             'exclude' => 1,
@@ -79,19 +79,19 @@
                 'items' => [
                     [
                         '',
-                        0
+                        0,
                     ],
                 ],
                 'default' => 0,
                 'foreign_table' => 'tt_content',
-                'foreign_table_where' => "AND (tt_content.sys_language_uid = ###REC_FIELD_sys_language_uid### OR tt_content.sys_language_uid = -1) AND tt_content.pid=###CURRENT_PID### AND tt_content.CType='gridelements_pi1' AND (tt_content.uid != ###THIS_UID###) AND (tt_content.tx_gridelements_container != ###THIS_UID### OR tt_content.tx_gridelements_container=0) ORDER BY tt_content.header, tt_content.uid",
+                'foreign_table_where' => 'AND ({#tt_content}.{#sys_language_uid} = ###REC_FIELD_sys_language_uid### OR {#tt_content}.{#sys_language_uid} = -1) AND {#tt_content}.{#pid}=###CURRENT_PID### AND {#tt_content}.{#CType}=\'gridelements_pi1\' AND ({#tt_content}.{#uid} != ###THIS_UID###) AND ({#tt_content}.{#tx_gridelements_container} != ###THIS_UID### OR {#tt_content}.{#tx_gridelements_container}=0)',
                 'dontRemapTablesOnCopy' => 'tt_content',
                 'itemsProcFunc' => 'GridElementsTeam\Gridelements\Backend\TtContent->containerItemsProcFunc',
                 'size' => 1,
                 'minitems' => 0,
                 'maxitems' => 1,
             ],
-            'onChange' => 'reload'
+            'onChange' => 'reload',
         ],
         'tx_gridelements_columns' => [
             'exclude' => 1,
@@ -104,8 +104,8 @@
                 'maxitems' => 1,
                 'default' => 0,
             ],
-            'onChange' => 'reload'
-        ]
+            'onChange' => 'reload',
+        ],
     ]
 );
 

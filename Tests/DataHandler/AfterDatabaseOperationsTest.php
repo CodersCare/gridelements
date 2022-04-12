@@ -7,7 +7,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class AfterDatabaseOperationsTest extends UnitTestCase
 {
-
     /**
      * test inject layout setup
      *
@@ -37,7 +36,7 @@ class AfterDatabaseOperationsTest extends UnitTestCase
         $table = 'tt_content';
         $hook->setTable($table);
         $result = $hook->getTable();
-        $this->assertEquals($table, $result);
+        self::assertEquals($table, $result);
     }
 
     /**
@@ -51,7 +50,7 @@ class AfterDatabaseOperationsTest extends UnitTestCase
         $pageUid = 123;
         $hook->setPageUid($pageUid);
         $result = $hook->getPageUid();
-        $this->assertEquals($pageUid, $result);
+        self::assertEquals($pageUid, $result);
     }
 
     /**
@@ -65,7 +64,7 @@ class AfterDatabaseOperationsTest extends UnitTestCase
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $hook->setTceMain($dataHandler);
         $result = $hook->getTceMain();
-        $this->assertEquals($dataHandler, $result);
+        self::assertEquals($dataHandler, $result);
     }
 
     /**

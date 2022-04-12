@@ -33,7 +33,6 @@ class ExtTablesInclusionPostProcessing
      * scripts (f.e. modifying TCA data of all extensions)
      *
      * @param AfterTcaCompilationEvent $event
-     * @return void
      */
     public function __invoke(AfterTcaCompilationEvent $event): void
     {

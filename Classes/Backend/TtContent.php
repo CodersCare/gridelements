@@ -34,7 +34,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class TtContent
 {
-
     /**
      * @var LayoutSetup
      */
@@ -197,7 +196,7 @@ class TtContent
      */
     public function getQueryBuilder()
     {
-        /** @var $queryBuilder QueryBuilder */
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tt_content');
         $queryBuilder->getRestrictions()
@@ -244,10 +243,10 @@ class TtContent
                 $disallowed = $layoutSetups[$backendLayout]['disallowed'][$gridColumn];
                 if ($container[1] > 0 && (!empty($allowed) || !empty($disallowed))) {
                     if ((
-                            !empty($allowed) &&
+                        !empty($allowed) &&
                             !isset($allowed['CType']['*']) &&
                             !isset($allowed['CType'][$contentType])
-                        ) ||
+                    ) ||
                         (
                             !empty($disallowed) &&
                             (
@@ -259,13 +258,13 @@ class TtContent
                     }
                     if (!empty($listType)) {
                         if ((
-                                !empty($allowed) &&
+                            !empty($allowed) &&
                                 !isset($allowed['CType']['*']) &&
                                 !(
                                     isset($allowed['list_type']['*']) ||
                                     isset($allowed['list_type'][$listType])
                                 )
-                            ) ||
+                        ) ||
                             (
                                 !empty($disallowed) &&
                                 (
@@ -293,9 +292,9 @@ class TtContent
     {
         $this->init($params['row']['pid']);
         $layoutSelectItems = $this->layoutSetup->getLayoutSelectItems(
-            isset($params['row']['colPos'][0]) ? $params['row']['colPos'][0] : $params['row']['colPos'],
-            $params['row']['tx_gridelements_columns'],
-            $params['row']['tx_gridelements_container'],
+            isset($params['row']['colPos'][0]) ? (int)$params['row']['colPos'][0] : (int)$params['row']['colPos'],
+            (int)$params['row']['tx_gridelements_columns'],
+            (int)$params['row']['tx_gridelements_container'],
             $this->layoutSetup->getRealPid()
         );
         $params['items'] = ArrayUtility::keepItemsInArray($layoutSelectItems, $params['items'], true);

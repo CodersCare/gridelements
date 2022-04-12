@@ -28,9 +28,9 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider;
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
 use TYPO3\CMS\Core\Imaging\IconRegistry;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
-use TYPO3\CMS\Core\Localization\LanguageService;
 
 /**
  * Class/Function which manipulates the rendering of items within the new content element wizard
@@ -102,10 +102,10 @@ class WizardItems implements NewContentElementWizardHookInterface
             $disallowed = null;
         }
         if ((
-                empty($allowed['CType']) ||
+            empty($allowed['CType']) ||
                 isset($allowed['CType']['gridelements_pi1']) ||
                 isset($allowed['CType']['*'])
-            ) &&
+        ) &&
             !isset($disallowed['CType']['gridelements_pi1']) &&
             !isset($disallowed['tx_gridelements_backend_layout']['*'])
         ) {
@@ -256,7 +256,7 @@ class WizardItems implements NewContentElementWizardHookInterface
                     } else {
                         if (!StringUtility::beginsWith($largeIcon, 'EXT:') && strpos(
                             $largeIcon,
-                                '/'
+                            '/'
                         ) === false
                         ) {
                             $largeIcon = GeneralUtility::resolveBackPath($item['icon'][1]);
@@ -297,13 +297,13 @@ class WizardItems implements NewContentElementWizardHookInterface
 
             $itemIdentifier = $item['alias'] ? $item['alias'] : $item['uid'];
             $wizardItems['gridelements_' . $itemIdentifier] = [
-                'title'                => $item['title'],
-                'description'          => $item['description'],
-                'params'               => ($largeIcon ? '&largeIconImage=' . $largeIcon : '')
+                'title' => $item['title'],
+                'description' => $item['description'],
+                'params' => ($largeIcon ? '&largeIconImage=' . $largeIcon : '')
                     . '&defVals[tt_content][CType]=gridelements_pi1' . $defVals . '&defVals[tt_content][tx_gridelements_backend_layout]=' . $item['uid']
                     . ($item['tll'] ? '&isTopLevelLayout' : ''),
                 'tt_content_defValues' => [
-                    'CType'                          => 'gridelements_pi1',
+                    'CType' => 'gridelements_pi1',
                     'tx_gridelements_backend_layout' => $item['uid'],
                 ],
             ];
@@ -393,7 +393,7 @@ class WizardItems implements NewContentElementWizardHookInterface
             $keyParts = GeneralUtility::trimExplode('_', $key);
             if ($keyParts[1]) {
                 $keyChunk = '';
-                foreach($keyParts as $keyPart) {
+                foreach ($keyParts as $keyPart) {
                     $keyChunk .= $keyChunk ? '_' . $keyPart : $keyPart;
                     $headersWithElements[$keyChunk] = true;
                 }

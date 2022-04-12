@@ -76,22 +76,22 @@ class GridChildrenProcessor implements DataProcessorInterface
      * @var array
      */
     protected $registeredOptions = [
-        'sortingDirection'          => 'asc',
-        'sortingDirection.'         => [],
-        'sortingField'              => 'sorting',
-        'sortingField.'             => [],
-        'recursive'                 => 0,
-        'recursive.'                => [],
-        'resolveFlexFormData'       => 1,
-        'resolveFlexFormData.'      => [],
-        'resolveChildFlexFormData'  => 1,
+        'sortingDirection' => 'asc',
+        'sortingDirection.' => [],
+        'sortingField' => 'sorting',
+        'sortingField.' => [],
+        'recursive' => 0,
+        'recursive.' => [],
+        'resolveFlexFormData' => 1,
+        'resolveFlexFormData.' => [],
+        'resolveChildFlexFormData' => 1,
         'resolveChildFlexFormData.' => [],
-        'resolveBackendLayout'      => 1,
-        'resolveBackendLayout.'     => [],
-        'respectColumns'            => 1,
-        'respectColumns.'           => [],
-        'respectRows'               => 1,
-        'respectRows.'              => [],
+        'resolveBackendLayout' => 1,
+        'resolveBackendLayout.' => [],
+        'respectColumns' => 1,
+        'respectColumns.' => [],
+        'respectRows' => 1,
+        'respectRows.' => [],
     ];
 
     /**
@@ -142,7 +142,7 @@ class GridChildrenProcessor implements DataProcessorInterface
         unset($processedData);
 
         $targetVariableName = $cObj->stdWrapValue('as', $this->containerProcessorConfiguration, 'children');
-        $options = $this->containerProcessorConfiguration['options.'] ? $this->containerProcessorConfiguration['options.'] : [];
+        $options = $this->containerProcessorConfiguration['options.'] ?: [];
         foreach ($options as $key => &$option) {
             $option = $cObj->stdWrapValue($key, $options, $option);
         }
@@ -164,13 +164,13 @@ class GridChildrenProcessor implements DataProcessorInterface
 
         $queryConfiguration = [
             'pidInList' => (int)$cObj->data['pid'],
-            'languageField'     => 0,
-            'orderBy'   => (
+            'languageField' => 0,
+            'orderBy' => (
                 $this->options['sortingField'] ? htmlspecialchars($this->options['sortingField']) : 'sorting'
-                ) . ' ' . (
+            ) . ' ' . (
                 strtolower($this->options['sortingDirection']) === 'desc' ? 'DESC' : 'ASC'
-                ),
-            'where'     => 'tx_gridelements_container = ' . (int)$cObj->data['uid'],
+            ),
+            'where' => 'tx_gridelements_container = ' . (int)$cObj->data['uid'],
         ];
         $records = $cObj->getRecords('tt_content', $queryConfiguration);
         foreach ($records as $record) {
@@ -233,7 +233,7 @@ class GridChildrenProcessor implements DataProcessorInterface
     /**
      * Processes child records recursively to get other children into the same array
      *
-     * @param $record
+     * @param array $record
      */
     protected function processChildRecord($record)
     {
@@ -282,10 +282,14 @@ class GridChildrenProcessor implements DataProcessorInterface
             $this->options['respectColumns'] = 1;
             $processedRows = [];
             if (!empty($this->processedData['data']['tx_gridelements_backend_layout_resolved'])) {
-                foreach ($this->processedData['data']['tx_gridelements_backend_layout_resolved']['config']['rows.'] as $rowNumber => $row) {
-                    foreach ($row['columns.'] as $column) {
-                        $key = substr($rowNumber, 0, -1);
-                        $processedRows[$key][$column['colPos']] = $processedColumns[$column['colPos']];
+                if (!empty($this->processedData['data']['tx_gridelements_backend_layout_resolved']['config']['rows.'])) {
+                    foreach ($this->processedData['data']['tx_gridelements_backend_layout_resolved']['config']['rows.'] as $rowNumber => $row) {
+                        if (!empty($row['columns.'])) {
+                            foreach ($row['columns.'] as $column) {
+                                $key = substr($rowNumber, 0, -1);
+                                $processedRows[$key][$column['colPos']] = $processedColumns[$column['colPos']];
+                            }
+                        }
                     }
                 }
             }

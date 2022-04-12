@@ -41,33 +41,37 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  */
 class Gridelements extends ContentObjectRenderer
 {
-
     /**
      * Same as class name
      *
      * @var string
      */
     public $prefixId = 'Gridelements';
+
     /**
      * Path to this script relative to the extension dir
      *
      * @var string
      */
     public $scriptRelPath = 'Classes/Plugin/Gridelements.php';
+
     /**
      * The extension key
      *
      * @var string
      */
     public $extKey = 'gridelements';
+
     /**
      * @var ContentObjectRenderer
      */
     protected $cObj;
+
     /**
      * @var PageRenderer
      */
     protected $pageRenderer;
+
     /**
      * @var LanguageAspect
      */
@@ -119,7 +123,6 @@ class Gridelements extends ContentObjectRenderer
         $sortColumns = explode(',', $csvColumns);
 
         $this->renderChildrenIntoParentColumns($typoScriptSetup, $sortColumns);
-        unset($children);
         unset($sortColumns);
 
         // if there are any columns available, we can go on with the render process
@@ -293,7 +296,7 @@ class Gridelements extends ContentObjectRenderer
     }
 
     /**
-     * @param $dataArr
+     * @param array $dataArr
      * @param string $valueKey
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return array
@@ -354,8 +357,10 @@ class Gridelements extends ContentObjectRenderer
                 }
                 if ($element) {
                     $translationOverlay = $queryBuilder->expr()->andX(
-                        $queryBuilder->expr()->eq('tx_gridelements_container',
-                            $queryBuilder->createNamedParameter((int)$element, \PDO::PARAM_INT)),
+                        $queryBuilder->expr()->eq(
+                            'tx_gridelements_container',
+                            $queryBuilder->createNamedParameter((int)$element, \PDO::PARAM_INT)
+                        ),
                         $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, \PDO::PARAM_INT)),
                         $queryBuilder->expr()->eq(
                             'pid',
@@ -468,7 +473,7 @@ class Gridelements extends ContentObjectRenderer
      */
     public function getQueryBuilder()
     {
-        /** @var $queryBuilder QueryBuilder */
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tt_content');
         $queryBuilder->setRestrictions(GeneralUtility::makeInstance(FrontendRestrictionContainer::class));
@@ -556,8 +561,8 @@ class Gridelements extends ContentObjectRenderer
     public function copyCurrentParentGrid()
     {
         return [
-            'record'             => $this->cObj->currentRecord,
-            'data'               => $this->cObj->data,
+            'record' => $this->cObj->currentRecord,
+            'data' => $this->cObj->data,
             'parentRecordNumber' => $this->cObj->parentRecordNumber,
         ];
     }
@@ -581,7 +586,7 @@ class Gridelements extends ContentObjectRenderer
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return array
