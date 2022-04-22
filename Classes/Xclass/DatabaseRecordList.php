@@ -999,8 +999,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         $out = '
 		<!-- Element, begin: -->
 		<tr ' . $rowParams . ' data-uid="' . (int)$data['uid'] . '" data-l10nparent="' . $parent . '"' .
-            ((int)$data['tx_gridelements_container'] > 0 ? ' data-grid-container="' . $data['tx_gridelements_container'] . '"' : '') .
-            ((int)$data['_triggerContainer'] > 0 ? ' data-trigger-container="' . $data['_triggerContainer'] . '"' : '') . '>';
+            ((int)$data['tx_gridelements_container'] > 0 ? ' data-grid-container="' . (int)$data['tx_gridelements_container'] . '"' : '') .
+            ((int)$data['_triggerContainer'] > 0 ? ' data-trigger-container="' . (int)$data['_triggerContainer'] . '"' : '') . '>';
         if (count($data) > 1) {
             for ($i = 0; $i < $level; $i++) {
                 $out .= '<' . $colType . '></' . $colType . '>';
@@ -1830,8 +1830,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     $cellOutput .= $action;
                 }
                 $output .= ' <div class="btn-group">' .
-                    '<span id="actions_' . $table . '_' . $row['uid'] . '" class="btn-group collapse collapse-horizontal width">' . $cellOutput . '</span>' .
-                    '<a href="#actions_' . $table . '_' . $row['uid'] . '" class="btn btn-default collapsed" data-toggle="collapse" aria-expanded="false"><span class="t3-icon fa fa-ellipsis-h"></span></a>' .
+                    '<span id="actions_' . htmlspecialchars($table) . '_' . $row['uid'] . '" class="btn-group collapse collapse-horizontal width">' . $cellOutput . '</span>' .
+                    '<a href="#actions_' . htmlspecialchars($table) . '_' . $row['uid'] . '" class="btn btn-default collapsed" data-toggle="collapse" aria-expanded="false"><span class="t3-icon fa fa-ellipsis-h"></span></a>' .
                     '</div>';
             } else {
                 $output .= ' <div class="btn-group" role="group">' . implode('', $actions) . '</div>';

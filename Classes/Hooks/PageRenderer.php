@@ -161,7 +161,7 @@ class PageRenderer implements SingletonInterface
             if ((boolean)$this->extensionConfiguration['disableCopyFromPageButton'] !== true
                 && (boolean)$this->helper->getBackendUser()->uc['disableCopyFromPageButton'] !== true) {
                 $pAddExtOnReadyCode .= '
-                    top.copyFromAnotherPageLinkTemplate = ' . json_encode('<a class="t3js-paste-new btn btn-default" title="' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.copyfrompage') . '">' . $iconFactory->getIcon(
+                    top.copyFromAnotherPageLinkTemplate = ' . json_encode('<a class="t3js-paste-new btn btn-default" title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.copyfrompage')) . '">' . $iconFactory->getIcon(
                     'actions-insert-reference',
                     Icon::SIZE_SMALL
                 )->render() . '</a>') . ';';
