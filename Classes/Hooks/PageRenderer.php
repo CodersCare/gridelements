@@ -144,15 +144,15 @@ class PageRenderer implements SingletonInterface
 
             $elFromTable = $clipObj->elFromTable('tt_content');
             if (!empty($elFromTable)) {
-                $pasteItem = substr(key($elFromTable), 11);
+                $pasteItem = htmlspecialchars(substr(key($elFromTable), 11));
                 $pasteRecord = BackendUtility::getRecord('tt_content', (int)$pasteItem);
-                $pasteTitle = $pasteRecord['header'] ? $pasteRecord['header'] : $pasteItem;
+                $pasteTitle = $pasteRecord['header'] ? htmlspecialchars($pasteRecord['header']) : $pasteItem;
                 $copyMode = $clipObj->clipData['normal']['mode'] ? '-' . $clipObj->clipData['normal']['mode'] : '';
                 $pAddExtOnReadyCode .= "
                     top.clipBoardElementCType = '" . $pasteRecord['CType'] . "';
                     top.clipBoardElementGridType = '" . $pasteRecord['tx_gridelements_backend_layout'] . "';
-                    top.pasteIntoLinkTemplate = " . json_encode('<a data-pasteitem="' . $pasteItem . '" data-pastetitle="' . $pasteTitle . '" class="t3js-paste t3js-paste' . $copyMode . ' t3js-paste-into btn btn-default" title="' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.pasteinto') . '">' . $iconFactory->getIcon('actions-document-paste-into', Icon::SIZE_SMALL)->render() . '</a>') . ";
-                    top.pasteAfterLinkTemplate = " . json_encode('<a data-pasteitem="' . $pasteItem . '" data-pastetitle="' . $pasteTitle . '"  class="t3js-paste t3js-paste' . $copyMode . ' t3js-paste-after btn btn-default" title="' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.pasteafter') . '">' . $iconFactory->getIcon('actions-document-paste-into', Icon::SIZE_SMALL)->render() . '</a>') . ";";
+                    top.pasteIntoLinkTemplate = " . json_encode('<a data-pasteitem="' . $pasteItem . '" data-pastetitle="' . $pasteTitle . '" class="t3js-paste t3js-paste' . $copyMode . ' t3js-paste-into btn btn-default" title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.pasteinto')) . '">' . $iconFactory->getIcon('actions-document-paste-into', Icon::SIZE_SMALL)->render() . '</a>') . ";
+                    top.pasteAfterLinkTemplate = " . json_encode('<a data-pasteitem="' . $pasteItem . '" data-pastetitle="' . $pasteTitle . '"  class="t3js-paste t3js-paste' . $copyMode . ' t3js-paste-after btn btn-default" title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.pasteafter')) . '">' . $iconFactory->getIcon('actions-document-paste-into', Icon::SIZE_SMALL)->render() . '</a>') . ";";
                 if ($this->getBackendUser()->checkAuthMode('tt_content', 'CType', 'shortcut', $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode'])) {
                     $pAddExtOnReadyCode .= "
                         top.pasteReferencesAllowed = true;";
@@ -166,7 +166,7 @@ class PageRenderer implements SingletonInterface
             }
 
             $pAddExtOnReadyCode .= "
-                    top.copyFromAnotherPageLinkTemplate = " . json_encode('<a class="t3js-paste-new btn btn-default" title="' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.copyfrompage') . '">' . $iconFactory->getIcon('actions-insert-reference', Icon::SIZE_SMALL)->render() . '</a>') . ";";
+                    top.copyFromAnotherPageLinkTemplate = " . json_encode('<a class="t3js-paste-new btn btn-default" title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.copyfrompage')) . '">' . $iconFactory->getIcon('actions-insert-reference', Icon::SIZE_SMALL)->render() . '</a>') . ";";
 
             $pageRenderer->addJsInlineCode('gridelementsExtOnReady', $pAddExtOnReadyCode);
         }

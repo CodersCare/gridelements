@@ -1654,9 +1654,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 foreach ($actions as $action) {
                     $cellOutput .= $action;
                 }
-                $output .= ' <div class="btn-group">' . '<span id="actions_' . $table . '_' . $row['uid']
+                $output .= ' <div class="btn-group">' . '<span id="actions_' . htmlspecialchars($table) . '_' . $row['uid']
                            . '" class="btn-group collapse collapse-horizontal width">' . $cellOutput . '</span>'
-                           . '<a href="#actions_' . $table . '_' . $row['uid']
+                           . '<a href="#actions_' . htmlspecialchars($table) . '_' . $row['uid']
                            . '" class="btn btn-default collapsed" data-toggle="collapse" aria-expanded="false">'
                            . '<span class="t3-icon fa fa-ellipsis-h"></span></a>' . '</div>';
             } else {
@@ -1989,7 +1989,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     if (is_array($lRow) && $this->backendUser->checkLanguageAccess($lRow[$GLOBALS['TCA'][$table]['ctrl']['languageField']])) {
                         $this->currentIdList[] = $lRow['uid'];
                         if ($row['tx_gridelements_container']) {
-                            $lRow['_CSSCLASS'] = 't3-gridelements-child" data-trigger-container="' . $row['tx_gridelements_container'] . $expanded;
+                            $lRow['_CSSCLASS'] = 't3-gridelements-child" data-trigger-container="' . (int)$row['tx_gridelements_container'] . $expanded;
                         }
                         $rowOutput .= $this->renderListRow($table, $lRow, $cc, $titleCol, $thumbsCol, 20, $level);
                     }
@@ -2080,7 +2080,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         $out = '
 		<!-- Element, begin: -->
 		<tr ' . $rowParams . ' data-uid="' . (int)$data['uid'] . '" data-l10nparent="' . $parent . '"' .
-               ((int)$data['tx_gridelements_container'] > 0 ? ' data-grid-container="' . $data['tx_gridelements_container'] . '"' : '') . '>';
+               ((int)$data['tx_gridelements_container'] > 0 ? ' data-grid-container="' . (int)$data['tx_gridelements_container'] . '"' : '') . '>';
         if (count($data) > 1) {
             for ($i = 0; $i < $level; $i++) {
                 $out .= '<' . $colType . '></' . $colType . '>';
