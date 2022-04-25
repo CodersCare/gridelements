@@ -4,7 +4,6 @@
   "type": "typo3-cms-extension",
   "version": "11.0.0-dev",
   "prefer-stable": true,
-  "minimum-stability": "dev",
   "keywords": ["TYPO3 CMS", "Grids", "Gridelements"],
   "homepage": "https://forge.typo3.org/projects/extension-gridelements2",
   "license": "GPL-2.0-or-later",

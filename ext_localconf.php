@@ -7,7 +7,7 @@ if (!defined('TYPO3_MODE')) {
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1488914437] = [
     'nodeName' => 'belayoutwizard',
     'priority' => 50,
-    'class'    => \GridElementsTeam\Gridelements\Wizard\GridelementsBackendLayoutWizardElement::class,
+    'class' => \GridElementsTeam\Gridelements\Wizard\GridelementsBackendLayoutWizardElement::class,
 ];
 
 // XCLASS

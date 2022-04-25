@@ -79,8 +79,8 @@ class PageRenderer implements SingletonInterface
             $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
             $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsOnReady');
             $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragDrop');
-            if ((bool)$this->extensionConfiguration['disableDragInWizard'] !== true
-                && (bool)$this->helper->getBackendUser()->uc['disableDragInWizard'] !== true) {
+            if ((boolean)$this->extensionConfiguration['disableDragInWizard'] !== true
+                && (boolean)$this->helper->getBackendUser()->uc['disableDragInWizard'] !== true) {
                 $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard');
             }
 
@@ -158,8 +158,8 @@ class PageRenderer implements SingletonInterface
                 }
             }
 
-            if ((bool)$this->extensionConfiguration['disableCopyFromPageButton'] !== true
-                && (bool)$this->helper->getBackendUser()->uc['disableCopyFromPageButton'] !== true) {
+            if ((boolean)$this->extensionConfiguration['disableCopyFromPageButton'] !== true
+                && (boolean)$this->helper->getBackendUser()->uc['disableCopyFromPageButton'] !== true) {
                 $pAddExtOnReadyCode .= '
                     top.copyFromAnotherPageLinkTemplate = ' . json_encode('<a class="t3js-paste-new btn btn-default" title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.copyfrompage')) . '">' . $iconFactory->getIcon(
                     'actions-insert-reference',

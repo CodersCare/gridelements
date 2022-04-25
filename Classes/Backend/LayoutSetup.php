@@ -22,13 +22,16 @@ namespace GridElementsTeam\Gridelements\Backend;
 
 use GridElementsTeam\Gridelements\Helper\Helper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DefaultRestrictionContainer;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
+use TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider;
+use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
+use TYPO3\CMS\Core\Imaging\IconRegistry;
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -454,14 +457,23 @@ class LayoutSetup
             if ($item['iconIdentifier']) {
                 $icon = $item['iconIdentifier'];
             } elseif (!empty($item['icon'])) {
-                if (is_array($item['icon']) && !empty($item['icon'][0])) {
-                    $icon = $item['icon'][0];
+                $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
+                $icons = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'icon', $layoutId);
+                $iconRegistry = GeneralUtility::makeInstance(IconRegistry::class);
+                if (StringUtility::endsWith($icons[0]->getPublicUrl(), '.svg')) {
+                    $iconRegistry->registerIcon('gridelements-select-icon-' . $layoutId, SvgIconProvider::class, [
+                        'source' => $icons[0]->getPublicUrl(),
+                    ]);
                 } else {
-                    $icon = $item['icon'];
+                    $iconRegistry->registerIcon(
+                        'gridelements-select-icon-' . $layoutId,
+                        BitmapIconProvider::class,
+                        [
+                            'source' => $icons[0]->getPublicUrl(),
+                        ]
+                    );
                 }
-                if (StringUtility::beginsWith($icon, '../')) {
-                    $icon = Environment::getPublicPath() . str_replace('../', '', $icon);
-                }
+                $icon = 'gridelements-select-icon-' . $layoutId;
             }
             $selectItems[] = [$this->languageService->sL($item['title']), $layoutId, $icon];
         }
@@ -595,11 +607,18 @@ class LayoutSetup
                 continue;
             }
 
+            $icons = [];
+            if ($item['icon']) {
+                $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
+                $icons = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'icon', $layoutId);
+            }
+            $item['icon'] = count($icons) > 0 ? '/' . $icons[0]->getPublicUrl() : '';
+
             $wizardItems[] = [
                 'uid' => $layoutId,
                 'title' => $this->languageService->sL($item['title']),
                 'description' => $this->languageService->sL($item['description']),
-                'icon' => $item['icon'],
+                'icon' => [$item['icon']],
                 'iconIdentifier' => $item['iconIdentifier'],
                 'tll' => $item['top_level_layout'],
                 'tt_content_defValues' => $item['tt_content_defValues.'],
