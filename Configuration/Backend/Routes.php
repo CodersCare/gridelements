@@ -1,6 +1,7 @@
 <?php
 
 use GridElementsTeam\Gridelements\Wizard\GridelementsBackendLayoutWizardElement;
+use GridElementsTeam\Gridelements\Wizard\GridelementsBackendLayoutWizardElement10;
 
 /**
  * Definitions for routes provided by EXT:gridelements
@@ -10,12 +11,23 @@ use GridElementsTeam\Gridelements\Wizard\GridelementsBackendLayoutWizardElement;
  * Currently the "access" property is only used so no token creation + validation is made,
  * but will be extended further.
  */
-return [
-    // Login screen of the TYPO3 Backend
-    /** Wizards */
-    // Register backend_layout wizard
-    'wizard_gridelements_backend_layout' => [
-        'path' => '/wizard',
-        'target' => GridelementsBackendLayoutWizardElement::class . '::mainAction',
-    ],
-];
+if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger(TYPO3_version) >= 11000000) {
+    return [
+        // Login screen of the TYPO3 Backend
+        /** Wizards */
+        // Register backend_layout wizard
+        'wizard_gridelements_backend_layout' => [
+            'path' => '/wizard',
+            'target' => GridelementsBackendLayoutWizardElement::class . '::mainAction',
+        ],
+    ];
+}
+    return [
+        // Login screen of the TYPO3 Backend
+        /** Wizards */
+        // Register backend_layout wizard
+        'wizard_gridelements_backend_layout' => [
+            'path' => '/wizard',
+            'target' => GridelementsBackendLayoutWizardElement10::class . '::mainAction',
+        ],
+    ];

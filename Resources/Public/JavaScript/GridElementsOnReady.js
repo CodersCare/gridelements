@@ -149,6 +149,14 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
                     Paste.activatePasteModal($(this));
                 });
             }
+            if (Paste.pasteAfterLinkTemplate && Paste.pasteIntoLinkTemplate && gridCell.data('allowed')) {
+                var parent = $(this).parent();
+                if (parent.data('page') || (parent.data('container') && !parent.data('uid'))) {
+                    $(this).append(Paste.pasteIntoLinkTemplate);
+                } else {
+                    $(this).append(Paste.pasteAfterLinkTemplate);
+                }
+            }
             $(this).append(top.copyFromAnotherPageLinkTemplate);
             $(this).find('.t3js-paste-new').on('click', function (evt) {
                 evt.preventDefault();
@@ -163,8 +171,13 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
     Paste.activatePasteModal = function (element) {
         var $element = $(element);
         var url = $element.data('url') || null;
-        var title = (TYPO3.lang['paste.modal.title.paste'] || 'Paste record') + ': "' + $element.data('title') + '"';
-        var severity = (typeof top.TYPO3.Severity[$element.data('severity')] !== 'undefined') ? top.TYPO3.Severity[$element.data('severity')] : top.TYPO3.Severity.info;
+        if (Paste.itemOnClipboardTitle) {
+            var title = (TYPO3.lang['paste.modal.title.paste'] || 'Paste record') + ': "' + Paste.itemOnClipboardTitle + '"';
+            var severity = (typeof top.TYPO3.Severity[$element.data('severity')] !== 'undefined') ? top.TYPO3.Severity[$element.data('severity')] : top.TYPO3.Severity.warning;
+        } else {
+            var title = (TYPO3.lang['paste.modal.title.paste'] || 'Paste record') + ': "' + $element.data('title') + '"';
+            var severity = (typeof top.TYPO3.Severity[$element.data('severity')] !== 'undefined') ? top.TYPO3.Severity[$element.data('severity')] : top.TYPO3.Severity.info;
+        }
         if ($element.hasClass('t3js-paste-copy')) {
             var content = TYPO3.lang['tx_gridelements_js.modal.pastecopy'] || '1 How do you want to paste that clipboard content here?';
             var buttons = [
@@ -230,7 +243,7 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
      * sets the classes for allowed element types to the cells of the original page module
      */
     OnReady.setAllowedData = function () {
-        $('table.t3js-page-columns > tbody > tr > td').each(function () {
+        $('table.t3js-page-columns > tbody > tr > td:not(.t3-grid-container-cell)').each(function () {
             var colPos = $(this).data('colpos') ? $(this).data('colpos') : $(this).find('> .t3-page-ce-wrapper').data('colpos');
             if (typeof colPos !== 'undefined') {
                 if (typeof top.pageColumnsAllowed[colPos] !== 'undefined') {
@@ -272,16 +285,24 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
      * sets the parameters for allowed element types to the add new content links of the original page module
      */
     OnReady.setAllowedParameters = function (pageColumn, colPos) {
-        pageColumn.find('.t3js-page-new-ce:not(".t3js-page-new-ce-allowed") a').each(function () {
-            if (typeof $(this).attr('href') !== 'undefined') {
-                $(this).attr('href', $(this).attr('href').replace(
-                    '&uid_pid',
-                    (top.pageColumnsAllowed[colPos] ? ('&tx_gridelements_allowed=' + window.btoa(JSON.stringify(top.pageColumnsAllowed[colPos]))) : '') +
-                    (top.pageColumnsDisallowed[colPos] ? ('&tx_gridelements_disallowed=' + window.btoa(JSON.stringify(top.pageColumnsDisallowed[colPos]))) : '') +
-                    '&uid_pid'
-                ));
-            }
-        });
+      pageColumn.find('.t3js-page-new-ce:not(".t3js-page-new-ce-allowed") a, .t3js-page-new-ce:not(".t3js-page-new-ce-allowed") typo3-backend-new-content-element-wizard-button').each(function () {
+        if (typeof $(this).attr('url') !== 'undefined') {
+          $(this).attr('url', $(this).attr('url').replace(
+            '&uid_pid',
+            (top.pageColumnsAllowed[colPos] ? ('&tx_gridelements_allowed=' + window.btoa(JSON.stringify(top.pageColumnsAllowed[colPos]))) : '') +
+            (top.pageColumnsDisallowed[colPos] ? ('&tx_gridelements_disallowed=' + window.btoa(JSON.stringify(top.pageColumnsDisallowed[colPos]))) : '') +
+            '&uid_pid'
+          ));
+        }
+        if (typeof $(this).attr('href') !== 'undefined') {
+          $(this).attr('href', $(this).attr('href').replace(
+            '&uid_pid',
+            (top.pageColumnsAllowed[colPos] ? ('&tx_gridelements_allowed=' + window.btoa(JSON.stringify(top.pageColumnsAllowed[colPos]))) : '') +
+            (top.pageColumnsDisallowed[colPos] ? ('&tx_gridelements_disallowed=' + window.btoa(JSON.stringify(top.pageColumnsDisallowed[colPos]))) : '') +
+            '&uid_pid'
+          ));
+        }
+      });
     };
 
     /**

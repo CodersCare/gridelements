@@ -1,6 +1,6 @@
 <?php
 
-use GridElementsTeam\Gridelements\Hooks\PageRenderer;
+use GridElementsTeam\Gridelements\Hooks\PageLayoutController;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Tests\UnitTestCase;
@@ -15,7 +15,7 @@ class PageRendererTest extends UnitTestCase
      */
     public function testGetBackendUser()
     {
-        $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
+        $pageRenderer = GeneralUtility::makeInstance(PageLayoutController::class);
         $GLOBALS['BE_USER'] = GeneralUtility::makeInstance(BackendUserAuthentication::class);
         $result = $pageRenderer->getBackendUser();
         self::assertEquals($GLOBALS['BE_USER'], $result);
@@ -28,7 +28,7 @@ class PageRendererTest extends UnitTestCase
      */
     public function testGetLanguageService()
     {
-        $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
+        $pageRenderer = GeneralUtility::makeInstance(PageLayoutController::class);
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);
         $result = $pageRenderer->getLanguageService();
         self::assertEquals($GLOBALS['LANG'], $result);

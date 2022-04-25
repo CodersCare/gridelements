@@ -19,7 +19,6 @@ namespace GridElementsTeam\Gridelements\Hooks;
  *  GNU General Public License for more details.
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-
 class PageLayoutView
 {
     public function contentIsUsed(array $params, \TYPO3\CMS\Backend\View\PageLayoutView $parentObject): bool

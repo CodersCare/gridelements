@@ -1,10 +1,16 @@
 parameters:
+	excludePaths:
+		-	Classes/Wizard/*
 	ignoreErrors:
 		-
 			message: "#^Constant TYPO3_MODE not found\\.$#"
 			count: 1
 			path: Classes/Backend/LayoutSetup.php
 		-
-			message: "#^Constant LF not found\\.$#"
+			message: "#^Class TYPO3\\\\CMS\\\\Fluid\\\\View\\\\StandaloneView not found\\.$#"
 			count: 1
-			path: Classes/Wizard/GridelementsBackendLayoutWizardElement.php
+			path: Classes/PageLayoutView/GridelementsPreviewRenderer.php
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Extbase\\\\Configuration\\\\BackendConfigurationManager not found\\.$#"
+			count: 1
+			path: Classes/PageLayoutView/GridelementsPreviewRenderer.php
