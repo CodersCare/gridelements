@@ -155,8 +155,8 @@ class DatabaseRecordList implements RecordListHookInterface, SingletonInterface
     public function contentCollapseIcon(array &$data, $sortField, $level, &$contentCollapseIcon, DatabaseRecordListXclass $parentObj)
     {
         if ($data['_EXPAND_TABLE_'] === 'tt_content') {
-            $expandTitle = $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.expandElement');
-            $collapseTitle = $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.collapseElement');
+            $expandTitle = htmlspecialchars($this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.expandElement'));
+            $collapseTitle = htmlspecialchars($this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.collapseElement'));
             $expandedGridelements = $parentObj->getExpandedGridelements();
             if ($expandedGridelements[$data['uid']]) {
                 $href = htmlspecialchars(($parentObj->listURL() . '&gridelementsExpand[' . (int)$data['uid'] . ']=0'));
