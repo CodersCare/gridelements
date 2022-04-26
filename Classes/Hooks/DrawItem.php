@@ -259,8 +259,8 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                             $columnKey = (int)$parserColumns['colPos'];
                             $colPosValues[$columnKey] = [
                                 'name'       => htmlspecialchars($name),
-                                'allowed'    => htmlspecialchars($layout['allowed'][$columnKey]),
-                                'disallowed' => htmlspecialchars($layout['disallowed'][$columnKey]),
+                                'allowed'    => $layout['allowed'][$columnKey],
+                                'disallowed' => $layout['disallowed'][$columnKey],
                                 'maxitems'   => (int)$layout['maxitems'][$columnKey],
                             ];
                         } else {
