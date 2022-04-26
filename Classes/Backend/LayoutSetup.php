@@ -635,7 +635,7 @@ class LayoutSetup
                     if (!empty($icons)) {
                         $source = '/' . $icons[0]->getPublicUrl();
                     }
-                } else if (is_array($item['icon']) && !empty($item['icon'][0])) {
+                } elseif (is_array($item['icon']) && !empty($item['icon'][0])) {
                     $source = $item['icon'][0];
                 } else {
                     $source = $item['icon'];
