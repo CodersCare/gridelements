@@ -13,7 +13,7 @@ $EM_CONF['gridelements'] = [
     'description' => 'This extension integrates the grid layout concept also to regular content elements - the grid elements.
 It offers a lot of new features like advanced drag & drop or real references, that improve the usability of the page and list module to speed up the daily work with the backend.',
     'category' => 'be',
-    'version' => '10.4.1',
+    'version' => '10.4.2',
     'priority' => 'bottom',
     'module' => '',
     'state' => 'stable',
