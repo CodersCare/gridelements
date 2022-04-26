@@ -466,7 +466,7 @@ class LayoutSetup
                         $icons = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'icon', $layoutId);
                     }
                     if (!empty($icons)) {
-                        $source = $icons[0]->getPublicUrl();
+                        $source = '/' . $icons[0]->getPublicUrl();
                     }
                 } elseif (is_array($item['icon']) && !empty($item['icon'][0])) {
                     $source = $item['icon'][0];
@@ -476,7 +476,7 @@ class LayoutSetup
 
                 if ($source !== '') {
                     $iconRegistry = GeneralUtility::makeInstance(IconRegistry::class);
-                    if (StringUtility::endsWith($icons[0]->getPublicUrl(), '.svg')) {
+                    if (StringUtility::endsWith($source, '.svg')) {
                         $iconRegistry->registerIcon('gridelements-select-icon-' . $layoutId, SvgIconProvider::class, [
                             'source' => $source,
                         ]);
