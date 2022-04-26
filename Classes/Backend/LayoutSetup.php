@@ -35,6 +35,7 @@ use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
@@ -458,20 +459,36 @@ class LayoutSetup
                 $icon = $item['iconIdentifier'];
             } elseif (!empty($item['icon'])) {
                 $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-                $icons = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'icon', $layoutId);
-                $iconRegistry = GeneralUtility::makeInstance(IconRegistry::class);
-                if (StringUtility::endsWith($icons[0]->getPublicUrl(), '.svg')) {
-                    $iconRegistry->registerIcon('gridelements-select-icon-' . $layoutId, SvgIconProvider::class, [
-                        'source' => $icons[0]->getPublicUrl(),
-                    ]);
+                $source = '';
+                if (MathUtility::canBeInterpretedAsInteger($item['icon'])) {
+                    $icons = [];
+                    if (MathUtility::canBeInterpretedAsInteger($layoutId)) {
+                        $icons = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'icon', $layoutId);
+                    }
+                    if (!empty($icons)) {
+                        $source = $icons[0]->getPublicUrl();
+                    }
+                } elseif (is_array($item['icon']) && !empty($item['icon'][0])) {
+                    $source = $item['icon'][0];
                 } else {
-                    $iconRegistry->registerIcon(
-                        'gridelements-select-icon-' . $layoutId,
-                        BitmapIconProvider::class,
-                        [
-                            'source' => $icons[0]->getPublicUrl(),
-                        ]
-                    );
+                    $source = $item['icon'];
+                }
+
+                if ($source !== '') {
+                    $iconRegistry = GeneralUtility::makeInstance(IconRegistry::class);
+                    if (StringUtility::endsWith($icons[0]->getPublicUrl(), '.svg')) {
+                        $iconRegistry->registerIcon('gridelements-select-icon-' . $layoutId, SvgIconProvider::class, [
+                            'source' => $source,
+                        ]);
+                    } else {
+                        $iconRegistry->registerIcon(
+                            'gridelements-select-icon-' . $layoutId,
+                            BitmapIconProvider::class,
+                            [
+                                'source' => $source,
+                            ]
+                        );
+                    }
                 }
                 $icon = 'gridelements-select-icon-' . $layoutId;
             }
@@ -607,12 +624,24 @@ class LayoutSetup
                 continue;
             }
 
-            $icons = [];
+            $source = '';
             if ($item['icon']) {
                 $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-                $icons = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'icon', $layoutId);
+                if (MathUtility::canBeInterpretedAsInteger($item['icon'])) {
+                    $icons = [];
+                    if (MathUtility::canBeInterpretedAsInteger($layoutId)) {
+                        $icons = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'icon', $layoutId);
+                    }
+                    if (!empty($icons)) {
+                        $source = '/' . $icons[0]->getPublicUrl();
+                    }
+                } else if (is_array($item['icon']) && !empty($item['icon'][0])) {
+                    $source = $item['icon'][0];
+                } else {
+                    $source = $item['icon'];
+                }
             }
-            $item['icon'] = count($icons) > 0 ? '/' . $icons[0]->getPublicUrl() : '';
+            $item['icon'] = $source;
 
             $wizardItems[] = [
                 'uid' => $layoutId,
