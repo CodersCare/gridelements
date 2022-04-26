@@ -639,7 +639,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
 			         data-container="' . (int)$row['uid'] . '"
 			         id="' . str_replace('.', '', uniqid('', true)) . '">
 					<div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce btn-group btn-group-sm"
-					     id="colpos-' . htmlspecialchars(colPos) . '-' . str_replace('.', '', uniqid('', true)) . '">' .
+					     id="colpos-' . htmlspecialchars($colPos) . '-' . str_replace('.', '', uniqid('', true)) . '">' .
             implode('', $iconsArray) . '
 					</div>
 					<div class="t3-page-ce-dropzone-available t3js-page-ce-dropzone-available"></div>
