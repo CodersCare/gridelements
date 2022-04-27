@@ -24,6 +24,7 @@ use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
 
 /**
  * Manipulate and find flex forms for gridelements tt_content plugin
@@ -55,30 +56,39 @@ class TtContentFlexForm
                 $layoutSetupInstance = GeneralUtility::makeInstance(LayoutSetup::class)->init($pageUid);
                 $layoutSetup = $layoutSetupInstance->getLayoutSetup($layoutId);
                 if ($layoutSetup['pi_flexform_ds_file']) {
-                    // Our data structure is in a record. Re-use core internal syntax to resolve that.
-                    // Get path of referenced file
-                    $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-                    $fileReferences = $fileRepository->findByRelation(
-                        'tx_gridelements_backend_layout',
-                        'pi_flexform_ds_file',
-                        $layoutSetup['uid']
-                    );
-                    if (count($fileReferences) > 0) {
-                        $file = $fileReferences[0]->getOriginalFile();
-                        $storageBasePath = rtrim($file->getStorage()->getConfiguration()['basePath'], '/');
-                        $filePath = $storageBasePath . $file->getProperties()['identifier'];
+                    if (MathUtility::canBeInterpretedAsInteger($layoutSetup['pi_flexform_ds_file'])) {
+                        // Our data structure is in a record. Re-use core internal syntax to resolve that.
+                        // Get path of referenced file
+                        $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
+                        if (MathUtility::canBeInterpretedAsInteger($layoutId)) {
+                            $fileReferences = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'pi_flexform_ds_file', $layoutId);
+                        }
+                        if (count($fileReferences) > 0) {
+                            $file = $fileReferences[0]->getOriginalFile();
+                            $storageBasePath = rtrim($file->getStorage()->getConfiguration()['basePath'], '/');
+                            $filePath = $storageBasePath . $file->getProperties()['identifier'];
+                            $identifier = [
+                                'type' => 'record',
+                                'tableName' => 'tx_gridelements_backend_layout',
+                                'uid' => $layoutId,
+                                'fieldName' => 'pi_flexform_ds_file',
+                                'flexformDS' => 'FILE:' . $filePath,
+                            ];
+                        } else {
+                            // This could be an additional core patch that allows referencing a DS file directly.
+                            // If so, the second hook below would be obsolete.
+                            $identifier = [
+                                'type' => 'gridelements-dummy',
+                            ];
+                        }
+                    } else {
+                        // Our data structure makes use of a written file path. Re-use core internal syntax to resolve that
                         $identifier = [
                             'type' => 'record',
                             'tableName' => 'tx_gridelements_backend_layout',
                             'uid' => $layoutId,
                             'fieldName' => 'pi_flexform_ds_file',
-                            'flexformDS' => 'FILE:' . $filePath,
-                        ];
-                    } else {
-                        // This could be an additional core patch that allows referencing a DS file directly.
-                        // If so, the second hook below would be obsolete.
-                        $identifier = [
-                            'type' => 'gridelements-dummy',
+                            'flexformDS' => 'FILE:' . $layoutSetup['pi_flexform_ds_file'],
                         ];
                     }
                 } elseif ($layoutSetup['pi_flexform_ds']) {
