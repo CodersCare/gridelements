@@ -5,54 +5,67 @@ Grid Elements
 =============
 
 :Extension key:
-          gridelements
+   gridelements
+
+:Package name:
+   gridelementsteam/gridelements
 
 :Version:
-          9.0.0
+   |release|
 
 :Language:
-          en
-
-:Description:
-          This extension integrates the backend layout concept of pages to regular content
-          elements.
-
-:Keywords:
-          grid elements, backend, layout
-
-:Copyright:
-          Jo Hasenau, Cybercraft GmbH
+   en
 
 :Author:
-          The Grid Elements Team
+   Jo Hasenau & Contributors
 
 :License:
-          GNU General Public License, either version 2 of the License or any
-          later version.
+   This document is published under the
+   `Creative Commons BY 4.0 <https://creativecommons.org/licenses/by/4.0/>`__
+   license.
 
 :Rendered:
-          |today|
+   |today|
 
-|
+----
 
-This project aims to integrate the backend layout concept of pages also to regular content elements - the grid elements. This approach is an alternative to TemplaVoila storing relations normalized in the database without using XML and offers a lot of comfortable features for an improved experience of the backend user. It's development has been financed by T-Systems, Cybercraft and via a crowd funding project @
-http://www.startnext.de/en/typo3-grid-elements-2-0 with sponsoring of 99 supporters. Additionally this new version is now managed by Coders.Care and has been sponsored during a private access phase backed by sponsors.
+This TYPO3 extension extends the grid-based concept known from the backend
+layout of pages to regular content elements.
 
-Table Of Content
-^^^^^^^^^^^^^^^^
+The grid elements are - just like backend layouts - defined by TypoScript and
+can thus be easily reused, extended and put under version control. It allows
+nesting of grids, giving the backend editor a wide range of layout
+possibilities. Its container nature encourages grouping content elements and
+assigning them specific frontend renderings, for example to display an
+accordion, tabs or galleries. Grid elements can be referenced to keep the
+content structure slim. The focus is always on the usability of the backend
+editor, which is supported by an advanced drag & drop handling and a granular
+configuration setting to define rules per grid element.
+
+----
+
+**Table of Contents:**
 
 .. toctree::
-       :titlesonly:
-       :glob:
+   :maxdepth: 1
+   :titlesonly:
 
-       Chapters/Introduction/Index
-       Chapters/Installation/Index
-       Chapters/GridTsSyntax/Index
-       Chapters/GridWizard/Index
-       Chapters/Flexform/Index
-       Chapters/Tsconfig/Index
-       Chapters/Typoscript/Index
-       Chapters/DataProcessing/Index
-       Chapters/Faq/Index
-       Chapters/Sponsoring/Index
-       Chapters/Notes/Index
+   Chapters/Introduction/Index
+   Chapters/Installation/Index
+   Chapters/GridTsSyntax/Index
+   Chapters/GridWizard/Index
+   Chapters/Flexform/Index
+   Chapters/Tsconfig/Index
+   Chapters/Typoscript/Index
+   Chapters/DataProcessing/Index
+   Chapters/Faq/Index
+   Chapters/Sponsoring/Index
+   Chapters/Notes/Index
+
+.. Meta Menu
+
+.. toctree::
+   :hidden:
+
+   Sitemap
+   genindex
