@@ -1,16 +1,13 @@
 .. include:: /Includes.rst.txt
 
-.. ==================================================
-.. DEFINE SOME TEXTROLES
-.. --------------------------------------------------
-.. role::   underline
-.. role::   typoscript(code)
-.. role::   ts(typoscript)
-    :class:  typoscript
-.. role::   php(code)
-
 Sponsoring
 ^^^^^^^^^^
+
+The development of this TYPO3 extension was funded by T-Systems, Cybercraft and
+via a `crowd funding project <https://www.startnext.com/en/typo3-grid-elements-2-0>`__
+with participation of 99 supporters. In addition, this new version is now
+managed by `Coders.Care <https://coders.care>`__ and was supported by additional
+sponsors in a private access phase.
 
 Inspiring people to share
 -------------------------

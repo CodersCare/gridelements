@@ -4,3 +4,4 @@
 /.php-cs-fixer.cache
 /.php_cs.cache
 /public
+/Documentation-GENERATED-temp/

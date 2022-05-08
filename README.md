@@ -1,3 +1,34 @@
+[![Latest Stable Version](https://poser.pugx.org/gridelementsteam/gridelements/v/stable)](https://extensions.typo3.org/extension/gridelements/)
+[![TYPO3 11](https://img.shields.io/badge/TYPO3-11-orange.svg?style=flat-square)](https://get.typo3.org/version/11)
+[![TYPO3 10](https://img.shields.io/badge/TYPO3-10-orange.svg?style=flat-square)](https://get.typo3.org/version/10)
+[![Total Downloads](https://poser.pugx.org/gridelementsteam/gridelements/d/total)](https://packagist.org/packages/gridelementsteam/gridelements)
+[![Monthly Downloads](https://poser.pugx.org/gridelementsteam/gridelements/d/monthly)](https://packagist.org/packages/gridelementsteam/gridelements)
+
+# TYPO3 extension `gridelements`
+
+This TYPO3 extension extends the grid-based concept known from the backend
+layout of pages to regular content elements - the grid elements.
+
+The grid elements are - just like backend layouts - defined by TypoScript and
+can thus be easily reused, extended and put under version control. It allows
+nesting of grids, giving the backend editor a wide range of layout
+possibilities. Its container nature encourages grouping content elements and
+assigning them specific frontend renderings, for example to display an
+accordion, tabs or galleries. Grid elements can be referenced to keep the
+content structure slim. The focus is always on the usability of the backend
+editor, which is supported by an advanced drag & drop handling and a granular
+configuration setting to define rules per grid element.
+
+This approach is an alternative to the *TemplaVoilà!* template engine, which
+uses XML in database fields to store relations and provides less convenience
+across all components.
+
+|                  | URL                                                                |
+|------------------|--------------------------------------------------------------------|
+| **Repository:**  | https://gitlab.com/coderscare/gridelements                         |
+| **Read online:** | https://docs.typo3.org/p/gridelementsteam/gridelements/main/en-us/ |
+| **TER:**         | https://extensions.typo3.org/extension/gridelements                |
+
 <!-- Markdown link & img dfn's -->
 [coders.care-url]: https://coders.care
 [patreon-url]: https://www.patreon.com/cybercraft
@@ -7,27 +38,13 @@
 [documentation-url]: https://docs.typo3.org/typo3cms/extensions/gridelements
 [blog-url]: https://coders.care/blog/article/service-level-agreements-for-typo3-extensions
 
-# Gridelements
-
-This TYPO3 extension integrates the grid based backend layout concept known from the page module also to regular content elements - the grid elements.
-
-## What does it do?
-
-Besides providing structures based on multiple columns similar to table cells, grid containers can be used to group several elements into one block or to assign special behaviour like accordions or tabs and to render the child elements accordingly. And of course containers can be nested.
-
-It offers a lot of new features like advanced drag & drop, drag in of new elements, maximum number of items, allowed content, plugin or grid types per column or real references, that improve the usability of the page and list module to speed up the daily work with the backend of TYPO3 CMS.
-
-## Documentation
-
-Find installation and configuration instructions and some basic examples on [docs.typo3.org][documentation-url]
-
 ## Inspiring people to share
 
 We strongly believe in the principles of Open-source software, which is why we share this TYPO3 extension with you completely free of charge.
 
 Still even contributors to Open-source projects have to make a living somehow, so even though you are not obliged to do so, you should consider sharing a small part of the money you might be earning with this extension in return. This way we can make sure to still provide the TYPO3 community with better extensions and services in the future.
 
-Thanks in advance for your support. 
+Thanks in advance for your support.
 
 ## How to support our efforts?
 
