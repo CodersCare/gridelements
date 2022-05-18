@@ -85,9 +85,9 @@
 	border: 1px dashed #79a548;
 	border-radius: 2px;
 	background-color: #d1e2bd;
-	margin: -28px 0 -28px 0;
-	padding: 40px 10px;
-	z-index: 10000;
+	margin: -38px 0 -38px 0;
+	padding: 50px 10px;
+	z-index: 10500;
 	position: relative!important;
 	opacity: 0.65;
 	filter: alpha(opacity=65);
