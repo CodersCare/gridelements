@@ -180,12 +180,12 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
                 if (isset($row['columns.'])) {
                     foreach ($row['columns.'] as $column) {
                         $gridColumn = GeneralUtility::makeInstance(GridelementsGridColumn::class, $context, $column, $gridContainerId);
+                        $gridColumn->setRestrictions($layoutColumns);
                         if (isset($activeColumns[$column['colPos']])) {
                             $gridColumn->setActive();
                         }
                         $gridRow->addColumn($gridColumn);
                         if (isset($column['colPos']) && isset($childColumns[$column['colPos']])) {
-                            $gridColumn->setRestrictions($layoutColumns);
                             $gridColumn->setCollapsed((bool)$this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$gridContainerId . '_' . $column['colPos']]);
                             foreach ($childColumns[$column['colPos']] as $child) {
                                 $gridColumnItem = GeneralUtility::makeInstance(GridelementsGridColumnItem::class, $context, $gridColumn, $child, $layoutColumns);
