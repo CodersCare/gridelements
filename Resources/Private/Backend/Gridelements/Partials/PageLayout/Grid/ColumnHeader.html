@@ -30,7 +30,7 @@
                     </f:if>
                 </f:if>
             </div>
-            {column.columnName}
+            {f:translate(key:column.columnName,default:column.columnName)}
         </f:then>
         <f:else if="{column.unassigned}">
             {column.titleUnassigned}
