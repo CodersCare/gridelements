@@ -393,23 +393,23 @@ class GridelementsGridColumn extends GridColumn
         }
 
         if (!empty($disallowedContentTypes)) {
-            $this->setDisallowedContentType(implode(',', $disallowedContentTypes));
+            $this->setDisallowedContentType(implode(',', array_keys($disallowedContentTypes)));
         }
         if (!empty($disallowedListTypes)) {
-            $this->setDisallowedListType(implode(',', $disallowedListTypes));
+            $this->setDisallowedListType(implode(',', array_keys($disallowedListTypes)));
         }
         if (!empty($disallowedGridTypes)) {
-            $this->setDisallowedGridType(implode(',', $disallowedGridTypes));
+            $this->setDisallowedGridType(implode(',', array_keys($disallowedGridTypes)));
         }
 
         if (!empty($allowedContentTypes)) {
-            $this->setAllowedContentType(implode(',', $allowedContentTypes));
+            $this->setAllowedContentType(implode(',', array_keys($allowedContentTypes)));
         }
         if (!empty($allowedListTypes)) {
-            $this->setAllowedListType(implode(',', $allowedListTypes));
+            $this->setAllowedListType(implode(',', array_keys($allowedListTypes)));
         }
         if (!empty($allowedGridTypes)) {
-            $this->setAllowedGridType(implode(',', $allowedGridTypes));
+            $this->setAllowedGridType(implode(',', array_keys($allowedGridTypes)));
         }
 
         if (isset($layoutColumns['maxitems']) && isset($layoutColumns['maxitems'][$this->columnNumber])) {
