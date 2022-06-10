@@ -38,7 +38,6 @@
                 'appearance' => [
                     'levelLinksPosition' => 'top',
                     'showPossibleLocalizationRecords' => true,
-                    'showRemovedLocalizationRecords' => true,
                     'showAllLocalizationLink' => true,
                     'showSynchronizationLink' => true,
                     'enabledControls' => [
@@ -140,4 +139,5 @@ $GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['showitem'] = '
 
 if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger(TYPO3_version) < 11000000) {
     $GLOBALS['TCA']['tt_content']['ctrl']['shadowColumnsForNewPlaceholders'] .= ',tx_gridelements_container,tx_gridelements_columns';
+    $GLOBALS['TCA']['tt_content']['columns']['tx_gridelements_children']['config']['appearance']['showRemovedLocalizationRecords'] = true;
 }
