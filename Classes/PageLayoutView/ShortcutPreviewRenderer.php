@@ -109,7 +109,13 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
 
         if (!empty($record['records'])) {
             $shortCutRenderItems = $this->addShortCutRenderItems($item);
-            return 'Shortcut content available';
+            $preview = '';
+            foreach ($shortCutRenderItems as $shortcutRecord) {
+                $shortcutItem = GeneralUtility::makeInstance(GridColumnItem::class, $item->getContext(), $item->getColumn(), $shortcutRecord);
+                $preview .= '<p class="pt-2 small"><b><a href="' . $shortcutItem->getEditUrl() . '">' . $this->getLanguageService()->getLL('edit') . '</a></b></p>';
+                $preview .= '<div class="mb-2 p-2 border reference">' . $shortcutItem->getPreview() . '<div class="reference-overlay"></div></div>';
+            }
+            return $preview;
         }
         return parent::renderPageModulePreviewContent($item);
     }
