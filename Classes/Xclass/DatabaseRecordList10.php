@@ -1004,9 +1004,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             ((int)$data['tx_gridelements_container'] > 0 ? ' data-grid-container="' . $data['tx_gridelements_container'] . '"' : '') .
             ((int)$data['_triggerContainer'] > 0 ? ' data-trigger-container="' . $data['_triggerContainer'] . '"' : '') . '>';
         if (count($data) > 1) {
-            for ($i = 0; $i < $level; $i++) {
-                $out .= '<' . $colType . '></' . $colType . '>';
-            }
+            $colsp = ' colspan="' . ( $level + 1 ) . '"';
 
             if ($data['_EXPANDABLE_'] && (!$this->localizationView || !$parent)) {
                 $sortField = GeneralUtility::_GP('sortField') ? GeneralUtility::_GP('sortField') . ':' . (int)GeneralUtility::_GP('sortRev') : '';
@@ -1022,10 +1020,10 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                         $hookObject->contentCollapseIcon($data, $sortField, $level, $contentCollapseIcon, $this);
                     }
                 }
-                $out .= '<' . $colType . ' nowrap="nowrap" class="col-icon">' . $contentCollapseIcon . '</' . $colType . '>';
+                $out .= '<' . $colType . $colsp . ' nowrap="nowrap" class="col-icon">' . $contentCollapseIcon . '</' . $colType . '>';
             } else {
                 if ($colType === 'td') {
-                    $out .= '<' . $colType . '></' . $colType . '>';
+                    $out .= '<' . $colType . $colsp . '></' . $colType . '>';
                 }
             }
         }
@@ -1339,7 +1337,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         if ($triggerContainer) {
             $theData['_triggerContainer'] = $triggerContainer;
         }
-        $rowOutput .= $this->addElement(1, $theIcon, $theData, GeneralUtility::implodeAttributes($tagAttributes, true));
+        $rowOutput .= $this->addElement(1, $theIcon, $theData, GeneralUtility::implodeAttributes($tagAttributes, true), '', '', 'td', $level);
 
         $translations = $this->translations;
 
@@ -1373,7 +1371,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                         . '" data-grid-container="' . $row['uid'] . '">
                                 <td colspan="' . ($level + 2) . '"></td>
                                 <td colspan="' . (count($this->fieldArray) - $level - 2 + $this->maxDepth) . '" style="padding:5px;">
-                                    <br />
+                                <br>
                                     <strong>' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:list.columnName')
                         . ' ' . (int)$child['tx_gridelements_columns'] . '</strong>
                                 </td>
