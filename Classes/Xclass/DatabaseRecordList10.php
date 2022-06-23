@@ -962,7 +962,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         }
 
         // Create and return header table row:
-        return $headerOutput . '<thead>' . $this->addElement(1, $icon, $theData, '', '', '', 'th') . '</thead>';
+        return $headerOutput . '<thead>' . $this->addElement(1, $icon, $theData, '', '', '', 'th', 0, $table) . '</thead>';
     }
 
     /*********************************
@@ -983,10 +983,11 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
      * @param string $_2 OBSOLETE - NOT USED ANYMORE. Is the HTML <img>-tag for an alternative 'gfx/ol/line.gif'-icon (used in the top)
      * @param string $colType Defines the tag being used for the columns. Default is td.
      * @param int $level
+     * @param string $table
      *
      * @return string HTML content for the table row
      */
-    public function addElement($h, $icon, $data, $rowParams = '', $_ = '', $_2 = '', $colType = 'td', $level = 0)
+    public function addElement($h, $icon, $data, $rowParams = '', $_ = '', $_2 = '', $colType = 'td', $level = 0, $table = '')
     {
         if ($colType === 'pagination') {
             $colType = 'td';
@@ -1004,7 +1005,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             ((int)$data['tx_gridelements_container'] > 0 ? ' data-grid-container="' . $data['tx_gridelements_container'] . '"' : '') .
             ((int)$data['_triggerContainer'] > 0 ? ' data-trigger-container="' . $data['_triggerContainer'] . '"' : '') . '>';
         if (count($data) > 1) {
-            $colsp = ' colspan="' . ( $level + 1 ) . '"';
+            $colsp = ' colspan="' . ((int)$level + 1) . '"';
 
             if ($data['_EXPANDABLE_'] && (!$this->localizationView || !$parent)) {
                 $sortField = GeneralUtility::_GP('sortField') ? GeneralUtility::_GP('sortField') . ':' . (int)GeneralUtility::_GP('sortRev') : '';
@@ -1022,7 +1023,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                 }
                 $out .= '<' . $colType . $colsp . ' nowrap="nowrap" class="col-icon">' . $contentCollapseIcon . '</' . $colType . '>';
             } else {
-                if ($colType === 'td') {
+                if ($table === 'tt_content' && $colType === 'td') {
                     $out .= '<' . $colType . $colsp . '></' . $colType . '>';
                 }
             }
@@ -1088,9 +1089,13 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             } elseif ($c > 1) {
                 $colsp = ' colspan="2"';
             } elseif ($ccount === 1 && $colType === 'td') {
-                $colsp = ' colspan="' . ($this->maxDepth - $level - 1) . '"';
+                $colsp = ' colspan="' . ($this->maxDepth - (int)$level - 1) . '"';
             } elseif ($ccount === 1 && $colType === 'th') {
-                $colsp = ' colspan="' . ($this->maxDepth - $level) . '"';
+                if ($table === 'tt_content') {
+                    $colsp = ' colspan="' . ($this->maxDepth - (int)$level) . '"';
+                } else {
+                    $colsp = ' colspan="' . ($this->maxDepth - (int)$level - 1) . '"';
+                }
             } else {
                 $colsp = '';
             }
@@ -1337,7 +1342,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         if ($triggerContainer) {
             $theData['_triggerContainer'] = $triggerContainer;
         }
-        $rowOutput .= $this->addElement(1, $theIcon, $theData, GeneralUtility::implodeAttributes($tagAttributes, true), '', '', 'td', $level);
+        $rowOutput .= $this->addElement(1, $theIcon, $theData, GeneralUtility::implodeAttributes($tagAttributes, true), '', '', 'td', $level, $table);
 
         $translations = $this->translations;
 
