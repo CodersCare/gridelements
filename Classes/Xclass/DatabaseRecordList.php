@@ -21,7 +21,6 @@ use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\HttpUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Recordlist\Event\ModifyRecordListHeaderColumnsEvent;
 use TYPO3\CMS\Recordlist\Event\ModifyRecordListRecordActionsEvent;
@@ -244,31 +243,6 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             // Create the Download button
             $tableActions .= $this->createDownloadButtonForTable($table, $totalItems);
         }
-        // Check if gridelements containers are expanded or collapsed
-        if ($table === 'tt_content') {
-            $this->expandedGridelements = [];
-            $backendUser = $this->getBackendUserAuthentication();
-            if (is_array($backendUser->uc['moduleData']['list']['gridelementsExpanded'])) {
-                $this->expandedGridelements = $backendUser->uc['moduleData']['list']['gridelementsExpanded'];
-            }
-            $expandOverride = GeneralUtility::_GP('gridelementsExpand');
-            if (is_array($expandOverride)) {
-                foreach ($expandOverride as $expandContainer => $expandValue) {
-                    if ($expandValue) {
-                        $this->expandedGridelements[$expandContainer] = 1;
-                    } else {
-                        unset($this->expandedGridelements[$expandContainer]);
-                    }
-                }
-                $backendUser->uc['moduleData']['list']['gridelementsExpanded'] = $this->expandedGridelements;
-                // Save modified user uc
-                $backendUser->writeUC($backendUser->uc);
-                $returnUrl = GeneralUtility::sanitizeLocalUrl(GeneralUtility::_GP('returnUrl'));
-                if ($returnUrl !== '') {
-                    HttpUtility::redirect($returnUrl);
-                }
-            }
-        }
         $currentIdList = [];
         // Render table rows only if in multi table view or if in single table view
         $rowOutput = '';
@@ -345,7 +319,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                                     <td colspan="' . (count($this->fieldArray) - 1 + $this->maxDepth) . '" style="padding:5px;">
                                         <br />
                                         <strong>'
-                            . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.columnName')
+                            . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:list.columnName')
                             . ' ' . ($backendLayoutColumns[$row['colPos']] ? $backendLayoutColumns[$row['colPos']] : (int)$row['colPos']) . '</strong>
                                     </td>
                                 </tr>';
@@ -364,7 +338,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                             BackendUtility::workspaceOL($table, $lRow, $backendUser->workspace, true);
                             if (is_array($lRow) && $backendUser->checkLanguageAccess($lRow[$GLOBALS['TCA'][$table]['ctrl']['languageField']])) {
                                 $currentIdList[] = $lRow['uid'];
-                                $rowOutput .= $this->renderListRow($table, $lRow, 0, [], false);
+                                $rowOutput .= $this->renderListRow($table, $lRow, 18, [], false);
                             }
                         }
                     }
@@ -777,67 +751,6 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             $theData['_triggerContainer'] = $triggerContainer;
         }
         $rowOutput .= $this->addElement($theData, GeneralUtility::implodeAttributes($tagAttributes, true), 'td', $level, $table);
-
-        if ($theData['_EXPANDABLE_'] && $level < 8 && ($row['l18n_parent'] == 0 || !$this->localizationView) && !empty($theData['_CHILDREN_'])) {
-            $expanded = $this->expandedGridelements[$row['uid']] && (($this->expandedGridelements[$row['tx_gridelements_container']] && $expanded) || $row['tx_gridelements_container'] === 0) ? ' expanded' : '';
-            $previousGridColumn = '';
-            $originalMoveUp = $this->showMoveUp;
-            $originalMoveDown = $this->showMoveDown;
-            foreach ($theData['_CHILDREN_'] as $key => $child) {
-                if (isset($child['tx_gridelements_columns']) && ($child['tx_gridelements_columns'] !== $previousGridColumn)) {
-                    $previousGridColumn = $child['tx_gridelements_columns'];
-                    $this->currentTable['prev'][$child['uid']] = (int)$row['pid'];
-                } else {
-                    if (isset($theData['_CHILDREN_'][$key - 2]) && $theData['_CHILDREN_'][$key - 2]['tx_gridelements_columns'] === $child['tx_gridelements_columns']) {
-                        $this->currentTable['prev'][$child['uid']] = -(int)$theData['_CHILDREN_'][$key - 2]['uid'];
-                    } else {
-                        $this->currentTable['prev'][$child['uid']] = (int)$row['pid'];
-                    }
-                }
-                if (isset($theData['_CHILDREN_'][$key + 1]) && $theData['_CHILDREN_'][$key + 1]['tx_gridelements_columns'] === $child['tx_gridelements_columns']) {
-                    $this->currentTable['next'][$child['uid']] = -(int)$theData['_CHILDREN_'][$key + 1]['uid'];
-                }
-            }
-            $previousGridColumn = '';
-            foreach ($theData['_CHILDREN_'] as $key => $child) {
-                if (isset($child['tx_gridelements_columns']) && ($child['tx_gridelements_columns'] !== $previousGridColumn)) {
-                    $previousGridColumn = $child['tx_gridelements_columns'];
-                    $this->showMoveUp = false;
-                    $rowOutput .= '<tr class="t3-gridelements-child' . $expanded . '" data-trigger-container="'
-                        . ($this->localizationView && $row['l18n_parent'] ? $row['l18n_parent'] : $row['uid'])
-                        . '" data-grid-container="' . $row['uid'] . '">
-                                <td colspan="' . ($level + 3) . '"></td>
-                                <td colspan="' . (count($this->fieldArray) - $level - 3 + $this->maxDepth) . '" style="padding:5px;">
-                                <br>
-                                    <strong>' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.containerColumnName')
-                        . ' ' . (int)$child['tx_gridelements_columns'] . '</strong>
-                                </td>
-                            </tr>';
-                } else {
-                    $this->showMoveUp = true;
-                }
-                $this->showMoveDown = !isset($child['tx_gridelements_columns']) || !isset($theData['_CHILDREN_'][$key + 1])
-                    || (int)$child['tx_gridelements_columns'] === (int)$theData['_CHILDREN_'][$key + 1]['tx_gridelements_columns'];
-                $this->currentIdList[] = $child['uid'];
-                if ($row['CType'] === 'gridelements_pi1') {
-                    $this->currentContainerIdList[] = $row['uid'];
-                }
-                $child['_CSSCLASS'] = 't3-gridelements-child' . $expanded;
-                $rowOutput .= $this->renderListRow(
-                    $table,
-                    $child,
-                    0,
-                    [],
-                    false,
-                    $level + 1,
-                    $row['uid'],
-                    $expanded
-                );
-            }
-            $this->showMoveUp = $originalMoveUp;
-            $this->showMoveDown = $originalMoveDown;
-        }
-
         // Finally, return table row element:
         return $rowOutput;
     }
@@ -912,7 +825,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     $collapseCell = '';
                     if ($table === 'tt_content' && $lastKey === '_SELECTOR_') {
                         if ($contentCollapseIcon) {
-                            $collapseCell = '<' . $colType . ' colspan="' . ((int)$level + 1) . '" nowrap="nowrap" class="col-icon col-content-collapse-icon">' . $contentCollapseIcon . '</' . $colType . '>';
+                            $collapseCell = '<' . $colType . ' colspan="' . ((int)$level + 1) . '" nowrap="nowrap" class="col-icon">' . $contentCollapseIcon . '</' . $colType . '>';
                         } elseif ($colType !== 'th') {
                             $collapseCell = '<' . $colType . ' colspan="' . ((int)$level + 1) . '" nowrap="nowrap"></' . $colType . '>';
                         }
@@ -1197,7 +1110,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
 
             // "Up/Down" links
             if ($permsEdit && ($GLOBALS['TCA'][$table]['ctrl']['sortby'] ?? false) && !$this->sortField && !$this->searchLevels) {
-                if (!$isL10nOverlay && !$isDeletePlaceHolder && isset($this->currentTable['prev'][$row['uid']]) && $this->showMoveUp === true) {
+                if (!$isL10nOverlay && !$isDeletePlaceHolder && isset($this->currentTable['prev'][$row['uid']])) {
                     // Up
                     $params = [];
                     $params['redirect'] = $this->listURL();
@@ -1210,7 +1123,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 }
                 $this->addActionToCellGroup($cells, $moveUpAction, 'moveUp');
 
-                if (!$isL10nOverlay && !$isDeletePlaceHolder && !empty($this->currentTable['next'][$row['uid']]) && $this->showMoveDown === true) {
+                if (!$isL10nOverlay && !$isDeletePlaceHolder && !empty($this->currentTable['next'][$row['uid']])) {
                     // Down
                     $params = [];
                     $params['redirect'] = $this->listURL();
