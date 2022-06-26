@@ -21,6 +21,7 @@ use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\HttpUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Recordlist\Event\ModifyRecordListHeaderColumnsEvent;
 use TYPO3\CMS\Recordlist\Event\ModifyRecordListRecordActionsEvent;
@@ -242,6 +243,31 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             $tableActions .= $this->columnSelector($table);
             // Create the Download button
             $tableActions .= $this->createDownloadButtonForTable($table, $totalItems);
+        }
+        // Check if gridelements containers are expanded or collapsed
+        if ($table === 'tt_content') {
+            $this->expandedGridelements = [];
+            $backendUser = $this->getBackendUserAuthentication();
+            if (is_array($backendUser->uc['moduleData']['list']['gridelementsExpanded'])) {
+                $this->expandedGridelements = $backendUser->uc['moduleData']['list']['gridelementsExpanded'];
+            }
+            $expandOverride = GeneralUtility::_GP('gridelementsExpand');
+            if (is_array($expandOverride)) {
+                foreach ($expandOverride as $expandContainer => $expandValue) {
+                    if ($expandValue) {
+                        $this->expandedGridelements[$expandContainer] = 1;
+                    } else {
+                        unset($this->expandedGridelements[$expandContainer]);
+                    }
+                }
+                $backendUser->uc['moduleData']['list']['gridelementsExpanded'] = $this->expandedGridelements;
+                // Save modified user uc
+                $backendUser->writeUC($backendUser->uc);
+                $returnUrl = GeneralUtility::sanitizeLocalUrl(GeneralUtility::_GP('returnUrl'));
+                if ($returnUrl !== '') {
+                    HttpUtility::redirect($returnUrl);
+                }
+            }
         }
         $currentIdList = [];
         // Render table rows only if in multi table view or if in single table view
