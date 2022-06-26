@@ -22,6 +22,7 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
      * @exports TYPO3/CMS/Gridelements/DragDrop
      */
     DragDrop.default.draggableIdentifier = '.t3js-page-ce:has(.t3-page-ce-header-draggable)';
+    DragDrop.default.columnHolderIdentifier = '.t3-grid-container';
     DragDrop.default.gridContainerIdentifier = '.t3-grid-element-container';
     DragDrop.default.newContentElementWizardIdentifier = '#new-element-drag-in-wizard';
     DragDrop.default.cTypeIdentifier = '.t3-ctype-identifier';
@@ -111,7 +112,7 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
         DragDrop.default.column = $element.closest(DragDrop.default.columnIdentifier);
         DragDrop.default.column.removeClass('active');
 
-        $element.parents(DragDrop.default.columnHolderIdentifier).addClass('move-to-front');
+        $element.parents(DragDrop.default.draggableIdentifier).addClass('move-to-front');
         $element.parents(DragDrop.default.columnHolderIdentifier).find(DragDrop.default.addContentIdentifier).hide();
         $element.find(DragDrop.default.dropZoneIdentifier).hide();
 
@@ -168,7 +169,7 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
         // Show create new element button
         DragDrop.default.ownDropZone.removeClass('drag-start');
         DragDrop.default.column.addClass('active');
-        $element.parents(DragDrop.default.columnHolderIdentifier).removeClass('move-to-front');
+        $element.parents(DragDrop.default.draggableIdentifier).removeClass('move-to-front');
         $element.parents(DragDrop.default.columnHolderIdentifier).find(DragDrop.default.addContentIdentifier).show();
         $element.find(DragDrop.default.dropZoneIdentifier).show();
         $element.find('.ui-draggable-copy-message').remove();

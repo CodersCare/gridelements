@@ -1,6 +1,7 @@
 parameters:
 	excludePaths:
 		-	Classes/Wizard/*
+		-	Classes/Xclass/*
 	ignoreErrors:
 		-
 			message: "#^Constant TYPO3_MODE not found\\.$#"

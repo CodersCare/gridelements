@@ -41,7 +41,7 @@ class GridelementsGridColumnItem extends GridColumnItem
         $this->layoutColumns = $layoutColumns;
     }
 
-    public function getColumn(): GridelementsGridColumn
+    public function getGridelementsColumn(): GridelementsGridColumn
     {
         return $this->column;
     }
@@ -56,7 +56,7 @@ class GridelementsGridColumnItem extends GridColumnItem
         } elseif (!GeneralUtility::inList($this->layoutColumns['CSV'], $this->record['tx_gridelements_columns'])) {
             $wrapperClassNames[] = 't3-page-ce-warning';
         } else {
-            $this->getColumn()->setActive();
+            $this->getGridelementsColumn()->setActive();
         }
         if ($this->isInconsistentLanguage()) {
             $wrapperClassNames[] = 't3-page-ce-danger';

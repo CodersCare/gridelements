@@ -59,6 +59,10 @@
 			<source>Column:</source>
 			<target>Spalte:</target>
 		</trans-unit>
+		<trans-unit id="list.containerColumnName" approved="yes">
+			<source>Container Column:</source>
+			<target>Container-Spalte:</target>
+		</trans-unit>
 		<trans-unit id="showGridInformation" approved="yes">
 			<source>Show grid layout information.</source>
 			<target>Grid-Layout-Informationen einblenden.</target>

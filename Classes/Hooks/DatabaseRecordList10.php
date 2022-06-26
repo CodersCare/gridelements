@@ -21,7 +21,7 @@ namespace GridElementsTeam\Gridelements\Hooks;
  ***************************************************************/
 
 use GridElementsTeam\Gridelements\Helper\Helper;
-use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList as DatabaseRecordListXclass;
+use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList10 as DatabaseRecordListXclass;
 use TYPO3\CMS\Backend\RecordList\RecordListGetTableHookInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Imaging\IconFactory;
@@ -36,7 +36,7 @@ use TYPO3\CMS\Recordlist\RecordList\RecordListHookInterface;
  * @author Jo Hasenau <info@cybercraft.de>
  * @author Dirk Hoffmann <hoffmann@vmd-jena.de>
  */
-class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableHookInterface, SingletonInterface
+class DatabaseRecordList10 implements RecordListHookInterface, RecordListGetTableHookInterface, SingletonInterface
 {
     /**
      * @var Iconfactory
@@ -150,7 +150,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
                 $row['pid'],
                 '',
                 0,
-                $parentObj->selectFields
+                $parentObj->selFieldList
             );
             if (!empty($elementChildren)) {
                 $theData['_EXPANDABLE_'] = true;
