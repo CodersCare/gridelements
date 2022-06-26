@@ -1197,7 +1197,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
 
             // "Up/Down" links
             if ($permsEdit && ($GLOBALS['TCA'][$table]['ctrl']['sortby'] ?? false) && !$this->sortField && !$this->searchLevels) {
-                if (!$isL10nOverlay && !$isDeletePlaceHolder && isset($this->currentTable['prev'][$row['uid']])) {
+                if (!$isL10nOverlay && !$isDeletePlaceHolder && isset($this->currentTable['prev'][$row['uid']]) && $this->showMoveUp === true) {
                     // Up
                     $params = [];
                     $params['redirect'] = $this->listURL();
@@ -1210,7 +1210,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 }
                 $this->addActionToCellGroup($cells, $moveUpAction, 'moveUp');
 
-                if (!$isL10nOverlay && !$isDeletePlaceHolder && !empty($this->currentTable['next'][$row['uid']])) {
+                if (!$isL10nOverlay && !$isDeletePlaceHolder && !empty($this->currentTable['next'][$row['uid']]) && $this->showMoveDown === true) {
                     // Down
                     $params = [];
                     $params['redirect'] = $this->listURL();
