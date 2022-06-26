@@ -84,10 +84,6 @@ class DatabaseRecordList10 implements RecordListHookInterface, RecordListGetTabl
      */
     public function makeClip($table, $row, $cells, &$parentObject)
     {
-        if ($table === 'tt_content') {
-            $cells['moveUp'] = '';
-        }
-
         return $cells;
     }
 
