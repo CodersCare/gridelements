@@ -806,8 +806,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     $rowOutput .= '<tr class="t3-gridelements-child' . $expanded . '" data-trigger-container="'
                         . ($this->localizationView && $row['l18n_parent'] ? $row['l18n_parent'] : $row['uid'])
                         . '" data-grid-container="' . $row['uid'] . '">
-                                <td colspan="' . ($level + 2) . '"></td>
-                                <td colspan="' . (count($this->fieldArray) - $level - 2 + $this->maxDepth) . '" style="padding:5px;">
+                                <td colspan="' . ($level + 3) . '"></td>
+                                <td colspan="' . (count($this->fieldArray) - $level - 3 + $this->maxDepth) . '" style="padding:5px;">
                                 <br>
                                     <strong>' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.containerColumnName')
                         . ' ' . (int)$child['tx_gridelements_columns'] . '</strong>
