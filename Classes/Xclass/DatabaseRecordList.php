@@ -15,6 +15,7 @@ namespace GridElementsTeam\Gridelements\Xclass;
  * The TYPO3 project - inspiring people to share!
  */
 
+use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Imaging\Icon;
@@ -93,6 +94,13 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     public $addElement_tdParams = [];
 
     /**
+     * Gridelements backend layouts to provide container column information
+     *
+     * @var LayoutSetup
+     */
+    protected $gridelementsBackendLayouts;
+
+    /**
      * Creates the listing of records from a single table
      *
      * @param string $table Table name
@@ -154,6 +162,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         $this->fieldArray = $this->getColumnsToRender($table, true);
         // Creating the list of fields to include in the SQL query
         $selectFields = $this->getFieldsToSelect($table, $this->fieldArray);
+        if ($table === 'tt_content') {
+            $this->gridelementsBackendLayouts = GeneralUtility::makeInstance(LayoutSetup::class)->init($id);
+        }
         $this->selectFields = implode(',', $selectFields);
 
         $firstElement = ($this->page - 1) * $itemsPerPage;
@@ -810,7 +821,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                                 <td colspan="' . (count($this->fieldArray) - $level - 2 + $this->maxDepth) . '" style="padding:5px;">
                                 <br>
                                     <strong>' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.containerColumnName')
-                        . ' ' . (int)$child['tx_gridelements_columns'] . '</strong>
+                        . ' ' . $theData['_CONTAINER_COLUMNS_']['columns'][(int)$child['tx_gridelements_columns']] . '</strong>
                                 </td>
                             </tr>';
                 } else {
@@ -1440,5 +1451,13 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     public function getExpandedGridelements()
     {
         return $this->expandedGridelements;
+    }
+
+    /**
+     * @return LayoutSetup
+     */
+    public function getGridelementsBackendLayouts()
+    {
+        return $this->gridelementsBackendLayouts;
     }
 }

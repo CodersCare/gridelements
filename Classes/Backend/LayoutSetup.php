@@ -302,6 +302,7 @@ class LayoutSetup
         $allowed = [];
         $disallowed = [];
         $maxItems = [];
+        $availableColumns['columns'] = [];
         foreach ($setup['config']['rows.'] as $row) {
             if (!empty($row['columns.'])) {
                 foreach ($row['columns.'] as $column) {
@@ -309,6 +310,7 @@ class LayoutSetup
                         continue;
                     }
                     $colPos = (int)$column['colPos'];
+                    $availableColumns['columns'][$colPos] = $column['name'];
                     if (isset($column['allowed.'])) {
                         $column['allowed'] = $column['allowed.'];
                     }

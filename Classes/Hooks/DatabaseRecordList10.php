@@ -152,7 +152,9 @@ class DatabaseRecordList10 implements RecordListHookInterface, RecordListGetTabl
                 0,
                 $parentObj->selFieldList
             );
+            $layoutColumns = $parentObj->getGridelementsBackendLayouts()->getLayoutColumns($row['tx_gridelements_backend_layout']);
             if (!empty($elementChildren)) {
+                $theData['_CONTAINER_COLUMNS_'] = $layoutColumns;
                 $theData['_EXPANDABLE_'] = true;
                 $theData['_EXPAND_ID_'] = $table . ':' . $row['uid'];
                 $theData['_EXPAND_TABLE_'] = $table;

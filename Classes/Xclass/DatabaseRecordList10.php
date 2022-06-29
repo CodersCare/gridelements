@@ -15,6 +15,7 @@ namespace GridElementsTeam\Gridelements\Xclass;
  * The TYPO3 project - inspiring people to share!
  */
 
+use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use PDO;
 use function trim;
 use TYPO3\CMS\Backend\RecordList\RecordListGetTableHookInterface;
@@ -109,6 +110,13 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
      * @var bool
      */
     protected $localizationView;
+
+    /**
+     * Gridelements backend layouts to provide container column information
+     *
+     * @var LayoutSetup
+     */
+    protected $gridelementsBackendLayouts;
 
     /**
      * Constructor
@@ -223,6 +231,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         if ($table === 'tt_content') {
             $selectFields[] = 'CType';
             $selectFields[] = 'colPos';
+            $selectFields[] = 'tx_gridelements_backend_layout';
             $selectFields[] = 'tx_gridelements_container';
             $selectFields[] = 'tx_gridelements_columns';
         }
@@ -278,6 +287,9 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         // Implode it into a list of fields for the SQL-statement.
         $selFieldList = implode(',', $selectFields);
         $this->selFieldList = $selFieldList;
+        if ($table === 'tt_content') {
+            $this->gridelementsBackendLayouts = GeneralUtility::makeInstance(LayoutSetup::class)->init($id);
+        }
         foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['getTable'] ?? [] as $className) {
             $hookObject = GeneralUtility::makeInstance($className);
             if (!$hookObject instanceof RecordListGetTableHookInterface) {
@@ -913,7 +925,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                                 <td colspan="' . (count($this->fieldArray) - $level - 2 + $this->maxDepth) . '" style="padding:5px;">
                                 <br>
                                     <strong>' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.containerColumnName')
-                        . ' ' . (int)$child['tx_gridelements_columns'] . '</strong>
+                        . ' ' . $theData['_CONTAINER_COLUMNS_']['columns'][(int)$child['tx_gridelements_columns']] . '</strong>
                                 </td>
                             </tr>';
                 } else {
@@ -1970,5 +1982,13 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
     public function getExpandedGridelements()
     {
         return $this->expandedGridelements;
+    }
+
+    /**
+     * @return LayoutSetup
+     */
+    public function getGridelementsBackendLayouts()
+    {
+        return $this->gridelementsBackendLayouts;
     }
 }
