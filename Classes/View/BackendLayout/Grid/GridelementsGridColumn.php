@@ -17,7 +17,6 @@ declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\View\BackendLayout\Grid;
 
-use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumn;
@@ -409,9 +408,7 @@ class GridelementsGridColumn extends GridColumn
                 }
             }
             // get disallowed list types
-            if (isset($this->getDisallowed()['list_type'])) {
-                $disallowedListTypes = $this->getDisallowed()['list_type'];
-            }
+            $disallowedListTypes = $this->getDisallowed()['list_type'] ?? [];
             if (!isset($disallowedListTypes['*']) && !empty($disallowedListTypes)) {
                 foreach ($disallowedListTypes as $key => &$ctype) {
                     $ctype = $key;
@@ -444,9 +441,7 @@ class GridelementsGridColumn extends GridColumn
                 }
             }
             // get disallowed grid types
-            if (isset($this->getDisallowed()['tx_gridelements_backend_layout'])) {
-                $disallowedGridTypes = $this->getDisallowed()['tx_gridelements_backend_layout'];
-            }
+            $disallowedGridTypes = $this->getDisallowed()['tx_gridelements_backend_layout'] ?? [];
             if (!isset($disallowedGridTypes['*']) && !empty($disallowedGridTypes)) {
                 foreach ($disallowedGridTypes as $key => &$ctype) {
                     $ctype = $key;
@@ -561,10 +556,6 @@ class GridelementsGridColumn extends GridColumn
             $routeName = 'record_edit';
         }
 
-        try {
-            return (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
-        } catch (RouteNotFoundException $e) {
-        }
-        return '';
+        return (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
     }
 }
