@@ -409,7 +409,9 @@ class GridelementsGridColumn extends GridColumn
                 }
             }
             // get disallowed list types
-            $disallowedListTypes = $this->getDisallowed()['list_type'] ?? [];
+            if (isset($this->getDisallowed()['list_type'])) {
+                $disallowedListTypes = $this->getDisallowed()['list_type'];
+            }
             if (!isset($disallowedListTypes['*']) && !empty($disallowedListTypes)) {
                 foreach ($disallowedListTypes as $key => &$ctype) {
                     $ctype = $key;
@@ -442,7 +444,9 @@ class GridelementsGridColumn extends GridColumn
                 }
             }
             // get disallowed grid types
-            $disallowedGridTypes = $this->getDisallowed()['tx_gridelements_backend_layout'] ?? [];
+            if (isset($this->getDisallowed()['tx_gridelements_backend_layout'])) {
+                $disallowedGridTypes = $this->getDisallowed()['tx_gridelements_backend_layout'];
+            }
             if (!isset($disallowedGridTypes['*']) && !empty($disallowedGridTypes)) {
                 foreach ($disallowedGridTypes as $key => &$ctype) {
                     $ctype = $key;

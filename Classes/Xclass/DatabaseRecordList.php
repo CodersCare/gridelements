@@ -50,11 +50,6 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     protected bool $showMoveDown;
 
     /**
-     * @var bool
-     */
-    protected bool $localizationView;
-
-    /**
      * select fields for the query which fetches the translations of the current
      * record
      *
@@ -89,7 +84,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     /**
      * @var bool
      */
-    protected bool $no_noWrap;
+    protected bool $no_noWrap = false;
 
     /**
      * Keys are fieldnames and values are td-parameters to add in addElement(), please use $addElement_tdCSSClass for CSS-classes;
@@ -1082,9 +1077,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 $icon = ($table === 'pages' ? $this->iconFactory->getIcon('actions-page-move', Icon::SIZE_SMALL) : $this->iconFactory->getIcon('actions-document-move', Icon::SIZE_SMALL));
                 try {
                     $url = (string)$this->uriBuilder->buildUriFromRoute('move_element', [
-                            'table' => $table,
-                            'uid' => $row['uid'],
-                            'returnUrl' => $this->listURL(),
+                        'table' => $table,
+                        'uid' => $row['uid'],
+                        'returnUrl' => $this->listURL(),
                     ]);
                 } catch (RouteNotFoundException $e) {
                 }
@@ -1100,9 +1095,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 if (!$isDeletePlaceHolder) {
                     try {
                         $moduleUrl = $this->uriBuilder->buildUriFromRoute('record_history', [
-                                        'element' => $table . ':' . $row['uid'],
-                                        'returnUrl' => $this->listURL(),
-                                ]) . '#latest';
+                                'element' => $table . ':' . $row['uid'],
+                                'returnUrl' => $this->listURL(),
+                            ]) . '#latest';
                     } catch (RouteNotFoundException $e) {
                     }
                     $historyAction = '<a class="btn btn-default" href="' . htmlspecialchars($moduleUrl) . '" title="'
@@ -1239,7 +1234,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             }
 
             // "Delete" link:
-            $disableDelete = (bool)trim($userTsConfig['options.']['disableDelete.'][$table] ?? $userTsConfig['options.']['disableDelete'] ?? false);
+            $disableDelete = (bool)trim($userTsConfig['options.']['disableDelete.'][$table] ?? $userTsConfig['options.']['disableDelete'] ?? '');
             if ($permsEdit
                     && !$disableDelete
                     && (($table === 'pages' && $localCalcPerms->deletePagePermissionIsGranted()) || ($table !== 'pages' && $this->calcPerms->editContentPermissionIsGranted()))
