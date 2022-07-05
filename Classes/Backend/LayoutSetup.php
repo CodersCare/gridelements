@@ -446,7 +446,10 @@ class LayoutSetup
             }
         }
         foreach ($this->layoutSetup as $layoutId => $item) {
-            if (
+            if ((
+                (int)$colPos === -1 &&
+                    !empty($item['top_level_layout'])
+            ) ||
                 (
                     $colPos === -1
                     && !empty($item['top_level_layout'])
@@ -559,7 +562,7 @@ class LayoutSetup
                     $this->languageService->sL($column['name']),
                     $column['colPos'] ?? 0,
                     null,
-                    $column['allowed'] ?: '*',
+                    $column['allowed'] ?? '*',
                 ];
             }
         }
