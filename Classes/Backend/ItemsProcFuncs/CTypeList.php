@@ -82,9 +82,7 @@ class CTypeList extends AbstractItemsProcFunc
      */
     public function checkForAllowedCTypes(array &$items, int $pageId, int $pageColumn, int $gridContainerId, int $gridColumn)
     {
-        $allowed = [];
-        $disallowed = [];
-        if ((int)$pageColumn >= 0 || (int)$pageColumn === -2) {
+        if ($pageColumn >= 0 || $pageColumn === -2) {
             $column = $pageColumn ?: 0;
             $layout = $this->getSelectedBackendLayout($pageId);
         } else {
