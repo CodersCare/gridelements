@@ -258,12 +258,12 @@ class Gridelements extends ContentObjectRenderer
         $where = $queryBuilder->expr()->andX(
             $queryBuilder->expr()->eq(
                 'tx_gridelements_container',
-                $queryBuilder->createNamedParameter($element, PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter((int)$element, PDO::PARAM_INT)
             ),
             $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)),
             $queryBuilder->expr()->eq(
                 'pid',
-                $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter((int)$pid, PDO::PARAM_INT)
             ),
             $queryBuilder->expr()->in(
                 'tx_gridelements_columns',
@@ -282,12 +282,12 @@ class Gridelements extends ContentObjectRenderer
                     $translationOverlay = $queryBuilder->expr()->andX(
                         $queryBuilder->expr()->eq(
                             'tx_gridelements_container',
-                            $queryBuilder->createNamedParameter($element, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter((int)$element, PDO::PARAM_INT)
                         ),
                         $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter((int)$pid, PDO::PARAM_INT)
                         ),
                         $queryBuilder->expr()->in(
                             'tx_gridelements_columns',
@@ -310,12 +310,12 @@ class Gridelements extends ContentObjectRenderer
                 $translationNoOverlay = $queryBuilder->expr()->andX(
                     $queryBuilder->expr()->eq(
                         'tx_gridelements_container',
-                        $queryBuilder->createNamedParameter($element, PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter((int)$element, PDO::PARAM_INT)
                     ),
                     $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)),
                     $queryBuilder->expr()->eq(
                         'pid',
-                        $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter((int)$pid, PDO::PARAM_INT)
                     ),
                     $queryBuilder->expr()->in(
                         'tx_gridelements_columns',

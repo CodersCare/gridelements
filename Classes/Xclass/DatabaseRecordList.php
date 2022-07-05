@@ -50,6 +50,11 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     protected bool $showMoveDown;
 
     /**
+     * @var bool
+     */
+    protected bool $localizationView;
+
+    /**
      * select fields for the query which fetches the translations of the current
      * record
      *
@@ -84,7 +89,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     /**
      * @var bool
      */
-    protected bool $no_noWrap = false;
+    protected bool $no_noWrap;
 
     /**
      * Keys are fieldnames and values are td-parameters to add in addElement(), please use $addElement_tdCSSClass for CSS-classes;
@@ -106,8 +111,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * @param string $table Table name
      * @param int $id Page id
      * @return string HTML table with the listing for the record.
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws UnexpectedValueException
      */
     public function getTable($table, $id): string
     {
@@ -1235,7 +1239,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             }
 
             // "Delete" link:
-            $disableDelete = (bool)trim($userTsConfig['options.']['disableDelete.'][$table] ?? $userTsConfig['options.']['disableDelete'] ?? '');
+            $disableDelete = (bool)trim($userTsConfig['options.']['disableDelete.'][$table] ?? $userTsConfig['options.']['disableDelete'] ?? false);
             if ($permsEdit
                     && !$disableDelete
                     && (($table === 'pages' && $localCalcPerms->deletePagePermissionIsGranted()) || ($table !== 'pages' && $this->calcPerms->editContentPermissionIsGranted()))

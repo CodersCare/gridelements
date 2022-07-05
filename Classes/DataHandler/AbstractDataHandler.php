@@ -78,7 +78,7 @@ abstract class AbstractDataHandler
      * @param string $uidPid : The uid of the record or page we are currently working on
      * @param DataHandler $dataHandler
      */
-    public function init(string $table, string $uidPid, DataHandler $dataHandler)
+    public function init(string $table, int $uidPid, DataHandler $dataHandler)
     {
         $this->setTable($table);
         if ($table === 'tt_content' && (int)$uidPid < 0) {
@@ -222,7 +222,7 @@ abstract class AbstractDataHandler
             )
             ->from('tt_content')
             ->where(
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter((int)$uid, PDO::PARAM_INT))
             )
             ->setMaxResults(1)
             ->execute()

@@ -33,6 +33,8 @@ use TYPO3\CMS\Backend\View\PageLayoutView;
 use TYPO3\CMS\Backend\View\PageLayoutViewDrawFooterHookInterface;
 use TYPO3\CMS\Backend\View\PageLayoutViewDrawItemHookInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -108,7 +110,11 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
 
     public function __construct()
     {
-        $this->extentensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+        try {
+            $this->extentensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
+        } catch (ExtensionConfigurationPathDoesNotExistException $e) {
+        }
         $this->setLanguageService($GLOBALS['LANG']);
         $this->helper = Helper::getInstance();
         $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
@@ -433,7 +439,6 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param array $row : The current data row for the container item
      *
      * @return mixed[] collected items for the given column
-     * @throws \Doctrine\DBAL\DBALException
      */
     protected function collectItemsForColumns(PageLayoutView $parentObject, array &$colPosValues, array &$row)
     {

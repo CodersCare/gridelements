@@ -89,16 +89,16 @@ class LayoutSetup
      */
     public function init(int $pageId, array $typoScriptSetup = []): LayoutSetup
     {
-        $this->setLanguageService($GLOBALS['LANG'] ?? null);
-        $pageId = (strpos((string)$pageId, 'NEW') === 0) ? 0 : $pageId;
-        if ($pageId < 0) {
+        $this->setLanguageService($GLOBALS['LANG']);
+        $pageId = (strpos((string)$pageId, 'NEW') === 0) ? 0 : (int)$pageId;
+        if ((int)$pageId < 0) {
             $pageId = Helper::getInstance()->getPidFromUid($pageId);
         }
         $this->realPid = $pageId;
         $this->loadLayoutSetup($pageId);
         foreach ($this->layoutSetup as $key => $setup) {
             $columns = $this->getLayoutColumns((string)$key);
-            if (!empty($columns['allowed']) || !empty($columns['disallowed']) || !empty($columns['maxitems'])) {
+            if ($columns['allowed'] || $columns['disallowed'] || $columns['maxitems']) {
                 $this->layoutSetup[$key]['columns'] = $columns;
                 unset($this->layoutSetup[$key]['columns']['allowed']);
                 $this->layoutSetup[$key]['allowed'] = $columns['allowed'] ?? [];
@@ -209,7 +209,7 @@ class LayoutSetup
                         $queryBuilder->expr()->comparison($pageTSconfigId, '=', 0),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter((int)$pageId, PDO::PARAM_INT)
                         )
                     )
                 )
@@ -559,7 +559,7 @@ class LayoutSetup
                     $this->languageService->sL($column['name']),
                     $column['colPos'] ?? 0,
                     null,
-                    $column['allowed'] ?? '*',
+                    $column['allowed'] ?: '*',
                 ];
             }
         }

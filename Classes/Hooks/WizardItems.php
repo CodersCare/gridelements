@@ -151,7 +151,7 @@ class WizardItems implements NewContentElementWizardHookInterface
     public function removeDisallowedWizardItems(array $allowed, array $disallowed, array &$wizardItems)
     {
         foreach ($wizardItems as $key => $wizardItem) {
-            if (empty($wizardItem['header'])) {
+            if (!$wizardItem['header']) {
                 if (
                     (
                         !empty($allowed['CType'])
@@ -187,7 +187,7 @@ class WizardItems implements NewContentElementWizardHookInterface
      * @param int $container
      * @param int $pageId The ID of the page that triggered this hook
      *
-     * @return string
+     * @return int|string
      */
     public function getExcludeLayouts(int $container, int $pageId)
     {
@@ -294,7 +294,7 @@ class WizardItems implements NewContentElementWizardHookInterface
                 }
             }
 
-            $itemIdentifier = $item['alias'] ?? $item['uid'];
+            $itemIdentifier = $item['alias'] ?: $item['uid'];
             $wizardItems['gridelements_' . $itemIdentifier] = [
                 'title' => $item['title'] ?? '',
                 'description' => $item['description'] ?? '',
@@ -365,7 +365,7 @@ class WizardItems implements NewContentElementWizardHookInterface
     public function addGridValuesToWizardItems(array &$wizardItems, int $container, int $column)
     {
         foreach ($wizardItems as $key => $wizardItem) {
-            if (empty($wizardItem['header'])) {
+            if (!$wizardItem['header']) {
                 if ($container !== 0) {
                     if (!isset($wizardItem['tt_content_defValues'])) {
                         $wizardItems[$key]['tt_content_defValues'] = [];
@@ -402,7 +402,7 @@ class WizardItems implements NewContentElementWizardHookInterface
             }
         }
         foreach ($wizardItems as $key => $wizardItem) {
-            if (!empty($wizardItem['header'])) {
+            if ($wizardItem['header']) {
                 if (!isset($headersWithElements[$key])) {
                     unset($wizardItems[$key]);
                 }

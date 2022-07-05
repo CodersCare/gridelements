@@ -82,7 +82,9 @@ class ListTypeList extends AbstractItemsProcFunc
      */
     public function checkForAllowedListTypes(array &$items, int $pageId, int $pageColumn, int $gridContainerId, int $gridColumn)
     {
-        if ($pageColumn >= 0 || $pageColumn === -2) {
+        $allowed = [];
+        $disallowed = [];
+        if ((int)$pageColumn >= 0 || (int)$pageColumn === -2) {
             $column = $pageColumn ?: 0;
             $layout = $this->getSelectedBackendLayout($pageId);
         } else {

@@ -82,11 +82,11 @@ class Helper implements SingletonInterface
                     $queryBuilder->expr()->andX(
                         $queryBuilder->expr()->eq(
                             'tx_gridelements_container',
-                            $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter((int)$uid, PDO::PARAM_INT)
                         ),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter((int)$pid, PDO::PARAM_INT)
                         )
                     )
                 )

@@ -61,7 +61,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param string $id The parent uid of either the page or the container we are currently working on
      * @param DataHandler $parentObj The parent object that triggered this hook
      */
-    public function execute_preProcessFieldArray(array &$fieldArray, string $table, string $id, DataHandler $parentObj)
+    public function execute_preProcessFieldArray(array &$fieldArray, string $table, int $id, DataHandler $parentObj)
     {
         if ($table === 'tt_content') {
             $this->init($table, $id, $parentObj);
@@ -85,7 +85,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param string $id
      * @param bool $new
      */
-    public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false)
+    public function processFieldArrayForTtContent(array &$fieldArray, int $id = 0, bool $new = false)
     {
         $pid = (int)GeneralUtility::_GET('DDinsertNew');
 
@@ -240,7 +240,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param string $contentId
      * @param bool $new
      */
-    public function setFieldEntries(array &$fieldArray, string $contentId = '0', bool $new = false)
+    public function setFieldEntries(array &$fieldArray, int $contentId = 0, bool $new = false)
     {
         $containerUpdateArray = [];
         if (isset($fieldArray['tx_gridelements_container'])) {
@@ -339,7 +339,7 @@ class PreProcessFieldArray extends AbstractDataHandler
             ->where(
                 $queryBuilder->expr()->eq(
                     't2.uid',
-                    $queryBuilder->createNamedParameter($contentId, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter((int)$contentId, PDO::PARAM_INT)
                 )
             )
             ->execute()

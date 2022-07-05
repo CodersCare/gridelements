@@ -21,6 +21,7 @@ use InvalidArgumentException;
 use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -161,7 +162,7 @@ class GridelementsBackendLayoutIconUpdateWizard implements UpgradeWizardInterfac
      * and also not numeric (which means that it is migrated)
      *
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws RuntimeException
      */
     protected function getRecordsFromTable(): array
     {

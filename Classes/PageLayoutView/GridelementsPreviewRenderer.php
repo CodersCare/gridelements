@@ -16,6 +16,8 @@ use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridRow;
 use TYPO3\CMS\Backend\View\PageLayoutView;
 use TYPO3\CMS\Backend\View\PageLayoutViewDrawItemHookInterface;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Imaging\IconFactory;
@@ -75,7 +77,11 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
      */
     public function __construct()
     {
-        $this->extentensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+        try {
+            $this->extentensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
+        } catch (ExtensionConfigurationPathDoesNotExistException $e) {
+        }
         $this->helper = Helper::getInstance();
         $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
         $this->cleanupCollapsedStatesInUC();

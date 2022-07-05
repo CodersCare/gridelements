@@ -30,6 +30,8 @@ use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
@@ -61,7 +63,11 @@ class PageLayoutController
 
     public function __construct()
     {
-        $this->extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+        try {
+            $this->extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
+        } catch (ExtensionConfigurationPathDoesNotExistException $e) {
+        }
         $this->helper = Helper::getInstance();
         $this->pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
     }

@@ -35,17 +35,17 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
     /**
      * @var array
      */
-    protected $rows = [];
+    protected array $rows = [];
 
     /**
      * @var int
      */
-    protected $colCount = 0;
+    protected int $colCount = 0;
 
     /**
      * @var int
      */
-    protected $rowCount = 0;
+    protected int $rowCount = 0;
 
     /**
      * @return array

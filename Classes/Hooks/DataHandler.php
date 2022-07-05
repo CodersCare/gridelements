@@ -56,7 +56,7 @@ class DataHandler implements SingletonInterface
     public function processDatamap_preProcessFieldArray(
         array &$fieldArray,
         string $table,
-        string $id,
+        int $id,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
     ) {
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
@@ -76,7 +76,7 @@ class DataHandler implements SingletonInterface
     public function processDatamap_afterDatabaseOperations(
         string &$status,
         string &$table,
-        string &$id,
+        int &$id,
         array &$fieldArray,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
     ) {
@@ -85,7 +85,7 @@ class DataHandler implements SingletonInterface
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
             /** @var AfterDatabaseOperations $hook */
             $hook = GeneralUtility::makeInstance(AfterDatabaseOperations::class);
-            if (strpos($recordUid, 'NEW') !== false) {
+            if (strpos((string)$recordUid, 'NEW') !== false) {
                 $recordUid = $parentObj->substNEWwithIDs[$recordUid];
             } else {
                 if ($table === 'tt_content' && $status === 'update') {

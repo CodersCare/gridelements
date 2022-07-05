@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\View\BackendLayout\Grid;
 
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumn;
@@ -514,7 +515,6 @@ class GridelementsGridColumn extends GridColumn
 
     /**
      * @return string
-     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      */
     public function getNewContentUrlWithRestrictions(): string
     {
@@ -557,6 +557,10 @@ class GridelementsGridColumn extends GridColumn
             $routeName = 'record_edit';
         }
 
-        return (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
+        try {
+            return (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
+        } catch (RouteNotFoundException $e) {
+        }
+        return '';
     }
 }
