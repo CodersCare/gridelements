@@ -55,7 +55,7 @@ class ColPosList extends AbstractItemsProcFunc
                 $contentType ?? '',
                 $listType ?? '',
                 $gridType ?? '',
-                $params['row']['tx_gridelements_container'] ?? 0
+                (int)($params['row']['tx_gridelements_container'] ?? 0)
             );
         } else {
             // negative uid_pid values indicate that the element has been inserted after an existing element

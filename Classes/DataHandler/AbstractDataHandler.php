@@ -78,7 +78,7 @@ abstract class AbstractDataHandler
      * @param string $uidPid : The uid of the record or page we are currently working on
      * @param DataHandler $dataHandler
      */
-    public function init(string $table, int $uidPid, DataHandler $dataHandler)
+    public function init(string $table, string $uidPid, DataHandler $dataHandler)
     {
         $this->setTable($table);
         if ($table === 'tt_content' && (int)$uidPid < 0) {
