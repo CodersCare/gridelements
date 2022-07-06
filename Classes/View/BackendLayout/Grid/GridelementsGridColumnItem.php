@@ -79,6 +79,7 @@ class GridelementsGridColumnItem extends GridColumnItem
 
     /**
      * @return string
+     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      */
     public function getNewContentAfterUrlWithRestrictions(): string
     {

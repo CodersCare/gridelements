@@ -99,7 +99,7 @@ class ProcessCmdmap extends AbstractDataHandler
                 ->where(
                     $queryBuilder->expr()->eq(
                         'uid',
-                        $queryBuilder->createNamedParameter((int)$id, PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter($id, PDO::PARAM_INT)
                     )
                 )
                 ->execute()

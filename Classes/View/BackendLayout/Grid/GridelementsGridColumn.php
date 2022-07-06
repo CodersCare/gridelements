@@ -514,6 +514,7 @@ class GridelementsGridColumn extends GridColumn
 
     /**
      * @return string
+     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      */
     public function getNewContentUrlWithRestrictions(): string
     {

@@ -106,7 +106,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * @param string $table Table name
      * @param int $id Page id
      * @return string HTML table with the listing for the record.
-     * @throws UnexpectedValueException
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function getTable($table, $id): string
     {

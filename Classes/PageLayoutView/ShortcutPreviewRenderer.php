@@ -209,7 +209,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
             ->where(
                 $queryBuilder->expr()->neq(
                     'uid',
-                    $queryBuilder->createNamedParameter((int)$parentUid, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($parentUid, PDO::PARAM_INT)
                 ),
                 $queryBuilder->expr()->in(
                     'pid',

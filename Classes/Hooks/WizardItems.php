@@ -367,7 +367,7 @@ class WizardItems implements NewContentElementWizardHookInterface
         foreach ($wizardItems as $key => $wizardItem) {
             if (empty($wizardItem['header'])) {
                 if ($container !== 0) {
-                    if (!isset($wizardItems[$key]['tt_content_defValues'])) {
+                    if (!isset($wizardItem['tt_content_defValues'])) {
                         $wizardItems[$key]['tt_content_defValues'] = [];
                     }
                     $wizardItems[$key]['tt_content_defValues']['tx_gridelements_container'] = $container;

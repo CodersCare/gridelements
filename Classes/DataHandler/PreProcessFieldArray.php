@@ -339,7 +339,7 @@ class PreProcessFieldArray extends AbstractDataHandler
             ->where(
                 $queryBuilder->expr()->eq(
                     't2.uid',
-                    $queryBuilder->createNamedParameter((int)$contentId, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($contentId, PDO::PARAM_INT)
                 )
             )
             ->execute()

@@ -209,7 +209,7 @@ class LayoutSetup
                         $queryBuilder->expr()->comparison($pageTSconfigId, '=', 0),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter((int)$pageId, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)
                         )
                     )
                 )

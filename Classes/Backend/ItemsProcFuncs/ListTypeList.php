@@ -87,7 +87,7 @@ class ListTypeList extends AbstractItemsProcFunc
             $layout = $this->getSelectedBackendLayout($pageId);
         } else {
             $this->init($pageId);
-            $column = $gridColumn ? $gridColumn : 0;
+            $column = $gridColumn ?: 0;
             $gridElement = $this->layoutSetup->cacheCurrentParent($gridContainerId, true);
             $layout = $this->layoutSetup->getLayoutSetup($gridElement['tx_gridelements_backend_layout'] ?? '');
         }

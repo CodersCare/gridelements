@@ -26,8 +26,6 @@ use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
-use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
@@ -99,13 +97,8 @@ class AfterDatabaseOperations extends AbstractDataHandler
         if ($table === 'tt_content' || $table === 'pages') {
             $this->init($table, (string)$uid, $parentObj);
             if (!$this->getTceMain()->isImporting) {
-                $extensionConfiguration = [];
-                try {
-                    $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
-                } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
-                } catch (ExtensionConfigurationPathDoesNotExistException $e) {
-                }
-                if ((bool)$extensionConfiguration['disableAutomaticUnusedColumnCorrection'] !== true) {
+                $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
+                if (empty($extensionConfiguration['disableAutomaticUnusedColumnCorrection'])) {
                     $this->saveCleanedUpFieldArray($fieldArray);
                 }
                 if ($table === 'tt_content' && $uid > 0) {
@@ -516,7 +509,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter((int)$pageUid, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($pageUid, PDO::PARAM_INT)
                 )
             )
             ->execute()

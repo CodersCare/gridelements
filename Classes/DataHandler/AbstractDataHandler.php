@@ -222,7 +222,7 @@ abstract class AbstractDataHandler
             )
             ->from('tt_content')
             ->where(
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter((int)$uid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
             )
             ->setMaxResults(1)
             ->execute()
