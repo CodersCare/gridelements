@@ -153,7 +153,7 @@ class PreProcessFieldArray extends AbstractDataHandler
         }
 
         // Fetch default values if a previous record exists
-        if ($uidPid < 0 && !empty($record) && $GLOBALS['TCA']['tt_content']['ctrl']['useColumnsForDefaultValues']) {
+        if ($uidPid < 0 && !empty($record) && !empty($GLOBALS['TCA']['tt_content']['ctrl']['useColumnsForDefaultValues'])) {
             // Gets the list of fields to copy from the previous record.
             $fieldArray = explode(',', $GLOBALS['TCA']['tt_content']['ctrl']['useColumnsForDefaultValues']);
             foreach ($fieldArray as $field) {
@@ -162,7 +162,7 @@ class PreProcessFieldArray extends AbstractDataHandler
                     continue;
                 }
                 if (isset($GLOBALS['TCA']['tt_content']['columns'][$field])) {
-                    $newRow[$field] = $record[$field];
+                    $newRow[$field] = $record[$field] ?? '';
                 }
             }
         }
@@ -184,10 +184,12 @@ class PreProcessFieldArray extends AbstractDataHandler
      */
     public function getDefaultFlexformValues(array &$fieldArray)
     {
-        foreach ($GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds'] as $key => $dataStructure) {
-            $types = GeneralUtility::trimExplode(',', $key);
-            if (($types[0] === $fieldArray['list_type'] || $types[0] === '*') && ($types[1] === $fieldArray['CType'] || $types[1] === '*')) {
-                $fieldArray['pi_flexform'] = $this->extractDefaultDataFromDataStructure($dataStructure);
+        if (!empty($GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds'])) {
+            foreach ($GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds'] as $key => $dataStructure) {
+                $types = GeneralUtility::trimExplode(',', $key);
+                if (($types[0] === $fieldArray['list_type'] || $types[0] === '*') && ($types[1] === $fieldArray['CType'] || $types[1] === '*')) {
+                    $fieldArray['pi_flexform'] = $this->extractDefaultDataFromDataStructure($dataStructure);
+                }
             }
         }
     }
@@ -202,7 +204,9 @@ class PreProcessFieldArray extends AbstractDataHandler
     public function extractDefaultDataFromDataStructure(string $dataStructure): string
     {
         $returnXML = '';
-        $sheetArray = [];
+        $sheetArray = [
+            'data' => []
+        ];
         if ($dataStructure) {
             $structureArray = GeneralUtility::xml2array($dataStructure);
             if (!isset($structureArray['sheets']) && isset($structureArray['ROOT'])) {
@@ -211,13 +215,15 @@ class PreProcessFieldArray extends AbstractDataHandler
             }
             if (isset($structureArray['sheets']) && !empty($structureArray['sheets'])) {
                 foreach ($structureArray['sheets'] as $sheetName => $sheet) {
-                    if (is_array($sheet['ROOT']['el']) && !empty($sheet['ROOT']['el'])) {
+                    $sheetArray['data'][$sheetName] = [];
+                    if (!empty($sheet['ROOT']['el']) && is_array($sheet['ROOT']['el'])) {
                         $elArray = [];
                         foreach ($sheet['ROOT']['el'] as $elName => $elConf) {
-                            $config = $elConf['TCEforms']['config'];
-                            $elArray[$elName]['vDEF'] = $config['default'];
-                            if (!$elArray[$elName]['vDEF'] && $config['type'] === 'select' && !empty($config['items'])) {
-                                $elArray[$elName]['vDEF'] = $config['items'][0][1];
+                            $elArray[$elName] = [];
+                            $config = $elConf['TCEforms']['config'] ?? [];
+                            $elArray[$elName]['vDEF'] = $config['default'] ?? [];
+                            if (empty($elArray[$elName]['vDEF']) && !empty($config['type']) && $config['type'] === 'select' && !empty($config['items'])) {
+                                $elArray[$elName]['vDEF'] = $config['items'][0][1] ?? '';
                             }
                         }
                         $sheetArray['data'][$sheetName]['lDEF'] = $elArray;
@@ -294,7 +300,7 @@ class PreProcessFieldArray extends AbstractDataHandler
                         (int)$fieldArray['tx_gridelements_container'],
                         'sys_language_uid'
                     );
-                    if ((int)$targetContainer['sys_language_uid'] > -1) {
+                    if (isset($targetContainer) && (int)$targetContainer['sys_language_uid'] > -1) {
                         $fieldArray['sys_language_uid'] = (int)$targetContainer['sys_language_uid'];
                     }
                 }
@@ -303,7 +309,7 @@ class PreProcessFieldArray extends AbstractDataHandler
         if (isset($targetContainer) && (int)$targetContainer['sys_language_uid'] === -1) {
             $list = array_flip(GeneralUtility::trimExplode(
                 ',',
-                $GLOBALS['TCA']['tt_content']['ctrl']['copyAfterDuplFields'],
+                $GLOBALS['TCA']['tt_content']['ctrl']['copyAfterDuplFields'] ?? '',
                 true
             ));
             unset($list['sys_language_uid']);
@@ -344,10 +350,10 @@ class PreProcessFieldArray extends AbstractDataHandler
             )
             ->execute()
             ->fetch();
-        if (!empty($parent) && $parent['tx_gridelements_container'] > 0) {
+        if (!empty($parent) && !empty($parent['tx_gridelements_container'])) {
             $colPos = $this->checkForRootColumn($parent['tx_gridelements_container']);
         } else {
-            $colPos = (int)$parent['colPos'];
+            $colPos = (int)($parent['colPos'] ?? 0);
         }
 
         return $colPos;

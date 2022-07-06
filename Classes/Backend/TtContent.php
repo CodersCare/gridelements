@@ -241,8 +241,10 @@ class TtContent
             foreach ($params['items'] as $key => $container) {
                 $backendLayout = $containers[$container[1]]['tx_gridelements_backend_layout'] ?? [];
                 $gridColumn = (string)$params['row']['tx_gridelements_columns'];
-                $allowed = $layoutSetups[$backendLayout]['allowed'][$gridColumn] ?? [];
-                $disallowed = $layoutSetups[$backendLayout]['disallowed'][$gridColumn] ?? [];
+                if ($backendLayout && $gridColumn) {
+                    $allowed = $layoutSetups[$backendLayout]['allowed'][$gridColumn] ?? [];
+                    $disallowed = $layoutSetups[$backendLayout]['disallowed'][$gridColumn] ?? [];
+                }
                 if ($container[1] > 0 && (!empty($allowed) || !empty($disallowed))) {
                     if (
                         (
