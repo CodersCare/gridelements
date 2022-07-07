@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Hooks;
 
 /***************************************************************
@@ -45,7 +47,7 @@ class TtContentFlexForm
      * @param array $row
      * @return array
      */
-    public function getDataStructureIdentifierPreProcess(array $tca, string $tableName, string $fieldName, array $row)
+    public function getDataStructureIdentifierPreProcess(array $tca, string $tableName, string $fieldName, array $row): array
     {
         if ($tableName === 'tt_content' && $fieldName === 'pi_flexform' && $row['CType'] === 'gridelements_pi1') {
             if (!empty($row['tx_gridelements_backend_layout'])) {
@@ -124,7 +126,7 @@ class TtContentFlexForm
      * @param array $identifier
      * @return string
      */
-    public function parseDataStructureByIdentifierPreProcess(array $identifier)
+    public function parseDataStructureByIdentifierPreProcess(array $identifier): string
     {
         if ($identifier['type'] === 'gridelements-dummy') {
             return 'FILE:EXT:gridelements/Configuration/FlexForms/default_flexform_configuration.xml';

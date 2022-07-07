@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\DataProcessing;
 
 /*
@@ -45,37 +47,37 @@ class GridChildrenProcessor implements DataProcessorInterface
     /**
      * @var array
      */
-    protected $contentObjectConfiguration;
+    protected array $contentObjectConfiguration;
 
     /**
      * @var array
      */
-    protected $processorConfiguration;
+    protected array $processorConfiguration;
 
     /**
      * @var array
      */
-    protected $containerProcessorConfiguration;
+    protected array $containerProcessorConfiguration;
 
     /**
      * @var array
      */
-    protected $processedData;
+    protected array $processedData;
 
     /**
      * @var array
      */
-    protected $processedRecordVariables = [];
+    protected array $processedRecordVariables = [];
 
     /**
      * @var array
      */
-    protected $options = [];
+    protected array $options = [];
 
     /**
      * @var array
      */
-    protected $registeredOptions = [
+    protected array $registeredOptions = [
         'sortingDirection' => 'asc',
         'sortingDirection.' => [],
         'sortingField' => 'sorting',
@@ -119,7 +121,7 @@ class GridChildrenProcessor implements DataProcessorInterface
         array $contentObjectConfiguration,
         array $processorConfiguration,
         array $processedData
-    ) {
+    ): array {
         if (
             $processedData['data']['CType'] !== 'gridelements_pi1' ||
             empty($processorConfiguration)
@@ -200,7 +202,7 @@ class GridChildrenProcessor implements DataProcessorInterface
      * @param array $data
      * @param bool $isChild
      */
-    protected function checkOptions(&$data, $isChild = false)
+    protected function checkOptions(array &$data, bool $isChild = false)
     {
         if (
             (
@@ -235,11 +237,11 @@ class GridChildrenProcessor implements DataProcessorInterface
      *
      * @param array $record
      */
-    protected function processChildRecord($record)
+    protected function processChildRecord(array $record)
     {
         $id = (int)$record['uid'];
         $this->checkOptions($record, true);
-        /* @var $recordContentObjectRenderer ContentObjectRenderer */
+        /* @var ContentObjectRenderer $recordContentObjectRenderer */
         $recordContentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
         $recordContentObjectRenderer->start($record, 'tt_content');
         $this->processedRecordVariables[$id] = ['data' => $record];
@@ -269,7 +271,7 @@ class GridChildrenProcessor implements DataProcessorInterface
     /**
      * @return array
      */
-    protected function sortRecordsIntoMatrix()
+    protected function sortRecordsIntoMatrix(): array
     {
         $processedColumns = [];
         foreach ($this->processedRecordVariables as $key => $processedRecord) {

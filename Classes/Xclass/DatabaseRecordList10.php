@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Xclass;
 
 /*
@@ -31,7 +33,6 @@ use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
-use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
@@ -51,12 +52,12 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
      *
      * @var int
      */
-    public $totalColumnCount;
+    public int $totalColumnCount;
 
     /**
      * @var int
      */
-    protected $maxDepth = 10;
+    protected int $maxDepth = 10;
 
     // *********
     // Internal:
@@ -64,59 +65,59 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
     /**
      * @var int[]
      */
-    protected $expandedGridelements = [];
+    protected array $expandedGridelements = [];
 
     /**
      * @var int[]
      */
-    protected $currentIdList = [];
+    protected array $currentIdList = [];
 
     /**
      * @var int[]
      */
-    protected $currentContainerIdList = [];
+    protected array $currentContainerIdList = [];
 
     /**
      * @var bool
      */
-    protected $showMoveUp;
+    protected bool $showMoveUp;
 
     /**
      * @var bool
      */
-    protected $showMoveDown;
+    protected bool $showMoveDown;
 
     /**
      * @var string
      */
-    protected $lastMoveDownParams;
+    protected string $lastMoveDownParams;
 
     /**
      * @var BackendUserAuthentication
      */
-    protected $backendUser;
+    protected BackendUserAuthentication $backendUser;
 
     /**
      * @var bool
      */
-    protected $l10nEnabled;
+    protected bool $l10nEnabled;
 
     /**
      * @var bool
      */
-    protected $no_noWrap;
+    protected bool $no_noWrap = false;
 
     /**
      * @var bool
      */
-    protected $localizationView;
+    protected bool $localizationView;
 
     /**
      * Gridelements backend layouts to provide container column information
      *
      * @var LayoutSetup
      */
-    protected $gridelementsBackendLayouts;
+    protected LayoutSetup $gridelementsBackendLayouts;
 
     /**
      * Constructor
@@ -134,8 +135,10 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
      * @param string $rowList List of fields to show in the listing. Pseudo fields will be added including the record header.
      * @return string HTML table with the listing for the record.
      * @throws Exception
+     * @throws RouteNotFoundException
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function getTable($table, $id, $rowList = '')
+    public function getTable($table, $id, $rowList = ''): string
     {
         $backendLayout = $this->getBackendLayoutView()->getSelectedBackendLayout($id);
         $backendLayoutColumns = [];
@@ -278,7 +281,6 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             );
             /** @var FlashMessageService $flashMessageService */
             $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-            /** @var FlashMessageQueue $defaultFlashMessageQueue */
             $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
             $defaultFlashMessageQueue->enqueue($flashMessage);
         }
@@ -512,7 +514,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                                         <br />
                                         <strong>'
                                 . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.columnName')
-                                . ' ' . ($backendLayoutColumns[$row['colPos']] ? $backendLayoutColumns[$row['colPos']] : (int)$row['colPos']) . '</strong>
+                                . ' ' . ($backendLayoutColumns[$row['colPos']] ?: (int)$row['colPos']) . '</strong>
                                     </td>
                                 </tr>';
                         } else {
@@ -599,9 +601,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                 } else {
                     // Show that there are more records than shown
                     if ($this->totalItems > $this->itemsLimitPerTable) {
-                        $countOnFirstPage = $this->totalItems > $this->itemsLimitSingleTable
-                            ? $this->itemsLimitSingleTable
-                            : $this->totalItems;
+                        $countOnFirstPage = min($this->totalItems, $this->itemsLimitSingleTable);
                         $hasMore = $this->totalItems > $this->itemsLimitSingleTable;
                         $colspan = $this->showIcon
                             ? count($this->fieldArray) + 1 + $this->maxDepth
@@ -650,9 +650,8 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         }
         // Return content:
         $out = str_replace('###REPLACE_LIST_HEADER###', $this->renderListHeader($table, $this->currentIdList), $out);
-        $out = str_replace('###REPLACE_LIST_NAVIGATION_TOP###', $this->renderListNavigation('top'), $out);
-        $out = str_replace('###REPLACE_LIST_NAVIGATION_BOTTOM###', $this->renderListNavigation('bottom'), $out);
-        return $out;
+        $out = str_replace('###REPLACE_LIST_NAVIGATION_TOP###', $this->renderListNavigation(), $out);
+        return str_replace('###REPLACE_LIST_NAVIGATION_BOTTOM###', $this->renderListNavigation('bottom'), $out);
     }
 
     /**
@@ -667,7 +666,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
      * Rendering a single row for the list
      *
      * @param string $table Table name
-     * @param mixed[] $row Current record
+     * @param array $row Current record
      * @param int $cc Counter, counting for each time an element is rendered (used for alternating colors)
      * @param string $titleCol Table field (column) where header value is found
      * @param string $thumbsCol Table field (column) where (possible) thumbnails can be found
@@ -677,6 +676,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
      * @param string $expanded
      * @return string Table row for the element
      * @throws RouteNotFoundException
+     * @throws \Doctrine\DBAL\DBALException
      * @internal
      * @see getTable()
      */
@@ -687,17 +687,17 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         $titleCol,
         $thumbsCol,
         $indent = 0,
-        $level = 0,
-        $triggerContainer = 0,
-        $expanded = ''
-    ) {
+        int $level = 0,
+        int $triggerContainer = 0,
+        string $expanded = ''
+    ): string {
         if (!is_array($row)) {
             return '';
         }
         $rowOutput = '';
         $id_orig = null;
         // If in search mode, make sure the preview will show the correct page
-        if ((string)$this->searchString !== '') {
+        if ($this->searchString !== '') {
             $id_orig = $this->id;
             $this->id = $row['pid'];
         }
@@ -749,7 +749,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         $lC2 = '';
         foreach ($this->fieldArray as $fCol) {
             if ($fCol == $titleCol) {
-                $recTitle = BackendUtility::getRecordTitle($table, $row, false, true);
+                $recTitle = BackendUtility::getRecordTitle($table, $row);
                 $warning = '';
                 // If the record is edit-locked	by another user, we will show a little warning sign:
                 $lockInfo = BackendUtility::isRecordLocked($table, $row['uid']);
@@ -778,10 +778,10 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                     $type = isset($GLOBALS['TCA'][$table]['types'][0]) ? 0 : 1;
                 }
 
-                $visibleColumns = $this->getVisibleColumns($GLOBALS['TCA'][$table], $type);
+                $visibleColumns = $this->getVisibleColumns($GLOBALS['TCA'][$table], (string)$type);
 
                 if ($this->thumbs &&
-                    trim($row[$thumbsCol]) &&
+                    trim((string)$row[$thumbsCol]) &&
                     preg_match('/(^|(.*(;|,)?))' . $thumbsCol . '(((;|,).*)|$)/', $visibleColumns) === 1
                 ) {
                     $thumbCode = '<br />' . BackendUtility::thumbCode($row, $table, $thumbsCol);
@@ -810,7 +810,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                 $theData[$fCol] = $lC1;
             } elseif ($fCol !== '_LOCALIZATION_b') {
                 $tmpProc = BackendUtility::getProcessedValueExtra($table, $fCol, $row[$fCol], 100, $row['uid']);
-                $theData[$fCol] = $this->linkUrlMail(htmlspecialchars($tmpProc), $row[$fCol]);
+                $theData[$fCol] = $this->linkUrlMail(htmlspecialchars((string)$tmpProc), $row[$fCol]);
                 if ($this->csvOutput) {
                     $row[$fCol] = BackendUtility::getProcessedValueExtra($table, $fCol, $row[$fCol], 0, $row['uid']);
                 }
@@ -827,7 +827,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             }
         }
         // Reset the ID if it was overwritten
-        if ((string)$this->searchString !== '') {
+        if ($this->searchString !== '') {
             $this->id = $id_orig;
         }
         // Add row to CSV list:
@@ -1028,12 +1028,12 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
      * Creates the control panel for a single record in the listing.
      *
      * @param string $table The table
-     * @param mixed[] $row The record for which to make the control panel.
+     * @param array $row The record for which to make the control panel.
      * @return string HTML table with the control panel (unless disabled)
      * @throws RouteNotFoundException
      * @throws UnexpectedValueException
      */
-    public function makeControl($table, $row)
+    public function makeControl($table, $row): string
     {
         $userTsConfig = $this->getBackendUserAuthentication()->getTSConfig();
         $rowUid = $row['uid'];
@@ -1119,7 +1119,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             if ($isL10nOverlay) {
                 $moveAction = $this->spaceIcon;
             } else {
-                $onClick = 'return jumpExt(' . GeneralUtility::quoteJSvalue((string)$uriBuilder->buildUriFromRoute('move_element') . '&table=' . $table . '&uid=' . $row['uid']) . ');';
+                $onClick = 'return jumpExt(' . GeneralUtility::quoteJSvalue($uriBuilder->buildUriFromRoute('move_element') . '&table=' . $table . '&uid=' . $row['uid']) . ');';
                 $linkTitleLL = htmlspecialchars($this->getLanguageService()->getLL('move_' . ($table === 'tt_content' ? 'record' : 'page')));
                 $icon = ($table === 'pages' ? $this->iconFactory->getIcon(
                     'actions-page-move',
@@ -1132,7 +1132,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         // If the table is NOT a read-only table, then show these links:
         if ($this->isEditable($table)) {
             // "Revert" link (history/undo)
-            if ((bool)trim($userTsConfig['options.']['showHistory.'][$table] ?? $userTsConfig['options.']['showHistory'] ?? '1')) {
+            if (trim($userTsConfig['options.']['showHistory.'][$table] ?? $userTsConfig['options.']['showHistory'] ?? '1')) {
                 $moduleUrl = (string)$uriBuilder->buildUriFromRoute(
                     'record_history',
                     ['element' => $table . ':' . $row['uid']]
@@ -1151,7 +1151,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                 if ($isL10nOverlay) {
                     $permsAction = $this->spaceIcon;
                 } else {
-                    $href = (string)$uriBuilder->buildUriFromRoute('system_BeuserTxPermission') . '&id=' . $row['uid'] . '&tx_beuser_system_beusertxpermission[action]=edit' . $this->makeReturnUrl();
+                    $href = $uriBuilder->buildUriFromRoute('system_BeuserTxPermission') . '&id=' . $row['uid'] . '&tx_beuser_system_beusertxpermission[action]=edit' . $this->makeReturnUrl();
                     $permsAction = '<a class="btn btn-default" href="' . htmlspecialchars($href) . '" title="'
                         . htmlspecialchars($this->getLanguageService()->getLL('permissions')) . '">'
                         . $this->iconFactory->getIcon('actions-lock', Icon::SIZE_SMALL)->render() . '</a>';
@@ -1281,7 +1281,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                     $l10nParentField = $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] ?? '';
                     $deleteAction = '<a class="btn btn-default t3js-record-delete" href="#" '
                         . ' data-button-ok-text="' . htmlspecialchars($linkTitle) . '"'
-                        . ' data-l10parent="' . ($l10nParentField ? htmlspecialchars($row[$l10nParentField]) : '') . '"'
+                        . ' data-l10parent="' . ($l10nParentField ? htmlspecialchars((string)$row[$l10nParentField]) : '') . '"'
                         . ' data-params="' . htmlspecialchars($params) . '" data-title="' . htmlspecialchars($title) . '"'
                         . ' data-message="' . htmlspecialchars($warningText) . '" title="' . $linkTitle . '"'
                         . '>' . $icon . '</a>';
@@ -1383,10 +1383,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         foreach ($cells as $classification => $actions) {
             $visibilityClass = ($classification !== 'primary' && !$this->moduleData['bigControlPanel'] ? 'collapsed' : 'expanded');
             if ($visibilityClass === 'collapsed') {
-                $cellOutput = '';
-                foreach ($actions as $action) {
-                    $cellOutput .= $action;
-                }
+                $cellOutput = implode('', $actions);
                 $output .= ' <div class="btn-group">' .
                     '<span id="actions_' . $table . '_' . $row['uid'] . '" class="btn-group collapse collapse-horizontal width">' . $cellOutput . '</span>' .
                     '<a href="#actions_' . $table . '_' . $row['uid'] . '" class="btn btn-default collapsed" data-toggle="collapse" aria-expanded="false"><span class="t3-icon fa fa-ellipsis-h"></span></a>' .
@@ -1414,7 +1411,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
      *
      * @return string HTML content for the table row
      */
-    public function addElement($h, $icon, $data, $rowParams = '', $_ = '', $_2 = '', $colType = 'td', $level = 0, $table = '')
+    public function addElement($h, $icon, $data, $rowParams = '', $_ = '', $_2 = '', $colType = 'td', int $level = 0, string $table = ''): string
     {
         if ($colType === 'pagination') {
             $colType = 'td';
@@ -1432,7 +1429,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             ((int)$data['tx_gridelements_container'] > 0 ? ' data-grid-container="' . $data['tx_gridelements_container'] . '"' : '') .
             ((int)$data['_triggerContainer'] > 0 ? ' data-trigger-container="' . $data['_triggerContainer'] . '"' : '') . '>';
         if (count($data) > 1) {
-            $colsp = ' colspan="' . ((int)$level + 1) . '"';
+            $colsp = ' colspan="' . ($level + 1) . '"';
 
             if ($data['_EXPANDABLE_'] && (!$this->localizationView || !$parent)) {
                 $sortField = GeneralUtility::_GP('sortField') ? GeneralUtility::_GP('sortField') . ':' . (int)GeneralUtility::_GP('sortRev') : '';
@@ -1516,12 +1513,12 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             } elseif ($c > 1) {
                 $colsp = ' colspan="2"';
             } elseif ($ccount === 1 && $colType === 'td') {
-                $colsp = ' colspan="' . ($this->maxDepth - (int)$level - 1) . '"';
+                $colsp = ' colspan="' . ($this->maxDepth - $level - 1) . '"';
             } elseif ($ccount === 1 && $colType === 'th') {
                 if ($table === 'tt_content') {
-                    $colsp = ' colspan="' . ($this->maxDepth - (int)$level) . '"';
+                    $colsp = ' colspan="' . ($this->maxDepth - $level) . '"';
                 } else {
-                    $colsp = ' colspan="' . ($this->maxDepth - (int)$level - 1) . '"';
+                    $colsp = ' colspan="' . ($this->maxDepth - $level - 1) . '"';
                 }
             } else {
                 $colsp = '';
@@ -1554,7 +1551,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
      * @internal
      * @see getTable()
      */
-    public function renderListHeader($table, $currentIdList)
+    public function renderListHeader($table, $currentIdList): string
     {
         $tsConfig = BackendUtility::getPagesTSconfig($this->id);
         $tsConfigOfTable = is_array($tsConfig['TCEFORM.'][$table . '.']) ? $tsConfig['TCEFORM.'][$table . '.'] : null;
@@ -1618,7 +1615,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                             $lang->getLL('clip_selectMarked')
                         );
                         // The "edit marked" link:
-                        $editUri = (string)$uriBuilder->buildUriFromRoute('record_edit')
+                        $editUri = $uriBuilder->buildUriFromRoute('record_edit')
                             . '&edit[' . $table . '][{entityIdentifiers:editList}]=edit'
                             . '&returnUrl={T3_THIS_LOCATION}';
                         $cells['edit'] = '<a class="btn btn-default t3js-record-edit-multiple" href="#"'
@@ -1722,9 +1719,6 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                                     . $spriteIcon->render() . '</a>';
                             } else {
                                 $params = '&edit[' . $table . '][' . $this->id . ']=new';
-                                if ($table === 'pages') {
-                                    $params .= '&overrideVals[pages][doktype]=' . (int)$this->pageRow['doktype'];
-                                }
                                 $icon = '<a class="btn btn-default" href="#" onclick="' . htmlspecialchars(BackendUtility::editOnClick(
                                     $params,
                                     '',
@@ -1739,7 +1733,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                             if ($this->clipNumPane()) {
                                 $entityIdentifiers .= ':editList';
                             }
-                            $editUri = (string)$uriBuilder->buildUriFromRoute('record_edit')
+                            $editUri = $uriBuilder->buildUriFromRoute('record_edit')
                                 . '&edit[' . $table . '][{' . $entityIdentifiers . '}]=edit'
                                 . '&columnsOnly=' . implode(',', $this->fieldArray)
                                 . '&returnUrl={T3_THIS_LOCATION}';
@@ -1791,10 +1785,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                     if ($this->table && is_array($currentIdList)) {
                         // If the numeric clipboard pads are selected, show duplicate sorting link:
                         if ($this->clipNumPane()) {
-                            $theData[$fCol] .= '<a class="btn btn-default" href="' . htmlspecialchars($this->listURL(
-                                '',
-                                '-1'
-                            ) . '&duplicateField=' . $fCol)
+                            $theData[$fCol] .= '<a class="btn btn-default" href="' . htmlspecialchars($this->listURL() . '&duplicateField=' . $fCol)
                                 . '" title="' . htmlspecialchars($lang->getLL('clip_duplicates')) . '">'
                                 . $this->iconFactory->getIcon(
                                     'actions-document-duplicates-select',
@@ -1808,7 +1799,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                             if ($this->clipNumPane()) {
                                 $entityIdentifiers .= ':editList';
                             }
-                            $editUri = (string)$uriBuilder->buildUriFromRoute('record_edit')
+                            $editUri = $uriBuilder->buildUriFromRoute('record_edit')
                                 . '&edit[' . $table . '][{' . $entityIdentifiers . '}]=edit'
                                 . '&columnsOnly=' . $fCol
                                 . '&returnUrl={T3_THIS_LOCATION}';
@@ -1865,7 +1856,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
      * @param string $renderPart Distinguish between 'top' and 'bottom' part of the navigation (above or below the records)
      * @return string Navigation HTML
      */
-    protected function renderListNavigation($renderPart = 'top')
+    protected function renderListNavigation($renderPart = 'top'): string
     {
         $totalPages = ceil($this->totalItems / $this->iLimit);
         // Show page selector if not all records fit into one page
@@ -1979,7 +1970,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
     /**
      * @return int[]
      */
-    public function getExpandedGridelements()
+    public function getExpandedGridelements(): array
     {
         return $this->expandedGridelements;
     }
@@ -1987,7 +1978,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
     /**
      * @return LayoutSetup
      */
-    public function getGridelementsBackendLayouts()
+    public function getGridelementsBackendLayouts(): LayoutSetup
     {
         return $this->gridelementsBackendLayouts;
     }

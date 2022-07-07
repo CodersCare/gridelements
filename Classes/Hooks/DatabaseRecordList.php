@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Hooks;
 
 /***************************************************************
@@ -41,12 +43,12 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
     /**
      * @var Iconfactory
      */
-    protected $iconFactory;
+    protected IconFactory $iconFactory;
 
     /**
      * @var LanguageService
      */
-    protected $languageService;
+    protected LanguageService $languageService;
 
     /**
      * DatabaseRecordList constructor.
@@ -82,7 +84,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
      *
      * @return array the modified clip-icons
      */
-    public function makeClip($table, $row, $cells, &$parentObject)
+    public function makeClip($table, $row, $cells, &$parentObject): array
     {
         return $cells;
     }
@@ -97,7 +99,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
      *
      * @return array the modified control-icons
      */
-    public function makeControl($table, $row, $cells, &$parentObject)
+    public function makeControl($table, $row, $cells, &$parentObject): array
     {
         return $cells;
     }
@@ -112,7 +114,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
      *
      * @return array Array of modified cells/columns
      */
-    public function renderListHeader($table, $currentIdList, $headerColumns, &$parentObject)
+    public function renderListHeader($table, $currentIdList, $headerColumns, &$parentObject): array
     {
         return $headerColumns;
     }
@@ -127,7 +129,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
      *
      * @return array Array of modified clipboard/action icons
      */
-    public function renderListHeaderActions($table, $currentIdList, $cells, &$parentObject)
+    public function renderListHeaderActions($table, $currentIdList, $cells, &$parentObject): array
     {
         return $cells;
     }
@@ -141,7 +143,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
      * @param array $theData
      * @param DatabaseRecordListXclass $parentObj
      */
-    public function checkChildren($table, array $row, $level, array &$theData, DatabaseRecordListXclass $parentObj)
+    public function checkChildren(string $table, array $row, int $level, array &$theData, DatabaseRecordListXclass $parentObj)
     {
         if ($table === 'tt_content' && $row['CType'] === 'gridelements_pi1') {
             $elementChildren = Helper::getInstance()->getChildren(
@@ -175,9 +177,9 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
      */
     public function contentCollapseIcon(
         array &$data,
-        $sortField,
-        $level,
-        &$contentCollapseIcon,
+        string $sortField,
+        int $level,
+        string &$contentCollapseIcon,
         DatabaseRecordListXclass $parentObj
     ) {
         if ($data['_EXPAND_TABLE_'] === 'tt_content') {
@@ -205,7 +207,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
     /**
      * @return IconFactory
      */
-    public function getIconFactory()
+    public function getIconFactory(): IconFactory
     {
         if ($this->iconFactory === null) {
             $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
@@ -219,7 +221,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
      *
      * @return LanguageService $languageService
      */
-    public function getLanguageService()
+    public function getLanguageService(): LanguageService
     {
         return $this->languageService;
     }
@@ -237,7 +239,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
     /**
      * @return BackendUserAuthentication
      */
-    public function getBackendUser()
+    public function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }

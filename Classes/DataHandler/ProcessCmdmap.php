@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\DataHandler;
 
 /***************************************************************
@@ -21,6 +23,7 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use PDO;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -39,19 +42,20 @@ class ProcessCmdmap extends AbstractDataHandler
      * @param int $id The id of the record that is going to be copied
      * @param string $value The value that has been sent with the copy command
      * @param bool $commandIsProcessed A switch to tell the parent object, if the record has been copied
-     * @param DataHandler $parentObj The parent object that triggered this hook
+     * @param DataHandler|null $parentObj The parent object that triggered this hook
      * @param array|bool $pasteUpdate Values to be updated after the record is pasted
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function execute_processCmdmap(
-        $command,
-        $table,
-        $id,
-        $value,
-        &$commandIsProcessed,
+        string $command,
+        string $table,
+        int $id,
+        string $value,
+        bool &$commandIsProcessed,
         DataHandler $parentObj = null,
         $pasteUpdate = false
     ) {
-        $this->init($table, $id, $parentObj);
+        $this->init($table, (string)$id, $parentObj);
         $reference = (int)GeneralUtility::_GET('reference');
 
         if ($command === 'copy' && $reference === 1 && !$commandIsProcessed && $table === 'tt_content' && !$this->getTceMain()->isImporting) {
@@ -95,7 +99,7 @@ class ProcessCmdmap extends AbstractDataHandler
                 ->where(
                     $queryBuilder->expr()->eq(
                         'uid',
-                        $queryBuilder->createNamedParameter((int)$id, \PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter($id, PDO::PARAM_INT)
                     )
                 )
                 ->execute()

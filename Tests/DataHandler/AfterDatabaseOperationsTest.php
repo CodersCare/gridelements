@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use GridElementsTeam\Gridelements\DataHandler\AfterDatabaseOperations;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Tests\UnitTestCase;

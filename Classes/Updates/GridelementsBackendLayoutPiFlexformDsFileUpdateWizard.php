@@ -16,7 +16,9 @@ namespace GridElementsTeam\Gridelements\Updates;
  *
  * The TYPO3 project - inspiring people to share!
  */
-use Doctrine\DBAL\DBALException;
+use Exception;
+use InvalidArgumentException;
+use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -44,33 +46,33 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
     /**
      * @var OutputInterface
      */
-    protected $output;
+    protected OutputInterface $output;
 
     /**
      * @var ResourceStorage
      */
-    protected $storage;
+    protected ResourceStorage $storage;
 
     /**
      * Table to migrate records from
      *
      * @var string
      */
-    protected $table = 'tx_gridelements_backend_layout';
+    protected string $table = 'tx_gridelements_backend_layout';
 
     /**
      * Table field holding the migration to be
      *
      * @var string
      */
-    protected $fieldToMigrate = 'pi_flexform_ds_file';
+    protected string $fieldToMigrate = 'pi_flexform_ds_file';
 
     /**
      * the source file resides here
      *
      * @var string
      */
-    protected $sourcePath = 'uploads/media/';
+    protected string $sourcePath = 'uploads/media/';
 
     /**
      * target folder after migration
@@ -78,7 +80,7 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
      *
      * @var string
      */
-    protected $targetPath = '_migrated/tx_gridelements_backend_layouts/';
+    protected string $targetPath = '_migrated/tx_gridelements_backend_layouts/';
 
     /**
      * @return string Unique identifier of this updater
@@ -147,7 +149,7 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
             foreach ($records as $record) {
                 $this->migrateField($record);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // If something goes wrong, migrateField() logs an error
             $result = false;
         }
@@ -159,47 +161,40 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
      * and also not numeric (which means that it is migrated)
      *
      * @return array
-     * @throws \RuntimeException
+     * @throws \Doctrine\DBAL\DBALException
      */
-    protected function getRecordsFromTable()
+    protected function getRecordsFromTable(): array
     {
         $connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
         $queryBuilder = $connectionPool->getQueryBuilderForTable($this->table);
         $queryBuilder->getRestrictions()->removeAll();
-        try {
-            return $queryBuilder
-                ->select('uid', 'pid', $this->fieldToMigrate)
-                ->from($this->table)
-                ->where(
-                    $queryBuilder->expr()->isNotNull($this->fieldToMigrate),
-                    $queryBuilder->expr()->neq(
-                        $this->fieldToMigrate,
-                        $queryBuilder->createNamedParameter('', \PDO::PARAM_STR)
-                    ),
-                    $queryBuilder->expr()->comparison(
-                        'CAST(CAST(' . $queryBuilder->quoteIdentifier($this->fieldToMigrate) . ' AS DECIMAL) AS CHAR)',
-                        ExpressionBuilder::NEQ,
-                        'CAST(' . $queryBuilder->quoteIdentifier($this->fieldToMigrate) . ' AS CHAR)'
-                    )
+        return $queryBuilder
+            ->select('uid', 'pid', $this->fieldToMigrate)
+            ->from($this->table)
+            ->where(
+                $queryBuilder->expr()->isNotNull($this->fieldToMigrate),
+                $queryBuilder->expr()->neq(
+                    $this->fieldToMigrate,
+                    $queryBuilder->createNamedParameter('')
+                ),
+                $queryBuilder->expr()->comparison(
+                    'CAST(CAST(' . $queryBuilder->quoteIdentifier($this->fieldToMigrate) . ' AS DECIMAL) AS CHAR)',
+                    ExpressionBuilder::NEQ,
+                    'CAST(' . $queryBuilder->quoteIdentifier($this->fieldToMigrate) . ' AS CHAR)'
                 )
-                ->orderBy('uid')
-                ->execute()
-                ->fetchAll();
-        } catch (DBALException $e) {
-            throw new \RuntimeException(
-                'Database query failed. Error was: ' . $e->getPrevious()->getMessage(),
-                1511950673
-            );
-        }
+            )
+            ->orderBy('uid')
+            ->execute()
+            ->fetchAll();
     }
 
     /**
      * Migrates a single field.
      *
      * @param array $row
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function migrateField($row)
+    protected function migrateField(array $row)
     {
         $fieldItems = GeneralUtility::trimExplode(',', $row[$this->fieldToMigrate], true);
         if (empty($fieldItems) || is_numeric($row[$this->fieldToMigrate])) {
@@ -208,7 +203,7 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
         $fileadminDirectory = rtrim($GLOBALS['TYPO3_CONF_VARS']['BE']['fileadminDir'], '/') . '/';
         $i = 0;
 
-        $storageUid = (int)$this->storage->getUid();
+        $storageUid = $this->storage->getUid();
         $connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
 
         foreach ($fieldItems as $item) {
@@ -231,11 +226,11 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
                 $existingFileRecord = $queryBuilder->select('uid')->from('sys_file')->where(
                     $queryBuilder->expr()->eq(
                         'sha1',
-                        $queryBuilder->createNamedParameter($fileSha1, \PDO::PARAM_STR)
+                        $queryBuilder->createNamedParameter($fileSha1)
                     ),
                     $queryBuilder->expr()->eq(
                         'storage',
-                        $queryBuilder->createNamedParameter($storageUid, \PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter($storageUid, PDO::PARAM_INT)
                     )
                 )->execute()->fetch();
 
@@ -256,7 +251,7 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
                     /** @var File $file */
                     $file = $this->storage->getFile($this->targetPath . $item);
                     $fileUid = $file->getUid();
-                } catch (\InvalidArgumentException $e) {
+                } catch (InvalidArgumentException $e) {
                     // no file found, no reference can be set
                     $this->logger->notice(
                         'File ' . $this->sourcePath . $item . ' does not exist. Reference was not migrated.',
@@ -305,7 +300,7 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
             $queryBuilder->update($this->table)->where(
                 $queryBuilder->expr()->eq(
                     'uid',
-                    $queryBuilder->createNamedParameter($row['uid'], \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($row['uid'], PDO::PARAM_INT)
                 )
             )->set($this->fieldToMigrate, $i)->execute();
         }

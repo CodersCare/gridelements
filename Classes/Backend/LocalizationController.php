@@ -87,8 +87,7 @@ class LocalizationController
         $result = $this->localizationRepository->getRecordsToCopyDatabaseResult(
             $pageId,
             $destLanguageId,
-            $languageId,
-            '*'
+            $languageId
         );
 
         while ($row = $result->fetch()) {
@@ -108,9 +107,9 @@ class LocalizationController
             if (!isset($containers[$container])) {
                 $records[$colPos][] = [
                     'icon' => $this->iconFactory->getIconForRecord('tt_content', $row, Icon::SIZE_SMALL)->render(),
-                    'title' => $row[$GLOBALS['TCA']['tt_content']['ctrl']['label']],
+                    'title' => $row[$GLOBALS['TCA']['tt_content']['ctrl']['label']] ?? '',
                     'uid' => $uid,
-                    'container' => $row['tx_gridelements_container'],
+                    'container' => $container,
                 ];
             }
         }
@@ -146,15 +145,19 @@ class LocalizationController
 
         $columns[-1] = 'Gridelements';
 
+        if (empty($backendLayouts['__items'])) {
+            return [];
+        }
         foreach ($backendLayouts['__items'] as $backendLayout) {
             $columns[(int)$backendLayout[1]] = $backendLayout[0];
         }
-
-        $backendLayouts['__colPosList'][] = -1;
+        if (isset($backendLayouts['__colPosList'])) {
+            $backendLayouts['__colPosList'][] = -1;
+        }
 
         return [
             'columns' => $columns,
-            'columnList' => $backendLayouts['__colPosList'],
+            'columnList' => $backendLayouts['__colPosList'] ?? [],
         ];
     }
 }

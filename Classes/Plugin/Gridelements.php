@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Plugin;
 
 /***************************************************************
@@ -21,7 +23,9 @@ namespace GridElementsTeam\Gridelements\Plugin;
  ***************************************************************/
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
+use PDO;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -46,46 +50,46 @@ class Gridelements extends ContentObjectRenderer
      *
      * @var string
      */
-    public $prefixId = 'Gridelements';
+    public string $prefixId = 'Gridelements';
 
     /**
      * Path to this script relative to the extension dir
      *
      * @var string
      */
-    public $scriptRelPath = 'Classes/Plugin/Gridelements.php';
+    public string $scriptRelPath = 'Classes/Plugin/Gridelements.php';
 
     /**
      * The extension key
      *
      * @var string
      */
-    public $extKey = 'gridelements';
+    public string $extKey = 'gridelements';
 
     /**
      * @var ContentObjectRenderer
      */
-    protected $cObj;
+    protected ContentObjectRenderer $cObj;
 
     /**
      * @var PageRenderer
      */
-    protected $pageRenderer;
+    protected PageRenderer $pageRenderer;
 
     /**
      * @var LanguageAspect
      */
-    protected $languageAspect;
+    protected LanguageAspect $languageAspect;
 
     /**
      * The main method of the PlugIn
      *
      * @param string $content The PlugIn content
      * @param array $conf The PlugIn configuration
-     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return string The content that is displayed on the website
+     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function main($content = '', $conf = [])
+    public function main(string $content = '', array $conf = []): string
     {
         // first we have to take care of possible flexform values containing additional information
         // that is not available via DB relations. It will be added as "virtual" key to the existing data Array
@@ -93,7 +97,10 @@ class Gridelements extends ContentObjectRenderer
         $this->initPluginFlexForm();
         $this->getPluginFlexFormData();
 
-        $this->languageAspect = GeneralUtility::makeInstance(Context::class)->getAspect('language');
+        try {
+            $this->languageAspect = GeneralUtility::makeInstance(Context::class)->getAspect('language');
+        } catch (AspectNotFoundException $e) {
+        }
 
         // now we have to find the children of this grid container regardless of their column
         // so we can get them within a single DB query instead of doing a query per column
@@ -153,11 +160,11 @@ class Gridelements extends ContentObjectRenderer
 
     /**
      * Converts $this->cObj->data['pi_flexform'] from XML string to flexForm array.
-     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @param string $field Field name to convert
-     * @param array $child
+     * @param array|null $child
+     *@deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function initPluginFlexForm($field = 'pi_flexform', &$child = null)
+    public function initPluginFlexForm(string $field = 'pi_flexform', array &$child = null)
     {
         // Converting flexform data into array:
         if (!empty($child)) {
@@ -185,10 +192,10 @@ class Gridelements extends ContentObjectRenderer
 
     /**
      * fetches values from the grid flexform and assigns them to virtual fields in the data array
-     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @param array $child
+     *@deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function getPluginFlexFormData(&$child = [])
+    public function getPluginFlexFormData(array &$child = [])
     {
         if (!empty($child)) {
             $cObjData = $child;
@@ -201,9 +208,9 @@ class Gridelements extends ContentObjectRenderer
         if (is_array($pluginFlexForm) && is_array($pluginFlexForm['data'])) {
             foreach ($pluginFlexForm['data'] as $sheet => $data) {
                 if (is_array($data)) {
-                    foreach ((array)$data as $language => $value) {
+                    foreach ($data as $language => $value) {
                         if (is_array($value)) {
-                            foreach ((array)$value as $key => $val) {
+                            foreach ($value as $key => $val) {
                                 $cObjData['flexform_' . $key] = $this->getFlexFormValue(
                                     $pluginFlexForm,
                                     $key,
@@ -235,15 +242,15 @@ class Gridelements extends ContentObjectRenderer
      * @param string $sheet Sheet pointer, eg. "sDEF"
      * @param string $language Language pointer, eg. "lDEF"
      * @param string $value Value pointer, eg. "vDEF"
-     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return string The content.
+     *@deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
     public function getFlexFormValue(
-        $T3FlexForm_array,
-        $fieldName,
-        $sheet = 'sDEF',
-        $language = 'lDEF',
-        $value = 'vDEF'
+        array $T3FlexForm_array,
+        string $fieldName,
+        string $sheet = 'sDEF',
+        string $language = 'lDEF',
+        string $value = 'vDEF'
     ) {
         $sheetArray = is_array($T3FlexForm_array) ? $T3FlexForm_array['data'][$sheet][$language] : '';
         if (is_array($sheetArray)) {
@@ -258,11 +265,11 @@ class Gridelements extends ContentObjectRenderer
      * @param array $sheetArray Multidimensional array, typically FlexForm contents
      * @param array $fieldNameArr Array where each value points to a key in the FlexForms content - the input array will have the value returned pointed to by these keys. All integer keys will not take their integer counterparts, but rather traverse the current position in the array an return element number X (whether this is right behavior is not settled yet...)
      * @param string $value Value for outermost key, typ. "vDEF" depending on language.
-     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return mixed The value, typ. string.
+     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @see pi_getFlexFormValue()
      */
-    public function getFlexFormValueFromSheetArray($sheetArray, $fieldNameArr, $value)
+    public function getFlexFormValueFromSheetArray(array $sheetArray, array $fieldNameArr, string $value)
     {
         $tempArr = $sheetArray;
         foreach ($fieldNameArr as $k => $v) {
@@ -298,10 +305,10 @@ class Gridelements extends ContentObjectRenderer
     /**
      * @param array $dataArr
      * @param string $valueKey
-     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return array
+     *@deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function getFlexformSectionsRecursively($dataArr, $valueKey = 'vDEF')
+    public function getFlexformSectionsRecursively(array $dataArr, string $valueKey = 'vDEF'): array
     {
         $out = [];
         foreach ($dataArr as $k => $el) {
@@ -323,9 +330,10 @@ class Gridelements extends ContentObjectRenderer
      * @param int $element The uid of the grid container
      * @param int $pid
      * @param string $csvColumns A list of available column IDs
+     * @throws \Doctrine\DBAL\DBALException
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function getChildren($element = 0, $pid = 0, $csvColumns = '')
+    public function getChildren(int $element = 0, int $pid = 0, string $csvColumns = '')
     {
         if (!$element || $csvColumns === '') {
             return;
@@ -335,12 +343,12 @@ class Gridelements extends ContentObjectRenderer
         $where = $queryBuilder->expr()->andX(
             $queryBuilder->expr()->eq(
                 'tx_gridelements_container',
-                $queryBuilder->createNamedParameter((int)$element, \PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter($element, PDO::PARAM_INT)
             ),
-            $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, \PDO::PARAM_INT)),
+            $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)),
             $queryBuilder->expr()->eq(
                 'pid',
-                $queryBuilder->createNamedParameter((int)$pid, \PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
             ),
             $queryBuilder->expr()->in(
                 'tx_gridelements_columns',
@@ -359,12 +367,12 @@ class Gridelements extends ContentObjectRenderer
                     $translationOverlay = $queryBuilder->expr()->andX(
                         $queryBuilder->expr()->eq(
                             'tx_gridelements_container',
-                            $queryBuilder->createNamedParameter((int)$element, \PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($element, PDO::PARAM_INT)
                         ),
-                        $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, \PDO::PARAM_INT)),
+                        $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter((int)$pid, \PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
                         ),
                         $queryBuilder->expr()->in(
                             'tx_gridelements_columns',
@@ -379,35 +387,33 @@ class Gridelements extends ContentObjectRenderer
                         ),
                         $queryBuilder->expr()->eq(
                             'l18n_parent',
-                            $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
                         )
                     );
                 }
             } else {
-                if ($element) {
-                    $translationNoOverlay = $queryBuilder->expr()->andX(
-                        $queryBuilder->expr()->eq(
-                            'tx_gridelements_container',
-                            $queryBuilder->createNamedParameter((int)$element, \PDO::PARAM_INT)
-                        ),
-                        $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, \PDO::PARAM_INT)),
-                        $queryBuilder->expr()->eq(
-                            'pid',
-                            $queryBuilder->createNamedParameter((int)$pid, \PDO::PARAM_INT)
-                        ),
-                        $queryBuilder->expr()->in(
-                            'tx_gridelements_columns',
-                            $queryBuilder->createNamedParameter($csvColumns, Connection::PARAM_INT_ARRAY)
-                        ),
-                        $queryBuilder->expr()->in(
-                            'sys_language_uid',
-                            $queryBuilder->createNamedParameter(
-                                [-1, $this->languageAspect->getContentId()],
-                                Connection::PARAM_INT_ARRAY
-                            )
+                $translationNoOverlay = $queryBuilder->expr()->andX(
+                    $queryBuilder->expr()->eq(
+                        'tx_gridelements_container',
+                        $queryBuilder->createNamedParameter($element, PDO::PARAM_INT)
+                    ),
+                    $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)),
+                    $queryBuilder->expr()->eq(
+                        'pid',
+                        $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                    ),
+                    $queryBuilder->expr()->in(
+                        'tx_gridelements_columns',
+                        $queryBuilder->createNamedParameter($csvColumns, Connection::PARAM_INT_ARRAY)
+                    ),
+                    $queryBuilder->expr()->in(
+                        'sys_language_uid',
+                        $queryBuilder->createNamedParameter(
+                            [-1, $this->languageAspect->getContentId()],
+                            Connection::PARAM_INT_ARRAY
                         )
-                    );
-                }
+                    )
+                );
             }
         }
 
@@ -471,7 +477,7 @@ class Gridelements extends ContentObjectRenderer
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return QueryBuilder queryBuilder
      */
-    public function getQueryBuilder()
+    public function getQueryBuilder(): QueryBuilder
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -484,7 +490,7 @@ class Gridelements extends ContentObjectRenderer
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return TypoScriptFrontendController
      */
-    public function getTSFE()
+    public function getTSFE(): TypoScriptFrontendController
     {
         return $GLOBALS['TSFE'];
     }
@@ -497,7 +503,7 @@ class Gridelements extends ContentObjectRenderer
      * @param array $sortColumns An Array of column positions within the grid container in the order they got in the grid setup
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function renderChildrenIntoParentColumns($typoScriptSetup = [], $sortColumns = [])
+    public function renderChildrenIntoParentColumns(array $typoScriptSetup = [], array $sortColumns = [])
     {
 
         // first we have to make a backup copy of the original data array
@@ -558,7 +564,7 @@ class Gridelements extends ContentObjectRenderer
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return array
      */
-    public function copyCurrentParentGrid()
+    public function copyCurrentParentGrid(): array
     {
         return [
             'record' => $this->cObj->currentRecord,
@@ -570,10 +576,10 @@ class Gridelements extends ContentObjectRenderer
     /**
      * @param array $sortColumns
      *
-     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return array
+     *@deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function getUsedColumns($sortColumns = [])
+    public function getUsedColumns(array $sortColumns = []): array
     {
         $columns = [];
         // we need the array values as keys
@@ -588,10 +594,10 @@ class Gridelements extends ContentObjectRenderer
     /**
      * @param array $data
      *
-     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return array
+     *@deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function getParentGridData($data = [])
+    public function getParentGridData(array $data = []): array
     {
         // filter out existing superfluous keys to reduce memory load
         // String comparisons are way too expensive, so we go for unset within some loops
@@ -626,10 +632,10 @@ class Gridelements extends ContentObjectRenderer
     /**
      * @param array $data
      *
-     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return array
+     *@deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function setParentGridData($data = [])
+    public function setParentGridData(array $data = []): array
     {
         $parentGridData = [];
         foreach ($data as $key => $value) {
@@ -649,11 +655,11 @@ class Gridelements extends ContentObjectRenderer
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
     public function renderChildIntoParentColumn(
-        $columns,
-        &$child,
-        &$parentGridData,
-        &$parentRecordNumbers,
-        $typoScriptSetup = []
+        array $columns,
+        array &$child,
+        array &$parentGridData,
+        array &$parentRecordNumbers,
+        array $typoScriptSetup = []
     ) {
         $column_number = (int)$child['tx_gridelements_columns'];
         $columnKey = $column_number . '.';
@@ -666,7 +672,11 @@ class Gridelements extends ContentObjectRenderer
         $this->cObj->lastChanged($child['tstamp']);
         $this->cObj->start(array_merge($child, $parentGridData), 'tt_content');
 
-        $parentRecordNumbers[$columnKey]++;
+        if (isset($parentRecordNumbers[$columnKey])) {
+            $parentRecordNumbers[$columnKey]++;
+        } else {
+            $parentRecordNumbers[$columnKey] = 1;
+        }
         $this->cObj->parentRecordNumber = $parentRecordNumbers[$columnKey];
 
         // we render each child into the children key to provide them prerendered for usage with your own templating
@@ -685,10 +695,10 @@ class Gridelements extends ContentObjectRenderer
      *
      * @param array $setup The adjusted setup of the grid container
      *
-     * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return string $content The raw HTML output of the grid container before stdWrap functions will be applied to it
+     *@deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function renderColumnsIntoParentGrid($setup = [])
+    public function renderColumnsIntoParentGrid(array $setup = []): string
     {
         if (empty($this->cObj->data['tx_gridelements_view_columns'])) {
             return '';
@@ -697,7 +707,7 @@ class Gridelements extends ContentObjectRenderer
         foreach ($this->cObj->data['tx_gridelements_view_columns'] as $column => $columnContent) {
             // if there are any columns available, we have to determine the corresponding TS setup
             // and if there is none we are going to use the default setup
-            $tempSetup = isset($setup['columns.'][$column . '.']) ? $setup['columns.'][$column . '.'] : $setup['columns.']['default.'];
+            $tempSetup = $setup['columns.'][$column . '.'] ?? $setup['columns.']['default.'];
             // now we just have to unset the renderObj
             // before applying the rest of the keys via the usual stdWrap operations
             unset($tempSetup['renderObj']);
@@ -716,7 +726,7 @@ class Gridelements extends ContentObjectRenderer
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      * @return PageRenderer
      */
-    public function getPageRenderer()
+    public function getPageRenderer(): PageRenderer
     {
         if ($this->pageRenderer === null) {
             $this->pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);

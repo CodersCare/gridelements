@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use GridElementsTeam\Gridelements\Hooks\DatabaseRecordList;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;

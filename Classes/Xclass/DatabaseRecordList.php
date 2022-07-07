@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Xclass;
 
 /*
@@ -16,6 +18,8 @@ namespace GridElementsTeam\Gridelements\Xclass;
  */
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
+use function trim;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Imaging\Icon;
@@ -27,6 +31,7 @@ use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Recordlist\Event\ModifyRecordListHeaderColumnsEvent;
 use TYPO3\CMS\Recordlist\Event\ModifyRecordListRecordActionsEvent;
 use TYPO3\CMS\Recordlist\RecordList\RecordListHookInterface;
+use UnexpectedValueException;
 
 /**
  * Class for rendering of Web>List module
@@ -37,17 +42,12 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     /**
      * @var bool
      */
-    protected $showMoveUp;
+    protected bool $showMoveUp;
 
     /**
      * @var bool
      */
-    protected $showMoveDown;
-
-    /**
-     * @var bool
-     */
-    protected $localizationView;
+    protected bool $showMoveDown;
 
     /**
      * select fields for the query which fetches the translations of the current
@@ -55,24 +55,24 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      *
      * @var string
      */
-    public $selectFields;
+    public string $selectFields;
 
     /**
      * @var int[]
      */
-    protected $expandedGridelements = [];
+    protected array $expandedGridelements = [];
 
     /**
      * Count of record columns in view
      *
      * @var int
      */
-    public $totalColumnCount;
+    public int $totalColumnCount;
 
     /**
      * @var int
      */
-    protected $maxDepth = 10;
+    protected int $maxDepth = 10;
 
     /**
      * If set this is <td> CSS-classname for odd columns in addElement. Used with db_layout / pages section
@@ -84,7 +84,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     /**
      * @var bool
      */
-    protected $no_noWrap;
+    protected bool $no_noWrap = false;
 
     /**
      * Keys are fieldnames and values are td-parameters to add in addElement(), please use $addElement_tdCSSClass for CSS-classes;
@@ -98,7 +98,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      *
      * @var LayoutSetup
      */
-    protected $gridelementsBackendLayouts;
+    protected LayoutSetup $gridelementsBackendLayouts;
 
     /**
      * Creates the listing of records from a single table
@@ -106,9 +106,10 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * @param string $table Table name
      * @param int $id Page id
      * @return string HTML table with the listing for the record.
-     * @throws \UnexpectedValueException
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
-    public function getTable($table, $id)
+    public function getTable($table, $id): string
     {
         $backendLayout = $this->getBackendLayoutView()->getSelectedBackendLayout($id);
         $backendLayoutColumns = [];
@@ -129,18 +130,10 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         // Use default value and overwrite with page ts config and tca config depending on the current view
         // Force limit in range 5, 10000
         // default 100
-        $itemsLimitSingleTable = MathUtility::forceIntegerInRange((int)(
-            $GLOBALS['TCA'][$table]['interface']['maxSingleDBListItems'] ??
-            $this->modTSconfig['itemsLimitSingleTable'] ??
-            100
-        ), 5, 10000);
+        $itemsLimitSingleTable = MathUtility::forceIntegerInRange((int)($GLOBALS['TCA'][$table]['interface']['maxSingleDBListItems'] ?? $this->modTSconfig['itemsLimitSingleTable'] ?? 100), 5, 10000);
 
         // default 20
-        $itemsLimitPerTable = MathUtility::forceIntegerInRange((int)(
-            $GLOBALS['TCA'][$table]['interface']['maxDBListItems'] ??
-            $this->modTSconfig['itemsLimitPerTable'] ??
-            20
-        ), 5, 10000);
+        $itemsLimitPerTable = MathUtility::forceIntegerInRange((int)($GLOBALS['TCA'][$table]['interface']['maxDBListItems'] ?? $this->modTSconfig['itemsLimitPerTable'] ?? 20), 5, 10000);
 
         // Set limit depending on the view (single table vs. default)
         $itemsPerPage = $this->table ? $itemsLimitSingleTable : $itemsLimitPerTable;
@@ -357,7 +350,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                                         <br />
                                         <strong>'
                             . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.columnName')
-                            . ' ' . ($backendLayoutColumns[$row['colPos']] ? $backendLayoutColumns[$row['colPos']] : (int)$row['colPos']) . '</strong>
+                            . ' ' . ($backendLayoutColumns[$row['colPos']] ?: (int)$row['colPos']) . '</strong>
                                     </td>
                                 </tr>';
                     } else {
@@ -459,11 +452,11 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * @param string $table Table name
      * @param int[] $currentIdList Array of the currently displayed uids of the table
      * @return string Header table row
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      * @internal
      * @see getTable()
      */
-    public function renderListHeader($table, $currentIdList)
+    public function renderListHeader($table, $currentIdList): string
     {
         $tsConfig = BackendUtility::getPagesTSconfig($this->id)['TCEFORM.'][$table . '.'] ?? null;
         $tsConfigOfTable = is_array($tsConfig) ? $tsConfig : null;
@@ -618,14 +611,12 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['actions'] ?? [] as $className) {
             $hookObject = GeneralUtility::makeInstance($className);
             if (!$hookObject instanceof RecordListHookInterface) {
-                throw new \UnexpectedValueException($className . ' must implement interface ' . RecordListHookInterface::class, 1195567855);
+                throw new UnexpectedValueException($className . ' must implement interface ' . RecordListHookInterface::class, 1195567855);
             }
             $theData = $hookObject->renderListHeader($table, $currentIdList, $theData, $this);
         }
 
-        $event = $this->eventDispatcher->dispatch(
-            new ModifyRecordListHeaderColumnsEvent($theData, $table, $currentIdList, $this)
-        );
+        $event = $this->eventDispatcher->dispatch(new ModifyRecordListHeaderColumnsEvent($theData, $table, $currentIdList, $this));
 
         // Create and return header table row:
         return $headerOutput . '<thead>' . $this->addElement($event->getColumns(), GeneralUtility::implodeAttributes($event->getHeaderAttributes(), true), 'th', 0, $table) . '</thead>';
@@ -635,7 +626,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * Rendering a single row for the list
      *
      * @param string $table Table name
-     * @param mixed[] $row Current record
+     * @param array $row Current record
      * @param int $indent Indent from left.
      * @param array $translations Array of already existing translations for the current record
      * @param bool $translationEnabled Whether the record can be translated
@@ -646,14 +637,14 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * @internal
      * @see getTable()
      */
-    public function renderListRow($table, array $row, int $indent, array $translations, bool $translationEnabled, int $level = 0, int $triggerContainer = 0, string $expanded = '')
+    public function renderListRow($table, array $row, int $indent, array $translations, bool $translationEnabled, int $level = 0, int $triggerContainer = 0, string $expanded = ''): string
     {
         $titleCol = $GLOBALS['TCA'][$table]['ctrl']['label'] ?? '';
         $languageService = $this->getLanguageService();
         $rowOutput = '';
         $id_orig = $this->id;
         // If in search mode, make sure the preview will show the correct page
-        if ((string)$this->searchString !== '') {
+        if ($this->searchString !== '') {
             $this->id = $row['pid'];
         }
 
@@ -683,7 +674,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         $deletePlaceholderClass = '';
         foreach ($this->fieldArray as $fCol) {
             if ($fCol === $titleCol) {
-                $recTitle = BackendUtility::getRecordTitle($table, $row, false, true);
+                $recTitle = BackendUtility::getRecordTitle($table, $row);
                 $warning = '';
                 // If the record is edit-locked	by another user, we will show a little warning sign:
                 $lockInfo = BackendUtility::isRecordLocked($table, $row['uid']);
@@ -746,7 +737,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             }
         }
         // Reset the ID if it was overwritten
-        if ((string)$this->searchString !== '') {
+        if ($this->searchString !== '') {
             $this->id = $id_orig;
         }
         // Add classes to table cells
@@ -789,8 +780,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         }
         $rowOutput .= $this->addElement($theData, GeneralUtility::implodeAttributes($tagAttributes, true), 'td', $level, $table);
 
-        if ($theData['_EXPANDABLE_'] && $level < 8 && ($row['l18n_parent'] == 0 || !$this->localizationView) && !empty($theData['_CHILDREN_'])) {
-            $expanded = $this->expandedGridelements[$row['uid']] && (($this->expandedGridelements[$row['tx_gridelements_container']] && $expanded) || empty($row['tx_gridelements_container'])) ? ' expanded' : '';
+        if (!empty($theData['_EXPANDABLE_']) && $level < 8 && $row['l18n_parent'] == 0 && !empty($theData['_CHILDREN_'])) {
+            $expanded = $this->expandedGridelements[$row['uid']] && ((!empty($this->expandedGridelements[$row['tx_gridelements_container']]) && $expanded) || empty($row['tx_gridelements_container'])) ? ' expanded' : '';
             $previousGridColumn = '';
             $originalMoveUp = $this->showMoveUp;
             $originalMoveDown = $this->showMoveDown;
@@ -815,7 +806,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     $previousGridColumn = $child['tx_gridelements_columns'];
                     $this->showMoveUp = false;
                     $rowOutput .= '<tr class="t3-gridelements-child' . $expanded . '" data-trigger-container="'
-                        . ($this->localizationView && $row['l18n_parent'] ? $row['l18n_parent'] : $row['uid'])
+                        . ($row['l18n_parent'] ?: $row['uid'])
                         . '" data-grid-container="' . $row['uid'] . '">
                                 <td colspan="' . ($level + 2) . '"></td>
                                 <td colspan="' . (count($this->fieldArray) - $level - 2 + $this->maxDepth) . '" style="padding:5px;">
@@ -834,16 +825,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     $this->currentContainerIdList[] = $row['uid'];
                 }
                 $child['_CSSCLASS'] = 't3-gridelements-child' . $expanded;
-                $rowOutput .= $this->renderListRow(
-                    $table,
-                    $child,
-                    0,
-                    [],
-                    false,
-                    $level + 1,
-                    $row['uid'],
-                    $expanded
-                );
+                $rowOutput .= $this->renderListRow($table, $child, 0, [], false, $level + 1, $row['uid'], $expanded);
             }
             $this->showMoveUp = $originalMoveUp;
             $this->showMoveDown = $originalMoveDown;
@@ -864,7 +846,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * @param string $table
      * @return string HTML content for the table row
      */
-    public function addElement($data, $rowParams = '', $colType = 'td', $level = 0, $table = '')
+    public function addElement($data, $rowParams = '', $colType = 'td', $level = 0, $table = ''): string
     {
         if ($colType === 'pagination') {
             $colType = 'td';
@@ -879,13 +861,13 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         $out = '
 		<!-- Element, begin: -->
 		<tr ' . $rowParams . ' data-uid="' . $dataUid . '" data-l10nparent="' . $l10nParent . '"' .
-            ((int)$data['tx_gridelements_container'] > 0 ? ' data-grid-container="' . (int)$data['tx_gridelements_container'] . '"' : '') .
-            ((int)$data['_triggerContainer'] > 0 ? ' data-trigger-container="' . (int)$data['_triggerContainer'] . '"' : '') . '>';
+            (!empty($data['tx_gridelements_container']) ? ' data-grid-container="' . (int)$data['tx_gridelements_container'] . '"' : '') .
+            (!empty($data['_triggerContainer']) ? ' data-trigger-container="' . (int)$data['_triggerContainer'] . '"' : '') . '>';
 
         $contentCollapseIcon = '';
 
         if (count($data) > 1) {
-            if ($data['_EXPANDABLE_'] && (!$this->localizationView || !$l10nParent)) {
+            if (!empty($data['_EXPANDABLE_']) && $l10nParent) {
                 $sortField = GeneralUtility::_GP('sortField') ? GeneralUtility::_GP('sortField') . ':' . (int)GeneralUtility::_GP('sortRev') : '';
                 /**
                  * @hook contentCollapseIcon
@@ -933,10 +915,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     }
                     $cssClass = $this->addElement_tdCssClass[$lastKey] ?? '';
                     if ($this->oddColumnsCssClass && $ccount % 2 == 0) {
-                        $cssClass = implode(
-                            ' ',
-                            [$this->addElement_tdCssClass[$lastKey], $this->oddColumnsCssClass]
-                        );
+                        $cssClass = implode(' ', [$this->addElement_tdCssClass[$lastKey], $this->oddColumnsCssClass]);
                     }
                     $out .= '
 						<' . $colType . ' class="' . $cssClass . ' nowrap' . '"' . $colsp . '>' . $data[$lastKey] . '</' . $colType . '>'
@@ -977,7 +956,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             }
             $out .= '
 				<' . $colType . $noWrap . ' class="' . $cssClass . '"' . $colsp
-                . $this->addElement_tdParams[$lastKey] . '>' . $data[$lastKey] . '</' . $colType . '>';
+                . ($this->addElement_tdParams[$lastKey] ?? '') . '>' . ($data[$lastKey] ?? '') . '</' . $colType . '>';
         }
         // End row
         $out .= '
@@ -989,11 +968,10 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
      * Creates the control panel for a single record in the listing.
      *
      * @param string $table The table
-     * @param mixed[] $row The record for which to make the control panel.
+     * @param array $row The record for which to make the control panel.
      * @return string HTML table with the control panel (unless disabled)
-     * @throws \UnexpectedValueException
      */
-    public function makeControl($table, $row)
+    public function makeControl($table, $row): string
     {
         $backendUser = $this->getBackendUserAuthentication();
         $userTsConfig = $backendUser->getTSConfig();
@@ -1066,8 +1044,11 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 $iconIdentifier = 'actions-page-open';
             }
             $params['returnUrl'] = $this->listURL();
-            $editLink = $this->uriBuilder->buildUriFromRoute('record_edit', $params);
-            $editAction = '<a class="btn btn-default" href="' . htmlspecialchars($editLink) . '"'
+            try {
+                $editLink = $this->uriBuilder->buildUriFromRoute('record_edit', $params);
+            } catch (RouteNotFoundException $e) {
+            }
+            $editAction = '<a class="btn btn-default" href="' . htmlspecialchars((string)$editLink) . '"'
                 . ' title="' . htmlspecialchars($this->getLanguageService()->getLL('edit')) . '">' . $this->iconFactory->getIcon($iconIdentifier, Icon::SIZE_SMALL)->render() . '</a>';
         } else {
             $editAction = $this->spaceIcon;
@@ -1095,11 +1076,14 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             } else {
                 $linkTitleLL = htmlspecialchars($this->getLanguageService()->getLL('move_' . ($table === 'tt_content' ? 'record' : 'page')));
                 $icon = ($table === 'pages' ? $this->iconFactory->getIcon('actions-page-move', Icon::SIZE_SMALL) : $this->iconFactory->getIcon('actions-document-move', Icon::SIZE_SMALL));
-                $url = (string)$this->uriBuilder->buildUriFromRoute('move_element', [
-                    'table' => $table,
-                    'uid' => $row['uid'],
-                    'returnUrl' => $this->listURL(),
-                ]);
+                try {
+                    $url = (string)$this->uriBuilder->buildUriFromRoute('move_element', [
+                        'table' => $table,
+                        'uid' => $row['uid'],
+                        'returnUrl' => $this->listURL(),
+                    ]);
+                } catch (RouteNotFoundException $e) {
+                }
                 $moveAction = '<a class="btn btn-default" href="' . htmlspecialchars($url) . '" aria-label="' . $linkTitleLL . '">' . $icon->render() . '</a>';
             }
             $this->addActionToCellGroup($cells, $moveAction, 'move');
@@ -1108,12 +1092,15 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         // If the table is NOT a read-only table, then show these links:
         if ($this->isEditable($table)) {
             // "Revert" link (history/undo)
-            if (\trim($userTsConfig['options.']['showHistory.'][$table] ?? $userTsConfig['options.']['showHistory'] ?? '1')) {
+            if (trim($userTsConfig['options.']['showHistory.'][$table] ?? $userTsConfig['options.']['showHistory'] ?? '1')) {
                 if (!$isDeletePlaceHolder) {
-                    $moduleUrl = $this->uriBuilder->buildUriFromRoute('record_history', [
-                            'element' => $table . ':' . $row['uid'],
-                            'returnUrl' => $this->listURL(),
-                        ]) . '#latest';
+                    try {
+                        $moduleUrl = $this->uriBuilder->buildUriFromRoute('record_history', [
+                                'element' => $table . ':' . $row['uid'],
+                                'returnUrl' => $this->listURL(),
+                            ]) . '#latest';
+                    } catch (RouteNotFoundException $e) {
+                    }
                     $historyAction = '<a class="btn btn-default" href="' . htmlspecialchars($moduleUrl) . '" title="'
                         . htmlspecialchars($this->getLanguageService()->getLL('history')) . '">'
                         . $this->iconFactory->getIcon('actions-document-history-open', Icon::SIZE_SMALL)->render() . '</a>';
@@ -1133,7 +1120,10 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                         'action' => 'edit',
                         'returnUrl' => $this->listURL(),
                     ];
-                    $href = (string)$this->uriBuilder->buildUriFromRoute('system_BeuserTxPermission', $params);
+                    try {
+                        $href = (string)$this->uriBuilder->buildUriFromRoute('system_BeuserTxPermission', $params);
+                    } catch (RouteNotFoundException $e) {
+                    }
                     $permsAction = '<a class="btn btn-default" href="' . htmlspecialchars($href) . '" title="'
                         . htmlspecialchars($this->getLanguageService()->getLL('permissions')) . '">'
                         . $this->iconFactory->getIcon('actions-lock', Icon::SIZE_SMALL)->render() . '</a>';
@@ -1162,8 +1152,11 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                         if ($GLOBALS['TCA'][$table]['ctrl']['sortby'] ?? false) {
                             $titleLabel .= ($table === 'pages' ? 'Page' : 'Record');
                         }
-                        $newLink = $this->uriBuilder->buildUriFromRoute('record_edit', $params);
-                        $newAction = '<a class="btn btn-default" href="' . htmlspecialchars($newLink) . '" title="' . htmlspecialchars($this->getLanguageService()->getLL($titleLabel)) . '">'
+                        try {
+                            $newLink = $this->uriBuilder->buildUriFromRoute('record_edit', $params);
+                        } catch (RouteNotFoundException $e) {
+                        }
+                        $newAction = '<a class="btn btn-default" href="' . htmlspecialchars((string)$newLink) . '" title="' . htmlspecialchars($this->getLanguageService()->getLL($titleLabel)) . '">'
                             . $icon->render() . '</a>';
                         $this->addActionToCellGroup($cells, $newAction, 'new');
                     }
@@ -1213,7 +1206,10 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     $params = [];
                     $params['redirect'] = $this->listURL();
                     $params['cmd'][$table][$row['uid']]['move'] = $this->currentTable['prev'][$row['uid']];
-                    $url = (string)$this->uriBuilder->buildUriFromRoute('tce_db', $params);
+                    try {
+                        $url = (string)$this->uriBuilder->buildUriFromRoute('tce_db', $params);
+                    } catch (RouteNotFoundException $e) {
+                    }
                     $moveUpAction = '<a class="btn btn-default" href="' . htmlspecialchars($url) . '" title="' . htmlspecialchars($this->getLanguageService()->getLL('moveUp')) . '">'
                         . $this->iconFactory->getIcon('actions-move-up', Icon::SIZE_SMALL)->render() . '</a>';
                 } else {
@@ -1226,7 +1222,10 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     $params = [];
                     $params['redirect'] = $this->listURL();
                     $params['cmd'][$table][$row['uid']]['move'] = $this->currentTable['next'][$row['uid']];
-                    $url = (string)$this->uriBuilder->buildUriFromRoute('tce_db', $params);
+                    try {
+                        $url = (string)$this->uriBuilder->buildUriFromRoute('tce_db', $params);
+                    } catch (RouteNotFoundException $e) {
+                    }
                     $moveDownAction = '<a class="btn btn-default" href="' . htmlspecialchars($url) . '" title="' . htmlspecialchars($this->getLanguageService()->getLL('moveDown')) . '">'
                         . $this->iconFactory->getIcon('actions-move-down', Icon::SIZE_SMALL)->render() . '</a>';
                 } else {
@@ -1236,7 +1235,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             }
 
             // "Delete" link:
-            $disableDelete = (bool)\trim($userTsConfig['options.']['disableDelete.'][$table] ?? $userTsConfig['options.']['disableDelete'] ?? false);
+            $disableDelete = (bool)trim($userTsConfig['options.']['disableDelete.'][$table] ?? $userTsConfig['options.']['disableDelete'] ?? '');
             if ($permsEdit
                 && !$disableDelete
                 && (($table === 'pages' && $localCalcPerms->deletePagePermissionIsGranted()) || ($table !== 'pages' && $this->calcPerms->editContentPermissionIsGranted()))
@@ -1244,16 +1243,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 && !$isDeletePlaceHolder
             ) {
                 $actionName = 'delete';
-                $refCountMsg = BackendUtility::referenceCount(
-                    $table,
-                    $row['uid'],
-                    ' ' . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.referencesToRecord'),
-                    (string)$this->getReferenceCount($table, $row['uid'])
-                ) . BackendUtility::translationCount(
-                    $table,
-                    $row['uid'],
-                    ' ' . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.translationsOfRecord')
-                );
+                $refCountMsg = BackendUtility::referenceCount($table, $row['uid'], ' ' . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.referencesToRecord'), (string)$this->getReferenceCount($table, $row['uid']))
+                    . BackendUtility::translationCount($table, $row['uid'], ' ' . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.translationsOfRecord'));
                 $title = BackendUtility::getRecordTitle($table, $row);
                 $warningText = $this->getLanguageService()->getLL($actionName . 'Warning') . ' "' . $title . '" [' . $table . ':' . $row['uid'] . ']' . $refCountMsg;
                 $params = 'cmd[' . $table . '][' . $row['uid'] . '][delete]=1';
@@ -1265,7 +1256,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     . ' aria-label="' . $linkTitle . '"'
                     . ' aria-haspopup="dialog"'
                     . ' data-button-ok-text="' . htmlspecialchars($linkTitle) . '"'
-                    . ' data-l10parent="' . ($l10nParentField ? htmlspecialchars($row[$l10nParentField]) : '') . '"'
+                    . ' data-l10parent="' . ($l10nParentField ? htmlspecialchars((string)$row[$l10nParentField]) : '') . '"'
                     . ' data-params="' . htmlspecialchars($params) . '"'
                     . ' data-message="' . htmlspecialchars($warningText) . '">'
                     . $icon
@@ -1283,7 +1274,10 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                         $params = [];
                         $params['redirect'] = $this->listURL();
                         $params['cmd'][$table][$row['uid']]['move'] = -$this->id;
-                        $url = (string)$this->uriBuilder->buildUriFromRoute('tce_db', $params);
+                        try {
+                            $url = (string)$this->uriBuilder->buildUriFromRoute('tce_db', $params);
+                        } catch (RouteNotFoundException $e) {
+                        }
                         $moveLeftAction = '<a class="btn btn-default"'
                             . ' href="' . htmlspecialchars($url) . '"'
                             . ' title="' . htmlspecialchars($this->getLanguageService()->getLL('prevLevel')) . '"'
@@ -1297,15 +1291,15 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 }
                 // Down (Paste as subpage to the page right above)
                 if (!$isL10nOverlay && !$isDeletePlaceHolder && !empty($this->currentTable['prevUid'][$row['uid']])) {
-                    $localCalcPerms = $this->getPagePermissionsForRecord(
-                        'pages',
-                        BackendUtility::getRecord('pages', $this->currentTable['prevUid'][$row['uid']]) ?? []
-                    );
+                    $localCalcPerms = $this->getPagePermissionsForRecord('pages', BackendUtility::getRecord('pages', $this->currentTable['prevUid'][$row['uid']]) ?? []);
                     if ($localCalcPerms->createPagePermissionIsGranted()) {
                         $params = [];
                         $params['redirect'] = $this->listURL();
                         $params['cmd'][$table][$row['uid']]['move'] = $this->currentTable['prevUid'][$row['uid']];
-                        $url = (string)$this->uriBuilder->buildUriFromRoute('tce_db', $params);
+                        try {
+                            $url = (string)$this->uriBuilder->buildUriFromRoute('tce_db', $params);
+                        } catch (RouteNotFoundException $e) {
+                        }
                         $moveRightAction = '<a class="btn btn-default"'
                             . ' href="' . htmlspecialchars($url) . '"'
                             . ' title="' . htmlspecialchars($this->getLanguageService()->getLL('nextLevel')) . '"'
@@ -1335,10 +1329,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         }
 
         if (!empty($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['actions'])) {
-            trigger_error(
-                'The hook $TYPO3_CONF_VARS[SC_OPTIONS][typo3/class.db_list_extra.inc][actions] for calling method "makeControl" is deprecated and will stop working in TYPO3 v12.0. Use the ModifyRecordListRecordActionsEvent instead.',
-                E_USER_DEPRECATED
-            );
+            trigger_error('The hook $TYPO3_CONF_VARS[SC_OPTIONS][typo3/class.db_list_extra.inc][actions] for calling method "makeControl" is deprecated and will stop working in TYPO3 v12.0. Use the ModifyRecordListRecordActionsEvent instead.', E_USER_DEPRECATED);
         }
 
         /*
@@ -1361,7 +1352,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['actions'] as $className) {
                 $hookObject = GeneralUtility::makeInstance($className);
                 if (!$hookObject instanceof RecordListHookInterface) {
-                    throw new \UnexpectedValueException($className . ' must implement interface ' . RecordListHookInterface::class, 1195567840);
+                    throw new UnexpectedValueException($className . ' must implement interface ' . RecordListHookInterface::class, 1195567840);
                 }
                 $cells = $hookObject->makeControl($table, $row, $cells, $this);
             }
@@ -1448,7 +1439,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     /**
      * @return int[]
      */
-    public function getExpandedGridelements()
+    public function getExpandedGridelements(): array
     {
         return $this->expandedGridelements;
     }
@@ -1456,7 +1447,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
     /**
      * @return LayoutSetup
      */
-    public function getGridelementsBackendLayouts()
+    public function getGridelementsBackendLayouts(): LayoutSetup
     {
         return $this->gridelementsBackendLayouts;
     }

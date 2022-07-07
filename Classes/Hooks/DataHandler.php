@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Hooks;
 
 /***************************************************************
@@ -48,13 +50,13 @@ class DataHandler implements SingletonInterface
      *
      * @param array $fieldArray : The array of fields and values that have been saved to the datamap
      * @param string $table : The name of the table the data should be saved to
-     * @param int $id : The uid of the page we are currently working on
+     * @param string $id : The uid of the page we are currently working on
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj : The parent object that triggered this hook
      */
     public function processDatamap_preProcessFieldArray(
-        &$fieldArray,
-        $table,
-        $id,
+        array &$fieldArray,
+        string $table,
+        string $id,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
     ) {
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
@@ -67,15 +69,15 @@ class DataHandler implements SingletonInterface
     /**
      * @param string $status
      * @param string $table : The name of the table the data should be saved to
-     * @param int $id : The uid of the page we are currently working on
+     * @param string $id : The uid of the page we are currently working on
      * @param array $fieldArray : The array of fields and values that have been saved to the datamap
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj : The parent object that triggered this hook
      */
     public function processDatamap_afterDatabaseOperations(
-        &$status,
-        &$table,
-        &$id,
-        &$fieldArray,
+        string &$status,
+        string &$table,
+        string &$id,
+        array &$fieldArray,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
     ) {
         // create a copy of $id which is passed by reference
@@ -87,10 +89,10 @@ class DataHandler implements SingletonInterface
                 $recordUid = $parentObj->substNEWwithIDs[$recordUid];
             } else {
                 if ($table === 'tt_content' && $status === 'update') {
-                    $hook->adjustValuesAfterWorkspaceOperations($fieldArray, $recordUid, $parentObj);
+                    $hook->adjustValuesAfterWorkspaceOperations($fieldArray, (int)$recordUid, $parentObj);
                 }
             }
-            $hook->execute_afterDatabaseOperations($fieldArray, $table, $recordUid, $parentObj);
+            $hook->execute_afterDatabaseOperations($fieldArray, $table, (int)$recordUid, $parentObj);
         }
     }
 
@@ -106,11 +108,11 @@ class DataHandler implements SingletonInterface
      * @param array|bool $pasteUpdate Values to be updated after the record is pasted
      */
     public function processCmdmap(
-        $command,
-        $table,
-        $id,
-        $value,
-        &$commandIsProcessed,
+        string $command,
+        string $table,
+        int $id,
+        string $value,
+        bool &$commandIsProcessed,
         \TYPO3\CMS\Core\DataHandling\DataHandler &$parentObj,
         $pasteUpdate
     ) {

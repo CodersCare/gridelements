@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\PageLayoutView;
 
 use GridElementsTeam\Gridelements\Helper\Helper;
+use PDO;
 use TYPO3\CMS\Backend\Preview\PreviewRendererInterface;
 use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -17,6 +20,7 @@ use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use UnexpectedValueException;
 
 class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements PreviewRendererInterface
 {
@@ -28,7 +32,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
     /**
      * @var Helper
      */
-    protected $helper;
+    protected Helper $helper;
 
     /**
      * @var IconFactory
@@ -38,18 +42,22 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
     /**
      * @var QueryGenerator
      */
-    protected $tree;
+    protected QueryGenerator $tree;
 
     /**
      * @var bool
      */
-    protected $showHidden;
+    protected bool $showHidden = true;
 
     /**
      * @var string
      */
-    protected $backPath = '';
+    protected string $backPath = '';
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     */
     public function __construct()
     {
         $this->extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
@@ -81,7 +89,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
             foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawItem'] ?? [] as $className) {
                 $hookObject = GeneralUtility::makeInstance($className);
                 if (!$hookObject instanceof PageLayoutViewDrawItemHookInterface) {
-                    throw new \UnexpectedValueException(
+                    throw new UnexpectedValueException(
                         $className . ' must implement interface ' . PageLayoutViewDrawItemHookInterface::class,
                         1582574553
                     );
@@ -108,7 +116,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         }
 
         if (!empty($record['records'])) {
-            $shortCutRenderItems = $this->addShortCutRenderItems($item);
+            $shortCutRenderItems = $this->addShortcutRenderItems($item);
             $preview = '';
             foreach ($shortCutRenderItems as $shortcutRecord) {
                 $shortcutItem = GeneralUtility::makeInstance(GridColumnItem::class, $item->getContext(), $item->getColumn(), $shortcutRecord);
@@ -171,20 +179,21 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
      * @param int $recursive : The number of levels for the recursion
      * @param int $parentUid : uid of the referencing tt_content record
      * @param int $language : sys_language_uid of the referencing tt_content record
+     * @throws \Doctrine\DBAL\DBALException
      */
     protected function collectContentDataFromPages(
-        $shortcutItem,
-        &$collectedItems,
-        $recursive = 0,
-        $parentUid = 0,
-        $language = 0
+        string $shortcutItem,
+        array &$collectedItems,
+        int $recursive = 0,
+        int $parentUid = 0,
+        int $language = 0
     ) {
         $itemList = str_replace('pages_', '', $shortcutItem);
         if ($recursive) {
             if (!$this->tree instanceof QueryGenerator) {
                 $this->tree = GeneralUtility::makeInstance(QueryGenerator::class);
             }
-            $itemList = $this->tree->getTreeList($itemList, (int)$recursive, 0, 1);
+            $itemList = $this->tree->getTreeList($itemList, $recursive, 0, 1);
         }
         $itemList = GeneralUtility::intExplode(',', $itemList);
 
@@ -200,13 +209,13 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
             ->where(
                 $queryBuilder->expr()->neq(
                     'uid',
-                    $queryBuilder->createNamedParameter((int)$parentUid, \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($parentUid, PDO::PARAM_INT)
                 ),
                 $queryBuilder->expr()->in(
                     'pid',
                     $queryBuilder->createNamedParameter($itemList, Connection::PARAM_INT_ARRAY)
                 ),
-                $queryBuilder->expr()->gte('colPos', $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)),
+                $queryBuilder->expr()->gte('colPos', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)),
                 $queryBuilder->expr()->in(
                     'sys_language_uid',
                     $queryBuilder->createNamedParameter([0, -1], Connection::PARAM_INT_ARRAY)
@@ -241,11 +250,12 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
      * @param array $collectedItems : The collected item data row
      * @param int $parentUid : uid of the referencing tt_content record
      * @param int $language : sys_language_uid of the referencing tt_content record
+     * @throws \Doctrine\DBAL\DBALException
      */
-    protected function collectContentData($shortcutItem, &$collectedItems, $parentUid, $language)
+    protected function collectContentData(string $shortcutItem, array &$collectedItems, int $parentUid, int $language)
     {
         $shortcutItem = str_replace('tt_content_', '', $shortcutItem);
-        if ((int)$shortcutItem !== (int)$parentUid) {
+        if ((int)$shortcutItem !== $parentUid) {
             $queryBuilder = $this->getQueryBuilder();
             if ($this->showHidden) {
                 $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
@@ -256,7 +266,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
                 ->where(
                     $queryBuilder->expr()->eq(
                         'uid',
-                        $queryBuilder->createNamedParameter((int)$shortcutItem, \PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter((int)$shortcutItem, PDO::PARAM_INT)
                     )
                 )
                 ->setMaxResults(1)
@@ -286,7 +296,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
      *
      * @return QueryBuilder
      */
-    public function getQueryBuilder()
+    public function getQueryBuilder(): QueryBuilder
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)

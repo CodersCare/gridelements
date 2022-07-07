@@ -216,10 +216,10 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
                 targetPid = $('.t3js-page-ce[data-page]').first().data('page');
             } else {
                 // the negative value of the content element after where it should be moved
-                targetPid = 0 - parseInt(targetFound);
+                targetPid = 0 - (parseInt(targetFound) || 0);
             }
-            var container = parseInt($droppableElement.closest(DragDrop.default.gridContainerIdentifier).closest(DragDrop.default.contentIdentifier).data('uid'));
-            var language = parseInt($droppableElement.closest('[data-language-uid]').data('language-uid'));
+            var container = parseInt($droppableElement.closest(DragDrop.default.gridContainerIdentifier).closest(DragDrop.default.contentIdentifier).data('uid')) || 0;
+            var language = parseInt($droppableElement.closest('[data-language-uid]').data('language-uid')) || 0;
             var colPos = 0;
             if (container > 0 && gridColumn !== false && gridColumn !== '') {
                 colPos = -1;

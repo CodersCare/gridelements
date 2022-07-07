@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Backend;
 
 /***************************************************************
@@ -21,7 +23,9 @@ namespace GridElementsTeam\Gridelements\Backend;
  ***************************************************************/
 
 use GridElementsTeam\Gridelements\Helper\Helper;
+use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DefaultRestrictionContainer;
@@ -48,32 +52,32 @@ class LayoutSetup
     /**
      * @var DefaultRestrictionContainer
      */
-    protected $restrictions;
+    protected DefaultRestrictionContainer $restrictions;
 
     /**
      * @var array
      */
-    protected $layoutSetup = [];
+    protected array $layoutSetup = [];
 
     /**
      * @var LanguageService
      */
-    protected $languageService;
+    protected LanguageService $languageService;
 
     /**
      * @var array
      */
-    protected $typoScriptSetup;
+    protected array $typoScriptSetup;
 
     /**
      * @var string
      */
-    protected $flexformConfigurationPathAndFileName = 'EXT:gridelements/Configuration/FlexForms/default_flexform_configuration.xml';
+    protected string $flexformConfigurationPathAndFileName = 'EXT:gridelements/Configuration/FlexForms/default_flexform_configuration.xml';
 
     /**
      * @var int
      */
-    protected $realPid;
+    protected int $realPid;
 
     /**
      * Load page TSconfig
@@ -83,23 +87,23 @@ class LayoutSetup
      *
      * @return LayoutSetup
      */
-    public function init($pageId, array $typoScriptSetup = [])
+    public function init(int $pageId, array $typoScriptSetup = []): LayoutSetup
     {
-        $this->setLanguageService($GLOBALS['LANG']);
-        $pageId = (strpos($pageId, 'NEW') === 0) ? 0 : (int)$pageId;
-        if ((int)$pageId < 0) {
+        $this->setLanguageService($GLOBALS['LANG'] ?? null);
+        $pageId = (strpos((string)$pageId, 'NEW') === 0) ? 0 : $pageId;
+        if ($pageId < 0) {
             $pageId = Helper::getInstance()->getPidFromUid($pageId);
         }
         $this->realPid = $pageId;
         $this->loadLayoutSetup($pageId);
         foreach ($this->layoutSetup as $key => $setup) {
-            $columns = $this->getLayoutColumns($key);
-            if ($columns['allowed'] || $columns['disallowed'] || $columns['maxitems']) {
+            $columns = $this->getLayoutColumns((string)$key);
+            if (!empty($columns['allowed']) || !empty($columns['disallowed']) || !empty($columns['maxitems'])) {
                 $this->layoutSetup[$key]['columns'] = $columns;
                 unset($this->layoutSetup[$key]['columns']['allowed']);
-                $this->layoutSetup[$key]['allowed'] = $columns['allowed'] ?: [];
-                $this->layoutSetup[$key]['disallowed'] = $columns['disallowed'] ?: [];
-                $this->layoutSetup[$key]['maxitems'] = $columns['maxitems'] ?: [];
+                $this->layoutSetup[$key]['allowed'] = $columns['allowed'] ?? [];
+                $this->layoutSetup[$key]['disallowed'] = $columns['disallowed'] ?? [];
+                $this->layoutSetup[$key]['maxitems'] = $columns['maxitems'] ?? [];
             }
         }
         $this->setTypoScriptSetup($typoScriptSetup);
@@ -110,8 +114,9 @@ class LayoutSetup
      * Returns the page TSconfig merged with the grid layout records
      *
      * @param int $pageId The uid of the page we are currently working on
+     * @throws \Doctrine\DBAL\DBALException
      */
-    protected function loadLayoutSetup($pageId)
+    protected function loadLayoutSetup(int $pageId)
     {
         // Load page TSconfig.
         if (TYPO3_MODE === 'FE') {
@@ -138,13 +143,13 @@ class LayoutSetup
                 }
 
                 // Parse icon path for records.
-                if ($item['icon']) {
+                if (!empty($item['icon'])) {
                     $icons = explode(',', $item['icon']);
                     $item['icon'] = $icons;
                 }
 
                 // remove tailing dot of config
-                if (isset($item['config.'])) {
+                if (!empty($item['config.'])) {
                     $item['config'] = $item['config.'];
                     unset($item['config.']);
                     if (isset($item['backend_layout.'])) {
@@ -154,12 +159,16 @@ class LayoutSetup
                 }
 
                 // Change topLevelLayout to top_level_layout.
-                $item['top_level_layout'] = $item['topLevelLayout'];
-                unset($item['topLevelLayout']);
+                if (isset($item['topLevelLayout'])) {
+                    $item['top_level_layout'] = $item['topLevelLayout'];
+                    unset($item['topLevelLayout']);
+                }
 
                 // Change flexformDS to pi_flexform_ds.
-                $item['pi_flexform_ds'] = $item['flexformDS'];
-                unset($item['flexformDS']);
+                if (isset($item['flexformDS'])) {
+                    $item['pi_flexform_ds'] = $item['flexformDS'];
+                    unset($item['flexformDS']);
+                }
 
                 $gridLayoutConfig[$layoutId] = $item;
             }
@@ -189,18 +198,18 @@ class LayoutSetup
                     $queryBuilder->expr()->orX(
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter((int)$pageTSconfigId, \PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter((int)$pageTSconfigId, PDO::PARAM_INT)
                         ),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter((int)$storagePid, \PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($storagePid, PDO::PARAM_INT)
                         )
                     ),
                     $queryBuilder->expr()->andX(
                         $queryBuilder->expr()->comparison($pageTSconfigId, '=', 0),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter((int)$pageId, \PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)
                         )
                     )
                 )
@@ -223,7 +232,7 @@ class LayoutSetup
             }
 
             // Prepend icon path for records.
-            if ($item['icon']) {
+            if (!empty($item['icon'])) {
                 $icons = explode(',', $item['icon']);
                 foreach ($icons as &$icon) {
                     $icon = '../' . $GLOBALS['TCA']['tx_gridelements_backend_layout']['ctrl']['selicon_field_path'] . '/' . htmlspecialchars(trim($icon));
@@ -232,9 +241,9 @@ class LayoutSetup
             }
 
             // parse config
-            if ($item['config']) {
+            if (!empty($item['config'])) {
                 $parser = GeneralUtility::makeInstance(TypoScriptParser::class);
-                $parser->parse($parser->checkIncludeLines($item['config']));
+                $parser->parse($parser::checkIncludeLines($item['config']));
                 if (isset($parser->setup['backend_layout.'])) {
                     $item['config'] = $parser->setup['backend_layout.'];
                 }
@@ -257,7 +266,7 @@ class LayoutSetup
      *
      * @return QueryBuilder queryBuilder
      */
-    public function getQueryBuilder()
+    public function getQueryBuilder(): QueryBuilder
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -276,7 +285,7 @@ class LayoutSetup
      *
      * @return array first key is 'CSV' The columns available for the selected layout as CSV list and the allowed elements for each of the columns
      */
-    public function getLayoutColumns($layoutId)
+    public function getLayoutColumns(string $layoutId): array
     {
         if (!isset($this->layoutSetup[$layoutId])) {
             return [];
@@ -288,7 +297,7 @@ class LayoutSetup
             }
         }
 
-        return $GLOBALS['tx_gridelements']['ceBackendLayoutData'][$layoutId];
+        return $GLOBALS['tx_gridelements']['ceBackendLayoutData'][$layoutId] ?? [];
     }
 
     /**
@@ -296,7 +305,7 @@ class LayoutSetup
      * @param bool $csvValues
      * @return array
      */
-    public function checkAvailableColumns($setup, $csvValues = false)
+    public function checkAvailableColumns(array $setup, bool $csvValues = false): array
     {
         $availableColumns = ['CSV' => '-2,-1'];
         $allowed = [];
@@ -310,14 +319,14 @@ class LayoutSetup
                         continue;
                     }
                     $colPos = (int)$column['colPos'];
-                    $availableColumns['columns'][$colPos] = $column['name'];
+                    $availableColumns['columns'][$colPos] = $column['name'] ?? $colPos;
                     if (isset($column['allowed.'])) {
                         $column['allowed'] = $column['allowed.'];
                     }
                     if (isset($column['disallowed.'])) {
                         $column['disallowed'] = $column['disallowed.'];
                     }
-                    if (!is_array($column['allowed']) && !empty($column['allowed'])) {
+                    if (!empty($column['allowed']) && !is_array($column['allowed'])) {
                         $allowed[$colPos] = ['CType' => $column['allowed']];
                     } else {
                         if (empty($column['allowed'])) {
@@ -326,7 +335,7 @@ class LayoutSetup
                             $allowed[$colPos] = $column['allowed'];
                         }
                     }
-                    if ($column['allowedGridTypes']) {
+                    if (!empty($column['allowedGridTypes'])) {
                         $allowed[$colPos]['tx_gridelements_backend_layout'] = $column['allowedGridTypes'];
                     }
                     if (!empty($column['disallowed'])) {
@@ -346,8 +355,7 @@ class LayoutSetup
         if (!empty($maxItems)) {
             $availableColumns['maxitems'] = $maxItems;
         }
-        $availableColumns = Helper::getInstance()->mergeAllowedDisallowedSettings($availableColumns, $csvValues);
-        return $availableColumns;
+        return Helper::getInstance()->mergeAllowedDisallowedSettings($availableColumns, $csvValues);
     }
 
     /**
@@ -358,7 +366,7 @@ class LayoutSetup
      *
      * @return array The adjusted TypoScript setup for the container or a default setup
      */
-    public function getTypoScriptSetup($layoutId)
+    public function getTypoScriptSetup(string $layoutId): array
     {
         $typoScriptSetup = [];
 
@@ -366,7 +374,7 @@ class LayoutSetup
             $typoScriptSetup = $this->typoScriptSetup['setup.']['default.'];
         } elseif ($layoutId && isset($this->typoScriptSetup['setup.'][$layoutId . '.'])) {
             $typoScriptSetup = $this->typoScriptSetup['setup.'][$layoutId . '.'];
-        } elseif ($layoutId) {
+        } elseif ($layoutId && isset($this->typoScriptSetup['setup.']['default.'])) {
             $typoScriptSetup = $this->typoScriptSetup['setup.']['default.'];
         }
 
@@ -394,7 +402,7 @@ class LayoutSetup
      *
      * @return string $flexformConfigurationPathAndFileName
      */
-    public function getFlexformConfigurationPathAndFileName()
+    public function getFlexformConfigurationPathAndFileName(): string
     {
         return $this->flexformConfigurationPathAndFileName;
     }
@@ -404,7 +412,7 @@ class LayoutSetup
      *
      * @param string $flexformConfigurationPathAndFileName
      */
-    public function setFlexformConfigurationPathAndFileName($flexformConfigurationPathAndFileName)
+    public function setFlexformConfigurationPathAndFileName(string $flexformConfigurationPathAndFileName)
     {
         $this->flexformConfigurationPathAndFileName = $flexformConfigurationPathAndFileName;
     }
@@ -418,29 +426,29 @@ class LayoutSetup
      * @param int $pageId
      * @return array
      */
-    public function getLayoutSelectItems($colPos, $gridColPos = 0, $containerId = 0, $pageId = 0)
+    public function getLayoutSelectItems(int $colPos, int $gridColPos = 0, int $containerId = 0, int $pageId = 0): array
     {
         $allowed = ['*' => '*'];
         $disallowed = [];
         $selectItems = [];
         if ($containerId > 0) {
-            $container = $this->cacheCurrentParent((int)$containerId, true);
+            $container = $this->cacheCurrentParent($containerId, true);
             if (!empty($container)) {
-                $containerLayout = $this->layoutSetup[$container['tx_gridelements_backend_layout']];
-                $allowed = $containerLayout['allowed'][$gridColPos]['tx_gridelements_backend_layout'];
-                $disallowed = $containerLayout['disallowed'][$gridColPos]['tx_gridelements_backend_layout'];
+                $containerLayout = $this->layoutSetup[$container['tx_gridelements_backend_layout']] ?? [];
+                $allowed = $containerLayout['allowed'][$gridColPos]['tx_gridelements_backend_layout'] ?? [];
+                $disallowed = $containerLayout['disallowed'][$gridColPos]['tx_gridelements_backend_layout'] ?? [];
             }
         } elseif ($pageId > 0) {
             $pageLayout = Helper::getInstance()->getSelectedBackendLayout($pageId);
             if (!empty($pageLayout)) {
-                $allowed = $pageLayout['allowed'][$colPos]['tx_gridelements_backend_layout'];
-                $disallowed = $pageLayout['disallowed'][$colPos]['tx_gridelements_backend_layout'];
+                $allowed = $pageLayout['allowed'][$colPos]['tx_gridelements_backend_layout'] ?? [];
+                $disallowed = $pageLayout['disallowed'][$colPos]['tx_gridelements_backend_layout'] ?? [];
             }
         }
         foreach ($this->layoutSetup as $layoutId => $item) {
             if ((
-                (int)$colPos === -1 &&
-                    $item['top_level_layout']
+                $colPos === -1 &&
+                    !empty($item['top_level_layout'])
             ) ||
                 (
                     !empty($allowed) &&
@@ -457,7 +465,7 @@ class LayoutSetup
                 continue;
             }
             $icon = 'gridelements-default';
-            if ($item['iconIdentifier']) {
+            if (!empty($item['iconIdentifier'])) {
                 $icon = $item['iconIdentifier'];
             } elseif (!empty($item['icon'])) {
                 $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
@@ -494,7 +502,9 @@ class LayoutSetup
                 }
                 $icon = 'gridelements-select-icon-' . $layoutId;
             }
-            $selectItems[] = [$this->languageService->sL($item['title']), $layoutId, $icon];
+            if (!empty($item['title'])) {
+                $selectItems[] = [$this->languageService->sL($item['title']), $layoutId, $icon];
+            }
         }
 
         return $selectItems;
@@ -508,7 +518,7 @@ class LayoutSetup
      *
      * @return array|null
      */
-    public function cacheCurrentParent($gridContainerId = 0, $doReturn = false)
+    public function cacheCurrentParent(int $gridContainerId = 0, bool $doReturn = false): ?array
     {
         if ($gridContainerId > 0) {
             if (empty($GLOBALS['tx_gridelements']['parentElement'][$gridContainerId])) {
@@ -517,9 +527,9 @@ class LayoutSetup
                     $gridContainerId
                 );
             }
-        }
-        if ($doReturn) {
-            return $GLOBALS['tx_gridelements']['parentElement'][$gridContainerId];
+            if ($doReturn) {
+                return $GLOBALS['tx_gridelements']['parentElement'][$gridContainerId];
+            }
         }
 
         return null;
@@ -532,7 +542,7 @@ class LayoutSetup
      *
      * @return array
      */
-    public function getLayoutColumnsSelectItems($layoutId)
+    public function getLayoutColumnsSelectItems(string $layoutId): array
     {
         $setup = $this->getLayoutSetup($layoutId);
         if (empty($setup['config']['rows.'])) {
@@ -547,9 +557,9 @@ class LayoutSetup
             foreach ($row['columns.'] as $column) {
                 $selectItems[] = [
                     $this->languageService->sL($column['name']),
-                    $column['colPos'],
+                    $column['colPos'] ?? 0,
                     null,
-                    $column['allowed'] ? $column['allowed'] : '*',
+                    $column['allowed'] ?? '*',
                 ];
             }
         }
@@ -564,7 +574,7 @@ class LayoutSetup
      *
      * @return array
      */
-    public function getLayoutSetup($layoutId = '')
+    public function getLayoutSetup(string $layoutId = ''): array
     {
         // Continue only if setup for given layout ID found.
         if (isset($this->layoutSetup[$layoutId])) {
@@ -590,7 +600,7 @@ class LayoutSetup
      * @param string $key
      * @param array $layoutSetup
      */
-    public function setSingleLayoutSetup($key, array $layoutSetup)
+    public function setSingleLayoutSetup(string $key, array $layoutSetup)
     {
         $this->layoutSetup[$key] = $layoutSetup;
     }
@@ -606,13 +616,16 @@ class LayoutSetup
      * @return array
      */
     public function getLayoutWizardItems(
-        $colPos,
-        $excludeLayouts = '',
+        int $colPos,
+        string $excludeLayouts = '',
         array $allowedGridTypes = [],
         array $disallowedGridTypes = []
-    ) {
+    ): array {
         $wizardItems = [];
         $excludeLayouts = array_flip(explode(',', $excludeLayouts));
+        if (empty($this->layoutSetup)) {
+            return [];
+        }
         foreach ($this->layoutSetup as $layoutId => $item) {
             if ((
                 !empty($allowedGridTypes) &&
@@ -622,12 +635,12 @@ class LayoutSetup
             ) {
                 continue;
             }
-            if (isset($excludeLayouts[$layoutId]) || (int)$colPos === -1 && $item['top_level_layout']) {
+            if (isset($excludeLayouts[$layoutId]) || $colPos === -1 && !empty($item['top_level_layout'])) {
                 continue;
             }
 
             $source = '';
-            if ($item['icon']) {
+            if (!empty($item['icon'])) {
                 $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
                 if (MathUtility::canBeInterpretedAsInteger($item['icon'])) {
                     $icons = [];
@@ -647,12 +660,12 @@ class LayoutSetup
 
             $wizardItems[] = [
                 'uid' => $layoutId,
-                'title' => $this->languageService->sL($item['title']),
-                'description' => $this->languageService->sL($item['description']),
+                'title' => $this->languageService->sL($item['title'] ?? ''),
+                'description' => $this->languageService->sL($item['description'] ?? ''),
                 'icon' => [$item['icon']],
-                'iconIdentifier' => $item['iconIdentifier'],
-                'tll' => $item['top_level_layout'],
-                'tt_content_defValues' => $item['tt_content_defValues.'],
+                'iconIdentifier' => $item['iconIdentifier'] ?? '',
+                'tll' => $item['top_level_layout'] ?? '',
+                'tt_content_defValues' => $item['tt_content_defValues.'] ?? '',
             ];
         }
 
@@ -666,18 +679,18 @@ class LayoutSetup
      *
      * @return string
      */
-    public function getFlexformConfiguration($layoutId)
+    public function getFlexformConfiguration(string $layoutId): string
     {
         $layoutSetup = $this->getLayoutSetup($layoutId);
         // Get flexform file from pi_flexform_ds if pi_flexform_ds_file not set and "FILE:" found in pi_flexform_ds for backward compatibility.
-        if ($layoutSetup['pi_flexform_ds_file']) {
+        if (!empty($layoutSetup['pi_flexform_ds_file'])) {
             $flexformConfiguration = GeneralUtility::getUrl(GeneralUtility::getFileAbsFileName($layoutSetup['pi_flexform_ds_file']));
-        } elseif (strpos($layoutSetup['pi_flexform_ds'], 'FILE:') === 0) {
+        } elseif (!empty($layoutSetup['pi_flexform_ds']) && strpos($layoutSetup['pi_flexform_ds'], 'FILE:') === 0) {
             $flexformConfiguration = GeneralUtility::getUrl(GeneralUtility::getFileAbsFileName(substr(
                 $layoutSetup['pi_flexform_ds'],
                 5
             )));
-        } elseif ($layoutSetup['pi_flexform_ds']) {
+        } elseif (!empty($layoutSetup['pi_flexform_ds'])) {
             $flexformConfiguration = $layoutSetup['pi_flexform_ds'];
         } else {
             $flexformConfiguration = GeneralUtility::getUrl(GeneralUtility::getFileAbsFileName($this->flexformConfigurationPathAndFileName));
@@ -689,7 +702,7 @@ class LayoutSetup
     /**
      * getter for restrictions
      *
-     * @return object|DefaultRestrictionContainer restrictions
+     * @return DefaultRestrictionContainer restrictions
      */
     public function getRestrictions()
     {
@@ -701,7 +714,7 @@ class LayoutSetup
      *
      * @return LanguageService $languageService
      */
-    public function getLanguageService()
+    public function getLanguageService(): LanguageService
     {
         return $this->languageService;
     }
@@ -709,22 +722,22 @@ class LayoutSetup
     /**
      * setter for languageService object
      *
-     * @param LanguageService $languageService
+     * @param LanguageService|null $languageService
      */
     public function setLanguageService(LanguageService $languageService = null)
     {
         $this->languageService = $languageService instanceof LanguageService ? $languageService : GeneralUtility::makeInstance(LanguageService::class);
         if ($this->getBackendUser()) {
-            $this->languageService->init($this->getBackendUser()->uc['lang']);
+            $this->languageService->init($this->getBackendUser()->uc['lang'] ?? '');
         }
     }
 
     /**
      * Gets the current backend user.
      *
-     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication
+     * @return BackendUserAuthentication
      */
-    public function getBackendUser()
+    public function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }
@@ -734,7 +747,7 @@ class LayoutSetup
      *
      * @return int
      */
-    public function getRealPid()
+    public function getRealPid(): int
     {
         return $this->realPid;
     }

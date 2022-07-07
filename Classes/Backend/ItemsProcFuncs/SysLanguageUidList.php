@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
 
 /***************************************************************
@@ -47,7 +49,7 @@ class SysLanguageUidList extends AbstractItemsProcFunc
      * @param array $items The items of the current language list
      * @param int $gridContainerId The ID of the current container
      */
-    public function checkForAllowedLanguages(array &$items, $gridContainerId)
+    public function checkForAllowedLanguages(array &$items, int $gridContainerId)
     {
         if (!$gridContainerId) {
             return;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Backend;
 
 /***************************************************************
@@ -37,7 +39,7 @@ class TtContent
     /**
      * @var LayoutSetup
      */
-    protected $layoutSetup;
+    protected LayoutSetup $layoutSetup;
 
     /**
      * ItemProcFunc for columns items
@@ -56,7 +58,7 @@ class TtContent
             $params['items'] = $this->layoutSetup->getLayoutColumnsSelectItems($gridElement['tx_gridelements_backend_layout']);
 
             $ContentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
-            if (!empty($ContentType) && is_array($params['items'])) {
+            if (!empty($ContentType)) {
                 foreach ($params['items'] as $itemKey => $itemArray) {
                     if ($itemArray[3] !== '' && $itemArray[3] !== '*'
                         && !GeneralUtility::inList($itemArray[3], $ContentType)
@@ -73,11 +75,9 @@ class TtContent
      *
      * @param int $pageId
      */
-    public function init($pageId)
+    public function init(int $pageId)
     {
-        if (!$this->layoutSetup instanceof LayoutSetup) {
-            $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
-        }
+        $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
     }
 
     /**
@@ -138,7 +138,7 @@ class TtContent
             }
 
             if ($params['row']['uid'] > 0) {
-                $this->lookForChildContainersRecursively((int)$params['row']['uid'], $possibleContainers);
+                $this->lookForChildContainersRecursively((string)(int)$params['row']['uid'], $possibleContainers);
             }
         }
     }
@@ -149,8 +149,9 @@ class TtContent
      *
      * @param string $containerIds : A list determining containers that should be checked
      * @param array $possibleContainers : The result list containing the remaining containers after the check
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function lookForChildContainersRecursively($containerIds, array &$possibleContainers)
+    public function lookForChildContainersRecursively(string $containerIds, array &$possibleContainers)
     {
         if (!$containerIds) {
             return;
@@ -194,7 +195,7 @@ class TtContent
      *
      * @return QueryBuilder queryBuilder
      */
-    public function getQueryBuilder()
+    public function getQueryBuilder(): QueryBuilder
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -210,8 +211,9 @@ class TtContent
      *
      * @param array $params
      * @param string $itemUidList comma separated list of uids
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function deleteDisallowedContainers(array &$params, $itemUidList = '')
+    public function deleteDisallowedContainers(array &$params, string $itemUidList = '')
     {
         $contentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
         $listType = '';
@@ -237,10 +239,12 @@ class TtContent
                 $containers[$container['uid']] = $container;
             }
             foreach ($params['items'] as $key => $container) {
-                $backendLayout = $containers[$container[1]]['tx_gridelements_backend_layout'];
+                $backendLayout = $containers[$container[1]]['tx_gridelements_backend_layout'] ?? [];
                 $gridColumn = (string)$params['row']['tx_gridelements_columns'];
-                $allowed = $layoutSetups[$backendLayout]['allowed'][$gridColumn];
-                $disallowed = $layoutSetups[$backendLayout]['disallowed'][$gridColumn];
+                if ($backendLayout && $gridColumn) {
+                    $allowed = $layoutSetups[$backendLayout]['allowed'][$gridColumn] ?? [];
+                    $disallowed = $layoutSetups[$backendLayout]['disallowed'][$gridColumn] ?? [];
+                }
                 if ($container[1] > 0 && (!empty($allowed) || !empty($disallowed))) {
                     if ((
                         !empty($allowed) &&

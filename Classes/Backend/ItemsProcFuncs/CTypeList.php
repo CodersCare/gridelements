@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
 
 /***************************************************************
@@ -34,7 +36,7 @@ class CTypeList extends AbstractItemsProcFunc
     /**
      * @var LayoutSetup
      */
-    protected $layoutSetup;
+    protected LayoutSetup $layoutSetup;
 
     /**
      * ItemProcFunc for CType items
@@ -47,10 +49,10 @@ class CTypeList extends AbstractItemsProcFunc
             $colPos = is_array($params['row']['colPos']) ? $params['row']['colPos'][0] : $params['row']['colPos'];
             $this->checkForAllowedCTypes(
                 $params['items'],
-                $params['row']['pid'],
-                $colPos,
-                $params['row']['tx_gridelements_container'],
-                $params['row']['tx_gridelements_columns']
+                (int)$params['row']['pid'],
+                (int)$colPos,
+                (int)$params['row']['tx_gridelements_container'],
+                (int)$params['row']['tx_gridelements_columns']
             );
         } else {
             $this->init((int)$params['row']['pid']);
@@ -60,10 +62,10 @@ class CTypeList extends AbstractItemsProcFunc
             if ((int)$existingElement['pid'] > 0) {
                 $this->checkForAllowedCTypes(
                     $params['items'],
-                    $existingElement['pid'],
-                    $existingElement['colPos'],
-                    $existingElement['tx_gridelements_container'],
-                    $existingElement['tx_gridelements_columns']
+                    (int)$existingElement['pid'],
+                    (int)$existingElement['colPos'],
+                    (int)$existingElement['tx_gridelements_container'],
+                    (int)$existingElement['tx_gridelements_columns']
                 );
             }
         }
@@ -78,34 +80,27 @@ class CTypeList extends AbstractItemsProcFunc
      * @param int $gridContainerId The ID of the current container
      * @param int $gridColumn The grid column the element is a child of
      */
-    public function checkForAllowedCTypes(array &$items, $pageId, $pageColumn, $gridContainerId, $gridColumn)
+    public function checkForAllowedCTypes(array &$items, int $pageId, int $pageColumn, int $gridContainerId, int $gridColumn)
     {
-        $allowed = [];
-        $disallowed = [];
-        if ((int)$pageColumn >= 0 || (int)$pageColumn === -2) {
-            $column = $pageColumn ? $pageColumn : 0;
+        if ($pageColumn >= 0 || $pageColumn === -2) {
+            $column = $pageColumn ?: 0;
             $layout = $this->getSelectedBackendLayout($pageId);
         } else {
             $this->init($pageId);
-            $column = $gridColumn ? (int)$gridColumn : 0;
+            $column = $gridColumn ?: 0;
             $gridElement = $this->layoutSetup->cacheCurrentParent($gridContainerId, true);
-            $layout = $this->layoutSetup->getLayoutSetup($gridElement['tx_gridelements_backend_layout']);
+            $layout = $this->layoutSetup->getLayoutSetup($gridElement['tx_gridelements_backend_layout'] ?? '');
         }
         if (!empty($layout)) {
-            if (is_array($layout['allowed']) && is_array($layout['allowed'][$column]) && !empty($layout['allowed'][$column]['CType'])) {
-                $allowed = $layout['allowed'][$column]['CType'];
-            }
-            if (is_array($layout['disallowed']) && is_array($layout['disallowed'][$column]) && !empty($layout['disallowed'][$column]['CType'])) {
-                $disallowed = $layout['disallowed'][$column]['CType'];
-            }
-        }
-        if (isset($layout) && (!empty($allowed) || !empty($disallowed))) {
-            foreach ($items as $key => $item) {
-                if ((
-                    !empty($allowed) &&
+            $allowed = $layout['allowed'][$column]['CType'] ?? [];
+            $disallowed = $layout['disallowed'][$column]['CType'] ?? [];
+            if (!empty($allowed) || !empty($disallowed)) {
+                foreach ($items as $key => $item) {
+                    if ((
+                        !empty($allowed) &&
                         !isset($allowed['*']) &&
                         !isset($allowed[$item[1]])
-                ) ||
+                    ) ||
                     (
                         !empty($disallowed) &&
                         (
@@ -113,7 +108,8 @@ class CTypeList extends AbstractItemsProcFunc
                             isset($disallowed[$item[1]])
                         )
                     )) {
-                    unset($items[$key]);
+                        unset($items[$key]);
+                    }
                 }
             }
         }
@@ -124,12 +120,10 @@ class CTypeList extends AbstractItemsProcFunc
      *
      * @param int $pageId
      */
-    public function init($pageId = 0)
+    public function init(int $pageId = 0)
     {
         parent::init();
-        if (!$this->layoutSetup) {
-            $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
-        }
+        $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
     }
 
     /**

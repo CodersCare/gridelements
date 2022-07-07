@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
 
 /***************************************************************
@@ -23,6 +25,7 @@ namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
 
 use GridElementsTeam\Gridelements\Helper\Helper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\SingletonInterface;
@@ -37,12 +40,12 @@ abstract class AbstractItemsProcFunc implements SingletonInterface
     /**
      * @var LanguageService
      */
-    protected $languageService;
+    protected LanguageService $languageService;
 
     /**
      * @var QueryGenerator
      */
-    protected $tree;
+    protected QueryGenerator $tree;
 
     /**
      * initializes this class
@@ -59,7 +62,7 @@ abstract class AbstractItemsProcFunc implements SingletonInterface
      *
      * @return array|null An array containing the data of the selected backend layout as well as a parsed version of the layout configuration
      */
-    public function getSelectedBackendLayout($pageId)
+    public function getSelectedBackendLayout(int $pageId): ?array
     {
         return Helper::getInstance()->getSelectedBackendLayout($pageId);
     }
@@ -71,7 +74,7 @@ abstract class AbstractItemsProcFunc implements SingletonInterface
      *
      * @return array
      */
-    public function getRootline($pageId)
+    public function getRootline(int $pageId): array
     {
         return BackendUtility::BEgetRootLine($pageId);
     }
@@ -81,7 +84,7 @@ abstract class AbstractItemsProcFunc implements SingletonInterface
      *
      * @return LanguageService $languageService
      */
-    public function getLanguageService()
+    public function getLanguageService(): LanguageService
     {
         return $this->languageService;
     }
@@ -99,9 +102,9 @@ abstract class AbstractItemsProcFunc implements SingletonInterface
     /**
      * Gets the current backend user.
      *
-     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication
+     * @return BackendUserAuthentication
      */
-    public function getBackendUser()
+    public function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }

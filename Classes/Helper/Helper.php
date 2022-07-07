@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Helper;
 
 /***************************************************************
@@ -20,7 +22,9 @@ namespace GridElementsTeam\Gridelements\Helper;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use PDO;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
@@ -41,20 +45,16 @@ class Helper implements SingletonInterface
      *
      * @var Helper
      */
-    protected static $instance;
+    protected static Helper $instance;
 
     /**
      * Get instance from the class.
      *
      * @return Helper
      */
-    public static function getInstance()
+    public static function getInstance(): Helper
     {
-        if (!self::$instance instanceof Helper) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
+        return new self();
     }
 
     /**
@@ -65,8 +65,9 @@ class Helper implements SingletonInterface
      * @param int $sortRev
      * @param string $selectFieldList
      * @return array
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function getChildren($table = '', $uid = 0, $pid = 0, $sortingField = '', $sortRev = 0, $selectFieldList = '')
+    public function getChildren(string $table = '', int $uid = 0, int $pid = 0, string $sortingField = '', int $sortRev = 0, string $selectFieldList = ''): array
     {
         $retVal = [];
 
@@ -81,11 +82,11 @@ class Helper implements SingletonInterface
                     $queryBuilder->expr()->andX(
                         $queryBuilder->expr()->eq(
                             'tx_gridelements_container',
-                            $queryBuilder->createNamedParameter((int)$uid, \PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)
                         ),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter((int)$pid, \PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
                         )
                     )
                 )
@@ -118,12 +119,12 @@ class Helper implements SingletonInterface
     /**
      * @param array $backendLayout
      * @param bool $csvValues
-     * @return mixed
+     * @return array
      */
-    public function mergeAllowedDisallowedSettings($backendLayout, $csvValues = false)
+    public function mergeAllowedDisallowedSettings(array $backendLayout, bool $csvValues = false)
     {
         if (!empty($backendLayout['allowed'])) {
-            foreach ($backendLayout['allowed'] as $column => &$allowedFields) {
+            foreach ($backendLayout['allowed'] as &$allowedFields) {
                 if (isset($allowedFields['CType']) && $allowedFields['CType'] !== '*') {
                     if (!empty($allowedFields['list_type']) && strpos($allowedFields['CType'], 'list') === false) {
                         $allowedFields['CType'] .= ',list';
@@ -147,7 +148,7 @@ class Helper implements SingletonInterface
             }
         }
         if (!empty($backendLayout['disallowed']) && !$csvValues) {
-            foreach ($backendLayout['disallowed'] as $column => &$disallowedFields) {
+            foreach ($backendLayout['disallowed'] as &$disallowedFields) {
                 if (!empty($disallowedFields['CType'])) {
                     $disallowedFields['CType'] = array_flip(GeneralUtility::trimExplode(',', $disallowedFields['CType']));
                 }
@@ -168,8 +169,9 @@ class Helper implements SingletonInterface
      * @param int $uid the uid value of a tt_content record
      *
      * @return int
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function getPidFromUid($uid = 0)
+    public function getPidFromUid(int $uid = 0): int
     {
         $queryBuilder = self::getQueryBuilder();
         $triggerElement = $queryBuilder
@@ -178,7 +180,7 @@ class Helper implements SingletonInterface
             ->where(
                 $queryBuilder->expr()->eq(
                     'uid',
-                    $queryBuilder->createNamedParameter(abs($uid), \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter(abs($uid), PDO::PARAM_INT)
                 )
             )
             ->execute()
@@ -192,7 +194,7 @@ class Helper implements SingletonInterface
      *
      * @return QueryBuilder queryBuilder
      */
-    public function getQueryBuilder()
+    public function getQueryBuilder(): QueryBuilder
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -213,7 +215,7 @@ class Helper implements SingletonInterface
      *
      * @return int[]
      */
-    public function getSpecificIds(array $record)
+    public function getSpecificIds(array $record): array
     {
         $specificIds = [];
         $specificIds['uid'] = (int)$record['uid'];
@@ -231,7 +233,7 @@ class Helper implements SingletonInterface
      * @param int $pageId
      * @return mixed
      */
-    public function getSelectedBackendLayout($pageId)
+    public function getSelectedBackendLayout(int $pageId)
     {
         if (empty($GLOBALS['tx_gridelements']['pageBackendLayoutData'][$pageId])) {
             $backendLayoutData = GeneralUtility::callUserFunction(
@@ -259,14 +261,14 @@ class Helper implements SingletonInterface
                                 if (isset($column['disallowed.'])) {
                                     $column['disallowed'] = $column['disallowed.'];
                                 }
-                                if (!is_array($column['allowed']) && !empty($column['allowed'])) {
+                                if (!empty($column['allowed']) && !is_array($column['allowed'])) {
                                     $allowed[$colPos] = ['CType' => $column['allowed']];
                                 } elseif (empty($column['allowed'])) {
                                     $allowed[$colPos] = ['CType' => '*'];
                                 } else {
                                     $allowed[$colPos] = $column['allowed'];
                                 }
-                                if ($column['allowedGridTypes']) {
+                                if (!empty($column['allowedGridTypes'])) {
                                     $allowed[$colPos]['tx_gridelements_backend_layout'] = $column['allowedGridTypes'];
                                 }
                                 if (!empty($column['disallowed'])) {
@@ -291,15 +293,15 @@ class Helper implements SingletonInterface
             }
             $GLOBALS['tx_gridelements']['pageBackendLayoutData'][$pageId] = $backendLayoutData;
         }
-        return $GLOBALS['tx_gridelements']['pageBackendLayoutData'][$pageId];
+        return $GLOBALS['tx_gridelements']['pageBackendLayoutData'][$pageId] ?? [];
     }
 
     /**
      * Gets the current backend user.
      *
-     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication
+     * @return BackendUserAuthentication
      */
-    public function getBackendUser()
+    public function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use GridElementsTeam\Gridelements\Hooks\WizardItems;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Tests\UnitTestCase;

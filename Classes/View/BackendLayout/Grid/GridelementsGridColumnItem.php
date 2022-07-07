@@ -33,19 +33,31 @@ class GridelementsGridColumnItem extends GridColumnItem
     /**
      * @var array
      */
-    protected $layoutColumns;
+    protected array $layoutColumns;
 
+    /**
+     * @param PageLayoutContext $context
+     * @param GridelementsGridColumn $column
+     * @param array $record
+     * @param array $layoutColumns
+     */
     public function __construct(PageLayoutContext $context, GridelementsGridColumn $column, array $record, array $layoutColumns)
     {
         parent::__construct($context, $column, $record);
         $this->layoutColumns = $layoutColumns;
     }
 
+    /**
+     * @return GridelementsGridColumn
+     */
     public function getGridelementsColumn(): GridelementsGridColumn
     {
         return $this->column;
     }
 
+    /**
+     * @return string
+     */
     public function getWrapperClassName(): string
     {
         $wrapperClassNames = [];
@@ -53,7 +65,7 @@ class GridelementsGridColumnItem extends GridColumnItem
             $wrapperClassNames[] = 't3-page-ce-hidden t3js-hidden-record';
         } elseif ($this->record['colPos'] !== -1) {
             $wrapperClassNames[] = 't3-page-ce-warning';
-        } elseif (!GeneralUtility::inList($this->layoutColumns['CSV'], $this->record['tx_gridelements_columns'])) {
+        } elseif (!GeneralUtility::inList($this->layoutColumns['CSV'] ?? '', $this->record['tx_gridelements_columns'])) {
             $wrapperClassNames[] = 't3-page-ce-warning';
         } else {
             $this->getGridelementsColumn()->setActive();
@@ -65,6 +77,10 @@ class GridelementsGridColumnItem extends GridColumnItem
         return implode(' ', $wrapperClassNames);
     }
 
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
+     */
     public function getNewContentAfterUrlWithRestrictions(): string
     {
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);

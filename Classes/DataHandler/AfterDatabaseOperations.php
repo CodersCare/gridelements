@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\DataHandler;
 
 /***************************************************************
@@ -20,8 +22,10 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
@@ -42,14 +46,14 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param int $uid the ID of the record
      * @param DataHandler $parentObj The parent object that triggered this hook
      */
-    public function adjustValuesAfterWorkspaceOperations(array $fieldArray, $uid, DataHandler $parentObj)
+    public function adjustValuesAfterWorkspaceOperations(array $fieldArray, int $uid, DataHandler $parentObj)
     {
         $workspace = $this->getBackendUser()->workspace;
         if ($workspace && (isset($fieldArray['colPos']) || isset($fieldArray['tx_gridelements_container']) || isset($fieldArray['tx_gridelements_columns']))) {
-            $originalRecord = $parentObj->recordInfo('tt_content', (int)$uid, '*');
+            $originalRecord = $parentObj->recordInfo('tt_content', $uid, '*');
             if ($originalRecord['t3ver_state'] === 4) {
                 $updateArray = [];
-                $movePlaceholder = BackendUtility::getMovePlaceholder('tt_content', (int)$uid, 'uid', $workspace);
+                $movePlaceholder = BackendUtility::getMovePlaceholder('tt_content', $uid, 'uid', $workspace);
                 if (isset($fieldArray['colPos'])) {
                     $updateArray['colPos'] = (int)$fieldArray['colPos'];
                 }
@@ -67,9 +71,9 @@ class AfterDatabaseOperations extends AbstractDataHandler
     /**
      * Gets the current backend user.
      *
-     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication
+     * @return BackendUserAuthentication
      */
-    public function getBackendUser()
+    public function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }
@@ -88,16 +92,16 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param int $uid the ID of the record
      * @param DataHandler $parentObj The parent object that triggered this hook
      */
-    public function execute_afterDatabaseOperations(array &$fieldArray, $table, $uid, DataHandler $parentObj)
+    public function execute_afterDatabaseOperations(array &$fieldArray, string $table, int $uid, DataHandler $parentObj)
     {
         if ($table === 'tt_content' || $table === 'pages') {
-            $this->init($table, $uid, $parentObj);
+            $this->init($table, (string)$uid, $parentObj);
             if (!$this->getTceMain()->isImporting) {
                 $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
-                if ((bool)$extensionConfiguration['disableAutomaticUnusedColumnCorrection'] !== true) {
+                if (empty($extensionConfiguration['disableAutomaticUnusedColumnCorrection'])) {
                     $this->saveCleanedUpFieldArray($fieldArray);
                 }
-                if ($table === 'tt_content' && (int)$uid > 0) {
+                if ($table === 'tt_content' && $uid > 0) {
                     $this->checkAndUpdateTranslatedElements($uid);
                 }
             }
@@ -124,6 +128,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * Function to move elements to/from the unused elements column while changing the layout of a page or a grid element
      *
      * @param array $fieldArray The array of fields and values that have been saved to the datamap
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function setUnusedElements(array &$fieldArray)
     {
@@ -147,7 +152,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             $queryBuilder->expr()->gt('tx_gridelements_container', 0),
                             $queryBuilder->expr()->eq(
                                 'tx_gridelements_container',
-                                $queryBuilder->createNamedParameter((int)$this->getContentUid(), \PDO::PARAM_INT)
+                                $queryBuilder->createNamedParameter($this->getContentUid(), PDO::PARAM_INT)
                             ),
                             $queryBuilder->expr()->notIn(
                                 'tx_gridelements_columns',
@@ -187,7 +192,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             $queryBuilder->expr()->gt('tx_gridelements_container', 0),
                             $queryBuilder->expr()->eq(
                                 'tx_gridelements_container',
-                                $queryBuilder->createNamedParameter((int)$this->getContentUid(), \PDO::PARAM_INT)
+                                $queryBuilder->createNamedParameter($this->getContentUid(), PDO::PARAM_INT)
                             ),
                             $queryBuilder->expr()->in(
                                 'tx_gridelements_columns',
@@ -243,11 +248,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         break;
                     }
                 } else {
-                    if ($selectedBackendLayoutNextLevel === -1 && $page['uid'] !== $this->getPageUid()) {
+                    if ($selectedBackendLayoutNextLevel === -1) {
                         // Some previous page in our rootline sets layout_next to "None"
                         break;
                     }
-                    if ($selectedBackendLayoutNextLevel > 0 && $page['uid'] !== $this->getPageUid()) {
+                    if ($selectedBackendLayoutNextLevel > 0) {
                         // Some previous page in our rootline sets some backend_layout, use it
                         $backendLayoutUid = $selectedBackendLayoutNextLevel;
                         break;
@@ -266,7 +271,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder->expr()->andX(
                             $queryBuilder->expr()->eq(
                                 'pid',
-                                $queryBuilder->createNamedParameter((int)$this->getPageUid(), \PDO::PARAM_INT)
+                                $queryBuilder->createNamedParameter($this->getPageUid(), PDO::PARAM_INT)
                             ),
                             $queryBuilder->expr()->notIn(
                                 'colPos',
@@ -305,11 +310,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder->expr()->andX(
                             $queryBuilder->expr()->eq(
                                 'pid',
-                                $queryBuilder->createNamedParameter((int)$this->getPageUid(), \PDO::PARAM_INT)
+                                $queryBuilder->createNamedParameter($this->getPageUid(), PDO::PARAM_INT)
                             ),
                             $queryBuilder->expr()->neq(
                                 'backupColPos',
-                                $queryBuilder->createNamedParameter(-2, \PDO::PARAM_INT)
+                                $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)
                             ),
                             $queryBuilder->expr()->in(
                                 'backupColPos',
@@ -343,7 +348,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
             }
 
             if (isset($fieldArray['backend_layout_next_level'])) {
-                $backendLayoutUid = $backendLayoutNextLevelUid ? $backendLayoutNextLevelUid : $backendLayoutUid;
+                $backendLayoutUid = $backendLayoutNextLevelUid ?: $backendLayoutUid;
                 $subPages = [];
                 $this->getSubPagesRecursively($this->getPageUid(), $subPages);
                 if (!empty($subPages)) {
@@ -359,7 +364,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 $queryBuilder->expr()->andX(
                                     $queryBuilder->expr()->eq(
                                         'pid',
-                                        $queryBuilder->createNamedParameter((int)$page['uid'], \PDO::PARAM_INT)
+                                        $queryBuilder->createNamedParameter((int)$page['uid'], PDO::PARAM_INT)
                                     ),
                                     $queryBuilder->expr()->notIn(
                                         'colPos',
@@ -401,11 +406,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 $queryBuilder->expr()->andX(
                                     $queryBuilder->expr()->eq(
                                         'pid',
-                                        $queryBuilder->createNamedParameter((int)$page['uid'], \PDO::PARAM_INT)
+                                        $queryBuilder->createNamedParameter((int)$page['uid'], PDO::PARAM_INT)
                                     ),
                                     $queryBuilder->expr()->neq(
                                         'backupColPos',
-                                        $queryBuilder->createNamedParameter(-2, \PDO::PARAM_INT)
+                                        $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)
                                     ),
                                     $queryBuilder->expr()->in(
                                         'backupColPos',
@@ -463,7 +468,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      *
      * @return string The columns available for the selected layout as CSV list
      */
-    public function getAvailableColumns($layout = '', $table = '', $id = 0)
+    public function getAvailableColumns(string $layout = '', string $table = '', int $id = 0): string
     {
         $tcaColumns = '';
 
@@ -493,8 +498,9 @@ class AfterDatabaseOperations extends AbstractDataHandler
      *
      * @param int $pageUid
      * @param array $subPages
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function getSubPagesRecursively($pageUid, array &$subPages)
+    public function getSubPagesRecursively(int $pageUid, array &$subPages)
     {
         $queryBuilder = $this->getQueryBuilder('pages');
         $childPages = $queryBuilder
@@ -503,7 +509,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter((int)$pageUid, \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($pageUid, PDO::PARAM_INT)
                 )
             )
             ->execute()

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Hooks;
 
 /***************************************************************
@@ -24,6 +26,7 @@ use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\Helper;
 use PDO;
 use TYPO3\CMS\Backend\Controller\PageLayoutController;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\PageLayoutView;
@@ -69,7 +72,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     /**
      * @var Helper
      */
-    protected $helper;
+    protected Helper $helper;
 
     /**
      * @var IconFactory
@@ -79,29 +82,29 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     /**
      * @var LanguageService
      */
-    protected $languageService;
+    protected LanguageService $languageService;
 
     /**
      * Stores whether a certain language has translations in it
      *
      * @var array
      */
-    protected $languageHasTranslationsCache = [];
+    protected array $languageHasTranslationsCache = [];
 
     /**
      * @var QueryGenerator
      */
-    protected $tree;
+    protected QueryGenerator $tree;
 
     /**
      * @var bool
      */
-    protected $showHidden;
+    protected bool $showHidden;
 
     /**
      * @var string
      */
-    protected $backPath = '';
+    protected string $backPath = '';
 
     public function __construct()
     {
@@ -133,7 +136,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     /**
      * @return BackendUserAuthentication
      */
-    public function getBackendUser()
+    public function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }
@@ -151,7 +154,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     public function preProcess(PageLayoutView &$parentObject, &$drawItem, &$headerContent, &$itemContent, array &$row)
     {
         if ($row['CType']) {
-            $this->showHidden = $parentObject->tt_contentConfig['showHidden'] ? true : false;
+            $this->showHidden = (bool)$parentObject->tt_contentConfig['showHidden'];
 
             if ($this->helper->getBackendUser()->uc['hideContentPreview']) {
                 $itemContent = '';
@@ -182,7 +185,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      *
      * @return string $itemContent: The HTML output for elements of the CType gridelements_pi1
      */
-    protected function renderCTypeGridelements(PageLayoutView $parentObject, &$row)
+    protected function renderCTypeGridelements(PageLayoutView $parentObject, array &$row): string
     {
         $head = [];
         $gridContent = [];
@@ -249,29 +252,27 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param array $colPosValues : The column positions that have been found for that layout
      * @param array $layout
      */
-    protected function setMultipleColPosValues($parserRows, &$colPosValues, $layout)
+    protected function setMultipleColPosValues(array $parserRows, array &$colPosValues, array $layout)
     {
-        if (is_array($parserRows)) {
-            foreach ($parserRows as $parserRow) {
-                if (is_array($parserRow['columns.']) && !empty($parserRow['columns.'])) {
-                    foreach ($parserRow['columns.'] as $parserColumns) {
-                        $name = $this->languageService->sL($parserColumns['name']);
-                        if (isset($parserColumns['colPos']) && $parserColumns['colPos'] !== '') {
-                            $columnKey = (int)$parserColumns['colPos'];
-                            $colPosValues[$columnKey] = [
-                                'name' => htmlspecialchars($name),
-                                'allowed' => htmlspecialchars($layout['allowed'][$columnKey]),
-                                'disallowed' => htmlspecialchars($layout['disallowed'][$columnKey]),
-                                'maxitems' => (int)$layout['maxitems'][$columnKey],
-                            ];
-                        } else {
-                            $colPosValues[32768] = [
-                                'name' => htmlspecialchars($this->languageService->getLL('notAssigned')),
-                                'allowed' => '',
-                                'disallowed' => '*',
-                                'maxitems' => 0,
-                            ];
-                        }
+        foreach ($parserRows as $parserRow) {
+            if (is_array($parserRow['columns.']) && !empty($parserRow['columns.'])) {
+                foreach ($parserRow['columns.'] as $parserColumns) {
+                    $name = $this->languageService->sL($parserColumns['name']);
+                    if (isset($parserColumns['colPos']) && $parserColumns['colPos'] !== '') {
+                        $columnKey = (int)$parserColumns['colPos'];
+                        $colPosValues[$columnKey] = [
+                            'name' => htmlspecialchars($name),
+                            'allowed' => htmlspecialchars($layout['allowed'][$columnKey]),
+                            'disallowed' => htmlspecialchars($layout['disallowed'][$columnKey]),
+                            'maxitems' => (int)$layout['maxitems'][$columnKey],
+                        ];
+                    } else {
+                        $colPosValues[32768] = [
+                            'name' => htmlspecialchars($this->languageService->getLL('notAssigned')),
+                            'allowed' => '',
+                            'disallowed' => '*',
+                            'maxitems' => 0,
+                        ];
                     }
                 }
             }
@@ -286,8 +287,9 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param array $row : The current data row for the container item
      *
      * @return array collected items for this column
+     * @throws \Doctrine\DBAL\DBALException
      */
-    protected function setSingleColPosItems(PageLayoutView $parentObject, &$colPosValues, &$row)
+    protected function setSingleColPosItems(PageLayoutView $parentObject, array &$colPosValues, array &$row): array
     {
         $specificIds = $this->helper->getSpecificIds($row);
 
@@ -329,12 +331,12 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      */
     protected function renderGridColumns(
         PageLayoutView $parentObject,
-        &$colPosValues,
-        &$gridContent,
-        &$row,
-        &$editUidList,
-        &$singleColumn,
-        &$head
+        array &$colPosValues,
+        array &$gridContent,
+        array &$row,
+        array &$editUidList,
+        bool &$singleColumn,
+        array &$head
     ) {
         $collectedItems = $this->collectItemsForColumns($parentObject, $colPosValues, $row);
         $workspace = $this->helper->getBackendUser()->workspace;
@@ -394,8 +396,8 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             // first we have to create the column content separately for each column
             // so we can check for the first and the last element to provide proper sorting
             $counter = 0;
+            $items = [];
             if ($singleColumn === false) {
-                $items = [];
                 foreach ($collectedItems as $item) {
                     if ((int)$item['tx_gridelements_columns'] === $colPos && (int)$item['tx_gridelements_container'] === (int)$row['uid']) {
                         if (
@@ -407,8 +409,6 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                         $items[] = $item;
                     }
                 }
-            } else {
-                $items = [];
             }
             usort($items, function ($a, $b) {
                 if ($a['sorting'] === $b['sorting']) {
@@ -420,7 +420,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             $gridContent['numberOfItems'][$colPos] = $counter;
             $this->renderSingleGridColumn($parentObject, $items, $colPos, $values, $gridContent, $row, $editUidList);
             // we will need a header for each of the columns to activate mass editing for elements of that column
-            $expanded = $this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$row['uid'] . '_' . $colPos] ? false : true;
+            $expanded = !$this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$row['uid'] . '_' . $colPos];
             $this->setColumnHeader($parentObject, $head, $colPos, $values['name'], $editUidList, $expanded);
         }
     }
@@ -432,9 +432,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param array $colPosValues : The column position to collect the items for
      * @param array $row : The current data row for the container item
      *
-     * @return mixed collected items for the given column
+     * @return mixed[] collected items for the given column
+     * @throws \Doctrine\DBAL\DBALException
      */
-    protected function collectItemsForColumns(PageLayoutView $parentObject, &$colPosValues, &$row)
+    protected function collectItemsForColumns(PageLayoutView $parentObject, array &$colPosValues, array &$row)
     {
         $colPosList = array_keys($colPosValues);
         $specificIds = $this->helper->getSpecificIds($row);
@@ -500,7 +501,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         }
         $restrictions->removeByType(StartTimeRestriction::class);
         $restrictions->removeByType(EndTimeRestriction::class);
-        $workspaceRestriction = GeneralUtility::makeInstance(WorkspaceRestriction::class, (int)$this->helper->getBackendUser()->workspace);
+        $workspaceRestriction = GeneralUtility::makeInstance(
+            WorkspaceRestriction::class,
+            $this->helper->getBackendUser()->workspace
+        );
         $restrictions->add($workspaceRestriction);
         $queryBuilder->setRestrictions($restrictions);
 
@@ -512,7 +516,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      *
      * @return QueryBuilder
      */
-    public function getQueryBuilder()
+    public function getQueryBuilder(): QueryBuilder
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -533,12 +537,12 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      */
     protected function renderSingleGridColumn(
         PageLayoutView $parentObject,
-        &$items,
-        &$colPos,
-        $values,
-        &$gridContent,
-        $row,
-        &$editUidList
+        array &$items,
+        int &$colPos,
+        array $values,
+        array &$gridContent,
+        array $row,
+        array &$editUidList
     ) {
         $specificIds = $this->helper->getSpecificIds($row);
         $allowed = base64_encode(json_encode($values['allowed']));
@@ -548,54 +552,63 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         $pageinfo = BackendUtility::readPageAccess($parentObject->id, '');
         $contentIsNotLockedForEditors = $this->contentIsNotLockedForEditors($parentObject->id);
         if ($colPos < 32768) {
-            if ($contentIsNotLockedForEditors
-                && $this->getBackendUser()->doesUserHaveAccess($pageinfo, Permission::CONTENT_EDIT)
-                && (!$this->checkIfTranslationsExistInLanguage($items, $row['sys_language_uid'], $parentObject))
-            ) {
-                if ($parentObject->option_newWizard) {
-                    $urlParameters = [
-                        'id' => $parentObject->id,
-                        'sys_language_uid' => $row['sys_language_uid'],
-                        'tx_gridelements_allowed' => $allowed,
-                        'tx_gridelements_disallowed' => $disallowed,
-                        'tx_gridelements_container' => $specificIds['uid'],
-                        'tx_gridelements_columns' => $colPos,
-                        'colPos' => -1,
-                        'uid_pid' => $parentObject->id,
-                        'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
-                    ];
-                    $routeName = BackendUtility::getPagesTSconfig($parentObject->id)['mod.']['newContentElementWizard.']['override']
-                        ?? 'new_content_element_wizard';
-                    $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-                    $url = (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
-                } else {
-                    $urlParameters = [
-                        'edit' => [
-                            'tt_content' => [
-                                $parentObject->id => 'new',
-                            ],
-                        ],
-                        'defVals' => [
-                            'tt_content' => [
+            try {
+                if ($contentIsNotLockedForEditors
+                        && $this->getBackendUser()->doesUserHaveAccess($pageinfo, Permission::CONTENT_EDIT)
+                        && (!$this->checkIfTranslationsExistInLanguage($items, $row['sys_language_uid'], $parentObject))
+                ) {
+                    if ($parentObject->option_newWizard) {
+                        $urlParameters = [
+                                'id' => $parentObject->id,
                                 'sys_language_uid' => $row['sys_language_uid'],
                                 'tx_gridelements_allowed' => $allowed,
                                 'tx_gridelements_disallowed' => $disallowed,
                                 'tx_gridelements_container' => $specificIds['uid'],
                                 'tx_gridelements_columns' => $colPos,
                                 'colPos' => -1,
-                            ],
-                        ],
-                        'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
-                    ];
-                    $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-                    $url = (string)$uriBuilder->buildUriFromRoute('record_edit', $urlParameters);
+                                'uid_pid' => $parentObject->id,
+                                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
+                        ];
+                        $routeName = BackendUtility::getPagesTSconfig($parentObject->id)['mod.']['newContentElementWizard.']['override']
+                                ?? 'new_content_element_wizard';
+                        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+                        try {
+                            $url = (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
+                        } catch (RouteNotFoundException $e) {
+                        }
+                    } else {
+                        $urlParameters = [
+                                'edit' => [
+                                        'tt_content' => [
+                                                $parentObject->id => 'new',
+                                        ],
+                                ],
+                                'defVals' => [
+                                        'tt_content' => [
+                                                'sys_language_uid' => $row['sys_language_uid'],
+                                                'tx_gridelements_allowed' => $allowed,
+                                                'tx_gridelements_disallowed' => $disallowed,
+                                                'tx_gridelements_container' => $specificIds['uid'],
+                                                'tx_gridelements_columns' => $colPos,
+                                                'colPos' => -1,
+                                        ],
+                                ],
+                                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
+                        ];
+                        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+                        try {
+                            $url = (string)$uriBuilder->buildUriFromRoute('record_edit', $urlParameters);
+                        } catch (RouteNotFoundException $e) {
+                        }
+                    }
                 }
+            } catch (Exception $e) {
             }
         }
 
         $iconsArray = [];
 
-        if ($colPos !== '' && $colPos !== null && $colPos < 32768 && $url) {
+        if ((string)$colPos !== '' && $colPos < 32768 && $url) {
             $iconsArray = [
                 'new' => '<a
                             href="' . htmlspecialchars($url) . '"
@@ -613,14 +626,14 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             '</div>';
 
         $gridContent[$colPos] .= '
-			<div data-colpos="' . htmlspecialchars($colPos) . '"
+			<div data-colpos="' . htmlspecialchars((string)$colPos) . '"
 			     data-language-uid="' . (int)$row['sys_language_uid'] . '"
 			     class="t3js-sortable t3js-sortable-lang t3js-sortable-lang-' . (int)$row['sys_language_uid'] . ' t3-page-ce-wrapper ui-sortable">
 			    <div class="t3-page-ce t3js-page-ce"
 			         data-container="' . (int)$row['uid'] . '"
 			         id="' . str_replace('.', '', uniqid('', true)) . '">
 					<div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce btn-group btn-group-sm"
-					     id="colpos-' . htmlspecialchars($colPos) . '-' . str_replace('.', '', uniqid('', true)) . '">' .
+					     id="colpos-' . htmlspecialchars((string)$colPos) . '-' . str_replace('.', '', uniqid('', true)) . '">' .
             implode('', $iconsArray) . '
 					</div>
 					<div class="t3-page-ce-dropzone-available t3js-page-ce-dropzone-available"></div>
@@ -647,8 +660,15 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     $statusHidden = $parentObject->isDisabled('tt_content', $item) ? ' t3-page-ce-hidden' : '';
                     $maxItemsReached = $counter > $maxItems && $maxItems > 0 ? ' t3-page-ce-danger' : '';
                     $highlightHeader = '';
-                    if ($this->checkIfTranslationsExistInLanguage([], (int)$item['sys_language_uid'], $parentObject) && (int)$item['l18n_parent'] === 0) {
-                        $highlightHeader = ' t3-page-ce-danger';
+                    try {
+                        if ($this->checkIfTranslationsExistInLanguage(
+                            [],
+                            (int)$item['sys_language_uid'],
+                            $parentObject
+                        ) && (int)$item['l18n_parent'] === 0) {
+                            $highlightHeader = ' t3-page-ce-danger';
+                        }
+                    } catch (Exception $e) {
                     }
                     $gridContent[$colPos] .= '
 				<div class="t3-page-ce t3js-page-ce t3js-page-ce-sortable' . $statusHidden . $maxItemsReached . $highlightHeader . '"
@@ -658,60 +678,73 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
 				     data-ctype="' . htmlspecialchars($item['CType']) . '">' .
                         $this->renderSingleElementHTML($parentObject, $item) .
                         '</div>';
-                    if ($contentIsNotLockedForEditors
-                        && $this->getBackendUser()->doesUserHaveAccess($pageinfo, Permission::CONTENT_EDIT)
-                        && (!$this->checkIfTranslationsExistInLanguage($items, $row['sys_language_uid'], $parentObject))
-                    ) {
-                        // New content element:
-                        $specificIds = $this->helper->getSpecificIds($item);
-                        if ($parentObject->option_newWizard) {
-                            $urlParameters = [
-                                'id' => $parentObject->id,
-                                'sys_language_uid' => $language,
-                                'tx_gridelements_allowed' => $allowed,
-                                'tx_gridelements_disallowed' => $disallowed,
-                                'tx_gridelements_container' => $container,
-                                'tx_gridelements_columns' => $gridColumn,
-                                'colPos' => -1,
-                                'uid_pid' => -$specificIds['uid'],
-                                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
-                            ];
-                            $routeName = BackendUtility::getPagesTSconfig($pid)['mod.']['newContentElementWizard.']['override']
-                                ?? 'new_content_element_wizard';
-                            $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-                            $url = (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
-                        } else {
-                            $urlParameters = [
-                                'edit' => [
-                                    'tt_content' => [
-                                        -$specificIds['uid'] => 'new',
-                                    ],
-                                ],
-                                'defVals' => [
-                                    'tt_content' => [
+                    try {
+                        if ($contentIsNotLockedForEditors
+                                && $this->getBackendUser()->doesUserHaveAccess($pageinfo, Permission::CONTENT_EDIT)
+                                && (!$this->checkIfTranslationsExistInLanguage(
+                                    $items,
+                                    $row['sys_language_uid'],
+                                    $parentObject
+                                ))
+                        ) {
+                            // New content element:
+                            $specificIds = $this->helper->getSpecificIds($item);
+                            if ($parentObject->option_newWizard) {
+                                $urlParameters = [
+                                        'id' => $parentObject->id,
                                         'sys_language_uid' => $language,
                                         'tx_gridelements_allowed' => $allowed,
                                         'tx_gridelements_disallowed' => $disallowed,
                                         'tx_gridelements_container' => $container,
                                         'tx_gridelements_columns' => $gridColumn,
                                         'colPos' => -1,
-                                    ],
-                                ],
-                                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
+                                        'uid_pid' => -$specificIds['uid'],
+                                        'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
+                                ];
+                                $routeName = BackendUtility::getPagesTSconfig($pid)['mod.']['newContentElementWizard.']['override']
+                                        ?? 'new_content_element_wizard';
+                                $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+                                try {
+                                    $url = (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
+                                } catch (RouteNotFoundException $e) {
+                                }
+                            } else {
+                                $urlParameters = [
+                                        'edit' => [
+                                                'tt_content' => [
+                                                        -$specificIds['uid'] => 'new',
+                                                ],
+                                        ],
+                                        'defVals' => [
+                                                'tt_content' => [
+                                                        'sys_language_uid' => $language,
+                                                        'tx_gridelements_allowed' => $allowed,
+                                                        'tx_gridelements_disallowed' => $disallowed,
+                                                        'tx_gridelements_container' => $container,
+                                                        'tx_gridelements_columns' => $gridColumn,
+                                                        'colPos' => -1,
+                                                ],
+                                        ],
+                                        'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
+                                ];
+                                $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+                                try {
+                                    $url = (string)$uriBuilder->buildUriFromRoute('record_edit', $urlParameters);
+                                } catch (RouteNotFoundException $e) {
+                                }
+                            }
+                            $iconsArray = [
+                                    'new' => '<a
+                                    href="' . htmlspecialchars($url) . '"
+                                    data-title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '"
+                                    title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '"
+                                    class="btn btn-default btn-sm btn t3js-toggle-new-content-element-wizard">' .
+                                            $this->iconFactory->getIcon('actions-add', 'small') . ' ' .
+                                            $this->languageService->getLL('content') .
+                                            '</a>',
                             ];
-                            $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-                            $url = (string)$uriBuilder->buildUriFromRoute('record_edit', $urlParameters);
                         }
-                        $iconsArray = [
-                            'new' => '<a
-                                href="' . htmlspecialchars($url) . '"
-                                data-title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '"
-                                title="' . htmlspecialchars($this->getLanguageService()->getLL('newContentElement')) . '"
-                                class="btn btn-default btn-sm btn t3js-toggle-new-content-element-wizard">' .
-                                    $this->iconFactory->getIcon('actions-add', 'small') . ' ' .
-                                    $this->languageService->getLL('content') .
-                                '</a>',
-                        ];
+                    } catch (Exception $e) {
                     }
 
                     $gridContent[$colPos] .= '
@@ -741,7 +774,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param int $id
      * @return bool
      */
-    protected function contentIsNotLockedForEditors($id): bool
+    protected function contentIsNotLockedForEditors(int $id): bool
     {
         if (!empty($this->getPageLayoutController()) && get_class($this->getPageLayoutController()) === PageLayoutController::class) {
             $perms_clause = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
@@ -755,7 +788,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     /**
      * @return PageLayoutController
      */
-    public function getPageLayoutController()
+    public function getPageLayoutController(): PageLayoutController
     {
         return $GLOBALS['SOBE'];
     }
@@ -790,9 +823,9 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      */
     protected function checkIfTranslationsExistInLanguage(
         array $contentElements,
-        $language,
+        int $language,
         PageLayoutView $parentObject
-    ) {
+    ): bool {
         // If in default language, you may always create new entries
         // Also, you may override this strict behavior via user TS Config
         // If you do so, you're on your own and cannot rely on any support by the TYPO3 core
@@ -849,7 +882,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      *
      * @return LanguageService $languageService
      */
-    public function getLanguageService()
+    public function getLanguageService(): LanguageService
     {
         return $this->languageService;
     }
@@ -872,7 +905,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      *
      * @return string
      */
-    protected function renderSingleElementHTML(PageLayoutView $parentObject, $item)
+    protected function renderSingleElementHTML(PageLayoutView $parentObject, array $item): string
     {
         $singleElementHTML = '';
         $unset = false;
@@ -914,7 +947,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @return string HTML of the footer
      * @throws UnexpectedValueException
      */
-    protected function tt_content_drawFooter(PageLayoutView $parentObject, array $row)
+    protected function tt_content_drawFooter(PageLayoutView $parentObject, array $row): string
     {
         $content = '';
         // Get processed values:
@@ -935,7 +968,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawFooter'] ?? [] as $className) {
             $hookObject = GeneralUtility::makeInstance($className);
             if (!$hookObject instanceof PageLayoutViewDrawFooterHookInterface) {
-                throw new \UnexpectedValueException($className . ' must implement interface ' . PageLayoutViewDrawFooterHookInterface::class, 1404378171);
+                throw new UnexpectedValueException($className . ' must implement interface ' . PageLayoutViewDrawFooterHookInterface::class, 1404378171);
             }
             $hookObject->preProcess($parentObject, $info, $row);
         }
@@ -967,11 +1000,11 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      */
     protected function setColumnHeader(
         PageLayoutView $parentObject,
-        &$head,
-        &$colPos,
-        &$name,
-        &$editUidList,
-        $expanded = true
+        array &$head,
+        int &$colPos,
+        string &$name,
+        array &$editUidList,
+        bool $expanded = true
     ) {
         $head[$colPos] = $this->tt_content_drawColHeader(
             $name,
@@ -991,7 +1024,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      *
      * @return string HTML table
      */
-    protected function tt_content_drawColHeader($colName, $editParams, PageLayoutView $parentObject, $expanded = true)
+    protected function tt_content_drawColHeader(string $colName, string $editParams, PageLayoutView $parentObject, bool $expanded = true): string
     {
         $iconsArr = [];
         // Create command links:
@@ -999,12 +1032,15 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             // Edit whole of column:
             if ($editParams) {
                 $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-                $iconsArr['edit'] = '<a
-                    class="btn btn-default"
-                    href="' . htmlspecialchars($uriBuilder->buildUriFromRoute('record_edit') . $editParams . '&returnUrl=' . rawurlencode(GeneralUtility::getIndpEnv('REQUEST_URI'))) . '"
-                    title="' . htmlspecialchars($this->getLanguageService()->getLL('editColumn')) . '">' .
-                    $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render() .
-                    '</a>';
+                try {
+                    $iconsArr['edit'] = '<a
+                        class="btn btn-default"
+                        href="' . htmlspecialchars($uriBuilder->buildUriFromRoute('record_edit') . $editParams . '&returnUrl=' . rawurlencode(GeneralUtility::getIndpEnv('REQUEST_URI'))) . '"
+                        title="' . htmlspecialchars($this->getLanguageService()->getLL('editColumn')) . '">' .
+                            $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render() .
+                            '</a>';
+                } catch (RouteNotFoundException $e) {
+                }
             }
         }
 
@@ -1030,12 +1066,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             $iconsArr
         ) . '</div>';
         // Create header row:
-        $out = '<div class="t3-page-column-header">
+        return '<div class="t3-page-column-header">
 					' . $icons . '
 					<div class="t3-page-column-header-label">' . htmlspecialchars($colName) . '</div>
 				</div>';
-
-        return $out;
     }
 
     /**
@@ -1049,7 +1083,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      *
      * @return string
      */
-    protected function renderGridLayoutTable($layout, $row, $head, $gridContent, PageLayoutView $parentObject)
+    protected function renderGridLayoutTable(array $layout, array $row, array $head, array $gridContent, PageLayoutView $parentObject): string
     {
         $specificIds = $this->helper->getSpecificIds($row);
         $grid = '<div class="t3-grid-container t3-grid-element-container' . ($layout['frame'] ? ' t3-grid-container-framed t3-grid-container-' . htmlspecialchars($layout['frame']) : '') . ($layout['top_level_layout'] ? ' t3-grid-tl-container' : '') . '">';
@@ -1279,7 +1313,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      *
      * @return string $shortcutContent: The HTML output for elements of the CType shortcut
      */
-    protected function renderCTypeShortcut(PageLayoutView $parentObject, &$row)
+    protected function renderCTypeShortcut(PageLayoutView $parentObject, array &$row): string
     {
         $shortcutContent = '';
         if ($row['records']) {
@@ -1331,20 +1365,21 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param int $recursive : The number of levels for the recursion
      * @param int $parentUid : uid of the referencing tt_content record
      * @param int $language : sys_language_uid of the referencing tt_content record
+     * @throws \Doctrine\DBAL\DBALException
      */
     protected function collectContentDataFromPages(
-        $shortcutItem,
-        &$collectedItems,
-        $recursive = 0,
-        $parentUid = 0,
-        $language = 0
+        string $shortcutItem,
+        array &$collectedItems,
+        int $recursive = 0,
+        int $parentUid = 0,
+        int $language = 0
     ) {
         $itemList = str_replace('pages_', '', $shortcutItem);
         if ($recursive) {
             if (!$this->tree instanceof QueryGenerator) {
                 $this->tree = GeneralUtility::makeInstance(QueryGenerator::class);
             }
-            $itemList = $this->tree->getTreeList($itemList, (int)$recursive, 0, 1);
+            $itemList = $this->tree->getTreeList($itemList, $recursive, 0, 1);
         }
         $itemList = GeneralUtility::intExplode(',', $itemList);
 
@@ -1360,7 +1395,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             ->where(
                 $queryBuilder->expr()->neq(
                     'uid',
-                    $queryBuilder->createNamedParameter((int)$parentUid, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($parentUid, PDO::PARAM_INT)
                 ),
                 $queryBuilder->expr()->in(
                     'pid',
@@ -1401,11 +1436,12 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      * @param array $collectedItems : The collected item data row
      * @param int $parentUid : uid of the referencing tt_content record
      * @param int $language : sys_language_uid of the referencing tt_content record
+     * @throws \Doctrine\DBAL\DBALException
      */
-    protected function collectContentData($shortcutItem, &$collectedItems, $parentUid, $language)
+    protected function collectContentData(string $shortcutItem, array &$collectedItems, int $parentUid, int $language)
     {
         $shortcutItem = str_replace('tt_content_', '', $shortcutItem);
-        if ((int)$shortcutItem !== (int)$parentUid) {
+        if ((int)$shortcutItem !== $parentUid) {
             $queryBuilder = $this->getQueryBuilder();
             if ($this->showHidden) {
                 $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
@@ -1446,7 +1482,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      *
      * @return IconFactory iconFactory
      */
-    public function getIconFactory()
+    public function getIconFactory(): IconFactory
     {
         return $this->iconFactory;
     }

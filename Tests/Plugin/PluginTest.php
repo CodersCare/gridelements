@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use GridElementsTeam\Gridelements\Plugin\Gridelements;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Tests\UnitTestCase;

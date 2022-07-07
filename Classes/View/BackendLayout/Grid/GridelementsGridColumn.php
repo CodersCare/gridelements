@@ -43,89 +43,100 @@ class GridelementsGridColumn extends GridColumn
     /**
      * @var int
      */
-    protected $gridContainerId;
+    protected int $gridContainerId;
 
     /**
      * @var bool
      */
-    protected $collapsed = false;
+    protected bool $collapsed = false;
 
     /**
      * @var array
      */
-    protected $allowed = [];
+    protected array $allowed = [];
 
     /**
      * @var string
      */
-    protected $allowedContentType = '';
+    protected string $allowedContentType = '';
 
     /**
      * @var string
      */
-    protected $allowedListType = '';
+    protected string $allowedListType = '';
 
     /**
      * @var string
      */
-    protected $allowedGridType = '';
+    protected string $allowedGridType = '';
 
     /**
      * @var array
      */
-    protected $disallowed = [];
+    protected array $disallowed = [];
 
     /**
      * @var string
      */
-    protected $disallowedContentType = '';
+    protected string $disallowedContentType = '';
 
     /**
      * @var string
      */
-    protected $disallowedListType = '';
+    protected string $disallowedListType = '';
 
     /**
      * @var string
      */
-    protected $disallowedGridType = '';
+    protected string $disallowedGridType = '';
 
     /**
      * @var int
      */
-    protected $maxitems = 0;
+    protected int $maxitems = 0;
 
     /**
      * @var bool
      */
-    protected $disableNewContent = false;
+    protected bool $disableNewContent = false;
 
     /**
      * @var bool
      */
-    protected $tooManyItems = false;
+    protected bool $tooManyItems = false;
 
     /**
      * @var bool
      */
-    protected $active = false;
+    protected bool $active = false;
 
     /**
      * @var string
      */
-    protected $maxItemsClass = '';
+    protected string $maxItemsClass = '';
 
+    /**
+     * @param PageLayoutContext $context
+     * @param array $columnDefinition
+     * @param int $gridContainerId
+     */
     public function __construct(PageLayoutContext $context, array $columnDefinition, int $gridContainerId)
     {
         parent::__construct($context, $columnDefinition);
         $this->gridContainerId = $gridContainerId;
     }
 
+    /**
+     * @return bool
+     */
     public function isActive(): bool
     {
         return $this->columnNumber !== null && $this->active === true;
     }
 
+    /**
+     * @return int|null
+     */
     public function getGridContainerId(): ?int
     {
         return $this->gridContainerId;
@@ -136,141 +147,225 @@ class GridelementsGridColumn extends GridColumn
         $this->active = true;
     }
 
-    public function setCollapsed($collapsed)
+    /**
+     * @param bool $collapsed
+     */
+    public function setCollapsed(bool $collapsed)
     {
-        $this->collapsed = (bool)$collapsed;
+        $this->collapsed = $collapsed;
     }
 
+    /**
+     * @return bool|null
+     */
     public function getCollapsed(): ?bool
     {
         return $this->collapsed;
     }
 
+    /**
+     * @param array $allowed
+     */
     public function setAllowed(array $allowed)
     {
         $this->allowed = $allowed;
     }
 
+    /**
+     * @return array|null
+     */
     public function getAllowed(): ?array
     {
         return $this->allowed;
     }
 
+    /**
+     * @param string $allowedContentType
+     */
     public function setAllowedContentType(string $allowedContentType)
     {
         $this->allowedContentType = $allowedContentType;
     }
 
+    /**
+     * @return string|null
+     */
     public function getAllowedContentType(): ?string
     {
         return $this->allowedContentType;
     }
 
+    /**
+     * @param string $allowedListType
+     */
     public function setAllowedListType(string $allowedListType)
     {
         $this->allowedListType = $allowedListType;
     }
 
+    /**
+     * @return string|null
+     */
     public function getAllowedListType(): ?string
     {
         return $this->allowedListType;
     }
 
+    /**
+     * @param string $allowedGridType
+     */
     public function setAllowedGridType(string $allowedGridType)
     {
         $this->allowedGridType = $allowedGridType;
     }
 
+    /**
+     * @return string|null
+     */
     public function getAllowedGridType(): ?string
     {
         return $this->disallowedGridType;
     }
 
+    /**
+     * @param array $disallowed
+     */
     public function setDisallowed(array $disallowed)
     {
         $this->disallowed = $disallowed;
     }
 
+    /**
+     * @return array|null
+     */
     public function getDisallowed(): ?array
     {
         return $this->disallowed;
     }
 
+    /**
+     * @param string $disallowedContentType
+     */
     public function setDisallowedContentType(string $disallowedContentType)
     {
         $this->disallowedContentType = $disallowedContentType;
     }
 
+    /**
+     * @return string|null
+     */
     public function getDisallowedContentType(): ?string
     {
         return $this->disallowedContentType;
     }
 
+    /**
+     * @param string $disallowedListType
+     */
     public function setDisallowedListType(string $disallowedListType)
     {
         $this->disallowedListType = $disallowedListType;
     }
 
+    /**
+     * @return string|null
+     */
     public function getDisallowedListType(): ?string
     {
         return $this->disallowedListType;
     }
 
+    /**
+     * @param string $disallowedGridType
+     */
     public function setDisallowedGridType(string $disallowedGridType)
     {
         $this->disallowedGridType = $disallowedGridType;
     }
 
+    /**
+     * @return string|null
+     */
     public function getDisallowedGridType(): ?string
     {
         return $this->disallowedGridType;
     }
 
+    /**
+     * @param int $maxitems
+     */
     public function setMaxitems(int $maxitems)
     {
         $this->maxitems = $maxitems;
     }
 
+    /**
+     * @return int|null
+     */
     public function getMaxitems(): ?int
     {
         return $this->maxitems;
     }
 
+    /**
+     * @return int|null
+     */
     public function getNumberOfItems(): ?int
     {
         return count($this->items);
     }
 
+    /**
+     * @param bool $disableNewContent
+     */
     public function setDisableNewContent(bool $disableNewContent)
     {
         $this->disableNewContent = $disableNewContent;
     }
 
+    /**
+     * @return bool|null
+     */
     public function getDisableNewContent(): ?bool
     {
         return $this->disableNewContent;
     }
 
+    /**
+     * @param bool $tooManyItems
+     */
     public function setTooManyItems(bool $tooManyItems)
     {
         $this->tooManyItems = $tooManyItems;
     }
 
+    /**
+     * @return bool|null
+     */
     public function getTooManyItems(): ?bool
     {
         return $this->tooManyItems;
     }
 
+    /**
+     * @param string $maxItemsClass
+     */
     public function setMaxItemsClass(string $maxItemsClass)
     {
         $this->maxItemsClass = $maxItemsClass;
     }
 
+    /**
+     * @return string|null
+     */
     public function getMaxItemsClass(): ?string
     {
         return $this->maxItemsClass;
     }
 
+    /**
+     * @param array $layoutColumns
+     */
     public function setRestrictions(array $layoutColumns)
     {
         if (empty($layoutColumns)) {
@@ -285,15 +380,9 @@ class GridelementsGridColumn extends GridColumn
         $allowedGridTypes = [];
 
         // first get disallowed CTypes
-        if (isset($layoutColumns['disallowed']) && isset($layoutColumns['disallowed'][$this->columnNumber])) {
-            $this->setDisallowed($layoutColumns['disallowed'][$this->columnNumber]);
-        }
-        if (isset($layoutColumns['allowed']) && isset($layoutColumns['allowed'][$this->columnNumber])) {
-            $this->setAllowed($layoutColumns['allowed'][$this->columnNumber]);
-        }
-        if (isset($this->getDisallowed()['CType'])) {
-            $disallowedContentTypes = $this->getDisallowed()['CType'];
-        }
+        $this->setDisallowed($layoutColumns['disallowed'][$this->columnNumber] ?? []);
+        $this->setAllowed($layoutColumns['allowed'][$this->columnNumber] ?? []);
+        $disallowedContentTypes = $this->getDisallowed()['CType'] ?? [];
         if (!isset($disallowedContentTypes['*']) && !empty($disallowedContentTypes)) {
             foreach ($disallowedContentTypes as $key => &$ctype) {
                 $ctype = $key;
@@ -306,9 +395,7 @@ class GridelementsGridColumn extends GridColumn
         }
         // when everything is disallowed, no further checks are necessary
         if (!isset($disallowedContentTypes['*'])) {
-            if (isset($this->getAllowed()['CType'])) {
-                $allowedContentTypes = $this->getAllowed()['CType'];
-            }
+            $allowedContentTypes = $this->getAllowed()['CType'] ?? [];
             if (!isset($allowedContentTypes['*']) && !empty($allowedContentTypes)) {
                 // set allowed CTypes unless they are disallowed
                 foreach ($allowedContentTypes as $key => &$ctype) {
@@ -321,7 +408,7 @@ class GridelementsGridColumn extends GridColumn
                 }
             }
             // get disallowed list types
-            $disallowedListTypes = $this->getDisallowed()['list_type'];
+            $disallowedListTypes = $this->getDisallowed()['list_type'] ?? [];
             if (!isset($disallowedListTypes['*']) && !empty($disallowedListTypes)) {
                 foreach ($disallowedListTypes as $key => &$ctype) {
                     $ctype = $key;
@@ -335,9 +422,7 @@ class GridelementsGridColumn extends GridColumn
             }
             // when each list type is disallowed, no further list type checks are necessary
             if (!isset($disallowedListTypes['*'])) {
-                if (isset($this->getAllowed()['list_type'])) {
-                    $allowedListTypes = $this->getAllowed()['list_type'];
-                }
+                $allowedListTypes = $this->getAllowed()['list_type'] ?? [];
                 if (!isset($allowedListTypes['*']) && !empty($allowedListTypes)) {
                     foreach ($allowedListTypes as $listType => &$listTypeData) {
                         // set allowed list types unless they are disallowed
@@ -356,7 +441,7 @@ class GridelementsGridColumn extends GridColumn
                 }
             }
             // get disallowed grid types
-            $disallowedGridTypes = $this->getDisallowed()['tx_gridelements_backend_layout'];
+            $disallowedGridTypes = $this->getDisallowed()['tx_gridelements_backend_layout'] ?? [];
             if (!isset($disallowedGridTypes['*']) && !empty($disallowedGridTypes)) {
                 foreach ($disallowedGridTypes as $key => &$ctype) {
                     $ctype = $key;
@@ -370,9 +455,7 @@ class GridelementsGridColumn extends GridColumn
             }
             // when each list type is disallowed, no further grid types checks are necessary
             if (!isset($disallowedGridTypes['*'])) {
-                if (isset($this->getAllowed()['tx_gridelements_backend_layout'])) {
-                    $allowedGridTypes = $this->getAllowed()['tx_gridelements_backend_layout'];
-                }
+                $allowedGridTypes = $this->getAllowed()['tx_gridelements_backend_layout'] ?? [];
                 if (!isset($allowedGridTypes['*']) && !empty($allowedGridTypes)) {
                     foreach ($allowedGridTypes as $gridType => &$gridTypeData) {
                         // set allowed grid types unless they are disallowed
@@ -417,6 +500,9 @@ class GridelementsGridColumn extends GridColumn
         }
     }
 
+    /**
+     * @param GridColumnItem $item
+     */
     public function addItem(GridColumnItem $item): void
     {
         $this->items[] = $item;
@@ -426,6 +512,10 @@ class GridelementsGridColumn extends GridColumn
         $this->setMaxItemsClass($this->getTooManyItems() ? ' danger' : $this->getMaxItemsClass());
     }
 
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
+     */
     public function getNewContentUrlWithRestrictions(): string
     {
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);

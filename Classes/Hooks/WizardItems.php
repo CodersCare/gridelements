@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Hooks;
 
 /***************************************************************
@@ -42,7 +44,7 @@ class WizardItems implements NewContentElementWizardHookInterface
     /**
      * @var LayoutSetup
      */
-    protected $layoutSetup;
+    protected LayoutSetup $layoutSetup;
 
     /**
      * inject layout setup
@@ -77,8 +79,8 @@ class WizardItems implements NewContentElementWizardHookInterface
 
         $container = (int)GeneralUtility::_GP('tx_gridelements_container');
         $column = (int)GeneralUtility::_GP('tx_gridelements_columns');
-        $allowed_GP = GeneralUtility::_GP('tx_gridelements_allowed');
-        $disallowed_GP = GeneralUtility::_GP('tx_gridelements_disallowed');
+        $allowed_GP = (string)GeneralUtility::_GP('tx_gridelements_allowed');
+        $disallowed_GP = (string)GeneralUtility::_GP('tx_gridelements_disallowed');
         if (!empty($allowed_GP) || !empty($disallowed_GP)) {
             $allowed = json_decode(base64_decode($allowed_GP), true) ?: [];
             if (!empty($allowed)) {
@@ -109,12 +111,12 @@ class WizardItems implements NewContentElementWizardHookInterface
             !isset($disallowed['CType']['gridelements_pi1']) &&
             !isset($disallowed['tx_gridelements_backend_layout']['*'])
         ) {
-            $allowedGridTypes = $allowed['tx_gridelements_backend_layout'] ?: [];
-            $disallowedGridTypes = $disallowed['tx_gridelements_backend_layout'] ?: [];
+            $allowedGridTypes = $allowed['tx_gridelements_backend_layout'] ?? [];
+            $disallowedGridTypes = $disallowed['tx_gridelements_backend_layout'] ?? [];
             $excludeLayouts = $this->getExcludeLayouts($container, $pageId);
 
             $gridItems = $this->layoutSetup->getLayoutWizardItems(
-                $parentObject->getColPos(),
+                (int)$parentObject->getColPos(),
                 $excludeLayouts,
                 $allowedGridTypes,
                 $disallowedGridTypes
@@ -132,7 +134,7 @@ class WizardItems implements NewContentElementWizardHookInterface
      *
      * @return BackendUserAuthentication
      */
-    public function getBackendUser()
+    public function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }
@@ -142,11 +144,9 @@ class WizardItems implements NewContentElementWizardHookInterface
      *
      * @param int $pageUid
      */
-    public function init($pageUid)
+    public function init(int $pageUid)
     {
-        if (!$this->layoutSetup instanceof LayoutSetup) {
-            $this->layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($pageUid);
-        }
+        $this->layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($pageUid);
     }
 
     /**
@@ -159,29 +159,29 @@ class WizardItems implements NewContentElementWizardHookInterface
     public function removeDisallowedWizardItems(array $allowed, array $disallowed, array &$wizardItems)
     {
         foreach ($wizardItems as $key => $wizardItem) {
-            if (!$wizardItems[$key]['header']) {
+            if (empty($wizardItem['header'])) {
                 if (
                     (
                         !empty($allowed['CType']) &&
-                        !isset($allowed['CType'][$wizardItems[$key]['tt_content_defValues']['CType']]) &&
+                        !isset($allowed['CType'][$wizardItem['tt_content_defValues']['CType']]) &&
                         !isset($allowed['CType']['*'])
                     ) ||
                     (
                         !empty($disallowed) && (
-                            isset($disallowed['CType'][$wizardItems[$key]['tt_content_defValues']['CType']]) ||
+                            isset($disallowed['CType'][$wizardItem['tt_content_defValues']['CType']]) ||
                             isset($disallowed['CType']['*'])
                         )
                     ) ||
                     (
-                        isset($wizardItems[$key]['tt_content_defValues']['list_type']) &&
+                        isset($wizardItem['tt_content_defValues']['list_type']) &&
                         !empty($allowed['list_type']) &&
-                        !isset($allowed['list_type'][$wizardItems[$key]['tt_content_defValues']['list_type']]) &&
+                        !isset($allowed['list_type'][$wizardItem['tt_content_defValues']['list_type']]) &&
                         !isset($allowed['list_type']['*'])
                     ) ||
                     (
-                        isset($wizardItems[$key]['tt_content_defValues']['list_type']) &&
+                        isset($wizardItem['tt_content_defValues']['list_type']) &&
                         !empty($disallowed) && (
-                            isset($disallowed['list_type'][$wizardItems[$key]['tt_content_defValues']['list_type']]) ||
+                            isset($disallowed['list_type'][$wizardItem['tt_content_defValues']['list_type']]) ||
                             isset($disallowed['list_type']['*'])
                         )
                     )
@@ -198,26 +198,26 @@ class WizardItems implements NewContentElementWizardHookInterface
      * @param int $container
      * @param int $pageId The ID of the page that triggered this hook
      *
-     * @return array
+     * @return string
      */
-    public function getExcludeLayouts($container, $pageId)
+    public function getExcludeLayouts(int $container, int $pageId)
     {
         $excludeLayouts = 0;
         $excludeArray = [];
 
         $TSconfig = BackendUtility::getPagesTSconfig($pageId);
 
-        if ($container && $TSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['itemsProcFunc.']['topLevelLayouts']) {
+        if ($container && !empty($TSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['itemsProcFunc.']['topLevelLayouts'])) {
             $excludeArray[] = trim($TSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['itemsProcFunc.']['topLevelLayouts']);
         }
 
-        $excludeLayoutsTS = $TSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['itemsProcFunc.']['excludeLayouts'];
+        $excludeLayoutsTS = $TSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['itemsProcFunc.']['excludeLayouts'] ?? '';
 
         if ($excludeLayoutsTS) {
             $excludeArray[] = trim($excludeLayoutsTS);
         }
 
-        $userExcludeLayoutsTS = $TSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['itemsProcFunc.']['userExcludeLayouts'];
+        $userExcludeLayoutsTS = $TSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['itemsProcFunc.']['userExcludeLayouts'] ?? '';
 
         if ($userExcludeLayoutsTS) {
             $excludeArray[] = trim($userExcludeLayoutsTS);
@@ -227,7 +227,7 @@ class WizardItems implements NewContentElementWizardHookInterface
             $excludeLayouts = implode(',', $excludeArray);
         }
 
-        return $excludeLayouts;
+        return (string)$excludeLayouts;
     }
 
     /**
@@ -255,7 +255,7 @@ class WizardItems implements NewContentElementWizardHookInterface
         foreach ($gridItems as $key => $item) {
             $largeIcon = '';
             if (empty($item['iconIdentifierLarge'])) {
-                if (is_array($item['icon']) && isset($item['icon'][1])) {
+                if (!empty($item['icon']) && is_array($item['icon']) && isset($item['icon'][1])) {
                     $item['iconIdentifierLarge'] = 'gridelements-large-' . $key;
                     $largeIcon = $item['icon'][1];
                     if (StringUtility::beginsWith($largeIcon, '../typo3conf/ext/')) {
@@ -298,17 +298,17 @@ class WizardItems implements NewContentElementWizardHookInterface
             // Traverse defVals
             $defVals = '';
 
-            if ($item['tt_content_defValues']) {
+            if (!empty($item['tt_content_defValues'])) {
                 foreach ($item['tt_content_defValues'] as $field => $value) {
                     $value = $this->getLanguageService()->sL($value);
                     $defVals .= '&defVals[tt_content][' . $field . ']=' . $value;
                 }
             }
 
-            $itemIdentifier = $item['alias'] ? $item['alias'] : $item['uid'];
+            $itemIdentifier = $item['alias'] ?? $item['uid'];
             $wizardItems['gridelements_' . $itemIdentifier] = [
-                'title' => $item['title'],
-                'description' => $item['description'],
+                'title' => $item['title'] ?? '',
+                'description' => $item['description'] ?? '',
                 'params' => ($largeIcon ? '&largeIconImage=' . $largeIcon : '')
                     . '&defVals[tt_content][CType]=gridelements_pi1' . $defVals . '&defVals[tt_content][tx_gridelements_backend_layout]=' . $item['uid']
                     . ($item['tll'] ? '&isTopLevelLayout' : ''),
@@ -318,9 +318,9 @@ class WizardItems implements NewContentElementWizardHookInterface
                 ],
             ];
             $icon = '';
-            if ($item['iconIdentifier']) {
+            if (!empty($item['iconIdentifier'])) {
                 $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = $item['iconIdentifier'];
-            } elseif (is_array($item['icon']) && isset($item['icon'][0])) {
+            } elseif (!empty($item['icon']) && is_array($item['icon']) && isset($item['icon'][0])) {
                 $item['iconIdentifier'] = 'gridelements-' . $key;
                 $icon = $item['icon'][0];
                 if (StringUtility::beginsWith($icon, '../typo3conf/ext/')) {
@@ -361,7 +361,7 @@ class WizardItems implements NewContentElementWizardHookInterface
     /**
      * @return LanguageService
      */
-    public function getLanguageService()
+    public function getLanguageService(): LanguageService
     {
         return $GLOBALS['LANG'];
     }
@@ -373,18 +373,21 @@ class WizardItems implements NewContentElementWizardHookInterface
      * @param int $container
      * @param int $column
      */
-    public function addGridValuesToWizardItems(array &$wizardItems, $container, $column)
+    public function addGridValuesToWizardItems(array &$wizardItems, int $container, int $column)
     {
         foreach ($wizardItems as $key => $wizardItem) {
-            if (!$wizardItems[$key]['header']) {
+            if (empty($wizardItem['header'])) {
                 if ($container !== 0) {
-                    $wizardItems[$key]['tt_content_defValues']['tx_gridelements_container'] = (int)$container;
-                    $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_container]=' . (int)$container;
+                    if (!isset($wizardItem['tt_content_defValues'])) {
+                        $wizardItems[$key]['tt_content_defValues'] = [];
+                    }
+                    $wizardItems[$key]['tt_content_defValues']['tx_gridelements_container'] = $container;
+                    $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_container]=' . $container;
                 }
-                $wizardItems[$key]['tt_content_defValues']['tx_gridelements_columns'] = (int)$column;
-                $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_columns]=' . (int)$column;
+                $wizardItems[$key]['tt_content_defValues']['tx_gridelements_columns'] = $column;
+                $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_columns]=' . $column;
             }
-            if ($wizardItems[$key]['tt_content_defValues']['CType'] === 'table') {
+            if (isset($wizardItems[$key]['tt_content_defValues']['CType']) && $wizardItems[$key]['tt_content_defValues']['CType'] === 'table') {
                 $wizardItems[$key]['tt_content_defValues']['bodytext'] = '';
                 $wizardItems[$key]['params'] .= '&defVals[tt_content][bodytext]=';
             }
@@ -401,7 +404,7 @@ class WizardItems implements NewContentElementWizardHookInterface
         $headersWithElements = [];
         foreach ($wizardItems as $key => $wizardItem) {
             $keyParts = GeneralUtility::trimExplode('_', $key);
-            if ($keyParts[1]) {
+            if (!empty($keyParts[1])) {
                 $keyChunk = '';
                 foreach ($keyParts as $keyPart) {
                     $keyChunk .= $keyChunk ? '_' . $keyPart : $keyPart;
@@ -410,7 +413,7 @@ class WizardItems implements NewContentElementWizardHookInterface
             }
         }
         foreach ($wizardItems as $key => $wizardItem) {
-            if ($wizardItems[$key]['header']) {
+            if (!empty($wizardItem['header'])) {
                 if (!isset($headersWithElements[$key])) {
                     unset($wizardItems[$key]);
                 }

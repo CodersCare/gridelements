@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\DataHandler;
 
 /***************************************************************
@@ -20,6 +22,7 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
@@ -37,12 +40,12 @@ class PreProcessFieldArray extends AbstractDataHandler
     /**
      * @var array
      */
-    protected $definitionValues;
+    protected array $definitionValues;
 
     /**
      * @var array
      */
-    protected $overrideValues;
+    protected array $overrideValues;
 
     /**
      * Function to set the colPos of an element depending on
@@ -55,21 +58,21 @@ class PreProcessFieldArray extends AbstractDataHandler
      *
      * @param array $fieldArray The array of fields and values that have been saved to the datamap
      * @param string $table The name of the table the data should be saved to
-     * @param int $id The parent uid of either the page or the container we are currently working on
+     * @param string $id The parent uid of either the page or the container we are currently working on
      * @param DataHandler $parentObj The parent object that triggered this hook
      */
-    public function execute_preProcessFieldArray(array &$fieldArray, $table, $id, DataHandler $parentObj)
+    public function execute_preProcessFieldArray(array &$fieldArray, string $table, string $id, DataHandler $parentObj)
     {
         if ($table === 'tt_content') {
             $this->init($table, $id, $parentObj);
             if (!$this->getTceMain()->isImporting) {
-                $cmdId = '';
-                if (is_array($parentObj->cmdmap['tt_content'])) {
+                $new = false;
+                if (!empty($parentObj->cmdmap['tt_content']) && is_array($parentObj->cmdmap['tt_content'])) {
                     $cmdId = (int)key($parentObj->cmdmap['tt_content']);
+                    $new = !MathUtility::canBeInterpretedAsInteger(key($parentObj->datamap['tt_content'])) ||
+                        !empty($parentObj->cmdmap['tt_content'][$cmdId]['copy']) ||
+                        !empty($parentObj->cmdmap['tt_content'][$cmdId]['move']);
                 }
-                $new = !MathUtility::canBeInterpretedAsInteger(key($parentObj->datamap['tt_content'])) ||
-                    !empty($parentObj->cmdmap['tt_content'][$cmdId]['copy']) ||
-                    !empty($parentObj->cmdmap['tt_content'][$cmdId]['move']);
                 $this->processFieldArrayForTtContent($fieldArray, $id, $new);
             }
         }
@@ -79,10 +82,10 @@ class PreProcessFieldArray extends AbstractDataHandler
      * process field array for table tt_content
      *
      * @param array $fieldArray
-     * @param int $id
+     * @param string $id
      * @param bool $new
      */
-    public function processFieldArrayForTtContent(array &$fieldArray, $id = 0, $new = false)
+    public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false)
     {
         $pid = (int)GeneralUtility::_GET('DDinsertNew');
 
@@ -100,14 +103,14 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param array $fieldArray
      * @param int $uidPid
      */
-    public function setDefaultFieldValues(array &$fieldArray, $uidPid = 0)
+    public function setDefaultFieldValues(array &$fieldArray, int $uidPid = 0)
     {
         // Default values:
         $newRow = []; // Used to store default values as found here:
 
         // Default values as set in userTS:
         $TCAdefaultOverride = (array)($this->getBackendUser()->getTSConfig()['TCAdefaults'] ?? []);
-        if (is_array($TCAdefaultOverride['tt_content.'])) {
+        if (!empty($TCAdefaultOverride['tt_content.']) && is_array($TCAdefaultOverride['tt_content.'])) {
             foreach ($TCAdefaultOverride['tt_content.'] as $field => $value) {
                 if (isset($GLOBALS['TCA']['tt_content']['columns'][$field])) {
                     $newRow[$field] = $value;
@@ -119,14 +122,14 @@ class PreProcessFieldArray extends AbstractDataHandler
             $record = BackendUtility::getRecord('tt_content', abs($uidPid), 'pid');
             $pageId = $record['pid'];
         } else {
-            $pageId = (int)$uidPid;
+            $pageId = $uidPid;
         }
 
         $pageTS = BackendUtility::getPagesTSconfig($pageId);
 
         if (isset($pageTS['TCAdefaults.'])) {
             $TCAPageTSOverride = $pageTS['TCAdefaults.'];
-            if (is_array($TCAPageTSOverride['tt_content.'])) {
+            if (!empty($TCAPageTSOverride['tt_content.']) && is_array($TCAPageTSOverride['tt_content.'])) {
                 foreach ($TCAPageTSOverride['tt_content.'] as $field => $value) {
                     if (isset($GLOBALS['TCA']['tt_content']['columns'][$field])) {
                         $newRow[$field] = $value;
@@ -136,12 +139,12 @@ class PreProcessFieldArray extends AbstractDataHandler
         }
 
         // Default values as submitted:
-        $this->definitionValues = GeneralUtility::_GP('defVals');
-        $this->overrideValues = GeneralUtility::_GP('overrideVals');
-        if (!is_array($this->definitionValues) && is_array($this->overrideValues)) {
+        $this->definitionValues = GeneralUtility::_GP('defVals') ?? [];
+        $this->overrideValues = GeneralUtility::_GP('overrideVals') ?? [];
+        if (empty($this->definitionValues) && !empty($this->overrideValues)) {
             $this->definitionValues = $this->overrideValues;
         }
-        if (is_array($this->definitionValues['tt_content'])) {
+        if (!empty($this->definitionValues['tt_content']) && is_array($this->definitionValues['tt_content'])) {
             foreach ($this->definitionValues['tt_content'] as $field => $value) {
                 if (isset($GLOBALS['TCA']['tt_content']['columns'][$field])) {
                     $newRow[$field] = $value;
@@ -169,7 +172,7 @@ class PreProcessFieldArray extends AbstractDataHandler
     /**
      * @return BackendUserAuthentication
      */
-    public function getBackendUser()
+    public function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }
@@ -196,7 +199,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      *
      * @return string $defaultData
      */
-    public function extractDefaultDataFromDataStructure($dataStructure)
+    public function extractDefaultDataFromDataStructure(string $dataStructure): string
     {
         $returnXML = '';
         $sheetArray = [];
@@ -234,10 +237,10 @@ class PreProcessFieldArray extends AbstractDataHandler
      * set initial entries to field array
      *
      * @param array $fieldArray
-     * @param int $contentId
+     * @param string $contentId
      * @param bool $new
      */
-    public function setFieldEntries(array &$fieldArray, $contentId = 0, $new = false)
+    public function setFieldEntries(array &$fieldArray, string $contentId = '0', bool $new = false)
     {
         $containerUpdateArray = [];
         if (isset($fieldArray['tx_gridelements_container'])) {
@@ -268,7 +271,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      */
     public function setFieldEntriesForGridContainers(array &$fieldArray)
     {
-        if ((int)$fieldArray['tx_gridelements_container'] > 0 && isset($fieldArray['colPos']) && (int)$fieldArray['colPos'] !== -1) {
+        if (!empty($fieldArray['tx_gridelements_container']) && isset($fieldArray['colPos']) && (int)$fieldArray['colPos'] !== -1) {
             $fieldArray['colPos'] = -1;
             $fieldArray['tx_gridelements_columns'] = 0;
             $targetContainer = BackendUtility::getRecord(
@@ -276,12 +279,12 @@ class PreProcessFieldArray extends AbstractDataHandler
                 (int)$fieldArray['tx_gridelements_container'],
                 'sys_language_uid'
             );
-            if ((int)$targetContainer['sys_language_uid'] > -1) {
+            if (isset($targetContainer) && (int)$targetContainer['sys_language_uid'] > -1) {
                 $fieldArray['sys_language_uid'] = (int)$targetContainer['sys_language_uid'];
             }
         } else {
             if (isset($fieldArray['tx_gridelements_container']) && (int)$fieldArray['tx_gridelements_container'] === 0 && (int)$fieldArray['colPos'] === -1) {
-                $fieldArray['colPos'] = $this->checkForRootColumn((int)$this->getContentUid());
+                $fieldArray['colPos'] = $this->checkForRootColumn($this->getContentUid());
                 $fieldArray['tx_gridelements_columns'] = 0;
                 $fieldArray['tx_gridelements_container'] = 0;
             } else {
@@ -316,8 +319,9 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param int $contentId The uid of the current content element
      *
      * @return int The new column of this content element
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function checkForRootColumn($contentId)
+    public function checkForRootColumn(int $contentId): int
     {
         $queryBuilder = $this->getQueryBuilder();
         $queryBuilder
@@ -335,7 +339,7 @@ class PreProcessFieldArray extends AbstractDataHandler
             ->where(
                 $queryBuilder->expr()->eq(
                     't2.uid',
-                    $queryBuilder->createNamedParameter((int)$contentId, \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($contentId, PDO::PARAM_INT)
                 )
             )
             ->execute()

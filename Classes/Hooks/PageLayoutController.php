@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Hooks;
 
 /***************************************************************
@@ -23,12 +25,16 @@ namespace GridElementsTeam\Gridelements\Hooks;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\Helper;
 use TYPO3\CMS\Backend\Clipboard\Clipboard;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -46,10 +52,10 @@ class PageLayoutController
     /**
      * @var Helper
      */
-    protected $helper;
+    protected Helper $helper;
 
     /**
-     * @var \TYPO3\CMS\Core\Page\PageRenderer
+     * @var PageRenderer
      */
     protected $pageRenderer;
 
@@ -57,7 +63,7 @@ class PageLayoutController
     {
         $this->extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
         $this->helper = Helper::getInstance();
-        $this->pageRenderer = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Page\PageRenderer::class);
+        $this->pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
     }
 
     /**
@@ -108,31 +114,39 @@ class PageLayoutController
         if (is_array($layout) && !empty($layout['__config']['backend_layout.']['rows.'])) {
             /** @var LayoutSetup $layoutSetup */
             $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init(0);
-            $layout = ['config' => $layout['__config']['backend_layout.']];
+            $layout = [
+                'config' => $layout['__config']['backend_layout.'],
+                'allowed' => [],
+                'disallowed' => [],
+                'maxitems' => [],
+            ];
             $columns = $layoutSetup->checkAvailableColumns($layout, true);
-            if ($columns['allowed'] || $columns['disallowed'] || $columns['maxitems']) {
+            if (isset($columns['allowed']) || isset($columns['disallowed']) || isset($columns['maxitems'])) {
                 $layout['columns'] = $columns;
                 unset($layout['columns']['allowed']);
-                $layout['allowed'] = $columns['allowed'] ?: [];
-                $layout['disallowed'] = $columns['disallowed'] ?: [];
-                $layout['maxitems'] = $columns['maxitems'] ?: [];
+                $layout['allowed'] = $columns['allowed'] ?? [];
+                $layout['disallowed'] = $columns['disallowed'] ?? [];
+                $layout['maxitems'] = $columns['maxitems'] ?? [];
             }
         }
 
         // add Ext.onReady() code from file
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        $pAddExtOnReadyCode .= '
-            top.pageColumnsAllowed = ' . json_encode($layout['allowed']) . ';
-            top.pageColumnsDisallowed = ' . json_encode($layout['disallowed']) . ';
-            top.pageColumnsMaxitems = ' . json_encode($layout['maxitems']) . ';
-            top.pasteReferenceAllowed = ' . ($this->getBackendUser()->checkAuthMode(
-            'tt_content',
-            'CType',
-            'shortcut',
-            $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode']
-        ) ? 'true' : 'false') . ';
-            top.skipDraggableDetails = ' . ($this->getBackendUser()->uc['dragAndDropHideNewElementWizardInfoOverlay'] ? 'true' : 'false') . ';
-            top.browserUrl = ' . json_encode((string)$uriBuilder->buildUriFromRoute('wizard_element_browser')) . ';';
+        try {
+            $pAddExtOnReadyCode .= '
+                top.pageColumnsAllowed = ' . json_encode($layout['allowed']) . ';
+                top.pageColumnsDisallowed = ' . json_encode($layout['disallowed']) . ';
+                top.pageColumnsMaxitems = ' . json_encode($layout['maxitems']) . ';
+                top.pasteReferenceAllowed = ' . ($this->getBackendUser()->checkAuthMode(
+                'tt_content',
+                'CType',
+                'shortcut',
+                $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode']
+            ) ? 'true' : 'false') . ';
+                top.skipDraggableDetails = ' . ($this->getBackendUser()->uc['dragAndDropHideNewElementWizardInfoOverlay'] ? 'true' : 'false') . ';
+                top.browserUrl = ' . json_encode((string)$uriBuilder->buildUriFromRoute('wizard_element_browser')) . ';';
+        } catch (RouteNotFoundException $e) {
+        }
 
         if (!empty($clipBoard) && !empty($clipBoard['el'])) {
             $clipBoardElement = GeneralUtility::trimExplode('|', key($clipBoard['el']));
@@ -150,8 +164,8 @@ class PageLayoutController
             }
         }
 
-        if ((boolean)$this->extensionConfiguration['disableCopyFromPageButton'] !== true
-            && (boolean)$this->helper->getBackendUser()->uc['disableCopyFromPageButton'] !== true) {
+        if (empty($this->extensionConfiguration['disableCopyFromPageButton'])
+            && empty($this->helper->getBackendUser()->uc['disableCopyFromPageButton'])) {
             $pAddExtOnReadyCode .= '
                     top.copyFromAnotherPageLinkTemplate = ' . json_encode('<a class="t3js-paste-new btn btn-default" title="' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.copyfrompage') . '">' . $iconFactory->getIcon(
                 'actions-insert-reference',
@@ -165,9 +179,9 @@ class PageLayoutController
     /**
      * Gets the current backend user.
      *
-     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication
+     * @return BackendUserAuthentication
      */
-    public function getBackendUser()
+    public function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }
@@ -175,9 +189,9 @@ class PageLayoutController
     /**
      * getter for language service
      *
-     * @return \TYPO3\CMS\Core\Localization\LanguageService
+     * @return LanguageService
      */
-    public function getLanguageService()
+    public function getLanguageService(): LanguageService
     {
         return $GLOBALS['LANG'];
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Hooks;
 
 /***************************************************************
@@ -21,6 +23,11 @@ namespace GridElementsTeam\Gridelements\Hooks;
  ***************************************************************/
 class PageLayoutView
 {
+    /**
+     * @param array $params
+     * @param \TYPO3\CMS\Backend\View\PageLayoutView $parentObject
+     * @return bool
+     */
     public function contentIsUsed(array $params, \TYPO3\CMS\Backend\View\PageLayoutView $parentObject): bool
     {
         if ($params['used']) {

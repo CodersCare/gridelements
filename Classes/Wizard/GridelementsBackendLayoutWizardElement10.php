@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\Wizard;
 
 /***************************************************************
@@ -48,7 +50,7 @@ class GridelementsBackendLayoutWizardElement10 extends BackendLayoutWizardElemen
     /**
      * @return array
      */
-    public function render()
+    public function render(): array
     {
         $lang = $this->getLanguageService();
         $resultArray = $this->initializeResultArray();
@@ -81,8 +83,8 @@ class GridelementsBackendLayoutWizardElement10 extends BackendLayoutWizardElemen
         $html[] = ' id="editor"';
         $html[] = ' class="t3js-grideditor"';
         $html[] = ' data-data="' . htmlspecialchars($json) . '"';
-        $html[] = ' data-rowcount="' . (int)$this->rowCount . '"';
-        $html[] = ' data-colcount="' . (int)$this->colCount . '"';
+        $html[] = ' data-rowcount="' . $this->rowCount . '"';
+        $html[] = ' data-colcount="' . $this->colCount . '"';
         $html[] = ' data-field="' . htmlspecialchars($this->data['parameterArray']['itemFormElName']) . '"';
         $html[] = '>';
         $html[] = '</div>';

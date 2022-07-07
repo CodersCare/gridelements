@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use GridElementsTeam\Gridelements\Wizard\GridelementsBackendLayoutWizardElement;
 use GridElementsTeam\Gridelements\Wizard\GridelementsBackendLayoutWizardElement10;
 

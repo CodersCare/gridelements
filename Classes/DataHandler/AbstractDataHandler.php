@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GridElementsTeam\Gridelements\DataHandler;
 
 /***************************************************************
@@ -22,6 +24,7 @@ namespace GridElementsTeam\Gridelements\DataHandler;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\Helper;
+use PDO;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -41,54 +44,52 @@ abstract class AbstractDataHandler
     /**
      * @var Connection
      */
-    protected $connection;
+    protected Connection $connection;
 
     /**
      * @var string
      */
-    protected $table;
+    protected string $table;
 
     /**
      * @var int
      */
-    protected $pageUid;
+    protected int $pageUid;
 
     /**
      * @var int
      */
-    protected $contentUid = 0;
+    protected int $contentUid = 0;
 
     /**
      * @var DataHandler
      */
-    protected $dataHandler;
+    protected DataHandler $dataHandler;
 
     /**
      * @var LayoutSetup
      */
-    protected $layoutSetup;
+    protected LayoutSetup $layoutSetup;
 
     /**
      * initializes this class
      *
      * @param string $table : The name of the table the data should be saved to
-     * @param int $uidPid : The uid of the record or page we are currently working on
+     * @param string $uidPid : The uid of the record or page we are currently working on
      * @param DataHandler $dataHandler
      */
-    public function init($table, $uidPid, DataHandler $dataHandler)
+    public function init(string $table, string $uidPid, DataHandler $dataHandler)
     {
         $this->setTable($table);
         if ($table === 'tt_content' && (int)$uidPid < 0) {
-            $this->setContentUid(abs($uidPid));
+            $this->setContentUid(abs((int)$uidPid));
             $pageUid = Helper::getInstance()->getPidFromUid($this->getContentUid());
             $this->setPageUid($pageUid);
         } else {
             $this->setPageUid((int)$uidPid);
         }
         $this->setTceMain($dataHandler);
-        if (!$this->layoutSetup instanceof LayoutSetup) {
-            $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($this->getPageUid()));
-        }
+        $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($this->getPageUid()));
     }
 
     /**
@@ -96,7 +97,7 @@ abstract class AbstractDataHandler
      *
      * @return int contentUid
      */
-    public function getContentUid()
+    public function getContentUid(): int
     {
         return $this->contentUid;
     }
@@ -106,7 +107,7 @@ abstract class AbstractDataHandler
      *
      * @param int $contentUid
      */
-    public function setContentUid($contentUid)
+    public function setContentUid(int $contentUid)
     {
         $this->contentUid = $contentUid;
     }
@@ -136,7 +137,7 @@ abstract class AbstractDataHandler
      *
      * @return int pageUid
      */
-    public function getPageUid()
+    public function getPageUid(): int
     {
         return $this->pageUid;
     }
@@ -146,7 +147,7 @@ abstract class AbstractDataHandler
      *
      * @param int $pageUid
      */
-    public function setPageUid($pageUid)
+    public function setPageUid(int $pageUid)
     {
         $this->pageUid = $pageUid;
     }
@@ -154,6 +155,7 @@ abstract class AbstractDataHandler
     /**
      * Function to remove any remains of versioned records after finalizing a workspace action
      * via 'Discard' or 'Publish' commands
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function cleanupWorkspacesAfterFinalizing()
     {
@@ -163,11 +165,11 @@ abstract class AbstractDataHandler
             $queryBuilder->expr()->andX(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter(-1, \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter(-1, PDO::PARAM_INT)
                 ),
                 $queryBuilder->expr()->eq(
                     't3ver_wsid',
-                    $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
                 )
             ),
         ];
@@ -183,9 +185,9 @@ abstract class AbstractDataHandler
      * @param string $table
      * @return QueryBuilder $queryBuilder
      */
-    public function getQueryBuilder($table = 'tt_content')
+    public function getQueryBuilder(string $table = 'tt_content'): QueryBuilder
     {
-        /**@var $queryBuilder QueryBuilder */
+        /**@var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable($table);
         $queryBuilder->getRestrictions()
@@ -201,8 +203,9 @@ abstract class AbstractDataHandler
      * as well as translated references
      *
      * @param int $uid
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function checkAndUpdateTranslatedElements($uid)
+    public function checkAndUpdateTranslatedElements(int $uid)
     {
         if ($uid <= 0) {
             return;
@@ -219,7 +222,7 @@ abstract class AbstractDataHandler
             )
             ->from('tt_content')
             ->where(
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter((int)$uid, \PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
             )
             ->setMaxResults(1)
             ->execute()
@@ -240,7 +243,7 @@ abstract class AbstractDataHandler
                 ->where(
                     $queryBuilder->expr()->eq(
                         'uid',
-                        $queryBuilder->createNamedParameter((int)$currentValues['l18n_parent'], \PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter((int)$currentValues['l18n_parent'], PDO::PARAM_INT)
                     )
                 )
                 ->setMaxResults(1)
@@ -255,7 +258,7 @@ abstract class AbstractDataHandler
                 $this->getConnection()->update(
                     'tt_content',
                     $updateArray,
-                    ['uid' => (int)$originalUid]
+                    ['uid' => $originalUid]
                 );
             }
         }
@@ -276,7 +279,7 @@ abstract class AbstractDataHandler
             ->where(
                 $queryBuilder->expr()->eq(
                     'l18n_parent',
-                    $queryBuilder->createNamedParameter((int)$currentValues['uid'], \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter((int)$currentValues['uid'], PDO::PARAM_INT)
                 )
             )
             ->execute();
@@ -298,12 +301,12 @@ abstract class AbstractDataHandler
                         'l18n_parent',
                         $queryBuilder->createNamedParameter(
                             (int)$currentValues['tx_gridelements_container'],
-                            \PDO::PARAM_INT
+                            PDO::PARAM_INT
                         )
                     ),
                     $queryBuilder->expr()->eq(
                         't3ver_oid',
-                        $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
                     )
                 )
                 ->execute();
@@ -334,12 +337,11 @@ abstract class AbstractDataHandler
                 ['uid' => (int)$translatedUid]
             );
 
-            if (isset($updateArray['tx_gridelements_container']) &&
-                $translatedElement['tx_gridelements_container'] !== $updateArray['tx_gridelements_container']) {
+            if ($translatedElement['tx_gridelements_container'] !== $updateArray['tx_gridelements_container']) {
                 $containerUpdateArray[$translatedElement['tx_gridelements_container']] -= 1;
                 $containerUpdateArray[$updateArray['tx_gridelements_container']] += 1;
                 $this->getTceMain()->updateRefIndex('tt_content', (int)$translatedElement['tx_gridelements_container']);
-                $this->getTceMain()->updateRefIndex('tt_content', (int)$updateArray['tx_gridelements_container']);
+                $this->getTceMain()->updateRefIndex('tt_content', $updateArray['tx_gridelements_container']);
             }
         }
         if (!empty($containerUpdateArray)) {
@@ -352,7 +354,7 @@ abstract class AbstractDataHandler
      *
      * @return Connection
      */
-    public function getConnection()
+    public function getConnection(): Connection
     {
         return GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('tt_content');
@@ -363,7 +365,7 @@ abstract class AbstractDataHandler
      *
      * @return DataHandler dataHandler
      */
-    public function getTceMain()
+    public function getTceMain(): DataHandler
     {
         return $this->dataHandler;
     }
@@ -372,8 +374,9 @@ abstract class AbstractDataHandler
      * Function to handle record actions between different grid containers
      *
      * @param array $containerUpdateArray
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function doGridContainerUpdate($containerUpdateArray = [])
+    public function doGridContainerUpdate(array $containerUpdateArray = [])
     {
         if (is_array($containerUpdateArray) && !empty($containerUpdateArray)) {
             $queryBuilder = $this->getQueryBuilder();
@@ -406,7 +409,7 @@ abstract class AbstractDataHandler
      *
      * @return string table
      */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->table;
     }
@@ -416,7 +419,7 @@ abstract class AbstractDataHandler
      *
      * @param string $table
      */
-    public function setTable($table)
+    public function setTable(string $table)
     {
         $this->table = $table;
     }
