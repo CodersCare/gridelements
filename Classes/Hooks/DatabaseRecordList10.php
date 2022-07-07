@@ -56,6 +56,7 @@ class DatabaseRecordList10 implements RecordListHookInterface, RecordListGetTabl
     public function __construct()
     {
         $this->setLanguageService($GLOBALS['LANG']);
+        $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
     }
 
     /**
@@ -209,10 +210,6 @@ class DatabaseRecordList10 implements RecordListHookInterface, RecordListGetTabl
      */
     public function getIconFactory(): IconFactory
     {
-        if ($this->iconFactory === null) {
-            $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
-        }
-
         return $this->iconFactory;
     }
 

@@ -108,11 +108,6 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
     protected bool $no_noWrap = false;
 
     /**
-     * @var bool
-     */
-    protected bool $localizationView;
-
-    /**
      * Gridelements backend layouts to provide container column information
      *
      * @var LayoutSetup
@@ -893,7 +888,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
 
         $translations = $this->translations;
 
-        if ($theData['_EXPANDABLE_'] && $level < 8 && ($row['l18n_parent'] == 0 || !$this->localizationView) && !empty($theData['_CHILDREN_'])) {
+        if ($theData['_EXPANDABLE_'] && $level < 8 && !empty($theData['_CHILDREN_'])) {
             $expanded = $this->expandedGridelements[$row['uid']] && (($this->expandedGridelements[$row['tx_gridelements_container']] && $expanded) || $row['tx_gridelements_container'] === 0) ? ' expanded' : '';
             $previousGridColumn = '';
             $originalMoveUp = $this->showMoveUp;
@@ -919,7 +914,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                     $previousGridColumn = $child['tx_gridelements_columns'];
                     $this->showMoveUp = false;
                     $rowOutput .= '<tr class="t3-gridelements-child' . $expanded . '" data-trigger-container="'
-                        . ($this->localizationView && $row['l18n_parent'] ? $row['l18n_parent'] : $row['uid'])
+                        . $row['uid']
                         . '" data-grid-container="' . $row['uid'] . '">
                                 <td colspan="' . ($level + 2) . '"></td>
                                 <td colspan="' . (count($this->fieldArray) - $level - 2 + $this->maxDepth) . '" style="padding:5px;">
@@ -1431,7 +1426,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
         if (count($data) > 1) {
             $colsp = ' colspan="' . ($level + 1) . '"';
 
-            if ($data['_EXPANDABLE_'] && (!$this->localizationView || !$parent)) {
+            if ($data['_EXPANDABLE_']) {
                 $sortField = GeneralUtility::_GP('sortField') ? GeneralUtility::_GP('sortField') . ':' . (int)GeneralUtility::_GP('sortRev') : '';
                 $contentCollapseIcon = '';
                 /**
