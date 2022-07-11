@@ -446,10 +446,7 @@ class LayoutSetup
             }
         }
         foreach ($this->layoutSetup as $layoutId => $item) {
-            if ((
-                $colPos === -1 &&
-                    !empty($item['top_level_layout'])
-            ) ||
+            if (
                 (
                     $colPos === -1
                     && !empty($item['top_level_layout'])
@@ -630,11 +627,11 @@ class LayoutSetup
             return [];
         }
         foreach ($this->layoutSetup as $layoutId => $item) {
-            if ((
-                !empty($allowedGridTypes) &&
-                    !isset($allowedGridTypes[$layoutId])
-            ) ||
-                isset($disallowedGridTypes[$layoutId])
+            if (
+                (
+                    !empty($allowedGridTypes)
+                    && !isset($allowedGridTypes[$layoutId])
+                ) || isset($disallowedGridTypes[$layoutId])
             ) {
                 continue;
             }

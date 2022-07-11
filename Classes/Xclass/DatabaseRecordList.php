@@ -483,7 +483,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                         // Remove "_SELECTOR_", which is always the first item, from the field list
                         array_splice($this->fieldArray, 0, 1);
                     }
-                    break;
+                break;
                 case 'icon':
                     // In case no checkboxes are rendered (page translations or disabled) add the icon
                     // column, otherwise the selector column is using "colspan=2"
@@ -492,7 +492,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     ) {
                         $theData[$fCol] = '';
                     }
-                    break;
+                break;
                 case '_CONTROL_':
                     $theData[$fCol] = '<i>[' . htmlspecialchars($lang->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels._CONTROL_')) . ']</i>';
                     // In single table view, add button to edit displayed fields of marked / listed records
@@ -506,7 +506,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                                 . $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render()
                                 . '</button>';
                     }
-                    break;
+                break;
                 case '_PATH_':
                     // Path
                     $theData[$fCol] = '<i>[' . htmlspecialchars($lang->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels._PATH_')) . ']</i>';
@@ -524,7 +524,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     if ($this->showLocalizeColumn[$table] ?? false) {
                         $theData[$fCol] = htmlspecialchars($lang->getLL('Localize'));
                     }
-                    break;
+                break;
                 default:
                     // Regular fields header:
                     $theData[$fCol] = '';
@@ -558,34 +558,34 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                         $sortLabel = '<i>[' . rtrim(trim($sortLabel), ':') . ']</i>';
                     }
 
-                    if ($this->table && is_array($currentIdList)) {
-                        // If the numeric clipboard pads are selected, show duplicate sorting link:
-                        if ($this->noControlPanels === false
-                                && $this->isClipboardFunctionalityEnabled($table)
-                                && $this->clipObj->current !== 'normal'
-                        ) {
-                            $theData[$fCol] .= '<a class="btn btn-default" href="' . htmlspecialchars($this->listURL() . '&duplicateField=' . $fCol)
-                                    . '" title="' . htmlspecialchars($lang->getLL('clip_duplicates')) . '">'
-                                    . $this->iconFactory->getIcon('actions-document-duplicates-select', Icon::SIZE_SMALL)->render() . '</a>';
-                        }
-                        // If the table can be edited, add link for editing THIS field for all
-                        // listed records:
-                        if ($this->isEditable($table) && $permsEdit && ($GLOBALS['TCA'][$table]['columns'][$fCol] ?? false)) {
-                            $iTitle = sprintf($lang->getLL('editThisColumn'), $sortLabel);
-                            $theData[$fCol] .= '<button type="button"'
-                                    . ' class="btn btn-default t3js-record-edit-multiple"'
-                                    . ' title="' . htmlspecialchars($iTitle) . '"'
-                                    . ' aria-label="' . htmlspecialchars($iTitle) . '"'
-                                    . ' data-return-url="' . htmlspecialchars($this->listURL()) . '"'
-                                    . ' data-columns-only="' . htmlspecialchars($fCol) . '">'
-                                    . $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render()
-                                    . '</button>';
-                        }
-                        if (strlen($theData[$fCol]) > 0) {
-                            $theData[$fCol] = '<div class="btn-group">' . $theData[$fCol] . '</div> ';
-                        }
+                if ($this->table && is_array($currentIdList)) {
+                    // If the numeric clipboard pads are selected, show duplicate sorting link:
+                    if ($this->noControlPanels === false
+                        && $this->isClipboardFunctionalityEnabled($table)
+                        && $this->clipObj->current !== 'normal'
+                    ) {
+                        $theData[$fCol] .= '<a class="btn btn-default" href="' . htmlspecialchars($this->listURL() . '&duplicateField=' . $fCol)
+                            . '" title="' . htmlspecialchars($lang->getLL('clip_duplicates')) . '">'
+                            . $this->iconFactory->getIcon('actions-document-duplicates-select', Icon::SIZE_SMALL)->render() . '</a>';
                     }
-                    $theData[$fCol] .= $this->addSortLink($sortLabel, $fCol, $table);
+                    // If the table can be edited, add link for editing THIS field for all
+                    // listed records:
+                    if ($this->isEditable($table) && $permsEdit && ($GLOBALS['TCA'][$table]['columns'][$fCol] ?? false)) {
+                        $iTitle = sprintf($lang->getLL('editThisColumn'), $sortLabel);
+                        $theData[$fCol] .= '<button type="button"'
+                            . ' class="btn btn-default t3js-record-edit-multiple"'
+                            . ' title="' . htmlspecialchars($iTitle) . '"'
+                            . ' aria-label="' . htmlspecialchars($iTitle) . '"'
+                            . ' data-return-url="' . htmlspecialchars($this->listURL()) . '"'
+                            . ' data-columns-only="' . htmlspecialchars($fCol) . '">'
+                            . $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render()
+                            . '</button>';
+                    }
+                    if (strlen($theData[$fCol]) > 0) {
+                        $theData[$fCol] = '<div class="btn-group">' . $theData[$fCol] . '</div> ';
+                    }
+                }
+                $theData[$fCol] .= $this->addSortLink($sortLabel, $fCol, $table);
             }
         }
 
@@ -1001,8 +1001,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         if (
             (
                 $table === 'pages'
-                    && isset($row['doktype'])
-                    && !in_array((int)$row['doktype'], $this->getNoViewWithDokTypes($tsConfig), true)
+                && isset($row['doktype'])
+                && !in_array((int)$row['doktype'], $this->getNoViewWithDokTypes($tsConfig), true)
             ) || (
                 $table === 'tt_content'
                     && isset($this->pageRow['doktype'])
