@@ -1586,87 +1586,87 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                     if (!$this->moduleData['clipBoard']) {
                         break;
                     }
-                // Clipboard:
-                $cells = [];
-                // If there are elements on the clipboard for this table, and the parent page is not locked by editlock
-                // then display the "paste into" icon:
-                $elFromTable = $this->clipObj->elFromTable($table);
-                if (!empty($elFromTable) && $this->overlayEditLockPermissions($table)) {
-                    $href = htmlspecialchars($this->clipObj->pasteUrl($table, $this->id));
-                    $confirmMessage = $this->clipObj->confirmMsgText('pages', $this->pageRow, 'into', $elFromTable);
-                    $cells['pasteAfter'] = '<a class="btn btn-default t3js-modal-trigger"'
-                        . ' href="' . $href . '"'
-                        . ' title="' . htmlspecialchars($lang->getLL('clip_paste')) . '"'
-                        . ' data-title="' . htmlspecialchars($lang->getLL('clip_paste')) . '"'
-                        . ' data-content="' . htmlspecialchars($confirmMessage) . '"'
-                        . ' data-severity="warning">'
-                        . $this->iconFactory->getIcon('actions-document-paste-into', Icon::SIZE_SMALL)->render()
-                        . '</a>';
-                }
-                // If the numeric clipboard pads are enabled, display the control icons for that:
-                if ($this->clipObj->current !== 'normal') {
-                    // The "select" link:
-                    $spriteIcon = $this->iconFactory->getIcon('actions-edit-copy', Icon::SIZE_SMALL)->render();
-                    $cells['copyMarked'] = $this->linkClipboardHeaderIcon(
-                        $spriteIcon,
-                        $table,
-                        'setCB',
-                        '',
-                        $lang->getLL('clip_selectMarked')
-                    );
-                    // The "edit marked" link:
-                    $editUri = $uriBuilder->buildUriFromRoute('record_edit')
-                        . '&edit[' . $table . '][{entityIdentifiers:editList}]=edit'
-                        . '&returnUrl={T3_THIS_LOCATION}';
-                    $cells['edit'] = '<a class="btn btn-default t3js-record-edit-multiple" href="#"'
-                        . ' data-uri="' . htmlspecialchars($editUri) . '"'
-                        . ' title="' . htmlspecialchars($lang->getLL('clip_editMarked')) . '">'
-                        . $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render() . '</a>';
-                    // The "Delete marked" link:
-                    $cells['delete'] = $this->linkClipboardHeaderIcon(
-                        $this->iconFactory->getIcon('actions-edit-delete', Icon::SIZE_SMALL)->render(),
-                        $table,
-                        'delete',
-                        sprintf(
-                            $lang->getLL('clip_deleteMarkedWarning'),
-                            $lang->sL($GLOBALS['TCA'][$table]['ctrl']['title'])
-                        ),
-                        $lang->getLL('clip_deleteMarked')
-                    );
-                    // The "Select all" link:
-                    $cells['markAll'] = '<a class="btn btn-default t3js-toggle-all-checkboxes" data-checkboxes-names="' . htmlspecialchars(implode(',', $this->CBnames)) . '" rel="" href="#" title="'
-                        . htmlspecialchars($lang->getLL('clip_markRecords')) . '">'
-                        . $this->iconFactory->getIcon(
-                            'actions-document-select',
-                            Icon::SIZE_SMALL
-                        )->render() . '</a>';
-                } else {
-                    $cells['empty'] = '';
-                }
-                /*
-                 * hook:  renderListHeaderActions: Allows to change the clipboard icons of the Web>List table headers
-                 * usage: Above each listed table in Web>List a header row is shown.
-                 *        This hook allows to modify the icons responsible for the clipboard functions
-                 *        (shown above the clipboard checkboxes when a clipboard other than "Normal" is selected),
-                 *        or other "Action" functions which perform operations on the listed records.
-                 */
-                foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['actions'] ?? [] as $className) {
-                    $hookObject = GeneralUtility::makeInstance($className);
-                    if (!$hookObject instanceof RecordListHookInterface) {
-                        throw new UnexpectedValueException(
-                            $className . ' must implement interface ' . RecordListHookInterface::class,
-                            1195567850
-                        );
+                    // Clipboard:
+                    $cells = [];
+                    // If there are elements on the clipboard for this table, and the parent page is not locked by editlock
+                    // then display the "paste into" icon:
+                    $elFromTable = $this->clipObj->elFromTable($table);
+                    if (!empty($elFromTable) && $this->overlayEditLockPermissions($table)) {
+                        $href = htmlspecialchars($this->clipObj->pasteUrl($table, $this->id));
+                        $confirmMessage = $this->clipObj->confirmMsgText('pages', $this->pageRow, 'into', $elFromTable);
+                        $cells['pasteAfter'] = '<a class="btn btn-default t3js-modal-trigger"'
+                                . ' href="' . $href . '"'
+                                . ' title="' . htmlspecialchars($lang->getLL('clip_paste')) . '"'
+                                . ' data-title="' . htmlspecialchars($lang->getLL('clip_paste')) . '"'
+                                . ' data-content="' . htmlspecialchars($confirmMessage) . '"'
+                                . ' data-severity="warning">'
+                                . $this->iconFactory->getIcon('actions-document-paste-into', Icon::SIZE_SMALL)->render()
+                                . '</a>';
                     }
-                    $cells = $hookObject->renderListHeaderActions($table, $currentIdList, $cells, $this);
-                }
-                $theData[$fCol] = '';
-                if (isset($cells['edit']) && isset($cells['delete'])) {
-                    $theData[$fCol] .= '<div class="btn-group" role="group">' . $cells['edit'] . $cells['delete'] . '</div>';
-                    unset($cells['edit'], $cells['delete']);
-                }
-                $theData[$fCol] .= '<div class="btn-group" role="group">' . implode('', $cells) . '</div>';
-                break;
+                    // If the numeric clipboard pads are enabled, display the control icons for that:
+                    if ($this->clipObj->current !== 'normal') {
+                        // The "select" link:
+                        $spriteIcon = $this->iconFactory->getIcon('actions-edit-copy', Icon::SIZE_SMALL)->render();
+                        $cells['copyMarked'] = $this->linkClipboardHeaderIcon(
+                            $spriteIcon,
+                            $table,
+                            'setCB',
+                            '',
+                            $lang->getLL('clip_selectMarked')
+                        );
+                        // The "edit marked" link:
+                        $editUri = $uriBuilder->buildUriFromRoute('record_edit')
+                                . '&edit[' . $table . '][{entityIdentifiers:editList}]=edit'
+                                . '&returnUrl={T3_THIS_LOCATION}';
+                        $cells['edit'] = '<a class="btn btn-default t3js-record-edit-multiple" href="#"'
+                                . ' data-uri="' . htmlspecialchars($editUri) . '"'
+                                . ' title="' . htmlspecialchars($lang->getLL('clip_editMarked')) . '">'
+                                . $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render() . '</a>';
+                        // The "Delete marked" link:
+                        $cells['delete'] = $this->linkClipboardHeaderIcon(
+                            $this->iconFactory->getIcon('actions-edit-delete', Icon::SIZE_SMALL)->render(),
+                            $table,
+                            'delete',
+                            sprintf(
+                                $lang->getLL('clip_deleteMarkedWarning'),
+                                $lang->sL($GLOBALS['TCA'][$table]['ctrl']['title'])
+                            ),
+                            $lang->getLL('clip_deleteMarked')
+                        );
+                        // The "Select all" link:
+                        $cells['markAll'] = '<a class="btn btn-default t3js-toggle-all-checkboxes" data-checkboxes-names="' . htmlspecialchars(implode(',', $this->CBnames)) . '" rel="" href="#" title="'
+                                . htmlspecialchars($lang->getLL('clip_markRecords')) . '">'
+                                . $this->iconFactory->getIcon(
+                                    'actions-document-select',
+                                    Icon::SIZE_SMALL
+                                )->render() . '</a>';
+                    } else {
+                        $cells['empty'] = '';
+                    }
+                    /*
+                     * hook:  renderListHeaderActions: Allows to change the clipboard icons of the Web>List table headers
+                     * usage: Above each listed table in Web>List a header row is shown.
+                     *        This hook allows to modify the icons responsible for the clipboard functions
+                     *        (shown above the clipboard checkboxes when a clipboard other than "Normal" is selected),
+                     *        or other "Action" functions which perform operations on the listed records.
+                     */
+                    foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['actions'] ?? [] as $className) {
+                        $hookObject = GeneralUtility::makeInstance($className);
+                        if (!$hookObject instanceof RecordListHookInterface) {
+                            throw new UnexpectedValueException(
+                                $className . ' must implement interface ' . RecordListHookInterface::class,
+                                1195567850
+                            );
+                        }
+                        $cells = $hookObject->renderListHeaderActions($table, $currentIdList, $cells, $this);
+                    }
+                    $theData[$fCol] = '';
+                    if (isset($cells['edit']) && isset($cells['delete'])) {
+                        $theData[$fCol] .= '<div class="btn-group" role="group">' . $cells['edit'] . $cells['delete'] . '</div>';
+                        unset($cells['edit'], $cells['delete']);
+                    }
+                    $theData[$fCol] .= '<div class="btn-group" role="group">' . implode('', $cells) . '</div>';
+                    break;
                 case '_CONTROL_':
                     // Control panel:
                     if ($this->isEditable($table)) {
@@ -1751,7 +1751,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                     } else {
                         $icon = $this->spaceIcon;
                     }
-                break;
+                    break;
                 default:
                     // Regular fields header:
                     $theData[$fCol] = '';
@@ -1782,41 +1782,41 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                         $sortLabel = '<i>[' . rtrim(trim($sortLabel), ':') . ']</i>';
                     }
 
-                if ($this->table && is_array($currentIdList)) {
-                    // If the numeric clipboard pads are selected, show duplicate sorting link:
-                    if ($this->clipNumPane()) {
-                        $theData[$fCol] .= '<a class="btn btn-default" href="' . htmlspecialchars($this->listURL() . '&duplicateField=' . $fCol)
-                            . '" title="' . htmlspecialchars($lang->getLL('clip_duplicates')) . '">'
-                            . $this->iconFactory->getIcon(
-                                'actions-document-duplicates-select',
-                                Icon::SIZE_SMALL
-                            )->render() . '</a>';
-                    }
-                    // If the table can be edited, add link for editing THIS field for all
-                    // listed records:
-                    if ($this->isEditable($table) && $permsEdit && $GLOBALS['TCA'][$table]['columns'][$fCol]) {
-                        $entityIdentifiers = 'entityIdentifiers';
+                    if ($this->table && is_array($currentIdList)) {
+                        // If the numeric clipboard pads are selected, show duplicate sorting link:
                         if ($this->clipNumPane()) {
-                            $entityIdentifiers .= ':editList';
+                            $theData[$fCol] .= '<a class="btn btn-default" href="' . htmlspecialchars($this->listURL() . '&duplicateField=' . $fCol)
+                                    . '" title="' . htmlspecialchars($lang->getLL('clip_duplicates')) . '">'
+                                    . $this->iconFactory->getIcon(
+                                        'actions-document-duplicates-select',
+                                        Icon::SIZE_SMALL
+                                    )->render() . '</a>';
                         }
-                        $editUri = $uriBuilder->buildUriFromRoute('record_edit')
-                            . '&edit[' . $table . '][{' . $entityIdentifiers . '}]=edit'
-                            . '&columnsOnly=' . $fCol
-                            . '&returnUrl={T3_THIS_LOCATION}';
-                        $iTitle = sprintf($lang->getLL('editThisColumn'), $sortLabel);
-                        $theData[$fCol] .= '<a class="btn btn-default t3js-record-edit-multiple" href="#"'
-                            . ' data-uri="' . htmlspecialchars($editUri) . '"'
-                            . ' title="' . htmlspecialchars($iTitle) . '">'
-                            . $this->iconFactory->getIcon(
-                                'actions-document-open',
-                                Icon::SIZE_SMALL
-                            )->render() . '</a>';
+                        // If the table can be edited, add link for editing THIS field for all
+                        // listed records:
+                        if ($this->isEditable($table) && $permsEdit && $GLOBALS['TCA'][$table]['columns'][$fCol]) {
+                            $entityIdentifiers = 'entityIdentifiers';
+                            if ($this->clipNumPane()) {
+                                $entityIdentifiers .= ':editList';
+                            }
+                            $editUri = $uriBuilder->buildUriFromRoute('record_edit')
+                                    . '&edit[' . $table . '][{' . $entityIdentifiers . '}]=edit'
+                                    . '&columnsOnly=' . $fCol
+                                    . '&returnUrl={T3_THIS_LOCATION}';
+                            $iTitle = sprintf($lang->getLL('editThisColumn'), $sortLabel);
+                            $theData[$fCol] .= '<a class="btn btn-default t3js-record-edit-multiple" href="#"'
+                                    . ' data-uri="' . htmlspecialchars($editUri) . '"'
+                                    . ' title="' . htmlspecialchars($iTitle) . '">'
+                                    . $this->iconFactory->getIcon(
+                                        'actions-document-open',
+                                        Icon::SIZE_SMALL
+                                    )->render() . '</a>';
+                        }
+                        if (strlen($theData[$fCol]) > 0) {
+                            $theData[$fCol] = '<div class="btn-group" role="group">' . $theData[$fCol] . '</div> ';
+                        }
                     }
-                    if (strlen($theData[$fCol]) > 0) {
-                        $theData[$fCol] = '<div class="btn-group" role="group">' . $theData[$fCol] . '</div> ';
-                    }
-                }
-                $theData[$fCol] .= $this->addSortLink($sortLabel, $fCol, $table);
+                    $theData[$fCol] .= $this->addSortLink($sortLabel, $fCol, $table);
             }
         }
         $this->totalColumnCount = 10 + count($theData);
