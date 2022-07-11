@@ -224,17 +224,16 @@ class GridChildrenProcessor implements DataProcessorInterface
 
         if (
             (
-                !$isChild && !empty($this->options['resolveFlexFormData'])
-                || $isChild && !empty($this->options['resolveChildFlexFormData'])
+                !$isChild && $this->options['resolveFlexFormData']
+                || $isChild && $this->options['resolveChildFlexFormData']
             ) && !empty($record['pi_flexform'])
         ) {
             $this->initPluginFlexForm($record);
             $this->getPluginFlexFormData($record);
         }
-        if (!empty($this->options['resolveBackendLayout'])) {
-            $backendLayout = $record['tx_gridelements_backend_layout'] ?? '';
-            if (!empty($this->layoutSetup->getLayoutSetup($backendLayout))) {
-                $record['tx_gridelements_backend_layout_resolved'] = $this->layoutSetup->getLayoutSetup($backendLayout);
+        if ($this->options['resolveBackendLayout']) {
+            if (!empty($this->layoutSetup->getLayoutSetup($record['tx_gridelements_backend_layout']))) {
+                $record['tx_gridelements_backend_layout_resolved'] = $this->layoutSetup->getLayoutSetup($record['tx_gridelements_backend_layout']);
             } elseif (!empty($this->layoutSetup->getLayoutSetup('default'))) {
                 $record['tx_gridelements_backend_layout_resolved'] = $this->layoutSetup->getLayoutSetup('default');
             }
@@ -270,12 +269,12 @@ class GridChildrenProcessor implements DataProcessorInterface
     public function getPluginFlexFormData(array &$record)
     {
         if (!empty($record)) {
-            $pluginFlexForm = $record['pi_flexform'] ?? [];
+            $pluginFlexForm = $record['pi_flexform'];
 
-            if (is_array($pluginFlexForm) && !empty($pluginFlexForm['data']) && is_array($pluginFlexForm['data'])) {
+            if (is_array($pluginFlexForm) && is_array($pluginFlexForm['data'])) {
                 foreach ($pluginFlexForm['data'] as $sheet => $record) {
                     if (is_array($record)) {
-                        foreach ($record as $value) {
+                        foreach ($record as $language => $value) {
                             if (is_array($value)) {
                                 foreach ($value as $key => $val) {
                                     $record['flexform_' . $key] = $this->flexFormTools->getFlexFormValue(
