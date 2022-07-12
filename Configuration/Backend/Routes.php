@@ -24,12 +24,12 @@ if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger(
         ],
     ];
 }
-    return [
-        // Login screen of the TYPO3 Backend
-        /** Wizards */
-        // Register backend_layout wizard
-        'wizard_gridelements_backend_layout' => [
-            'path' => '/wizard',
-            'target' => GridelementsBackendLayoutWizardElement10::class . '::mainAction',
-        ],
-    ];
+return [
+    // Login screen of the TYPO3 Backend
+    /** Wizards */
+    // Register backend_layout wizard
+    'wizard_gridelements_backend_layout' => [
+        'path' => '/wizard',
+        'target' => GridelementsBackendLayoutWizardElement10::class . '::mainAction',
+    ],
+];

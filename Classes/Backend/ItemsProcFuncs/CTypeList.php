@@ -96,18 +96,19 @@ class CTypeList extends AbstractItemsProcFunc
             $disallowed = $layout['disallowed'][$column]['CType'] ?? [];
             if (!empty($allowed) || !empty($disallowed)) {
                 foreach ($items as $key => $item) {
-                    if ((
-                        !empty($allowed) &&
-                        !isset($allowed['*']) &&
-                        !isset($allowed[$item[1]])
-                    ) ||
-                    (
-                        !empty($disallowed) &&
+                    if (
                         (
-                            isset($disallowed['*']) ||
-                            isset($disallowed[$item[1]])
+                            !empty($allowed)
+                            && !isset($allowed['*'])
+                            && !isset($allowed[$item[1]])
+                        ) || (
+                            !empty($disallowed)
+                            && (
+                                isset($disallowed['*'])
+                                || isset($disallowed[$item[1]])
+                            )
                         )
-                    )) {
+                    ) {
                         unset($items[$key]);
                     }
                 }

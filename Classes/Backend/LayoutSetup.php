@@ -446,22 +446,22 @@ class LayoutSetup
             }
         }
         foreach ($this->layoutSetup as $layoutId => $item) {
-            if ((
-                $colPos === -1 &&
-                    !empty($item['top_level_layout'])
-            ) ||
+            if (
                 (
-                    !empty($allowed) &&
-                    !isset($allowed['*']) &&
-                    !isset($allowed[$layoutId])
-                ) ||
-                (
-                    !empty($disallowed) &&
-                    (
-                        isset($disallowed['*']) ||
-                        isset($disallowed[$layoutId])
+                    $colPos === -1
+                    && !empty($item['top_level_layout'])
+                ) || (
+                    !empty($allowed)
+                    && !isset($allowed['*'])
+                    && !isset($allowed[$layoutId])
+                ) || (
+                    !empty($disallowed)
+                    && (
+                        isset($disallowed['*'])
+                        || isset($disallowed[$layoutId])
                     )
-                )) {
+                )
+            ) {
                 continue;
             }
             $icon = 'gridelements-default';
@@ -627,11 +627,11 @@ class LayoutSetup
             return [];
         }
         foreach ($this->layoutSetup as $layoutId => $item) {
-            if ((
-                !empty($allowedGridTypes) &&
-                    !isset($allowedGridTypes[$layoutId])
-            ) ||
-                isset($disallowedGridTypes[$layoutId])
+            if (
+                (
+                    !empty($allowedGridTypes)
+                    && !isset($allowedGridTypes[$layoutId])
+                ) || isset($disallowedGridTypes[$layoutId])
             ) {
                 continue;
             }

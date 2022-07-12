@@ -65,12 +65,7 @@ class WizardItems implements NewContentElementWizardHookInterface
      */
     public function manipulateWizardItems(&$wizardItems, &$parentObject)
     {
-        if (!$this->getBackendUser()->checkAuthMode(
-            'tt_content',
-            'CType',
-            'gridelements_pi1',
-            $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode']
-        )) {
+        if (!$this->getBackendUser()->checkAuthMode('tt_content', 'CType', 'gridelements_pi1', $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode'])) {
             return;
         }
         $pageInfo = $parentObject->getPageInfo();
@@ -103,13 +98,10 @@ class WizardItems implements NewContentElementWizardHookInterface
             $allowed = null;
             $disallowed = null;
         }
-        if ((
-            empty($allowed['CType']) ||
-                isset($allowed['CType']['gridelements_pi1']) ||
-                isset($allowed['CType']['*'])
-        ) &&
-            !isset($disallowed['CType']['gridelements_pi1']) &&
-            !isset($disallowed['tx_gridelements_backend_layout']['*'])
+        if (
+            (empty($allowed['CType']) || isset($allowed['CType']['gridelements_pi1']) || isset($allowed['CType']['*']))
+            && !isset($disallowed['CType']['gridelements_pi1'])
+            && !isset($disallowed['tx_gridelements_backend_layout']['*'])
         ) {
             $allowedGridTypes = $allowed['tx_gridelements_backend_layout'] ?? [];
             $disallowedGridTypes = $disallowed['tx_gridelements_backend_layout'] ?? [];
@@ -162,27 +154,24 @@ class WizardItems implements NewContentElementWizardHookInterface
             if (empty($wizardItem['header'])) {
                 if (
                     (
-                        !empty($allowed['CType']) &&
-                        !isset($allowed['CType'][$wizardItem['tt_content_defValues']['CType']]) &&
-                        !isset($allowed['CType']['*'])
-                    ) ||
-                    (
+                        !empty($allowed['CType'])
+                        && !isset($allowed['CType'][$wizardItem['tt_content_defValues']['CType']])
+                        && !isset($allowed['CType']['*'])
+                    ) || (
                         !empty($disallowed) && (
-                            isset($disallowed['CType'][$wizardItem['tt_content_defValues']['CType']]) ||
-                            isset($disallowed['CType']['*'])
+                            isset($disallowed['CType'][$wizardItem['tt_content_defValues']['CType']])
+                            || isset($disallowed['CType']['*'])
                         )
-                    ) ||
-                    (
-                        isset($wizardItem['tt_content_defValues']['list_type']) &&
-                        !empty($allowed['list_type']) &&
-                        !isset($allowed['list_type'][$wizardItem['tt_content_defValues']['list_type']]) &&
-                        !isset($allowed['list_type']['*'])
-                    ) ||
-                    (
-                        isset($wizardItem['tt_content_defValues']['list_type']) &&
-                        !empty($disallowed) && (
-                            isset($disallowed['list_type'][$wizardItem['tt_content_defValues']['list_type']]) ||
-                            isset($disallowed['list_type']['*'])
+                    ) || (
+                        isset($wizardItem['tt_content_defValues']['list_type'])
+                            && !empty($allowed['list_type'])
+                            && !isset($allowed['list_type'][$wizardItem['tt_content_defValues']['list_type']])
+                            && !isset($allowed['list_type']['*'])
+                    ) || (
+                        isset($wizardItem['tt_content_defValues']['list_type'])
+                        && !empty($disallowed) && (
+                            isset($disallowed['list_type'][$wizardItem['tt_content_defValues']['list_type']])
+                            || isset($disallowed['list_type']['*'])
                         )
                     )
                 ) {
@@ -387,7 +376,7 @@ class WizardItems implements NewContentElementWizardHookInterface
                 $wizardItems[$key]['tt_content_defValues']['tx_gridelements_columns'] = $column;
                 $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_columns]=' . $column;
             }
-            if (isset($wizardItems[$key]['tt_content_defValues']['CType']) && $wizardItems[$key]['tt_content_defValues']['CType'] === 'table') {
+            if (isset($wizardItem['tt_content_defValues']['CType']) && $wizardItem['tt_content_defValues']['CType'] === 'table') {
                 $wizardItems[$key]['tt_content_defValues']['bodytext'] = '';
                 $wizardItems[$key]['params'] .= '&defVals[tt_content][bodytext]=';
             }

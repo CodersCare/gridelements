@@ -246,37 +246,39 @@ class TtContent
                     $disallowed = $layoutSetups[$backendLayout]['disallowed'][$gridColumn] ?? [];
                 }
                 if ($container[1] > 0 && (!empty($allowed) || !empty($disallowed))) {
-                    if ((
-                        !empty($allowed) &&
-                            !isset($allowed['CType']['*']) &&
-                            !isset($allowed['CType'][$contentType])
-                    ) ||
+                    if (
                         (
-                            !empty($disallowed) &&
-                            (
-                                isset($disallowed['CType']['*']) ||
-                                isset($disallowed['CType'][$contentType])
+                            !empty($allowed)
+                            && !isset($allowed['CType']['*'])
+                            && !isset($allowed['CType'][$contentType])
+                        ) || (
+                            !empty($disallowed)
+                            && (
+                                isset($disallowed['CType']['*'])
+                                || isset($disallowed['CType'][$contentType])
                             )
-                        )) {
+                        )
+                    ) {
                         unset($params['items'][$key]);
                     }
                     if (!empty($listType)) {
-                        if ((
-                            !empty($allowed) &&
-                                !isset($allowed['CType']['*']) &&
-                                !(
-                                    isset($allowed['list_type']['*']) ||
-                                    isset($allowed['list_type'][$listType])
-                                )
-                        ) ||
+                        if (
                             (
-                                !empty($disallowed) &&
-                                (
-                                    isset($disallowed['CType']['*']) ||
-                                    isset($disallowed['list_type']['*']) ||
-                                    isset($disallowed['list_type'][$listType])
+                                !empty($allowed)
+                                && !isset($allowed['CType']['*'])
+                                && !(
+                                    isset($allowed['list_type']['*'])
+                                    || isset($allowed['list_type'][$listType])
                                 )
-                            )) {
+                            ) || (
+                                !empty($disallowed)
+                                && (
+                                    isset($disallowed['CType']['*'])
+                                    || isset($disallowed['list_type']['*'])
+                                    || isset($disallowed['list_type'][$listType])
+                                )
+                            )
+                        ) {
                             unset($params['items'][$key]);
                         }
                     }

@@ -18,7 +18,9 @@ namespace GridElementsTeam\Gridelements\DataProcessing;
  */
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
+use GridElementsTeam\Gridelements\Helper\FlexFormTools;
 use GridElementsTeam\Gridelements\Plugin\Gridelements;
+use TYPO3\CMS\Core\Service\FlexFormService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentDataProcessor;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
@@ -43,6 +45,11 @@ class GridChildrenProcessor implements DataProcessorInterface
      * @var ContentDataProcessor
      */
     protected $contentDataProcessor;
+
+    /**
+     * @var FlexFormTools
+     */
+    protected $flexFormTools;
 
     /**
      * @var array
@@ -101,7 +108,7 @@ class GridChildrenProcessor implements DataProcessorInterface
      */
     public function __construct()
     {
-        $this->gridelements = GeneralUtility::makeInstance(Gridelements::class);
+        $this->flexFormTools = GeneralUtility::makeInstance(FlexFormTools::class);
         $this->layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class);
         $this->contentDataProcessor = GeneralUtility::makeInstance(ContentDataProcessor::class);
     }
@@ -123,15 +130,16 @@ class GridChildrenProcessor implements DataProcessorInterface
         array $processedData
     ): array {
         if (
+            empty($processedData['data']['CType']) ||
             $processedData['data']['CType'] !== 'gridelements_pi1' ||
             empty($processorConfiguration)
         ) {
             return $processedData;
         }
 
-        $this->containerProcessorConfiguration = $processorConfiguration[$processedData['data']['tx_gridelements_backend_layout'] . '.'];
+        $this->containerProcessorConfiguration = $processorConfiguration[$processedData['data']['tx_gridelements_backend_layout'] . '.'] ?? [];
         if (empty($this->containerProcessorConfiguration)) {
-            $this->containerProcessorConfiguration = $processorConfiguration['default.'];
+            $this->containerProcessorConfiguration = $processorConfiguration['default.'] ?? [];
             if (empty($this->containerProcessorConfiguration)) {
                 return $processedData;
             }
@@ -144,7 +152,7 @@ class GridChildrenProcessor implements DataProcessorInterface
         unset($processedData);
 
         $targetVariableName = $cObj->stdWrapValue('as', $this->containerProcessorConfiguration, 'children');
-        $options = $this->containerProcessorConfiguration['options.'] ?: [];
+        $options = $this->containerProcessorConfiguration['options.'] ?? [];
         foreach ($options as $key => &$option) {
             $option = $cObj->stdWrapValue($key, $options, $option);
         }
@@ -168,7 +176,7 @@ class GridChildrenProcessor implements DataProcessorInterface
             'pidInList' => (int)$cObj->data['pid'],
             'languageField' => 0,
             'orderBy' => (
-                $this->options['sortingField'] ? htmlspecialchars($this->options['sortingField']) : 'sorting'
+                !empty($this->options['sortingField']) ? htmlspecialchars($this->options['sortingField']) : 'sorting'
             ) . ' ' . (
                 strtolower($this->options['sortingDirection']) === 'desc' ? 'DESC' : 'ASC'
             ),
@@ -180,8 +188,8 @@ class GridChildrenProcessor implements DataProcessorInterface
         }
 
         if (
-            $this->options['respectColumns'] ||
-            $this->options['respectRows']
+            !empty($this->options['respectColumns']) ||
+            !empty($this->options['respectRows'])
         ) {
             $this->processedData[$targetVariableName] = $this->sortRecordsIntoMatrix();
         } else {
@@ -199,35 +207,87 @@ class GridChildrenProcessor implements DataProcessorInterface
     }
 
     /**
-     * @param array $data
+     * @param array $record
      * @param bool $isChild
      */
-    protected function checkOptions(array &$data, bool $isChild = false)
+    protected function checkOptions(array &$record, bool $isChild = false)
     {
         if (
             (
-                $this->options['resolveBackendLayout'] ||
-                $this->options['respectColumns'] ||
-                $this->options['respectRows']
+                !empty($this->options['resolveBackendLayout']) ||
+                !empty($this->options['respectColumns']) ||
+                !empty($this->options['respectRows'])
             ) && !$this->layoutSetup->getRealPid()
         ) {
-            $this->layoutSetup->init((int)$data['pid'], $this->contentObjectConfiguration);
+            $this->layoutSetup->init((int)$record['pid'], $this->contentObjectConfiguration);
         }
 
         if (
             (
-                !$isChild && $this->options['resolveFlexFormData']
-                || $isChild && $this->options['resolveChildFlexFormData']
-            ) && !empty($data['pi_flexform'])
+                !$isChild && !empty($this->options['resolveFlexFormData'])
+                || $isChild && !empty($this->options['resolveChildFlexFormData'])
+            ) && !empty($record['pi_flexform'])
         ) {
-            $this->gridelements->initPluginFlexForm('pi_flexform', $data);
-            $this->gridelements->getPluginFlexFormData($data);
+            $this->initPluginFlexForm($record);
+            $this->getPluginFlexFormData($record);
         }
-        if ($this->options['resolveBackendLayout']) {
-            if (!empty($this->layoutSetup->getLayoutSetup($data['tx_gridelements_backend_layout']))) {
-                $data['tx_gridelements_backend_layout_resolved'] = $this->layoutSetup->getLayoutSetup($data['tx_gridelements_backend_layout']);
+        if (!empty($this->options['resolveBackendLayout'])) {
+            $backendLayout = $record['tx_gridelements_backend_layout'] ?? '';
+            if (!empty($this->layoutSetup->getLayoutSetup($backendLayout))) {
+                $record['tx_gridelements_backend_layout_resolved'] = $this->layoutSetup->getLayoutSetup($backendLayout);
             } elseif (!empty($this->layoutSetup->getLayoutSetup('default'))) {
-                $data['tx_gridelements_backend_layout_resolved'] = $this->layoutSetup->getLayoutSetup('default');
+                $record['tx_gridelements_backend_layout_resolved'] = $this->layoutSetup->getLayoutSetup('default');
+            }
+        }
+    }
+
+    /**
+     * Converts $this->cObj->data['pi_flexform'] from XML string to flexForm array.
+     * @param array $record
+     * @param string $field Field name to convert
+     */
+    public function initPluginFlexForm(array &$record, string $field = 'pi_flexform')
+    {
+        // Converting flexform data into array:
+        if (!empty($record)) {
+            if (!empty($record[$field]) && !is_array($record[$field])) {
+                $record[$field . '_content'] = GeneralUtility::makeInstance(FlexFormService::class)->convertFlexFormContentToArray($record[$field]);
+                if (!is_array($record[$field . '_content'])) {
+                    $record[$field . '_content'] = [];
+                }
+                $record[$field] = GeneralUtility::xml2array($record[$field]);
+                if (!is_array($record[$field])) {
+                    $record[$field] = [];
+                }
+            }
+        }
+    }
+
+    /**
+     * fetches values from the grid flexform and assigns them to virtual fields in the data array
+     * @param array $record
+     */
+    public function getPluginFlexFormData(array &$record)
+    {
+        if (!empty($record)) {
+            $pluginFlexForm = $record['pi_flexform'] ?? [];
+
+            if (is_array($pluginFlexForm) && !empty($pluginFlexForm['data']) && is_array($pluginFlexForm['data'])) {
+                foreach ($pluginFlexForm['data'] as $sheet => $record) {
+                    if (is_array($record)) {
+                        foreach ($record as $value) {
+                            if (is_array($value)) {
+                                foreach ($value as $key => $val) {
+                                    $record['flexform_' . $key] = $this->flexFormTools->getFlexFormValue(
+                                        $pluginFlexForm,
+                                        $key,
+                                        $sheet
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -246,11 +306,14 @@ class GridChildrenProcessor implements DataProcessorInterface
         $recordContentObjectRenderer->start($record, 'tt_content');
         $this->processedRecordVariables[$id] = ['data' => $record];
         if (
-            (int)$this->options['recursive'] > 0 &&
+            !empty($this->options['recursive']) &&
             $record['CType'] === 'gridelements_pi1' &&
             !empty($record['tx_gridelements_backend_layout'])
         ) {
             $childProcessorConfiguration = $this->containerProcessorConfiguration;
+            if (!isset($childProcessorConfiguration['dataProcessing.'])) {
+                $childProcessorConfiguration['dataProcessing.'] = [];
+            }
             $childProcessorConfiguration['dataProcessing.']['0.'] = $this->processorConfiguration;
             $childProcessorConfiguration['dataProcessing.']['0.']['recursive'] = (int)$this->options['recursive'] - 1;
             $childProcessorConfiguration['dataProcessing.']['0'] = 'GridElementsTeam\Gridelements\DataProcessing\GridChildrenProcessor';
@@ -275,12 +338,12 @@ class GridChildrenProcessor implements DataProcessorInterface
     {
         $processedColumns = [];
         foreach ($this->processedRecordVariables as $key => $processedRecord) {
-            if (!isset($processedColumns[$processedRecord['data']['tx_gridelements_columns']])) {
+            if (isset($processedRecord['data']['tx_gridelements_columns']) && !isset($processedColumns[$processedRecord['data']['tx_gridelements_columns']])) {
                 $processedColumns[$processedRecord['data']['tx_gridelements_columns']] = [];
             }
             $processedColumns[$processedRecord['data']['tx_gridelements_columns']][$key] = $processedRecord;
         }
-        if ($this->options['respectRows']) {
+        if (!empty($this->options['respectRows'])) {
             $this->options['respectColumns'] = 1;
             $processedRows = [];
             if (!empty($this->processedData['data']['tx_gridelements_backend_layout_resolved'])) {
@@ -289,7 +352,10 @@ class GridChildrenProcessor implements DataProcessorInterface
                         if (!empty($row['columns.'])) {
                             foreach ($row['columns.'] as $column) {
                                 $key = substr($rowNumber, 0, -1);
-                                $processedRows[$key][$column['colPos']] = $processedColumns[$column['colPos']];
+                                if (!isset($processedRows[$key])) {
+                                    $processedRows[$key] = [];
+                                }
+                                $processedRows[$key][$column['colPos']] = $processedColumns[$column['colPos']] ?? [];
                             }
                         }
                     }
