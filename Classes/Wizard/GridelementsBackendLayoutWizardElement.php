@@ -189,7 +189,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                 $gridType = [];
                 if (!empty($key)) {
                     $gridType['key'] = $key;
-                    if (substr($gridType['key'], 0, 2) !== '--') {
+                    if (substr((string) $gridType['key'], 0, 2) !== '--') {
                         $gridType['label'] = $lang->sL($item['title']);
                         if (!empty($item['icon']) && is_array($item['icon']) && !empty($item['icon'][0])) {
                             if (strpos($item['icon'][0], 'EXT:') === 0) {
