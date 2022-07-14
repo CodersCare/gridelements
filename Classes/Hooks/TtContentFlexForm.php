@@ -65,7 +65,7 @@ class TtContentFlexForm
                         if (MathUtility::canBeInterpretedAsInteger($layoutId)) {
                             $fileReferences = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'pi_flexform_ds_file', $layoutId);
                         }
-                        if (count($fileReferences) > 0) {
+                        if (!empty($fileReferences[0])) {
                             $file = $fileReferences[0]->getOriginalFile();
                             $storageBasePath = rtrim($file->getStorage()->getConfiguration()['basePath'], '/');
                             $filePath = $storageBasePath . $file->getProperties()['identifier'];
