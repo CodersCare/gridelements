@@ -49,10 +49,10 @@ class ListTypeList extends AbstractItemsProcFunc
             $colPos = is_array($params['row']['colPos']) ? $params['row']['colPos'][0] : $params['row']['colPos'];
             $this->checkForAllowedListTypes(
                 $params['items'],
-                $params['row']['pid'],
-                $colPos,
-                $params['row']['tx_gridelements_container'],
-                $params['row']['tx_gridelements_columns']
+                (int)$params['row']['pid'],
+                (int)$colPos,
+                (int)$params['row']['tx_gridelements_container'],
+                (int)$params['row']['tx_gridelements_columns']
             );
         } else {
             $this->init((int)$params['row']['pid']);
@@ -62,10 +62,10 @@ class ListTypeList extends AbstractItemsProcFunc
             if ((int)$existingElement['pid'] > 0) {
                 $this->checkForAllowedListTypes(
                     $params['items'],
-                    $existingElement['pid'],
-                    $existingElement['colPos'],
-                    $existingElement['tx_gridelements_container'],
-                    $existingElement['tx_gridelements_columns']
+                    (int)$existingElement['pid'],
+                    (int)$existingElement['colPos'],
+                    (int)$existingElement['tx_gridelements_container'],
+                    (int)$existingElement['tx_gridelements_columns']
                 );
             }
         }
