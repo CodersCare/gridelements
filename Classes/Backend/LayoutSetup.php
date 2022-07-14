@@ -77,7 +77,7 @@ class LayoutSetup
     /**
      * @var int
      */
-    protected int $realPid;
+    protected int $realPid = 0;
 
     /**
      * Load page TSconfig

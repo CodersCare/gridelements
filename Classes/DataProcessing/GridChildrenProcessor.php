@@ -19,7 +19,6 @@ namespace GridElementsTeam\Gridelements\DataProcessing;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\FlexFormTools;
-use GridElementsTeam\Gridelements\Plugin\Gridelements;
 use TYPO3\CMS\Core\Service\FlexFormService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentDataProcessor;
@@ -31,11 +30,6 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
  */
 class GridChildrenProcessor implements DataProcessorInterface
 {
-    /**
-     * @var Gridelements
-     */
-    protected $gridelements;
-
     /**
      * @var LayoutSetup
      */
