@@ -155,7 +155,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
                 0,
                 $parentObj->selectFields
             );
-            $layoutColumns = $parentObj->getGridelementsBackendLayouts()->getLayoutColumns($row['tx_gridelements_backend_layout']);
+            $layoutColumns = $parentObj->getGridelementsBackendLayouts()->getLayoutColumns((string)$row['tx_gridelements_backend_layout']);
             if (!empty($elementChildren)) {
                 $theData['_CONTAINER_COLUMNS_'] = $layoutColumns;
                 $theData['_EXPANDABLE_'] = true;
