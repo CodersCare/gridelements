@@ -220,6 +220,8 @@ class LayoutSetup
 
         $gridLayoutRecords = [];
 
+        $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
+
         foreach ($layoutItems as $item) {
             if (isset($item['alias']) && (string)$item['alias'] !== '') {
                 $layoutId = $item['alias'];
@@ -233,9 +235,14 @@ class LayoutSetup
 
             // Prepend icon path for records.
             if (!empty($item['icon'])) {
-                $icons = explode(',', $item['icon']);
-                foreach ($icons as &$icon) {
-                    $icon = '../' . $GLOBALS['TCA']['tx_gridelements_backend_layout']['ctrl']['selicon_field_path'] . '/' . htmlspecialchars(trim($icon));
+                if (MathUtility::canBeInterpretedAsInteger($item['icon'])) {
+                    $icons = [];
+                    $fileObjects = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'icon', $item['uid']);
+                    foreach ($fileObjects as $fileObject) {
+                        $icons[] = $fileObject->getPublicUrl();
+                    }
+                } else {
+                    $icons = explode(',', $item['icon']);
                 }
                 $item['icon'] = $icons;
             }

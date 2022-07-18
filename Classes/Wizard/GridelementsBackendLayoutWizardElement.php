@@ -241,7 +241,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
             /** @var LayoutSetup $layoutSetup */
             $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init(0);
             if ($this->data['tableName'] === 'tx-gridelements_backend_layout') {
-                $layoutId = $this->data['databaseRow']['alias'] ?: (int)$this->data['databaseRow']['uid'];
+                $layoutId = $this->data['databaseRow']['alias'] ?? (int)$this->data['databaseRow']['uid'];
                 $layout = $layoutSetup->getLayoutSetup($layoutId);
             } else {
                 $parser = GeneralUtility::makeInstance(TypoScriptParser::class);
@@ -252,9 +252,9 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                     if ($columns['allowed'] || $columns['disallowed'] || $columns['maxitems']) {
                         $layout['columns'] = $columns;
                         unset($layout['columns']['allowed']);
-                        $layout['allowed'] = $columns['allowed'] ?: [];
-                        $layout['disallowed'] = $columns['disallowed'] ?: [];
-                        $layout['maxitems'] = $columns['maxitems'] ?: [];
+                        $layout['allowed'] = $columns['allowed'] ?? [];
+                        $layout['disallowed'] = $columns['disallowed'] ?? [];
+                        $layout['maxitems'] = $columns['maxitems'] ?? [];
                     }
                 }
             }
@@ -269,7 +269,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                 $columns = $row['columns.'];
                 for ($j = 1; $j <= $colCount; $j++) {
                     $cellData = [];
-                    if (!$spannedMatrix[$i][$j]) {
+                    if (empty($spannedMatrix[$i][$j])) {
                         if (is_array($columns) && !empty($columns)) {
                             $column = array_shift($columns);
                             if (isset($column['colspan'])) {
