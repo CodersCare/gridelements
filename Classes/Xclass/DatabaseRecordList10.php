@@ -1006,7 +1006,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                             $thumbsCol,
                             20,
                             $level,
-                            $row['tx_gridelements_container'],
+                            (int)$row['tx_gridelements_container'],
                             $expanded
                         );
                     }
