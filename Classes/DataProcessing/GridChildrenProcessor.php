@@ -267,15 +267,15 @@ class GridChildrenProcessor implements DataProcessorInterface
             $pluginFlexForm = $record['pi_flexform'] ?? [];
 
             if (is_array($pluginFlexForm) && !empty($pluginFlexForm['data']) && is_array($pluginFlexForm['data'])) {
-                foreach ($pluginFlexForm['data'] as $sheet => $record) {
-                    if (is_array($record)) {
-                        foreach ($record as $value) {
+                foreach ($pluginFlexForm['data'] as $sheetName => $sheet) {
+                    if (is_array($sheet)) {
+                        foreach ($sheet as $value) {
                             if (is_array($value)) {
                                 foreach ($value as $key => $val) {
                                     $record['flexform_' . $key] = $this->flexFormTools->getFlexFormValue(
                                         $pluginFlexForm,
                                         $key,
-                                        $sheet
+                                        $sheetName
                                     );
                                 }
                             }
