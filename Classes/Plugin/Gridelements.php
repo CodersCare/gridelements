@@ -26,7 +26,6 @@ use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\FlexFormTools;
 use PDO;
 use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -102,28 +101,25 @@ class Gridelements extends ContentObjectRenderer
         $this->initPluginFlexForm();
         $this->getPluginFlexFormData();
 
-        try {
-            $this->languageAspect = GeneralUtility::makeInstance(Context::class)->getAspect('language');
-        } catch (AspectNotFoundException $e) {
-        }
+        $this->languageAspect = GeneralUtility::makeInstance(Context::class)->getAspect('language');
 
         // now we have to find the children of this grid container regardless of their column
         // so we can get them within a single DB query instead of doing a query per column
         // but we will only fetch those columns that are used by the current grid layout
-        if ($this->languageAspect->getLegacyOverlayType() && $this->cObj->data['l18n_parent'] && $this->cObj->data['sys_language_uid'] > 0) {
-            $element = $this->cObj->data['l18n_parent'];
+        if ($this->languageAspect->getLegacyOverlayType() && !empty($this->cObj->data['l18n_parent']) && !empty($this->cObj->data['sys_language_uid'])) {
+            $element = $this->cObj->data['l18n_parent'] ?? 0;
         } else {
-            $element = $this->cObj->data['uid'];
+            $element = $this->cObj->data['uid'] ?? 0;
         }
-        $pid = $this->cObj->data['pid'];
-        $layout = $this->cObj->data['tx_gridelements_backend_layout'];
+        $pid = $this->cObj->data['pid'] ?? 0;
+        $layout = $this->cObj->data['tx_gridelements_backend_layout'] ?? '';
 
         /** @var LayoutSetup $layoutSetup */
         $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class);
-        $layoutSetup->init($this->cObj->data['pid'], $conf);
+        $layoutSetup->init($pid, $conf);
 
         $availableColumns = $layoutSetup->getLayoutColumns($layout);
-        $csvColumns = ltrim(str_replace('-2,-1', '', $availableColumns['CSV']), ',');
+        $csvColumns = ltrim(str_replace('-2,-1', '', $availableColumns['CSV'] ?? ''), ',');
         $this->getChildren($element, $pid, $csvColumns);
 
         // and we have to determine the frontend setup related to the backend layout record which is assigned to this container
@@ -171,6 +167,7 @@ class Gridelements extends ContentObjectRenderer
      */
     public function initPluginFlexForm(string $field = 'pi_flexform', array &$child = null)
     {
+        $this->flexFormTools = GeneralUtility::makeInstance(FlexFormTools::class);
         // Converting flexform data into array:
         if (!empty($child)) {
             if (!is_array($child[$field]) && $child[$field]) {
@@ -208,12 +205,12 @@ class Gridelements extends ContentObjectRenderer
             $cObjData = $this->cObj->data;
         }
 
-        $pluginFlexForm = $cObjData['pi_flexform'];
+        $pluginFlexForm = $cObjData['pi_flexform'] ?? '';
 
         if (is_array($pluginFlexForm) && is_array($pluginFlexForm['data'])) {
             foreach ($pluginFlexForm['data'] as $sheet => $data) {
                 if (is_array($data)) {
-                    foreach ($data as $language => $value) {
+                    foreach ($data as $value) {
                         if (is_array($value)) {
                             foreach ($value as $key => $val) {
                                 $cObjData['flexform_' . $key] = $this->flexFormTools->getFlexFormValue(
@@ -348,7 +345,7 @@ class Gridelements extends ContentObjectRenderer
         $this->cObj->data['tx_gridelements_view_children'] = [];
         while ($child = $children->fetch()) {
             // Versioning preview:
-            $sorting = $child['sorting'];
+            $sorting = $child['sorting'] ?? '';
             $this->getTSFE()->sys_page->versionOL('tt_content', $child, true);
 
             // Language overlay:
@@ -374,11 +371,13 @@ class Gridelements extends ContentObjectRenderer
         }
 
         $compareFunction = function ($child_a, $child_b) {
-            if ($child_a['sorting'] > $child_b['sorting']) {
-                return 1;
-            }
-            if ($child_a['sorting'] === $child_b['sorting']) {
-                return 0;
+            if (isset($child_a['sorting']) && isset($child_b['sorting'])) {
+                if ($child_a['sorting'] > $child_b['sorting']) {
+                    return 1;
+                }
+                if ($child_a['sorting'] === $child_b['sorting']) {
+                    return 0;
+                }
             }
             return -1;
         };
@@ -426,16 +425,16 @@ class Gridelements extends ContentObjectRenderer
 
         $currentParentGrid = $this->copyCurrentParentGrid();
         $columns = $this->getUsedColumns($sortColumns);
-        $parentGridData = $this->getParentGridData($currentParentGrid['data']);
+        $parentGridData = $this->getParentGridData($currentParentGrid['data'] ?? []);
         $parentGridData['tx_gridelements_view_columns'] = $columns;
 
-        $counter = !empty($this->cObj->data['tx_gridelements_view_children']);
+        $counter = count($this->cObj->data['tx_gridelements_view_children'] ?? []);
         $parentRecordNumbers = [];
         $this->getTSFE()->cObjectDepthCounter += $counter;
 
         // each of the children will now be rendered separately and the output will be added to it's particular column
         $rawColumns = [];
-        if (!empty($this->cObj->data['tx_gridelements_view_children'])) {
+        if ($counter) {
             foreach ($this->cObj->data['tx_gridelements_view_children'] as $child) {
                 $rawColumns[$child['tx_gridelements_columns']][] = $child;
                 $renderedChild = $child;
@@ -458,9 +457,9 @@ class Gridelements extends ContentObjectRenderer
         // since they will depend on the original data
         $this->getTSFE()->cObjectDepthCounter -= $counter;
 
-        $this->cObj->currentRecord = $currentParentGrid['record'];
-        $this->cObj->data = $currentParentGrid['data'];
-        $this->cObj->parentRecordNumber = $currentParentGrid['parentRecordNumber'];
+        $this->cObj->currentRecord = $currentParentGrid['record'] ?? [];
+        $this->cObj->data = $currentParentGrid['data'] ?? [];
+        $this->cObj->parentRecordNumber = $currentParentGrid['parentRecordNumber'] ?? 0;
 
         if (!empty($sortColumns)) {
             $this->cObj->data['tx_gridelements_view_columns'] = [];
@@ -576,15 +575,15 @@ class Gridelements extends ContentObjectRenderer
         array &$parentRecordNumbers,
         array $typoScriptSetup = []
     ) {
-        $column_number = (int)$child['tx_gridelements_columns'];
+        $column_number = (int)($child['tx_gridelements_columns'] ?? 0);
         $columnKey = $column_number . '.';
         $columnSetupKey = isset($typoScriptSetup['columns.'][$columnKey]) ? $columnKey : 'default.';
 
-        if ($child['uid'] <= 0) {
+        if (isset($child['uid']) && $child['uid'] <= 0) {
             return;
         }
         // update SYS_LASTCHANGED if necessary
-        $this->cObj->lastChanged($child['tstamp']);
+        $this->cObj->lastChanged($child['tstamp'] ?? 0);
         $this->cObj->start(array_merge($child, $parentGridData), 'tt_content');
 
         if (isset($parentRecordNumbers[$columnKey])) {
@@ -596,8 +595,8 @@ class Gridelements extends ContentObjectRenderer
 
         // we render each child into the children key to provide them prerendered for usage with your own templating
         $child = $this->cObj->cObjGetSingle(
-            $typoScriptSetup['columns.'][$columnSetupKey]['renderObj'],
-            $typoScriptSetup['columns.'][$columnSetupKey]['renderObj.']
+            $typoScriptSetup['columns.'][$columnSetupKey]['renderObj'] ?? '',
+            $typoScriptSetup['columns.'][$columnSetupKey]['renderObj.'] ?? []
         );
         // then we assign the prerendered child to the appropriate column
         if (isset($columns[$column_number])) {
@@ -655,7 +654,7 @@ class Gridelements extends ContentObjectRenderer
      */
     public function user_getTreeList()
     {
-        $pidList = $this->getTSFE()->register['tt_content_shortcut_recursive']
+        $pidList = !empty($this->getTSFE()->register['tt_content_shortcut_recursive'])
             ? $this->cObj->getTreeList(
                 $this->cObj->data['uid'],
                 $this->getTSFE()->register['tt_content_shortcut_recursive']
