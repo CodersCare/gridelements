@@ -84,7 +84,7 @@ class FlexFormTools
             }
         }
         if (is_array($tempArr)) {
-            if (is_array($tempArr['el'])) {
+            if (isset($tempArr['el']) && is_array($tempArr['el'])) {
                 $out = $this->getFlexformSectionsRecursively($tempArr['el'], $value);
             } else {
                 $out = $tempArr[$value];

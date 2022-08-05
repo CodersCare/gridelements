@@ -227,41 +227,47 @@ class AfterDatabaseOperations extends AbstractDataHandler
         }
 
         if ($this->getTable() === 'pages') {
-            $backendLayoutUid = 0;
-            $backendLayoutNextLevelUid = 0;
+            $backendLayoutId = 0;
+            $backendLayoutNextLevelId = 0;
+            $selectedBackendLayoutNextLevel = '';
             $rootline = BackendUtility::BEgetRootLine($this->getPageUid());
             for ($i = count($rootline); $i > 0; $i--) {
-                $page = BackendUtility::getRecord(
-                    'pages',
-                    (int)$rootline[$i]['uid'],
-                    'uid,backend_layout,backend_layout_next_level'
-                );
-                $selectedBackendLayoutNextLevel = (int)$page['backend_layout_next_level'];
-                if ($page['uid'] === $this->getPageUid()) {
-                    if ($fieldArray['backend_layout_next_level'] !== 0) {
+                $uid = isset($rootline[$i]) && isset($rootline[$i]['uid']) ? (int)$rootline[$i]['uid'] : 0;
+                if ($uid > 0) {
+                    $page = BackendUtility::getRecord(
+                        'pages',
+                        $uid,
+                        'uid,backend_layout,backend_layout_next_level'
+                    );
+                }
+                if (!empty($page['backend_layout_next_level'])) {
+                    $selectedBackendLayoutNextLevel = $page['backend_layout_next_level'];
+                }
+                if (isset($page['uid']) && $page['uid'] === $this->getPageUid()) {
+                    if (!empty($fieldArray['backend_layout_next_level'] !== 0)) {
                         // Backend layout for sub pages of the current page is set
-                        $backendLayoutNextLevelUid = (int)$fieldArray['backend_layout_next_level'];
+                        $backendLayoutNextLevelId = $fieldArray['backend_layout_next_level'];
                     }
-                    if ($fieldArray['backend_layout'] !== 0) {
+                    if (!empty($fieldArray['backend_layout'])) {
                         // Backend layout for current page is set
-                        $backendLayoutUid = $fieldArray['backend_layout'];
+                        $backendLayoutId = $fieldArray['backend_layout'];
                         break;
                     }
                 } else {
-                    if ($selectedBackendLayoutNextLevel === -1) {
+                    if ((int)$selectedBackendLayoutNextLevel === -1) {
                         // Some previous page in our rootline sets layout_next to "None"
                         break;
                     }
-                    if ($selectedBackendLayoutNextLevel > 0) {
+                    if (!empty($selectedBackendLayoutNextLevel)) {
                         // Some previous page in our rootline sets some backend_layout, use it
-                        $backendLayoutUid = $selectedBackendLayoutNextLevel;
+                        $backendLayoutId = $selectedBackendLayoutNextLevel;
                         break;
                     }
                 }
             }
 
             if (isset($fieldArray['backend_layout'])) {
-                $availableColumns = $this->getAvailableColumns($backendLayoutUid, 'pages', $this->getPageUid());
+                $availableColumns = $this->getAvailableColumns($backendLayoutId, 'pages', $this->getPageUid());
                 $availableColumns = GeneralUtility::intExplode(',', $availableColumns);
                 $queryBuilder = $this->getQueryBuilder();
                 $elementsInUnavailableColumnsQuery = $queryBuilder
@@ -347,14 +353,14 @@ class AfterDatabaseOperations extends AbstractDataHandler
                 $changedElements = $elementsInUnavailableColumns + $elementsInAvailableColumns;
             }
 
-            if (isset($fieldArray['backend_layout_next_level'])) {
-                $backendLayoutUid = $backendLayoutNextLevelUid ?: $backendLayoutUid;
+            if (!empty($fieldArray['backend_layout_next_level'])) {
+                $backendLayoutId = $backendLayoutNextLevelId ?: $backendLayoutId;
                 $subPages = [];
                 $this->getSubPagesRecursively($this->getPageUid(), $subPages);
                 if (!empty($subPages)) {
                     $changedSubPageElements = [];
                     foreach ($subPages as $page) {
-                        $availableColumns = $this->getAvailableColumns($backendLayoutUid, 'pages', $page['uid']);
+                        $availableColumns = $this->getAvailableColumns($backendLayoutId, 'pages', $page['uid']);
                         $availableColumns = GeneralUtility::intExplode(',', $availableColumns);
                         $queryBuilder = $this->getQueryBuilder();
                         $subPageElementsInUnavailableColumnsQuery = $queryBuilder

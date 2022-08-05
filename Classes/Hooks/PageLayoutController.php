@@ -77,7 +77,9 @@ class PageLayoutController
         $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsOnReady');
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragDrop');
-        if ((boolean)$this->extensionConfiguration['disableDragInWizard'] !== true
+        if (isset($this->extensionConfiguration['disableDragInWizard'])
+            && (boolean)$this->extensionConfiguration['disableDragInWizard'] !== true
+            && isset($this->helper->getBackendUser()->uc['disableDragInWizard'])
             && (boolean)$this->helper->getBackendUser()->uc['disableDragInWizard'] !== true) {
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard');
         }
