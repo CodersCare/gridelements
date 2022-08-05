@@ -140,7 +140,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
             $changedGridElements[$this->getContentUid()] = true;
             $childElementsInUnavailableColumns = [];
             $childElementsInAvailableColumns = [];
-            $availableColumns = $this->getAvailableColumns($fieldArray['tx_gridelements_backend_layout'], 'tt_content');
+            $availableColumns = $this->getAvailableColumns((string)$fieldArray['tx_gridelements_backend_layout'], 'tt_content');
             if (!empty($availableColumns) || $availableColumns === '0') {
                 $availableColumns = GeneralUtility::intExplode(',', $availableColumns);
                 $queryBuilder = $this->getQueryBuilder();
