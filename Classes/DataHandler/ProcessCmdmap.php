@@ -40,7 +40,7 @@ class ProcessCmdmap extends AbstractDataHandler
      * @param string $command The command to be handled by the command map
      * @param string $table The name of the table we are working on
      * @param int $id The id of the record that is going to be copied
-     * @param string $value The value that has been sent with the copy command
+     * @param mixed $value The value that has been sent with the copy command
      * @param bool $commandIsProcessed A switch to tell the parent object, if the record has been copied
      * @param DataHandler|null $parentObj The parent object that triggered this hook
      * @param array|bool $pasteUpdate Values to be updated after the record is pasted
@@ -50,7 +50,7 @@ class ProcessCmdmap extends AbstractDataHandler
         string $command,
         string $table,
         int $id,
-        string $value,
+        $value,
         bool &$commandIsProcessed,
         DataHandler $parentObj = null,
         $pasteUpdate = false
