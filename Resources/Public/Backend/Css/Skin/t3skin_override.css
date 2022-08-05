@@ -426,7 +426,8 @@
 }
 
 .t3-page-ce:hover > div > .t3-page-ce-header-icons-right,
-.t3-page-ce:hover > div > div > .t3-page-ce-header-icons-right {
+.t3-page-ce:hover > div > div > .t3-page-ce-header-icons-right,
+.t3-page-ce:hover > div > div > div > .t3-page-ce-header-icons-right {
 	opacity: 1;
 }
 
