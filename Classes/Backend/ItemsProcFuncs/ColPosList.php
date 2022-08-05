@@ -39,7 +39,7 @@ class ColPosList extends AbstractItemsProcFunc
     public function itemsProcFunc(array &$params)
     {
         $this->init();
-        if ($params['row']['pid'] > 0) {
+        if ((int)$params['row']['pid'] > 0) {
             if (isset($params['row']['CType'])) {
                 $contentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
             }
@@ -50,7 +50,7 @@ class ColPosList extends AbstractItemsProcFunc
                 $gridType = is_array($params['row']['tx_gridelements_backend_layout']) ? $params['row']['tx_gridelements_backend_layout'][0] : $params['row']['tx_gridelements_backend_layout'];
             }
             $params['items'] = $this->addColPosListLayoutItems(
-                $params['row']['pid'],
+                (int)$params['row']['pid'],
                 $params['items'],
                 $contentType ?? '',
                 $listType ?? '',

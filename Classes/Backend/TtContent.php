@@ -48,7 +48,7 @@ class TtContent
      */
     public function columnsItemsProcFunc(array &$params)
     {
-        $this->init($params['row']['pid']);
+        $this->init((int)$params['row']['pid']);
         $gridContainerId = is_array($params['row']['tx_gridelements_container'])
             ? (int)$params['row']['tx_gridelements_container'][0]
             : (int)$params['row']['tx_gridelements_container'];
@@ -99,7 +99,7 @@ class TtContent
      */
     public function containerItemsProcFunc(array &$params)
     {
-        $this->init($params['row']['pid']);
+        $this->init((int)$params['row']['pid']);
         $possibleContainers = [];
         $this->removeItemsFromListOfSelectableContainers($params, $possibleContainers);
 
@@ -296,7 +296,7 @@ class TtContent
      */
     public function layoutItemsProcFunc(array &$params)
     {
-        $this->init($params['row']['pid']);
+        $this->init((int)$params['row']['pid']);
         $layoutSelectItems = $this->layoutSetup->getLayoutSelectItems(
             isset($params['row']['colPos'][0]) ? (int)$params['row']['colPos'][0] : (int)$params['row']['colPos'],
             (int)$params['row']['tx_gridelements_columns'],
