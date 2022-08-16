@@ -36,6 +36,9 @@ class ExtTablesInclusionPostProcessing
      */
     public function __invoke(AfterTcaCompilationEvent $event): void
     {
+        $tcaBackup = $GLOBALS['TCA'];
+        $GLOBALS['TCA'] = $event->getTca();
+
         ExtensionManagementUtility::addToAllTCAtypes('tt_content', 'recursive', 'shortcut', 'after:records');
         ExtensionManagementUtility::addToAllTCAtypes(
             'tt_content',
@@ -43,5 +46,6 @@ class ExtTablesInclusionPostProcessing
         );
 
         $event->setTca($GLOBALS['TCA']);
+        $GLOBALS['TCA'] = $tcaBackup;
     }
 }
