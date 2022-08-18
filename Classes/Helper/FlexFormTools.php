@@ -105,9 +105,9 @@ class FlexFormTools
     {
         $out = [];
         foreach ($dataArr as $k => $el) {
-            if (is_array($el) && is_array($el['el'])) {
+            if (is_array($el) && isset($el['el']) && is_array($el['el'])) {
                 $out[$k] = $this->getFlexformSectionsRecursively($el['el']);
-            } elseif (is_array($el) && is_array($el['data']['el'])) {
+            } elseif (is_array($el) && isset($el['data']) && isset($el['data']['el']) && is_array($el['data']['el'])) {
                 $out[] = $this->getFlexformSectionsRecursively($el['data']['el']);
             } elseif (isset($el[$valueKey])) {
                 $out[$k] = $el[$valueKey];
