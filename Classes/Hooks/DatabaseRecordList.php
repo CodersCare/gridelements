@@ -185,7 +185,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
         string &$contentCollapseIcon,
         DatabaseRecordListXclass $parentObj
     ) {
-        if ($data['_EXPAND_TABLE_'] === 'tt_content') {
+        if (!empty($data['_EXPAND_TABLE_']) && $data['_EXPAND_TABLE_'] === 'tt_content') {
             $expandTitle = htmlspecialchars($this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.expandElement'));
             $collapseTitle = htmlspecialchars($this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.collapseElement'));
             $expandedGridelements = $parentObj->getExpandedGridelements();

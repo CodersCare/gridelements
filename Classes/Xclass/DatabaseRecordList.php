@@ -878,10 +878,12 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                  * @date 2014-02-11
                  * @request Alexander Grein <alexander.grein@in2code.de>
                  */
-                foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['actions'] ?? [] as $className) {
-                    $hookObject = GeneralUtility::makeInstance($className);
-                    if (is_object($hookObject) && method_exists($hookObject, 'contentCollapseIcon')) {
-                        $hookObject->contentCollapseIcon($data, $sortField, $level, $contentCollapseIcon, $this);
+                if (!empty($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['actions'])) {
+                    foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['actions'] ?? [] as $className) {
+                        $hookObject = GeneralUtility::makeInstance($className);
+                        if (is_object($hookObject) && method_exists($hookObject, 'contentCollapseIcon')) {
+                            $hookObject->contentCollapseIcon($data, $sortField, $level, $contentCollapseIcon, $this);
+                        }
                     }
                 }
             }
