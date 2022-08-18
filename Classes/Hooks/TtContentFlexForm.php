@@ -57,7 +57,7 @@ class TtContentFlexForm
                 /** @var LayoutSetup $layoutSetupInstance */
                 $layoutSetupInstance = GeneralUtility::makeInstance(LayoutSetup::class)->init($pageUid);
                 $layoutSetup = $layoutSetupInstance->getLayoutSetup($layoutId);
-                if ($layoutSetup['pi_flexform_ds_file']) {
+                if (!empty($layoutSetup['pi_flexform_ds_file'])) {
                     if (MathUtility::canBeInterpretedAsInteger($layoutSetup['pi_flexform_ds_file'])) {
                         // Our data structure is in a record. Re-use core internal syntax to resolve that.
                         // Get path of referenced file
@@ -128,7 +128,7 @@ class TtContentFlexForm
      */
     public function parseDataStructureByIdentifierPreProcess(array $identifier): string
     {
-        if ($identifier['type'] === 'gridelements-dummy') {
+        if (!empty($identifier['type']) && $identifier['type'] === 'gridelements-dummy') {
             return 'FILE:EXT:gridelements/Configuration/FlexForms/default_flexform_configuration.xml';
         }
         if (!empty($identifier['flexformDS'])) {
