@@ -156,6 +156,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         // Creating the list of fields to include in the SQL query
         $selectFields = $this->getFieldsToSelect($table, $this->fieldArray);
         if ($table === 'tt_content') {
+            $selectFields[] = 'tx_gridelements_backend_layout';
             $this->gridelementsBackendLayouts = GeneralUtility::makeInstance(LayoutSetup::class)->init($id);
         }
         $this->selectFields = implode(',', $selectFields);
@@ -782,7 +783,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
 
         if (!empty($theData['_EXPANDABLE_']) && $level < 8 && $row['l18n_parent'] == 0 && !empty($theData['_CHILDREN_'])) {
             $expanded = !empty($this->expandedGridelements[$row['uid']]) && (
-                (!empty($this->expandedGridelements[$row['tx_gridelements_container']]) && $expanded)
+                (!empty($row['tx_gridelements_container']) && !empty($this->expandedGridelements[$row['tx_gridelements_container']]) && $expanded)
                 || empty($row['tx_gridelements_container'])
             ) ? ' expanded' : '';
             $previousGridColumn = '';
@@ -870,7 +871,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         $contentCollapseIcon = '';
 
         if (count($data) > 1) {
-            if (!empty($data['_EXPANDABLE_']) && $l10nParent) {
+            if (!empty($data['_EXPANDABLE_']) && !$l10nParent) {
                 $sortField = GeneralUtility::_GP('sortField') ? GeneralUtility::_GP('sortField') . ':' . (int)GeneralUtility::_GP('sortRev') : '';
                 /**
                  * @hook contentCollapseIcon

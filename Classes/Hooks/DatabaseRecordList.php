@@ -155,14 +155,16 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
                 0,
                 $parentObj->selectFields
             );
-            $layoutColumns = $parentObj->getGridelementsBackendLayouts()->getLayoutColumns((string)$row['tx_gridelements_backend_layout']);
-            if (!empty($elementChildren)) {
-                $theData['_CONTAINER_COLUMNS_'] = $layoutColumns;
-                $theData['_EXPANDABLE_'] = true;
-                $theData['_EXPAND_ID_'] = $table . ':' . $row['uid'];
-                $theData['_EXPAND_TABLE_'] = $table;
-                $theData['_LEVEL_'] = $level;
-                $theData['_CHILDREN_'] = $elementChildren;
+            if (!empty($row['tx_gridelements_backend_layout'])) {
+                $layoutColumns = $parentObj->getGridelementsBackendLayouts()->getLayoutColumns((string)$row['tx_gridelements_backend_layout']);
+                if (!empty($elementChildren)) {
+                    $theData['_CONTAINER_COLUMNS_'] = $layoutColumns;
+                    $theData['_EXPANDABLE_'] = true;
+                    $theData['_EXPAND_ID_'] = $table . ':' . $row['uid'];
+                    $theData['_EXPAND_TABLE_'] = $table;
+                    $theData['_LEVEL_'] = $level;
+                    $theData['_CHILDREN_'] = $elementChildren;
+                }
             }
         }
     }
@@ -187,7 +189,7 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
             $expandTitle = htmlspecialchars($this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.expandElement'));
             $collapseTitle = htmlspecialchars($this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.collapseElement'));
             $expandedGridelements = $parentObj->getExpandedGridelements();
-            if ($expandedGridelements[$data['uid']]) {
+            if (!empty($expandedGridelements[$data['uid']])) {
                 $href = htmlspecialchars(($parentObj->listURL() . '&gridelementsExpand[' . (int)$data['uid'] . ']=0'));
                 $contentCollapseIcon = '<a class="btn btn-default t3js-toggle-gridelements-list open-gridelements-container" data-state="expanded" href="' . $href .
                     '" id="t3-gridelements-' . $data['uid'] . '" title="' . $collapseTitle

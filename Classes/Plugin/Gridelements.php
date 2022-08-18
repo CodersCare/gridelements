@@ -575,8 +575,7 @@ class Gridelements extends ContentObjectRenderer
         array &$parentGridData,
         array &$parentRecordNumbers,
         array $typoScriptSetup = []
-    )
-    {
+    ) {
         $column_number = (int)($child['tx_gridelements_columns'] ?? 0);
         $columnKey = $column_number . '.';
         $columnSetupKey = isset($typoScriptSetup['columns.'][$columnKey]) ? $columnKey : 'default.';
