@@ -16,7 +16,7 @@
  * based on jQuery UI
  */
 
-define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storage/Persistent', 'TYPO3/CMS/Gridelements/GridElementsDragDrop', 'TYPO3/CMS/Backend/LayoutModule/Paste', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Severity'], function ($, AjaxDataHandler, PersistentStorage, DragDrop, Paste, Modal, Severity) {
+define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storage/Persistent', 'TYPO3/CMS/Gridelements/GridElementsDragDrop', 'TYPO3/CMS/Backend/LayoutModule/Paste', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Severity', 'TYPO3/CMS/Backend/Utility/MessageUtility'], function ($, AjaxDataHandler, PersistentStorage, DragDrop, Paste, Modal, Severity, MessageUtility) {
 
     var OnReady = {
             openedPopupWindow: []
@@ -403,9 +403,25 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
      * gives back the data from the popup window to the copy action
      */
     if (!$('.typo3-TCEforms').length) {
-        OnReady.setSelectOptionFromExternalSource = setFormValueFromBrowseWin = function (elementId, tableUid) {
-            tableUid = tableUid.replace('tt_content_', '') * 1;
-            DragDrop.default.onDrop(tableUid, $('#' + elementId).find('.t3js-paste-new'), 'copyFromAnotherPage');
+        /**
+         * gives back the data from the popup window to the copy action
+         */
+        if (!$('.typo3-TCEforms').length) {
+            window.addEventListener('message', function (e) {
+                if (!MessageUtility.MessageUtility.verifyOrigin(e.origin)) {
+                    throw 'Denied message sent by ' + e.origin;
+                }
+
+                if (typeof e.data.fieldName === 'undefined') {
+                    throw 'fieldName not defined in message';
+                }
+
+                if (typeof e.data.value === 'undefined') {
+                    throw 'value not defined in message';
+                }
+                var tableUid = e.data.value.replace('tt_content_', '') * 1;
+                DragDrop.default.onDrop(tableUid, $('#' + e.data.fieldName).find('.t3js-paste-new'), 'copyFromAnotherPage');
+            });
         }
     }
 

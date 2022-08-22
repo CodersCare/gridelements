@@ -201,7 +201,7 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
 
         $droppableElement.removeClass(DragDrop.default.dropPossibleHoverClass);
         var $pasteAction = typeof $draggableElement === 'number' || typeof $draggableElement === 'undefined';
-        var $pasteElement = typeof Paste.itemOnClipboardUid === 'number' ? Paste.itemOnClipboardUid : $draggableElement;
+        var $pasteElement = typeof Paste.itemOnClipboardUid === 'number' && Paste.itemOnClipboardUid > 0 ? Paste.itemOnClipboardUid : $draggableElement;
 
         // send an AJAX request via the AjaxDataHandler
         var contentElementUid = $pasteAction ? $pasteElement : parseInt($draggableElement.data('uid'));
