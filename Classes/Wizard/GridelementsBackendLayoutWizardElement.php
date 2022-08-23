@@ -249,7 +249,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                 $layout = ['config' => $parser->setup['backend_layout.']];
                 if (!empty($layout['config']['rows.'])) {
                     $columns = $layoutSetup->checkAvailableColumns($layout);
-                    if ($columns['allowed'] || $columns['disallowed'] || $columns['maxitems']) {
+                    if (!empty($columns['allowed']) || !empty($columns['disallowed']) || !empty($columns['maxitems'])) {
                         $layout['columns'] = $columns;
                         unset($layout['columns']['allowed']);
                         $layout['allowed'] = $columns['allowed'] ?? [];
@@ -259,9 +259,9 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                 }
             }
             $rows = [];
-            $colCount = $layout['config']['colCount'];
-            $rowCount = $layout['config']['rowCount'];
-            $dataRows = $layout['config']['rows.'];
+            $colCount = $layout['config']['colCount'] ?? 0;
+            $rowCount = $layout['config']['rowCount'] ?? 0;
+            $dataRows = $layout['config']['rows.'] ?? [];
             $spannedMatrix = [];
             for ($i = 1; $i <= $rowCount; $i++) {
                 $cells = [];
@@ -270,7 +270,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                 for ($j = 1; $j <= $colCount; $j++) {
                     $cellData = [];
                     if (empty($spannedMatrix[$i][$j])) {
-                        if (is_array($columns) && !empty($columns)) {
+                        if (!empty($columns) && is_array($columns)) {
                             $column = array_shift($columns);
                             if (isset($column['colspan'])) {
                                 $cellData['colspan'] = (int)$column['colspan'];
@@ -279,11 +279,17 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                                     $columnRowSpan = (int)$column['rowspan'];
                                     for ($spanRow = 0; $spanRow < $columnRowSpan; $spanRow++) {
                                         for ($spanColumn = 0; $spanColumn < $columnColSpan; $spanColumn++) {
+                                            if (!isset($spannedMatrix[$i + $spanRow])) {
+                                                $spannedMatrix[$i + $spanRow] = [];
+                                            }
                                             $spannedMatrix[$i + $spanRow][$j + $spanColumn] = 1;
                                         }
                                     }
                                 } else {
                                     for ($spanColumn = 0; $spanColumn < $columnColSpan; $spanColumn++) {
+                                        if (!isset($spannedMatrix[$i])) {
+                                            $spannedMatrix[$i] = [];
+                                        }
                                         $spannedMatrix[$i][$j + $spanColumn] = 1;
                                     }
                                 }
@@ -292,6 +298,9 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                                 if (isset($column['rowspan'])) {
                                     $columnRowSpan = (int)$column['rowspan'];
                                     for ($spanRow = 0; $spanRow < $columnRowSpan; $spanRow++) {
+                                        if (!isset($spannedMatrix[$i + $spanRow])) {
+                                            $spannedMatrix[$i + $spanRow] = [];
+                                        }
                                         $spannedMatrix[$i + $spanRow][$j] = 1;
                                     }
                                 }
@@ -319,7 +328,9 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                                         $cellData['disallowed'][$key] = implode(',', array_keys($valueArray));
                                     }
                                 }
-                                $cellData['maxitems'] = (int)$layout['maxitems'][$colPos];
+                                if (isset($layout['maxitems'][$colPos])) {
+                                    $cellData['maxitems'] = (int)$layout['maxitems'][$colPos];
+                                }
                             }
                         }
                     } else {
