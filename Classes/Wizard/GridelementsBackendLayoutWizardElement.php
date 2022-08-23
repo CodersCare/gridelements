@@ -24,7 +24,9 @@ namespace GridElementsTeam\Gridelements\Wizard;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Backend\Form\Element\BackendLayoutWizardElement;
+use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -55,6 +57,14 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         $lang = $this->getLanguageService();
         $resultArray = $this->initializeResultArray();
         $this->init();
+
+        // readOnly is not supported as columns config but might be set by SingleFieldContainer in case
+        // "l10n_display" is set to "defaultAsReadonly". To prevent misbehaviour for fields, which falsely
+        // set this, we also check for "defaultAsReadonly" being set and whether the record is an overlay.
+        $readOnly = ($parameterArray['fieldConf']['config']['readOnly'] ?? false)
+            && ($tca['ctrl']['transOrigPointerField'] ?? false)
+            && ($row[$tca['ctrl']['transOrigPointerField']][0] ?? $row[$tca['ctrl']['transOrigPointerField']] ?? false)
+            && GeneralUtility::inList($parameterArray['fieldConf']['l10n_display'] ?? '', 'defaultAsReadonly');
 
         $fieldInformationResult = $this->renderFieldInformation();
         $fieldInformationHtml = $fieldInformationResult['html'];
@@ -118,7 +128,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         $html[] = '</tr>';
         $html[] = '<tr>';
         $html[] = '<td colspan="2">';
-        $html[] = '<a href="#" class="btn btn-default btn-sm t3js-grideditor-preview-button"></a>';
+        $html[] = '<a href="#" class="btn btn-default btn-sm t3js-grideditor-preview-button">' . htmlspecialchars($lang->getLL('buttons.pageTsConfig')) . '</a>';
         $html[] = '<pre class="t3js-grideditor-preview-config grideditor-preview"><code></code></pre>';
         $html[] = '</td>';
         $html[] = '</tr>';

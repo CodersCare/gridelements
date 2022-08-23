@@ -147,16 +147,22 @@ function ($, Modal, Severity) {
             GridEditor.writeConfig(GridEditor.export2LayoutRecord());
         });
 
-        $(GridEditor.selectorConfigPreviewButton).empty().append(TYPO3.lang['button.showPageTsConfig']);
+        if (TYPO3.lang['button.showPageTsConfig']) {
+            $(GridEditor.selectorConfigPreviewButton).empty().append(TYPO3.lang['button.showPageTsConfig']);
+        }
         $(document).on('click', GridEditor.selectorConfigPreviewButton, function (e) {
             e.preventDefault();
             var $preview = $(GridEditor.selectorConfigPreview);
             var $button = $(GridEditor.selectorConfigPreviewButton);
             if ($preview.is(':visible')) {
-                $button.empty().append(TYPO3.lang['button.showPageTsConfig']);
+                if (TYPO3.lang['button.showPageTsConfig']) {
+                    $button.empty().append(TYPO3.lang['button.showPageTsConfig']);
+                }
                 $(GridEditor.selectorConfigPreview).slideUp();
             } else {
-                $button.empty().append(TYPO3.lang['button.hidePageTsConfig']);
+                if (TYPO3.lang['button.hidePageTsConfig']) {
+                    $button.empty().append(TYPO3.lang['button.hidePageTsConfig']);
+                }
                 $(GridEditor.selectorConfigPreview).slideDown();
             }
 
