@@ -33,6 +33,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -77,11 +78,18 @@ class PageLayoutController
         $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsOnReady');
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragDrop');
-        if (isset($this->extensionConfiguration['disableDragInWizard'])
-            && (boolean)$this->extensionConfiguration['disableDragInWizard'] !== true
-            && isset($this->helper->getBackendUser()->uc['disableDragInWizard'])
-            && (boolean)$this->helper->getBackendUser()->uc['disableDragInWizard'] !== true) {
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard');
+        if (
+            !(isset($this->extensionConfiguration['disableDragInWizard'])
+                && (boolean)$this->extensionConfiguration['disableDragInWizard'] === true
+            || isset($this->helper->getBackendUser()->uc['disableDragInWizard'])
+                && (boolean)$this->helper->getBackendUser()->uc['disableDragInWizard'] === true)
+        ) {
+            $typo3Version = new Typo3Version();
+            if ($typo3Version->getMajorVersion() >= 11) {
+                $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard');
+            } else {
+                $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard10');
+            }
         }
 
         /** @var Clipboard $clipObj */

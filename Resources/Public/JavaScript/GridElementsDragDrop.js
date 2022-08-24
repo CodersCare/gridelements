@@ -44,12 +44,12 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
      */
     DragDrop.default.initialize = function () {
         $(DragDrop.default.draggableIdentifier).draggable({
-            handle: this.dragHeaderIdentifier,
             scope: 'tt_content',
             cursor: 'move',
             distance: 20,
             addClasses: 'active-drag',
             revert: 'invalid',
+            cancel: false,
             start: function () {
                 DragDrop.default.onDragStart($(this));
             },
@@ -100,11 +100,16 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
                     DragDrop.default.newContentElementDefaultValues = $.parseJSON(
                         '{' + DragDrop.default.newContentElementOnclick.replace(/\&/g, '",').replace(/defVals\[tt_content\]\[/g, '"').replace(/\]\=/g, '":"') + '"}'
                     );
-                    DragDrop.default.types.data('ctype', DragDrop.default.newContentElementDefaultValues.CType);
-                    DragDrop.default.types.data('list_type', DragDrop.default.newContentElementDefaultValues.list_type);
-                    DragDrop.default.types.data('tx_gridelements_backend_layout', DragDrop.default.newContentElementDefaultValues.tx_gridelements_backend_layout);
+                }
+            } else {
+                DragDrop.default.newContentElementPositionMapArguments = $element.find('button:first').data('position-map-arguments');
+                if (typeof DragDrop.default.newContentElementPositionMapArguments !== 'undefined') {
+                    DragDrop.default.newContentElementDefaultValues = DragDrop.default.newContentElementPositionMapArguments.defVals;
                 }
             }
+            DragDrop.default.types.data('ctype', DragDrop.default.newContentElementDefaultValues.CType);
+            DragDrop.default.types.data('list_type', DragDrop.default.newContentElementDefaultValues.list_type);
+            DragDrop.default.types.data('tx_gridelements_backend_layout', DragDrop.default.newContentElementDefaultValues.tx_gridelements_backend_layout);
         }
         // Hide create new element button
         DragDrop.default.ownDropZone = $element.children(DragDrop.default.dropZoneIdentifier);
