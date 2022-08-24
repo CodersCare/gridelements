@@ -198,6 +198,10 @@
 	-webkit-transition: opacity 0.7s;
 }
 
+#new-element-drag-in-wizard.new-element-drag-in-wizard-cms11 {
+	right: 185px;
+}
+
 #new-element-drag-in-wizard.active {
 	opacity: 1;
 }
@@ -262,10 +266,17 @@
 	min-height: 0 !important;
 }
 
-#new-element-drag-in-wizard .media {
+#new-element-drag-in-wizard .media,
+#new-element-drag-in-wizard .t3js-media-new-content-element-wizard {
 	display: inline-block;
 	margin-top: 0;
 	float: none;
+	width: initial;
+}
+
+#new-element-drag-in-wizard .t3js-media-new-content-element-wizard button {
+	display: inline;
+	float: initial;
 	width: initial;
 }
 
@@ -285,6 +296,10 @@
 	padding: 5px 10px;
 }
 
+#new-element-drag-in-wizard .panel-tab {
+	overflow: visible;
+}
+
 #new-element-drag-in-wizard .panel-tab:hover {
 	min-height: 122px;
 }
@@ -294,6 +309,10 @@
 
 #new-element-drag-in-wizard.dragged .panel-tab:hover {
 	min-height: 0 !important;
+}
+
+#new-element-drag-in-wizard .ui-draggable-dragging {
+	z-index: 20000 !important;
 }
 
 .t3js-module-body .exampleContent > .reference {

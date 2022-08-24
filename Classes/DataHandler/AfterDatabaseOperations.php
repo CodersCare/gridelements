@@ -140,7 +140,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
             $changedGridElements[$this->getContentUid()] = true;
             $childElementsInUnavailableColumns = [];
             $childElementsInAvailableColumns = [];
-            $availableColumns = $this->getAvailableColumns((string)$fieldArray['tx_gridelements_backend_layout'], 'tt_content');
+            $availableColumns = $this->getAvailableColumns((string)($fieldArray['tx_gridelements_backend_layout'] ?? ''), 'tt_content');
             if (!empty($availableColumns) || $availableColumns === '0') {
                 $availableColumns = GeneralUtility::intExplode(',', $availableColumns);
                 $queryBuilder = $this->getQueryBuilder();
@@ -244,7 +244,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     $selectedBackendLayoutNextLevel = $page['backend_layout_next_level'];
                 }
                 if (isset($page['uid']) && $page['uid'] === $this->getPageUid()) {
-                    if (!empty($fieldArray['backend_layout_next_level'] !== 0)) {
+                    if (!empty($fieldArray['backend_layout_next_level'])) {
                         // Backend layout for sub pages of the current page is set
                         $backendLayoutNextLevelId = $fieldArray['backend_layout_next_level'];
                     }
@@ -480,7 +480,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
 
         if ($layout && $table === 'tt_content') {
             $tcaColumns = $this->layoutSetup->getLayoutColumns($layout);
-            $tcaColumns = '-2,-1,' . $tcaColumns['CSV'];
+            $CSV = '';
+            if (!empty($tcaColumns['CSV'])) {
+                $CSV = $tcaColumns['CSV'];
+            }
+            $tcaColumns = '-2,-1,' . $CSV;
         } elseif ($table === 'pages') {
             $tcaColumns = GeneralUtility::callUserFunction(
                 BackendLayoutView::class . '->getColPosListItemsParsed',
