@@ -267,7 +267,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
             }
 
             if (isset($fieldArray['backend_layout'])) {
-                $availableColumns = $this->getAvailableColumns($backendLayoutId, 'pages', $this->getPageUid());
+                $availableColumns = $this->getAvailableColumns((string)$backendLayoutId, 'pages', $this->getPageUid());
                 $availableColumns = GeneralUtility::intExplode(',', $availableColumns);
                 $queryBuilder = $this->getQueryBuilder();
                 $elementsInUnavailableColumnsQuery = $queryBuilder
@@ -360,7 +360,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                 if (!empty($subPages)) {
                     $changedSubPageElements = [];
                     foreach ($subPages as $page) {
-                        $availableColumns = $this->getAvailableColumns($backendLayoutId, 'pages', $page['uid']);
+                        $availableColumns = $this->getAvailableColumns((string)$backendLayoutId, 'pages', $page['uid']);
                         $availableColumns = GeneralUtility::intExplode(',', $availableColumns);
                         $queryBuilder = $this->getQueryBuilder();
                         $subPageElementsInUnavailableColumnsQuery = $queryBuilder

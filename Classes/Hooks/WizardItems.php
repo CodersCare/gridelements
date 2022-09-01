@@ -365,6 +365,9 @@ class WizardItems implements NewContentElementWizardHookInterface
     public function addGridValuesToWizardItems(array &$wizardItems, int $container, int $column)
     {
         foreach ($wizardItems as $key => $wizardItem) {
+            if (!isset($wizardItems[$key]['params'])) {
+                $wizardItems[$key]['params'] = '';
+            }
             if (empty($wizardItem['header'])) {
                 if ($container !== 0) {
                     if (!isset($wizardItem['tt_content_defValues'])) {
@@ -379,6 +382,9 @@ class WizardItems implements NewContentElementWizardHookInterface
             if (isset($wizardItem['tt_content_defValues']['CType']) && $wizardItem['tt_content_defValues']['CType'] === 'table') {
                 $wizardItems[$key]['tt_content_defValues']['bodytext'] = '';
                 $wizardItems[$key]['params'] .= '&defVals[tt_content][bodytext]=';
+            }
+            if (empty($wizardItems[$key]['params'])) {
+                unset($wizardItems[$key]['params']);
             }
         }
     }

@@ -151,9 +151,13 @@ class PageLayoutController
                 'tt_content',
                 'CType',
                 'shortcut',
-                $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode']
+                $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode'] ?? ''
             ) ? 'true' : 'false') . ';
-                top.skipDraggableDetails = ' . ($this->getBackendUser()->uc['dragAndDropHideNewElementWizardInfoOverlay'] ? 'true' : 'false') . ';
+                top.skipDraggableDetails = ' . (
+                isset($this->getBackendUser()->uc['dragAndDropHideNewElementWizardInfoOverlay'])
+                && $this->getBackendUser()->uc['dragAndDropHideNewElementWizardInfoOverlay']
+                    ? 'true' : 'false'
+            ) . ';
                 top.browserUrl = ' . json_encode((string)$uriBuilder->buildUriFromRoute('wizard_element_browser')) . ';';
         } catch (RouteNotFoundException $e) {
         }

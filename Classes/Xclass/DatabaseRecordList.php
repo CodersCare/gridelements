@@ -218,8 +218,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
             $theData[$titleCol] = BackendUtility::wrapInHelp($table, '', $tableTitle) . ' (<span class="t3js-table-total-items">' . $totalItems . '</span>)';
         } else {
             $icon = $this->table // @todo separate table header from contract/expand link
-                    ? '<span title="' . htmlspecialchars($lang->getLL('contractView')) . '">' . $this->iconFactory->getIcon('actions-view-table-collapse', Icon::SIZE_SMALL)->render() . '</span>'
-                    : '<span title="' . htmlspecialchars($lang->getLL('expandView')) . '">' . $this->iconFactory->getIcon('actions-view-table-expand', Icon::SIZE_SMALL)->render() . '</span>';
+                ? '<span title="' . htmlspecialchars($lang->getLL('contractView')) . '">' . $this->iconFactory->getIcon('actions-view-table-collapse', Icon::SIZE_SMALL)->render() . '</span>'
+                : '<span title="' . htmlspecialchars($lang->getLL('expandView')) . '">' . $this->iconFactory->getIcon('actions-view-table-expand', Icon::SIZE_SMALL)->render() . '</span>';
             $theData[$titleCol] = $this->linkWrapTable($table, $tableTitle . ' (<span class="t3js-table-total-items">' . $totalItems . '</span>) ' . $icon);
         }
         $tableActions = '';
@@ -234,15 +234,15 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                 $title = sprintf(htmlspecialchars($lang->getLL('collapseExpandTable')), $tableTitle);
                 $icon = '<span class="collapseIcon">' . $this->iconFactory->getIcon(($tableCollapsed ? 'actions-view-list-expand' : 'actions-view-list-collapse'), Icon::SIZE_SMALL)->render() . '</span>';
                 $tableActions .= '<button type="button"'
-                        . ' class="btn btn-default btn-sm pull-right t3js-toggle-recordlist"'
-                        . ' title="' . $title . '"'
-                        . ' aria-label="' . $title . '"'
-                        . ' aria-expanded="' . ($tableCollapsed ? 'false' : 'true') . '"'
-                        . ' data-table="' . htmlspecialchars($tableIdentifier) . '"'
-                        . ' data-bs-toggle="collapse"'
-                        . ' data-bs-target="#recordlist-' . htmlspecialchars($tableIdentifier) . '">'
-                        . $icon
-                        . '</button>';
+                    . ' class="btn btn-default btn-sm pull-right t3js-toggle-recordlist"'
+                    . ' title="' . $title . '"'
+                    . ' aria-label="' . $title . '"'
+                    . ' aria-expanded="' . ($tableCollapsed ? 'false' : 'true') . '"'
+                    . ' data-table="' . htmlspecialchars($tableIdentifier) . '"'
+                    . ' data-bs-toggle="collapse"'
+                    . ' data-bs-target="#recordlist-' . htmlspecialchars($tableIdentifier) . '">'
+                    . $icon
+                    . '</button>';
             }
             // Show the select box
             $tableActions .= $this->columnSelector($table);
@@ -253,7 +253,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
         if ($table === 'tt_content') {
             $this->expandedGridelements = [];
             $backendUser = $this->getBackendUserAuthentication();
-            if (is_array($backendUser->uc['moduleData']['list']['gridelementsExpanded'])) {
+            if (!empty($backendUser->uc['moduleData']['list']['gridelementsExpanded'])
+                && is_array($backendUser->uc['moduleData']['list']['gridelementsExpanded'])) {
                 $this->expandedGridelements = $backendUser->uc['moduleData']['list']['gridelementsExpanded'];
             }
             $expandOverride = GeneralUtility::_GP('gridelementsExpand');
@@ -264,6 +265,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     } else {
                         unset($this->expandedGridelements[$expandContainer]);
                     }
+                }
+                if (!isset($backendUser->uc['moduleData']['list'])) {
+                    $backendUser->uc['moduleData']['list'] = [];
                 }
                 $backendUser->uc['moduleData']['list']['gridelementsExpanded'] = $this->expandedGridelements;
                 // Save modified user uc
