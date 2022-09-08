@@ -420,7 +420,6 @@ class Gridelements extends ContentObjectRenderer
      */
     public function renderChildrenIntoParentColumns(array $typoScriptSetup = [], array $sortColumns = [])
     {
-
         // first we have to make a backup copy of the original data array
         // and we have to modify the depth counter to avoid stopping too early
 

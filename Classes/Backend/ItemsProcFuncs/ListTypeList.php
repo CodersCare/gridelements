@@ -46,7 +46,7 @@ class ListTypeList extends AbstractItemsProcFunc
     public function itemsProcFunc(array &$params)
     {
         if ((int)$params['row']['pid'] > 0) {
-            $colPos = is_array($params['row']['colPos']) ? $params['row']['colPos'][0] : $params['row']['colPos'];
+            $colPos = is_array($params['row']['colPos']) ? ($params['row']['colPos'][0] ?? 0) : $params['row']['colPos'];
             $this->checkForAllowedListTypes(
                 $params['items'],
                 (int)$params['row']['pid'],

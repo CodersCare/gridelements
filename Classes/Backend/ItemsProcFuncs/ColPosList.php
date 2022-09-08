@@ -41,13 +41,13 @@ class ColPosList extends AbstractItemsProcFunc
         $this->init();
         if ((int)$params['row']['pid'] > 0) {
             if (isset($params['row']['CType'])) {
-                $contentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
+                $contentType = is_array($params['row']['CType']) ? ($params['row']['CType'][0] ?? '') : $params['row']['CType'];
             }
             if (isset($params['row']['list_type'])) {
-                $listType = is_array($params['row']['list_type']) ? $params['row']['list_type'][0] : $params['row']['list_type'];
+                $listType = is_array($params['row']['list_type']) ? ($params['row']['list_type'][0] ?? '') : $params['row']['list_type'];
             }
             if (isset($params['row']['tx_gridelements_backend_layout'])) {
-                $gridType = is_array($params['row']['tx_gridelements_backend_layout']) ? $params['row']['tx_gridelements_backend_layout'][0] : $params['row']['tx_gridelements_backend_layout'];
+                $gridType = is_array($params['row']['tx_gridelements_backend_layout']) ? ($params['row']['tx_gridelements_backend_layout'][0] ?? '') : $params['row']['tx_gridelements_backend_layout'];
             }
             $params['items'] = $this->addColPosListLayoutItems(
                 (int)$params['row']['pid'],
