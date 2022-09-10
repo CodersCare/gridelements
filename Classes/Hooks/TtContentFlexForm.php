@@ -93,7 +93,7 @@ class TtContentFlexForm
                             'flexformDS' => 'FILE:' . $layoutSetup['pi_flexform_ds_file'],
                         ];
                     }
-                } elseif ($layoutSetup['pi_flexform_ds']) {
+                } elseif (!empty($layoutSetup['pi_flexform_ds'])) {
                     $identifier = [
                         'type' => 'record',
                         'tableName' => 'tx_gridelements_backend_layout',
