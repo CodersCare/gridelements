@@ -219,6 +219,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         $view->assign('newContentTitle', $this->getLanguageService()->getLL('newContentElement'));
         $view->assign('newContentTitleShort', $this->getLanguageService()->getLL('content'));
         $view->assign('allowEditContent', $this->getBackendUser()->check('tables_modify', 'tt_content'));
+        $view->assign('gridElementsBackendLayout', $layout);
         $view->assign('gridElementsContainer', $grid);
         $rendered = $view->render();
 
