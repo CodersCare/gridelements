@@ -109,8 +109,10 @@
     ]
 );
 
-$GLOBALS['TCA']['tt_content']['ctrl']['useColumnsForDefaultValues'] .= ',tx_gridelements_container,tx_gridelements_columns';
-$GLOBALS['TCA']['tt_content']['ctrl']['shadowColumnsForNewPlaceholders'] .= ',tx_gridelements_container,tx_gridelements_columns';
+$GLOBALS['TCA']['tt_content']['ctrl']['useColumnsForDefaultValues'] = ($GLOBALS['TCA']['tt_content']['ctrl']['useColumnsForDefaultValues'] ?? '')
+    . ',tx_gridelements_container,tx_gridelements_columns';
+$GLOBALS['TCA']['tt_content']['ctrl']['shadowColumnsForNewPlaceholders'] = ($GLOBALS['TCA']['tt_content']['ctrl']['shadowColumnsForNewPlaceholders'] ?? '')
+    . ',tx_gridelements_container,tx_gridelements_columns';
 $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes']['gridelements_pi1'] = 'gridelements-default';
 
 $GLOBALS['TCA']['tt_content']['columns']['colPos']['config']['itemsProcFunc'] = 'GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\ColPosList->itemsProcFunc';
@@ -119,7 +121,8 @@ $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['itemsProcFunc'] = '
 $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['itemsProcFunc'] = 'GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\ListTypeList->itemsProcFunc';
 $GLOBALS['TCA']['tt_content']['columns']['sys_language_uid']['config']['itemsProcFunc'] = 'GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\SysLanguageUidList->itemsProcFunc';
 $GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds']['*,gridelements_pi1'] = '';
-$GLOBALS['TCA']['tt_content']['columns']['records']['config']['allowed'] .= ',pages';
+$GLOBALS['TCA']['tt_content']['columns']['records']['config']['allowed'] = ($GLOBALS['TCA']['tt_content']['columns']['records']['config']['allowed'] ?? '')
+    . ',pages';
 
 $GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['showitem'] = '
 	--palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:palette.general;general,

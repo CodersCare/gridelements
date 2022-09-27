@@ -63,7 +63,7 @@ $GLOBALS['TYPO3_USER_SETTINGS']['columns']['disableCopyFromPageButton'] = [
     'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:disableCopyFromPageButton',
 ];
 
-$GLOBALS['TYPO3_USER_SETTINGS']['showitem'] .= ',
+$GLOBALS['TYPO3_USER_SETTINGS']['showitem'] = ($GLOBALS['TYPO3_USER_SETTINGS']['showitem'] ?? '') . ',
     --div--;LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:gridElements,
         dragAndDropHideNewElementWizardInfoOverlay,
         hideColumnHeaders,
