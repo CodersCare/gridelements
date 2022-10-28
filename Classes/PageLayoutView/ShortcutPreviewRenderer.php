@@ -76,9 +76,6 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
      */
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
-        $out = '';
-        $content = parent::renderPageModulePreviewContent($item);
-        $context = $item->getContext();
         $record = $item->getRecord();
 
         $drawItem = true;

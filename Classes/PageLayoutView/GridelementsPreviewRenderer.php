@@ -155,7 +155,6 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
      */
     protected function renderGridContainer(GridColumnItem $item): string
     {
-        $content = parent::renderPageModulePreviewContent($item);
         $context = $item->getContext();
         $record = $item->getRecord();
         $grid = GeneralUtility::makeInstance(Grid::class, $context);
@@ -223,6 +222,6 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         $view->assign('gridElementsContainer', $grid);
         $rendered = $view->render();
 
-        return $content . $rendered;
+        return $rendered;
     }
 }
