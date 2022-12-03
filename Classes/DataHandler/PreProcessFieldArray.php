@@ -69,9 +69,11 @@ class PreProcessFieldArray extends AbstractDataHandler
                 $new = false;
                 if (!empty($parentObj->cmdmap['tt_content']) && is_array($parentObj->cmdmap['tt_content'])) {
                     $cmdId = (int)key($parentObj->cmdmap['tt_content']);
-                    $new = !MathUtility::canBeInterpretedAsInteger(key($parentObj->datamap['tt_content'])) ||
-                        !empty($parentObj->cmdmap['tt_content'][$cmdId]['copy']) ||
+                    $new = !empty($parentObj->cmdmap['tt_content'][$cmdId]['copy']) ||
                         !empty($parentObj->cmdmap['tt_content'][$cmdId]['move']);
+                }
+                if (!$new && !empty($parentObj->datamap['tt_content']) && is_array($parentObj->datamap['tt_content'])) {
+                    $new = !MathUtility::canBeInterpretedAsInteger(key($parentObj->datamap['tt_content']));
                 }
                 $this->processFieldArrayForTtContent($fieldArray, $id, $new);
             }
