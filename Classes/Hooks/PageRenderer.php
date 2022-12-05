@@ -58,48 +58,41 @@ class PageRenderer implements SingletonInterface
     }
 
     /**
-     * wrapper function called by hook (\TYPO3\CMS\Core\Page\PageRenderer->render-preProcess)
+     * Add sys_notes as additional content to the footer of the page module
      *
-     * @param array $parameters An array of available parameters
-     * @param \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer The parent object that triggered this hook
+     * @param array $params
+     * @param PageLayoutController $parentObject
+     *
+     * @return string
+     * @throws \TYPO3\CMS\Extbase\Mvc\Exception\InvalidExtensionNameException
      */
-    public function addJSCSS(array $parameters, \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer)
+    public function renderPageLayout(array $params, PageLayoutController $parentObject): string
     {
-        if (!empty($GLOBALS['SOBE']) && (get_class($GLOBALS['SOBE']) === RecordListController::class || is_subclass_of(
-            $GLOBALS['SOBE'],
-            RecordListController::class
-        ))) {
-            $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsOnReady');
-            return;
+        $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+        $pageRenderer = $this->getPageRenderer();
+        $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsOnReady');
+        $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragDrop');
+        if ((boolean)$this->extensionConfiguration['disableDragInWizard'] !== true
+            && (boolean)$this->helper->getBackendUser()->uc['disableDragInWizard'] !== true) {
+            $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard');
         }
-        if (!empty($GLOBALS['SOBE']) && (get_class($GLOBALS['SOBE']) === PageLayoutController::class || is_subclass_of(
-            $GLOBALS['SOBE'],
-            PageLayoutController::class
-        ))) {
-            $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
-            $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsOnReady');
-            $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragDrop');
-            if ((boolean)$this->extensionConfiguration['disableDragInWizard'] !== true
-                && (boolean)$this->helper->getBackendUser()->uc['disableDragInWizard'] !== true) {
-                $pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard');
-            }
 
-            /** @var Clipboard $clipObj */
-            $clipObj = GeneralUtility::makeInstance(Clipboard::class); // Start clipboard
-            $clipObj->initializeClipboard();
-            $clipObj->lockToNormal();
-            $clipBoard = $clipObj->clipData['normal'];
-            if (!$pageRenderer->getCharSet()) {
-                $pageRenderer->setCharSet('utf-8');
-            }
+        /** @var Clipboard $clipObj */
+        $clipObj = GeneralUtility::makeInstance(Clipboard::class); // Start clipboard
+        $clipObj->initializeClipboard();
+        $clipObj->lockToNormal();
+        $clipBoard = $clipObj->clipData['normal'];
+        if (!$pageRenderer->getCharSet()) {
+            $pageRenderer->setCharSet('utf-8');
+        }
 
-            // pull locallang_db.xml to JS side - only the tx_gridelements_js-prefixed keys
-            $pageRenderer->addInlineLanguageLabelFile(
-                'EXT:gridelements/Resources/Private/Language/locallang_db.xml',
-                'tx_gridelements_js'
-            );
+        // pull locallang_db.xml to JS side - only the tx_gridelements_js-prefixed keys
+        $pageRenderer->addInlineLanguageLabelFile(
+            'EXT:gridelements/Resources/Private/Language/locallang_db.xml',
+            'tx_gridelements_js'
+        );
 
-            $pAddExtOnReadyCode = '
+        $pAddExtOnReadyCode = '
                 TYPO3.l10n = {
                     localize: function(langKey){
                         return TYPO3.lang[langKey];
@@ -107,29 +100,29 @@ class PageRenderer implements SingletonInterface
                 }
             ';
 
-            $id = (int)GeneralUtility::_GP('id');
-            $layout = GeneralUtility::callUserFunction(
-                BackendLayoutView::class . '->getSelectedBackendLayout',
-                $id,
-                $this
-            );
-            if (is_array($layout) && !empty($layout['__config']['backend_layout.']['rows.'])) {
-                /** @var LayoutSetup $layoutSetup */
-                $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init(0);
-                $layout = ['config' => $layout['__config']['backend_layout.']];
-                $columns = $layoutSetup->checkAvailableColumns($layout, true);
-                if ($columns['allowed'] || $columns['disallowed'] || $columns['maxitems']) {
-                    $layout['columns'] = $columns;
-                    unset($layout['columns']['allowed']);
-                    $layout['allowed'] = $columns['allowed'] ?: [];
-                    $layout['disallowed'] = $columns['disallowed'] ?: [];
-                    $layout['maxitems'] = $columns['maxitems'] ?: [];
-                }
+        $id = (int)GeneralUtility::_GP('id');
+        $layout = GeneralUtility::callUserFunction(
+            BackendLayoutView::class . '->getSelectedBackendLayout',
+            $id,
+            $this
+        );
+        if (is_array($layout) && !empty($layout['__config']['backend_layout.']['rows.'])) {
+            /** @var LayoutSetup $layoutSetup */
+            $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init(0);
+            $layout = ['config' => $layout['__config']['backend_layout.']];
+            $columns = $layoutSetup->checkAvailableColumns($layout, true);
+            if ($columns['allowed'] || $columns['disallowed'] || $columns['maxitems']) {
+                $layout['columns'] = $columns;
+                unset($layout['columns']['allowed']);
+                $layout['allowed'] = $columns['allowed'] ?: [];
+                $layout['disallowed'] = $columns['disallowed'] ?: [];
+                $layout['maxitems'] = $columns['maxitems'] ?: [];
             }
+        }
 
-            // add Ext.onReady() code from file
-            $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-            $pAddExtOnReadyCode .= '
+        // add Ext.onReady() code from file
+        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+        $pAddExtOnReadyCode .= '
             top.pageColumnsAllowed = ' . json_encode($layout['allowed']) . ';
             top.pageColumnsDisallowed = ' . json_encode($layout['disallowed']) . ';
             top.pageColumnsMaxitems = ' . json_encode($layout['maxitems']) . ';
@@ -142,33 +135,46 @@ class PageRenderer implements SingletonInterface
             top.skipDraggableDetails = ' . ($this->getBackendUser()->uc['dragAndDropHideNewElementWizardInfoOverlay'] ? 'true' : 'false') . ';
             top.browserUrl = ' . json_encode((string)$uriBuilder->buildUriFromRoute('wizard_element_browser')) . ';';
 
-            if (!empty($clipBoard) && !empty($clipBoard['el'])) {
-                $clipBoardElement = GeneralUtility::trimExplode('|', key($clipBoard['el']));
-                if ($clipBoardElement[0] === 'tt_content') {
-                    $clipBoardElementData = BackendUtility::getRecord('tt_content', (int)$clipBoardElement[1]);
-                    $pAddExtOnReadyCode .= '
+        if (!empty($clipBoard) && !empty($clipBoard['el'])) {
+            $clipBoardElement = GeneralUtility::trimExplode('|', key($clipBoard['el']));
+            if ($clipBoardElement[0] === 'tt_content') {
+                $clipBoardElementData = BackendUtility::getRecord('tt_content', (int)$clipBoardElement[1]);
+                $pAddExtOnReadyCode .= '
             top.clipBoardElementCType = ' . json_encode($clipBoardElementData['CType']) . ';
             top.clipBoardElementTxGridelementsBackendLayout = ' . json_encode(($clipBoardElementData['CType'] === 'gridelements_pi1') ? $clipBoardElementData['tx_gridelements_backend_layout'] : '') . ';
             top.clipBoardElementListType = ' . json_encode($clipBoardElementData['list_type']) . ';';
-                } else {
-                    $pAddExtOnReadyCode .= "
+            } else {
+                $pAddExtOnReadyCode .= "
             top.clipBoardElementCType = '';
             top.clipBoardElementTxGridelementsBackendLayout = '';
             top.clipBoardElementListType = '';";
-                }
             }
-
-            if ((boolean)$this->extensionConfiguration['disableCopyFromPageButton'] !== true
-                && (boolean)$this->helper->getBackendUser()->uc['disableCopyFromPageButton'] !== true) {
-                $pAddExtOnReadyCode .= '
-                    top.copyFromAnotherPageLinkTemplate = ' . json_encode('<a class="t3js-paste-new btn btn-default" title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.copyfrompage')) . '">' . $iconFactory->getIcon(
-                    'actions-insert-reference',
-                    Icon::SIZE_SMALL
-                )->render() . '</a>') . ';';
-            }
-
-            $pageRenderer->addJsInlineCode('gridelementsExtOnReady', $pAddExtOnReadyCode);
         }
+
+        if ((boolean)$this->extensionConfiguration['disableCopyFromPageButton'] !== true
+            && (boolean)$this->helper->getBackendUser()->uc['disableCopyFromPageButton'] !== true) {
+            $pAddExtOnReadyCode .= '
+                    top.copyFromAnotherPageLinkTemplate = ' . json_encode('<a class="t3js-paste-new btn btn-default" title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.copyfrompage')) . '">' . $iconFactory->getIcon(
+                        'actions-insert-reference',
+                        Icon::SIZE_SMALL
+                    )->render() . '</a>') . ';';
+        }
+
+        $pageRenderer->addJsInlineCode('gridelementsExtOnReady', $pAddExtOnReadyCode);
+
+        return '';
+    }
+
+    /**
+     * @return \TYPO3\CMS\Core\Page\PageRenderer
+     */
+    protected function getPageRenderer()
+    {
+        if (!(property_exists($this, 'pageRenderer') && $this->pageRenderer !== null)) {
+            $this->pageRenderer = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Page\PageRenderer::class);
+        }
+
+        return $this->pageRenderer;
     }
 
     /**
