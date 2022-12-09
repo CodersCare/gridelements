@@ -332,6 +332,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      */
     public function checkForRootColumn(int $contentId): int
     {
+        $colPos = 0;
         $queryBuilder = $this->getQueryBuilder();
         $queryBuilder
             ->getRestrictions()
@@ -353,10 +354,12 @@ class PreProcessFieldArray extends AbstractDataHandler
             )
             ->execute()
             ->fetch();
-        if (!empty($parent) && $parent['tx_gridelements_container'] > 0) {
-            $colPos = $this->checkForRootColumn($parent['tx_gridelements_container']);
-        } else {
-            $colPos = (int)$parent['colPos'];
+        if (!empty($parent)) {
+            if ($parent['tx_gridelements_container'] > 0) {
+                $colPos = $this->checkForRootColumn($parent['tx_gridelements_container']);
+            } else {
+                $colPos = (int)$parent['colPos'];
+            }
         }
 
         return $colPos;
