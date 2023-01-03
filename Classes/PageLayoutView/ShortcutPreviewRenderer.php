@@ -63,6 +63,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         $this->extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
         $this->helper = Helper::getInstance();
         $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+        $this->tree = GeneralUtility::makeInstance(QueryGenerator::class);
     }
 
     /**
@@ -187,9 +188,6 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
     ) {
         $itemList = str_replace('pages_', '', $shortcutItem);
         if ($recursive) {
-            if (!$this->tree instanceof QueryGenerator) {
-                $this->tree = GeneralUtility::makeInstance(QueryGenerator::class);
-            }
             $itemList = $this->tree->getTreeList($itemList, $recursive, 0, 1);
         }
         $itemList = GeneralUtility::intExplode(',', $itemList);
