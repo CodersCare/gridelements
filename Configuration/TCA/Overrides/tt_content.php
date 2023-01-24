@@ -37,6 +37,7 @@
                 'type' => 'inline',
                 'appearance' => [
                     'levelLinksPosition' => 'top',
+                    'showNewRecordLink' => false,
                     'showPossibleLocalizationRecords' => true,
                     'showAllLocalizationLink' => true,
                     'showSynchronizationLink' => true,
