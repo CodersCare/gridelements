@@ -6,7 +6,7 @@
     <f:if condition="{gridElementsBackendLayout.frame}">
         <f:then>
             <h4 class="t3-grid-container-title-{f:if(condition: '{gridElementsBackendLayout.frame}', then: '{gridElementsBackendLayout.frame}', else: '0')}">
-                {gridElementsBackendLayout.title}
+                {f:translate(key: gridElementsBackendLayout.title, default: gridElementsBackendLayout.title)}
             </h4>
         </f:then>
     </f:if>
