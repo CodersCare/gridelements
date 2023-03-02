@@ -25,7 +25,6 @@ namespace GridElementsTeam\Gridelements\Wizard;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Backend\Form\Element\BackendLayoutWizardElement;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
-use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -192,7 +191,6 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
             }
         }
         $gridTypes = [];
-        DebugUtility::debug($this->data);
         $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($this->data['parentPageRow']['pid'] ?? 0)->getLayoutSetup();
         if (is_array($layoutSetup)) {
             foreach ($layoutSetup as $key => $item) {
