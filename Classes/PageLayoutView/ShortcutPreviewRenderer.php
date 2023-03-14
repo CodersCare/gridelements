@@ -192,14 +192,14 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         }
         $itemList = GeneralUtility::intExplode(',', $itemList);
 
+        if (empty($itemList)) {
+            return;
+        }
+
         $queryBuilder = $this->getQueryBuilder();
 
         $items = $queryBuilder
             ->select('*')
-            ->addSelectLiteral($queryBuilder->expr()->inSet(
-                'pid',
-                $queryBuilder->createNamedParameter($itemList, Connection::PARAM_INT_ARRAY)
-            ) . ' AS inSet')
             ->from('tt_content')
             ->where(
                 $queryBuilder->expr()->neq(
@@ -216,11 +216,12 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
                     $queryBuilder->createNamedParameter([0, -1], Connection::PARAM_INT_ARRAY)
                 )
             )
-            ->orderBy('inSet')
             ->addOrderBy('colPos')
             ->addOrderBy('sorting')
             ->execute()
             ->fetchAll();
+
+        $sortedItemList = array_flip($itemList);
 
         foreach ($items as $item) {
             if (!empty($this->extensionConfiguration['overlayShortcutTranslation']) && $language > 0) {
@@ -230,11 +231,22 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
                 }
             }
             if ($this->helper->getBackendUser()->workspace > 0) {
-                unset($item['inSet']);
                 BackendUtility::workspaceOL('tt_content', $item, $this->helper->getBackendUser()->workspace);
             }
             $item['tx_gridelements_reference_container'] = $item['pid'];
-            $collectedItems[] = $item;
+
+            if (array_key_exists($item['pid'], $sortedItemList)) {
+                if (!is_array($sortedItemList[$item['pid']])) {
+                    $sortedItemList[$item['pid']] = [];
+                }
+                $sortedItemList[$item['pid']][] = $item;
+            }
+        }
+
+        foreach ($sortedItemList as $pid) {
+            foreach ($pid as $item) {
+                $collectedItems[] = $item;
+            }
         }
     }
 
