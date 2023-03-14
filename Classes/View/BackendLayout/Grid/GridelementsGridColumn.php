@@ -135,6 +135,22 @@ class GridelementsGridColumn extends GridColumn
     }
 
     /**
+     * @return int
+     */
+    public function getColSpan(): int
+    {
+        return $this->colSpan;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRowSpan(): int
+    {
+        return $this->rowSpan;
+    }
+
+    /**
      * @return int|null
      */
     public function getGridContainerId(): ?int
