@@ -243,8 +243,10 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         }
 
         foreach ($sortedItemList as $pid) {
-            foreach ($pid as $item) {
-                $collectedItems[] = $item;
+            if (is_array($pid)) {
+                foreach ($pid as $item) {
+                    $collectedItems[] = $item;
+                }
             }
         }
     }
