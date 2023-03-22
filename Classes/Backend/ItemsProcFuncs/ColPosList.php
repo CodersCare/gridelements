@@ -159,7 +159,7 @@ class ColPosList extends AbstractItemsProcFunc
         } else {
             $items = [];
             $items[] = [
-                $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tt_content.tx_gridelements_container'),
+                $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tt_content.tx_gridelements_container'),
                 '-1',
                 null,
                 null,

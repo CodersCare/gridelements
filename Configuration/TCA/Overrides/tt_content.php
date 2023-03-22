@@ -4,7 +4,7 @@
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile('gridelements', 'Configuration/TypoScript/DataProcessingLibContentElement', 'Gridelements w/DataProcessing (recommended)');
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPlugin([
-    'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tt_content.CType_pi1',
+    'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tt_content.CType_pi1',
     'gridelements_pi1',
     'gridelements-default',
 ], 'CType', 'gridelements');
@@ -14,7 +14,7 @@
     [
         'tx_gridelements_backend_layout' => [
             'exclude' => 1,
-            'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tt_content.tx_gridelements_backend_layout',
+            'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tt_content.tx_gridelements_backend_layout',
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
@@ -32,7 +32,7 @@
         ],
         'tx_gridelements_children' => [
             'exclude' => 1,
-            'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tt_content.tx_gridelements_children',
+            'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tt_content.tx_gridelements_children',
             'config' => [
                 'type' => 'inline',
                 'appearance' => [
@@ -72,7 +72,7 @@
         ],
         'tx_gridelements_container' => [
             'exclude' => 1,
-            'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tt_content.tx_gridelements_container',
+            'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tt_content.tx_gridelements_container',
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
@@ -95,7 +95,7 @@
         ],
         'tx_gridelements_columns' => [
             'exclude' => 1,
-            'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tt_content.tx_gridelements_columns',
+            'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tt_content.tx_gridelements_columns',
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',

@@ -103,7 +103,7 @@ class PageLayoutController
 
         // pull locallang_db.xml to JS side - only the tx_gridelements_js-prefixed keys
         $this->pageRenderer->addInlineLanguageLabelFile(
-            'EXT:gridelements/Resources/Private/Language/locallang_db.xml',
+            'EXT:gridelements/Resources/Private/Language/locallang_db.xlf',
             'tx_gridelements_js'
         );
 
@@ -184,7 +184,7 @@ class PageLayoutController
         if (empty($this->extensionConfiguration['disableCopyFromPageButton'])
             && empty($this->helper->getBackendUser()->uc['disableCopyFromPageButton'])) {
             $pAddExtOnReadyCode .= '
-                    top.copyFromAnotherPageLinkTemplate = ' . json_encode('<a class="t3js-paste-new btn btn-default" title="' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_js.copyfrompage') . '">' . $iconFactory->getIcon(
+                    top.copyFromAnotherPageLinkTemplate = ' . json_encode('<a class="t3js-paste-new btn btn-default" title="' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_js.copyfrompage') . '">' . $iconFactory->getIcon(
                 'actions-insert-reference',
                 Icon::SIZE_SMALL
             )->render() . '</a>') . ';';

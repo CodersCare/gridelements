@@ -235,7 +235,7 @@ class WizardItems implements NewContentElementWizardHookInterface
 
         // set header label
         $wizardItems['gridelements']['header'] = $this->getLanguageService()->sL(
-            'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_backend_layout_wizard_label'
+            'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_backend_layout_wizard_label'
         );
 
         $iconRegistry = GeneralUtility::makeInstance(IconRegistry::class);

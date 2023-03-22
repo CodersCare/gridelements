@@ -38,22 +38,22 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tx_templavoila_api']['apiIsRunningTCE
 
 $GLOBALS['TYPO3_USER_SETTINGS']['columns']['dragAndDropHideNewElementWizardInfoOverlay'] = [
     'type'  => 'check',
-    'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:dragAndDropHideNewElementWizardInfoOverlay',
+    'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:dragAndDropHideNewElementWizardInfoOverlay',
 ];
 
 $GLOBALS['TYPO3_USER_SETTINGS']['columns']['hideColumnHeaders'] = [
     'type'  => 'check',
-    'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:hideColumnHeaders',
+    'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:hideColumnHeaders',
 ];
 
 $GLOBALS['TYPO3_USER_SETTINGS']['columns']['hideContentPreview'] = [
     'type'  => 'check',
-    'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:hideContentPreview',
+    'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:hideContentPreview',
 ];
 
 $GLOBALS['TYPO3_USER_SETTINGS']['columns']['showGridInformation'] = [
     'type'  => 'check',
-    'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:showGridInformation',
+    'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:showGridInformation',
 ];
 
 $GLOBALS['TYPO3_USER_SETTINGS']['columns']['disableDragInWizard'] = [
@@ -67,7 +67,7 @@ $GLOBALS['TYPO3_USER_SETTINGS']['columns']['disableCopyFromPageButton'] = [
 ];
 
 $GLOBALS['TYPO3_USER_SETTINGS']['showitem'] .= ',
-    --div--;LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:gridElements,
+    --div--;LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:gridElements,
         dragAndDropHideNewElementWizardInfoOverlay,
         hideColumnHeaders,
         hideContentPreview,

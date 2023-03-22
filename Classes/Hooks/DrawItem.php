@@ -622,7 +622,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         }
 
         $gridContent[$colPos] .= '<div class="t3-page-ce gridelements-collapsed-column-marker">' .
-            $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_contentcollapsed') .
+            $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_contentcollapsed') .
             '</div>';
 
         $gridContent[$colPos] .= '
@@ -1046,12 +1046,12 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
 
         if ($expanded) {
             $state = 'expanded';
-            $title = $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_collapsecontent');
-            $toggleTitle = $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_expandcontent');
+            $title = $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_collapsecontent');
+            $toggleTitle = $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_expandcontent');
         } else {
             $state = 'collapsed';
-            $title = $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_expandcontent');
-            $toggleTitle = $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_collapsecontent');
+            $title = $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_expandcontent');
+            $toggleTitle = $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_collapsecontent');
         }
 
         $iconsArr['toggleContent'] = '<a href="#" class="btn btn-default t3js-toggle-gridelements-column toggle-content" title="' . htmlspecialchars($title) . '" data-toggle-title="' . htmlspecialchars($toggleTitle) . '" data-state="' . $state . '">' . $this->iconFactory->getIcon(

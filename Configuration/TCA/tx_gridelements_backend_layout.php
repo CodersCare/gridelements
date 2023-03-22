@@ -1,6 +1,6 @@
 <?php
 
-$l10n = 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml';
+$l10n = 'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf';
 
 return [
     'ctrl' => [
