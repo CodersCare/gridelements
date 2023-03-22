@@ -1086,9 +1086,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     protected function renderGridLayoutTable(array $layout, array $row, array $head, array $gridContent, PageLayoutView $parentObject): string
     {
         $specificIds = $this->helper->getSpecificIds($row);
-        $grid = '<div class="t3-grid-container t3-grid-element-container' . ($layout['frame'] ? ' t3-grid-container-framed t3-grid-container-' . htmlspecialchars($layout['frame']) : '') . ($layout['top_level_layout'] ? ' t3-grid-tl-container' : '') . '">';
-        if ($layout['frame'] || (int)$this->helper->getBackendUser()->uc['showGridInformation'] === 1) {
-            $grid .= '<h4 class="t3-grid-container-title-' . ($layout['frame'] ? htmlspecialchars($layout['frame']) : '0') . '">' .
+        $frame = htmlspecialchars((string)$layout['frame']);
+        $grid = '<div class="t3-grid-container t3-grid-element-container' . ($frame ? ' t3-grid-container-framed t3-grid-container-' . $frame . ($layout['top_level_layout'] ? ' t3-grid-tl-container' : '') . '">';
+        if ($frame || (int)$this->helper->getBackendUser()->uc['showGridInformation'] === 1) {
+            $grid .= '<h4 class="t3-grid-container-title-' . ($frame ?? '0') . '">' .
                 BackendUtility::wrapInHelp(
                     'tx_gridelements_backend_layouts',
                     'title',
