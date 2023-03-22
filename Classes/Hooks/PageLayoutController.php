@@ -164,17 +164,20 @@ class PageLayoutController
 
         if (!empty($clipBoard) && !empty($clipBoard['el'])) {
             $clipBoardElement = GeneralUtility::trimExplode('|', key($clipBoard['el']));
+            $clipBoardElementData = [];
             if ($clipBoardElement[0] === 'tt_content') {
                 $clipBoardElementData = BackendUtility::getRecord('tt_content', (int)$clipBoardElement[1]);
+            }
+            if (!empty($clipBoardElementData)) {
                 $pAddExtOnReadyCode .= '
-            top.clipBoardElementCType = ' . json_encode($clipBoardElementData['CType']) . ';
-            top.clipBoardElementTxGridelementsBackendLayout = ' . json_encode(($clipBoardElementData['CType'] === 'gridelements_pi1') ? $clipBoardElementData['tx_gridelements_backend_layout'] : '') . ';
-            top.clipBoardElementListType = ' . json_encode($clipBoardElementData['list_type']) . ';';
+                    top.clipBoardElementCType = ' . json_encode($clipBoardElementData['CType']) . ';
+                    top.clipBoardElementTxGridelementsBackendLayout = ' . json_encode(($clipBoardElementData['CType'] === 'gridelements_pi1') ? $clipBoardElementData['tx_gridelements_backend_layout'] : '') . ';
+                    top.clipBoardElementListType = ' . json_encode($clipBoardElementData['list_type']) . ';';
             } else {
                 $pAddExtOnReadyCode .= "
-            top.clipBoardElementCType = '';
-            top.clipBoardElementTxGridelementsBackendLayout = '';
-            top.clipBoardElementListType = '';";
+                    top.clipBoardElementCType = '';
+                    top.clipBoardElementTxGridelementsBackendLayout = '';
+                    top.clipBoardElementListType = '';";
             }
         }
 
