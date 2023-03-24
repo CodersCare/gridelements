@@ -16,7 +16,7 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -266,7 +266,9 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         if ((int)$shortcutItem !== $parentUid) {
             $queryBuilder = $this->getQueryBuilder();
             if ($this->showHidden) {
-                $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
+                $queryBuilder->getRestrictions()
+                    ->removeAll()
+                    ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
             }
             $item = $queryBuilder
                 ->select('*')
