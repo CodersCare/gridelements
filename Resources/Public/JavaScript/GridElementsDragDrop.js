@@ -311,15 +311,29 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
                     });
                 });
             } else {
-                parameters['data']['tt_content'][contentElementUid] = {
-                    colPos: colPos,
-                    tx_gridelements_container: container,
-                    tx_gridelements_columns: gridColumn
-                };
-                if (language > -1) {
-                    parameters['data']['tt_content'][contentElementUid]['sys_language_uid'] = language;
+                if (!$pasteAction) {
+                    parameters['data']['tt_content'][contentElementUid] = {
+                        colPos: colPos,
+                        tx_gridelements_container: container,
+                        tx_gridelements_columns: gridColumn
+                    };
+                    if (language > -1) {
+                        parameters['data']['tt_content'][contentElementUid]['sys_language_uid'] = language;
+                    }
+                    parameters['cmd']['tt_content'][contentElementUid] = {move: targetPid};
+                } else {
+                    parameters['CB'] = {
+                        paste: 'tt_content|' + targetPid,
+                        update: {
+                            colPos: colPos,
+                            tx_gridelements_container: container,
+                            tx_gridelements_columns: gridColumn
+                        }
+                    };
+                    if (language > -1) {
+                        parameters['CB']['update']['sys_language_uid'] = language;
+                    }
                 }
-                parameters['cmd']['tt_content'][contentElementUid] = {move: targetPid};
                 // fire the request, and show a message if it has failed
                 require(['TYPO3/CMS/Backend/AjaxDataHandler'], function (DataHandler) {
                     DataHandler.process(parameters).done(function (result) {
