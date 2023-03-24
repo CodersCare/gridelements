@@ -205,8 +205,8 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
         }
 
         $droppableElement.removeClass(DragDrop.default.dropPossibleHoverClass);
-        var $pasteAction = typeof $draggableElement === 'number' || typeof $draggableElement === 'undefined';
-        var $pasteElement = typeof Paste.itemOnClipboardUid === 'number' && Paste.itemOnClipboardUid > 0 ? Paste.itemOnClipboardUid : $draggableElement;
+        var $pasteAction = (typeof $draggableElement === 'number' || typeof $draggableElement === 'undefined');
+        var $pasteElement = typeof Paste.itemOnClipboardUid === 'number' && Paste.itemOnClipboardUid > 0  && evt !== 'copyFromAnotherPage' ? Paste.itemOnClipboardUid : $draggableElement;
 
         // send an AJAX request via the AjaxDataHandler
         var contentElementUid = $pasteAction ? $pasteElement : parseInt($draggableElement.data('uid'));
@@ -287,9 +287,6 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
                 }
                 if (language > -1) {
                     parameters['cmd']['tt_content'][contentElementUid]['copy']['update']['sys_language_uid'] = language;
-                }
-                if (evt === 'copyFromAnotherPage') {
-                    parameters['CB'] = {setCopyMode: 1};
                 }
                 // fire the request, and show a message if it has failed
                 require(['TYPO3/CMS/Backend/AjaxDataHandler'], function (DataHandler) {
