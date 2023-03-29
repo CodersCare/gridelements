@@ -128,17 +128,19 @@ class TtContent
      */
     public function removeItemsFromListOfSelectableContainers(array &$params, array &$possibleContainers)
     {
-        $contentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
-        if ($contentType === 'gridelements_pi1' && count($params['items']) > 1) {
-            $items = $params['items'];
-            $params['items'] = [0 => array_shift($items)];
+        if (!empty($params['row']['CType'])) {
+            $contentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
+            if ($contentType === 'gridelements_pi1' && count($params['items']) > 1) {
+                $items = $params['items'];
+                $params['items'] = [0 => array_shift($items)];
 
-            foreach ($items as $item) {
-                $possibleContainers[$item['1']] = $item;
-            }
+                foreach ($items as $item) {
+                    $possibleContainers[$item['1']] = $item;
+                }
 
-            if ($params['row']['uid'] > 0) {
-                $this->lookForChildContainersRecursively((string)(int)$params['row']['uid'], $possibleContainers);
+                if ($params['row']['uid'] > 0) {
+                    $this->lookForChildContainersRecursively((string)(int)$params['row']['uid'], $possibleContainers);
+                }
             }
         }
     }
