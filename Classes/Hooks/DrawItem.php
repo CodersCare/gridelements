@@ -115,7 +115,9 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     public function cleanupCollapsedStatesInUC()
     {
         $backendUser = $this->getBackendUser();
-        if (is_array($backendUser->uc['moduleData']['page']['gridelementsCollapsedColumns'])) {
+        if (isset($backendUser->uc['moduleData']['page']['gridelementsCollapsedColumns']) 
+	    && is_array($backendUser->uc['moduleData']['page']['gridelementsCollapsedColumns'])
+	) {
             $collapsedGridelementColumns = $backendUser->uc['moduleData']['page']['gridelementsCollapsedColumns'];
             foreach ($collapsedGridelementColumns as $item => $collapsed) {
                 if (empty($collapsed)) {
