@@ -49,7 +49,7 @@ class ItemProvider extends RecordProvider
             $end = array_slice($items, $position + 1, null, true);
 
             $items = $beginning + $localItems + $end;
-            $items['pasteAfter']['additioanlAttributes'] = $this->getAdditionalAttributes('pasteAfter');
+            $items['pasteAfter']['additionalAttributes'] = $this->getAdditionalAttributes('pasteAfter');
         }
         return $items;
     }

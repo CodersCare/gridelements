@@ -64,6 +64,7 @@ class PreProcessFieldArray extends AbstractDataHandler
     public function execute_preProcessFieldArray(array &$fieldArray, string $table, string $id, DataHandler $parentObj)
     {
         if ($table === 'tt_content') {
+            $action = '';
             $this->init($table, $id, $parentObj);
             if (!$this->getTceMain()->isImporting) {
                 $new = false;
@@ -71,11 +72,14 @@ class PreProcessFieldArray extends AbstractDataHandler
                     $cmdId = (int)key($parentObj->cmdmap['tt_content']);
                     $new = !empty($parentObj->cmdmap['tt_content'][$cmdId]['copy']) ||
                         !empty($parentObj->cmdmap['tt_content'][$cmdId]['move']);
+                    if ($new) {
+                        $action = key($parentObj->cmdmap['tt_content'][$cmdId]);
+                    }
                 }
                 if (!$new && !empty($parentObj->datamap['tt_content']) && is_array($parentObj->datamap['tt_content'])) {
                     $new = !MathUtility::canBeInterpretedAsInteger(key($parentObj->datamap['tt_content']));
                 }
-                $this->processFieldArrayForTtContent($fieldArray, $id, $new);
+                $this->processFieldArrayForTtContent($fieldArray, $id, $new, $action);
             }
         }
     }
@@ -87,7 +91,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param string $id
      * @param bool $new
      */
-    public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false)
+    public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false, $action = '')
     {
         $pid = (int)GeneralUtility::_GET('DDinsertNew');
 
@@ -96,7 +100,7 @@ class PreProcessFieldArray extends AbstractDataHandler
             $this->getDefaultFlexformValues($fieldArray);
         }
 
-        $this->setFieldEntries($fieldArray, $id, $new);
+        $this->setFieldEntries($fieldArray, $id, $new, $action);
     }
 
     /**
@@ -245,28 +249,36 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param string $contentId
      * @param bool $new
      */
-    public function setFieldEntries(array &$fieldArray, string $contentId = '0', bool $new = false)
+    public function setFieldEntries(array &$fieldArray, string $contentId = '0', bool $new = false, $action = '')
     {
         $containerUpdateArray = [];
         if (isset($fieldArray['tx_gridelements_container'])) {
-            if ((int)$fieldArray['tx_gridelements_container'] > 0 && $new) {
+            $originalElement = BackendUtility::getRecord(
+                'tt_content',
+                (int)$contentId,
+                'tx_gridelements_container,sys_language_uid'
+            );
+            if (
+                $new &&
+                (int)$fieldArray['tx_gridelements_container'] > 0 &&
+                !empty($originalElement) &&
+                (int)$fieldArray['tx_gridelements_container'] !== (int)$originalElement['tx_gridelements_container']
+            ) {
                 $containerUpdateArray[(int)$fieldArray['tx_gridelements_container']] = 1;
             }
-            if ((int)$fieldArray['tx_gridelements_container'] === 0) {
-                $originalContainer = BackendUtility::getRecord(
-                    'tt_content',
-                    (int)$contentId,
-                    'tx_gridelements_container,sys_language_uid'
-                );
-                if (!empty($originalContainer)) {
-                    $containerUpdateArray[(int)$originalContainer['tx_gridelements_container']] = -1;
+            if (!empty($originalElement) && $action === 'move') {
+                if (
+                    (int)$fieldArray['tx_gridelements_container'] === 0 ||
+                    (int)$fieldArray['tx_gridelements_container'] !== (int)$originalElement['tx_gridelements_container']
+                ) {
+                    $containerUpdateArray[(int)$originalElement['tx_gridelements_container']] = -1;
                 }
             }
         }
         if (!empty($containerUpdateArray)) {
-            $this->doGridContainerUpdate($containerUpdateArray);
+            $this->doGridContainerUpdate($containerUpdateArray, 'preprocess:' . $action);
         }
-        $this->setFieldEntriesForGridContainers($fieldArray);
+        $this->setFieldEntriesForGridContainers($fieldArray, $action);
     }
 
     /**
@@ -274,7 +286,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      *
      * @param array $fieldArray
      */
-    public function setFieldEntriesForGridContainers(array &$fieldArray)
+    public function setFieldEntriesForGridContainers(array &$fieldArray, $action)
     {
         if (!empty($fieldArray['tx_gridelements_container'])
             && isset($fieldArray['colPos']) && (int)$fieldArray['colPos'] !== -1) {

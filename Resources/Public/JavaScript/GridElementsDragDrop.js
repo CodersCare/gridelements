@@ -309,15 +309,20 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
                 });
             } else {
                 if (!$pasteAction) {
-                    parameters['data']['tt_content'][contentElementUid] = {
-                        colPos: colPos,
-                        tx_gridelements_container: container,
-                        tx_gridelements_columns: gridColumn
+                    parameters['cmd']['tt_content'][contentElementUid] = {
+                        move: {
+                            action: 'paste',
+                            target: targetPid,
+                            update: {
+                                colPos: colPos,
+                                tx_gridelements_container: container,
+                                tx_gridelements_columns: gridColumn
+                            }
+                        },
                     };
                     if (language > -1) {
-                        parameters['data']['tt_content'][contentElementUid]['sys_language_uid'] = language;
+                        parameters['cmd']['tt_content'][contentElementUid]['move']['update']['sys_language_uid'] = language;
                     }
-                    parameters['cmd']['tt_content'][contentElementUid] = {move: targetPid};
                 } else {
                     parameters['CB'] = {
                         paste: 'tt_content|' + targetPid,

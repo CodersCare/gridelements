@@ -353,7 +353,7 @@ abstract class AbstractDataHandler
             }
         }
         if (!empty($containerUpdateArray)) {
-            $this->doGridContainerUpdate($containerUpdateArray);
+            $this->doGridContainerUpdate($containerUpdateArray, 'checkAndUpdateTranslatedElements');
         }
     }
 
@@ -384,7 +384,7 @@ abstract class AbstractDataHandler
      * @param array $containerUpdateArray
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function doGridContainerUpdate(array $containerUpdateArray = [])
+    public function doGridContainerUpdate(array $containerUpdateArray = [], $action = '')
     {
         if (is_array($containerUpdateArray) && !empty($containerUpdateArray)) {
             $queryBuilder = $this->getQueryBuilder();
@@ -399,7 +399,16 @@ abstract class AbstractDataHandler
             if (!empty($currentContainers)) {
                 foreach ($currentContainers as $fieldArray) {
                     $fieldArray['tx_gridelements_children'] = (int)$fieldArray['tx_gridelements_children'] + (int)$containerUpdateArray[$fieldArray['uid']];
+                    if ($fieldArray['tx_gridelements_children'] < 0) {
+                        $fieldArray['tx_gridelements_children'] = 0;
+                    }
                     $updateArray = $fieldArray;
+                    /* Get debug information of the latest transaction */
+                    // $updateArray['rowDescription'] =
+                    // $action . ' # ' .
+                    // serialize($fieldArray) . ' # ' .
+                    // serialize($containerUpdateArray) . ' # ' .
+                    // (int)$containerUpdateArray[$fieldArray['uid']];
                     unset($updateArray['uid']);
                     $this->getConnection()->update(
                         'tt_content',
