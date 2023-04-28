@@ -24,6 +24,19 @@
 			<trans-unit id="overlayShortcutTranslation" xml:space="preserve">
 				<source>Use language overlay for content and page records referenced in shortcut elements.</source>
 			</trans-unit>
+
+			<trans-unit id="gridelementsColPosFixer.name" xml:space="preserve">
+				<source>Gridelements ColPos Fixer</source>
+			</trans-unit>
+			<trans-unit id="gridelementsColPosFixer.description" xml:space="preserve">
+				<source>Sets colPos value of Gridelements children back to -1 if you accidentally reverted the SQL field definition during a major core upgrade.</source>
+			</trans-unit>
+			<trans-unit id="gridelementsNumberOfChildrenFixer.name" xml:space="preserve">
+				<source>Gridelements Number of Children Fixer</source>
+			</trans-unit>
+			<trans-unit id="gridelementsNumberOfChildrenFixer.description" xml:space="preserve">
+				<source>Recalculates the value of tx_gridelements_children due to buggy container update behaviour of Cut/Copy/Paste and/or Drag/Drop methods.</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

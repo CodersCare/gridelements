@@ -41,3 +41,18 @@ if (true === \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Cor
         '@import \'EXT:gridelements/Configuration/TypoScript/backend.typoscript\''
     );
 }
+
+// Add colPos fixer task
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks'][\GridElementsTeam\Gridelements\Task\GridelementsColPosFixer::class] = [
+    'extension'        => 'gridelements',
+    'title'            => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:gridelementsColPosFixer.name',
+    'description'      => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:gridelementsColPosFixer.description'
+];
+
+// Add number of children fixer task
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks'][\GridElementsTeam\Gridelements\Task\GridelementsNumberOfChildrenFixer::class] = [
+    'extension'        => 'gridelements',
+    'title'            => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:gridelementsNumberOfChildrenFixer.name',
+    'description'      => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:gridelementsNumberOfChildrenFixer.description'
+];
+
