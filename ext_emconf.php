@@ -16,7 +16,7 @@ It offers a lot of new features like advanced drag & drop or real references, th
     'version' => '11.0.0',
     'priority' => 'bottom',
     'module' => '',
-    'state' => 'beta',
+    'state' => 'stable',
     'uploadfolder' => true,
     'createDirs' => '',
     'modify_tables' => 'tt_content',
