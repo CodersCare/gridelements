@@ -2,7 +2,7 @@
   "name": "gridelementsteam/gridelements",
   "description": "This TYPO3 extension extends the grid-based concept known from the backend layout of pages to regular content elements - the grid elements. It offers a lot of new features like advanced drag & drop or real references, that improve the usability of the page and list module to speed up the daily work with the backend.",
   "type": "typo3-cms-extension",
-  "version": "11.0.0-dev",
+  "version": "11.0.0",
   "prefer-stable": true,
   "minimum-stability": "dev",
   "keywords": ["TYPO3 CMS", "Grids", "Gridelements"],
@@ -15,10 +15,10 @@
   },
   "license": "GPL-2.0-or-later",
   "require": {
-    "typo3/cms-core": "^10.4 || ^11.5 || dev-master",
-    "typo3/cms-backend": "^10.4 || ^11.5 || dev-master",
-    "typo3/cms-recordlist": "^10.4 || ^11.5 || dev-master",
-    "typo3/cms-frontend": "^10.4 || ^11.5 || dev-master"
+    "typo3/cms-core": "^10.4 || ^11.5",
+    "typo3/cms-backend": "^10.4 || ^11.5",
+    "typo3/cms-recordlist": "^10.4 || ^11.5",
+    "typo3/cms-frontend": "^10.4 || ^11.5"
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.1.0",
