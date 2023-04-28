@@ -8,7 +8,7 @@
  * writing. "version" and "dependencies" must not be touched!
  ***************************************************************/
 
-$EM_CONF['gridelements'] = [
+$EM_CONF[$_EXTKEY] = [
     'title' => 'Grid Elements',
     'description' => 'This extension extends the grid-based concept known from the backend layout of pages to regular content elements - the grid elements.
 It offers a lot of new features like advanced drag & drop or real references, that improve the usability of the page and list module to speed up the daily work with the backend.',
