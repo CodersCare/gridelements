@@ -232,7 +232,7 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
                         'storage',
                         $queryBuilder->createNamedParameter($storageUid, PDO::PARAM_INT)
                     )
-                )->execute()->fetch();
+                )->execute()->fetch(PDO::FETCH_BOTH);
 
                 // the file exists, the file does not have to be moved again
                 if (is_array($existingFileRecord)) {
