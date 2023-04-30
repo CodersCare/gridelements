@@ -40,6 +40,16 @@ use UnexpectedValueException;
 class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecordList
 {
     /**
+     * @var array
+     */
+    protected array $currentIdList;
+
+    /**
+     * @var array
+     */
+    protected array $currentContainerIdList;
+
+    /**
      * @var bool
      */
     protected bool $showMoveUp;
