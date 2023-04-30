@@ -1457,7 +1457,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 )
                 ->setMaxResults(1)
                 ->execute()
-                ->fetch();
+                ->fetch(PDO::FETCH_BOTH);
 
             if (!empty($this->extentensionConfiguration['overlayShortcutTranslation']) && $language > 0) {
                 $translatedItem = BackendUtility::getRecordLocalization('tt_content', $item['uid'], $language);
