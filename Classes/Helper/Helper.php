@@ -184,7 +184,7 @@ class Helper implements SingletonInterface
                 )
             )
             ->execute()
-            ->fetch();
+            ->fetch(PDO::FETCH_BOTH);
         $pid = (int)$triggerElement['pid'];
         return is_array($triggerElement) && $pid ? $pid : 0;
     }

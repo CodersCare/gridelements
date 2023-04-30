@@ -344,7 +344,7 @@ class Gridelements extends ContentObjectRenderer
             ->execute();
 
         $this->cObj->data['tx_gridelements_view_children'] = [];
-        while ($child = $children->fetch()) {
+        while ($child = $children->fetch(PDO::FETCH_BOTH)) {
             // Versioning preview:
             $sorting = $child['sorting'] ?? '';
             $this->getTSFE()->sys_page->versionOL('tt_content', $child, true);

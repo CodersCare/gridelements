@@ -266,7 +266,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
                 )
                 ->setMaxResults(1)
                 ->execute()
-                ->fetch();
+                ->fetch(PDO::FETCH_BOTH);
 
             if (!empty($this->extensionConfiguration['overlayShortcutTranslation']) && $language > 0) {
                 $translatedItem = BackendUtility::getRecordLocalization('tt_content', $item['uid'], $language);
