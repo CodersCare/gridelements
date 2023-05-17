@@ -39,7 +39,7 @@ class SysLanguageUidList extends AbstractItemsProcFunc
     public function itemsProcFunc(array &$params)
     {
         if ((int)$params['row']['pid'] > 0 && (int)$params['row']['tx_gridelements_container'] > 0 && isset($params['items'])) {
-            $this->checkForAllowedLanguages($params['items'], $params['row']['tx_gridelements_container']);
+            $this->checkForAllowedLanguages($params['items'], (int)$params['row']['tx_gridelements_container']);
         }
     }
 
