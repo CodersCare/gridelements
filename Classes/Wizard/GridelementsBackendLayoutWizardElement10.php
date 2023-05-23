@@ -137,14 +137,16 @@ class GridelementsBackendLayoutWizardElement10 extends BackendLayoutWizardElemen
                 $contentType = [];
                 if (!empty($item[1])) {
                     $contentType['key'] = $item[1];
-                    if (substr($contentType['key'], 0, 2) !== '--') {
+                    if (substr((string)$contentType['key'], 0, 2) !== '--') {
                         $contentType['label'] = $lang->sL($item[0]);
-                        if (strpos($item[2], 'EXT:') === 0) {
-                            $contentType['icon'] = GeneralUtility::getFileAbsFileName($item[2]);
-                        } elseif (strpos($item[2], '/typo3') === 0) {
-                            $contentType['icon'] = '../../../' . $item[2];
-                        } else {
-                            $contentType['icon'] = '../../../' . '../typo3/sysext/core/Resources/Public/Icons/T3Icons/content/' . $item[2];
+                        if (!empty($item[2])) {
+                            if (strpos($item[2], 'EXT:') === 0) {
+                                $contentType['icon'] = GeneralUtility::getFileAbsFileName($item[2]);
+                            } elseif (strpos($item[2], '/typo3') === 0) {
+                                $contentType['icon'] = '../../../' . $item[2];
+                            } else {
+                                $contentType['icon'] = '../../../' . '../typo3/sysext/core/Resources/Public/Icons/T3Icons/content/' . $item[2];
+                            }
                         }
                         // Check if file ending exists, therefore compare pos of last slash to pos of last dot
                         if (!empty($contentType['icon']) && strrpos($contentType['icon'], '/') > strrpos($contentType['icon'], '.')) {
@@ -161,7 +163,7 @@ class GridelementsBackendLayoutWizardElement10 extends BackendLayoutWizardElemen
                 $listType = [];
                 if (!empty($item[1])) {
                     $listType['key'] = $item[1];
-                    if (substr($listType['key'], 0, 2) !== '--') {
+                    if (substr((string)$listType['key'], 0, 2) !== '--') {
                         $listType['label'] = $lang->sL($item[0]);
                         if (strpos($item[2], 'EXT:') === 0) {
                             $listType['icon'] = GeneralUtility::getFileAbsFileName($item[2]);
