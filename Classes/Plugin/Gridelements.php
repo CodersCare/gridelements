@@ -208,7 +208,7 @@ class Gridelements extends ContentObjectRenderer
 
         $pluginFlexForm = $cObjData['pi_flexform'] ?? '';
 
-        if (is_array($pluginFlexForm) && is_array($pluginFlexForm['data'])) {
+        if (is_array($pluginFlexForm) && !empty($pluginFlexForm['data'])) {
             foreach ($pluginFlexForm['data'] as $sheet => $data) {
                 if (is_array($data)) {
                     foreach ($data as $value) {
