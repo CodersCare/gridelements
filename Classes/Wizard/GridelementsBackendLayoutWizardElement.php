@@ -145,7 +145,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                 $contentType = [];
                 if (!empty($item[1])) {
                     $contentType['key'] = $item[1];
-                    if (substr($contentType['key'], 0, 2) !== '--') {
+                    if (substr((string)$contentType['key'], 0, 2) !== '--') {
                         $contentType['label'] = $lang->sL($item[0]);
                         if (strpos($item[2], 'EXT:') === 0) {
                             $contentType['icon'] = GeneralUtility::getFileAbsFileName($item[2]);
@@ -169,7 +169,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                 $listType = [];
                 if (!empty($item[1])) {
                     $listType['key'] = $item[1];
-                    if (substr($listType['key'], 0, 2) !== '--') {
+                    if (substr((string)$listType['key'], 0, 2) !== '--') {
                         $listType['label'] = $lang->sL($item[0]);
                         if (strpos($item[2], 'EXT:') === 0) {
                             $listType['icon'] = GeneralUtility::getFileAbsFileName($item[2]);
