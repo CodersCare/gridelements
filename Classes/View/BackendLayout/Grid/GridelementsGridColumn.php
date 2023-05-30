@@ -240,7 +240,7 @@ class GridelementsGridColumn extends GridColumn
      */
     public function getAllowedGridType(): ?string
     {
-        return $this->disallowedGridType;
+        return $this->allowedGridType;
     }
 
     /**
