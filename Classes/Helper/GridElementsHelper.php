@@ -31,6 +31,7 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\WorkspaceRestriction;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -192,6 +193,15 @@ class GridElementsHelper implements SingletonInterface
             ->removeByType(HiddenRestriction::class)
             ->removeByType(StartTimeRestriction::class)
             ->removeByType(EndTimeRestriction::class);
+
+        $workspaceRestriction = GeneralUtility::makeInstance(
+            WorkspaceRestriction::class,
+            (int)self::getBackendUser()->workspace
+        );
+        $restrictions = $queryBuilder->getRestrictions();
+        $restrictions->add($workspaceRestriction);
+        $queryBuilder->setRestrictions($restrictions);
+
         return $queryBuilder;
     }
 
