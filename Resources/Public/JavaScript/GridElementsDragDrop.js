@@ -146,7 +146,7 @@ define(['jquery', 'jquery-ui/droppable', 'TYPO3/CMS/Backend/LayoutModule/DragDro
                     (!disallowedListType || ($.inArray('*', disallowedListType) === -1 && $.inArray(listType, disallowedListType) === -1))
                 )) && (gridType === '' || (
                     (!allowedGridType || $.inArray('*', allowedGridType) > -1 || $.inArray(gridType, allowedGridType) > -1) &&
-                    (!disallowedGridType || ($.inArray('*', disallowedGridType) === -1 && $.inArray(listType, disallowedGridType) === -1))
+                    (!disallowedGridType || ($.inArray('*', disallowedGridType) === -1 && $.inArray(gridType, disallowedGridType) === -1))
                 ))
                 &&
                 (
