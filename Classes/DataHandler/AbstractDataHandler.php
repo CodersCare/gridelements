@@ -226,7 +226,7 @@ abstract class AbstractDataHandler
             )
             ->setMaxResults(1)
             ->execute()
-            ->fetch();
+            ->fetch(PDO::FETCH_BOTH);
         if (!empty($currentValues['l18n_parent'])) {
             $originalUid = (int)$currentValues['uid'];
             $queryBuilder = $this->getQueryBuilder();
@@ -248,7 +248,7 @@ abstract class AbstractDataHandler
                 )
                 ->setMaxResults(1)
                 ->execute()
-                ->fetch();
+                ->fetch(PDO::FETCH_BOTH);
 
             if (is_array($currentValues)) {
                 $updateArray = $currentValues;
@@ -284,7 +284,7 @@ abstract class AbstractDataHandler
             )
             ->execute();
         $translatedElements = [];
-        while ($translatedElement = $translatedElementQuery->fetch()) {
+        while ($translatedElement = $translatedElementQuery->fetch(PDO::FETCH_BOTH)) {
             $translatedElements[$translatedElement['uid']] = $translatedElement;
         }
         if (empty($translatedElements)) {
@@ -310,7 +310,7 @@ abstract class AbstractDataHandler
                     )
                 )
                 ->execute();
-            while ($translatedContainer = $translatedContainerQuery->fetch()) {
+            while ($translatedContainer = $translatedContainerQuery->fetch(PDO::FETCH_BOTH)) {
                 $translatedContainers[$translatedContainer['sys_language_uid']] = $translatedContainer;
             }
         }

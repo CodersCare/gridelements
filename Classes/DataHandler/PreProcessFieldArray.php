@@ -365,7 +365,7 @@ class PreProcessFieldArray extends AbstractDataHandler
                 )
             )
             ->execute()
-            ->fetch();
+            ->fetch(PDO::FETCH_BOTH);
         if (!empty($parent)) {
             if ($parent['tx_gridelements_container'] > 0) {
                 $colPos = $this->checkForRootColumn($parent['tx_gridelements_container']);

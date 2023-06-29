@@ -457,14 +457,14 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                 $prevPrevUid = 0;
                 // Get first two rows and initialize prevPrevUid and prevUid if on page > 1
                 if ($this->firstElementNumber > 2 && $this->iLimit > 0) {
-                    $row = $queryResult->fetch();
+                    $row = $queryResult->fetch(PDO::FETCH_BOTH);
                     $prevPrevUid = -((int)$row['uid']);
-                    $row = $queryResult->fetch();
+                    $row = $queryResult->fetch(PDO::FETCH_BOTH);
                     $prevUid = $row['uid'];
                 }
                 $accRows = [];
                 // Accumulate rows here
-                while ($row = $queryResult->fetch()) {
+                while ($row = $queryResult->fetch(PDO::FETCH_BOTH)) {
                     if (!$this->isRowListingConditionFulfilled($table, $row)) {
                         continue;
                     }
@@ -567,7 +567,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                                                 ->from($table)
                                                 ->andWhere(...$predicates)
                                                 ->execute()
-                                                ->fetch();
+                                                ->fetch(PDO::FETCH_BOTH);
 
                                         $lRow = is_array($tmpRow) ? $tmpRow : $lRow;
                                     }
@@ -987,7 +987,7 @@ class DatabaseRecordList10 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                                 ->from($table)
                                 ->andWhere(...$predicates)
                                 ->execute()
-                                ->fetch();
+                                ->fetch(PDO::FETCH_BOTH);
 
                         $lRow = is_array($tmpRow) ? $tmpRow : $lRow;
                     }

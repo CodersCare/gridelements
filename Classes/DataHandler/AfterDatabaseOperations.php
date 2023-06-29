@@ -162,7 +162,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     )
                     ->execute();
                 $childElementsInUnavailableColumns = [];
-                while ($childElementInUnavailableColumns = $childElementsInUnavailableColumnsQuery->fetch()) {
+                while ($childElementInUnavailableColumns = $childElementsInUnavailableColumnsQuery->fetch(PDO::FETCH_BOTH)) {
                     $childElementsInUnavailableColumns[] = $childElementInUnavailableColumns['uid'];
                 }
                 if (!empty($childElementsInUnavailableColumns)) {
@@ -202,7 +202,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     )
                     ->execute();
                 $childElementsInAvailableColumns = [];
-                while ($childElementInAvailableColumns = $childElementsInAvailableColumnsQuery->fetch()) {
+                while ($childElementInAvailableColumns = $childElementsInAvailableColumnsQuery->fetch(PDO::FETCH_BOTH)) {
                     $childElementsInAvailableColumns[] = $childElementInAvailableColumns['uid'];
                 }
                 if (!empty($childElementsInAvailableColumns)) {
@@ -287,7 +287,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     )
                     ->execute();
                 $elementsInUnavailableColumns = [];
-                while ($elementInUnavailableColumns = $elementsInUnavailableColumnsQuery->fetch()) {
+                while ($elementInUnavailableColumns = $elementsInUnavailableColumnsQuery->fetch(PDO::FETCH_BOTH)) {
                     $elementsInUnavailableColumns[] = $elementInUnavailableColumns['uid'];
                 }
                 if (!empty($elementsInUnavailableColumns)) {
@@ -330,7 +330,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     )
                     ->execute();
                 $elementsInAvailableColumns = [];
-                while ($elementInAvailableColumns = $elementsInAvailableColumnsQuery->fetch()) {
+                while ($elementInAvailableColumns = $elementsInAvailableColumnsQuery->fetch(PDO::FETCH_BOTH)) {
                     $elementsInAvailableColumns[] = $elementInAvailableColumns['uid'];
                 }
                 if (!empty($elementsInAvailableColumns)) {
@@ -383,7 +383,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             )
                             ->execute();
                         $subPageElementsInUnavailableColumns = [];
-                        while ($subPageElementInUnavailableColumns = $subPageElementsInUnavailableColumnsQuery->fetch()) {
+                        while ($subPageElementInUnavailableColumns = $subPageElementsInUnavailableColumnsQuery->fetch(PDO::FETCH_BOTH)) {
                             $subPageElementsInUnavailableColumns[] = $subPageElementInUnavailableColumns['uid'];
                         }
                         if (!empty($subPageElementsInUnavailableColumns)) {
@@ -429,7 +429,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             )
                             ->execute();
                         $subPageElementsInAvailableColumns = [];
-                        while ($subPageElementInAvailableColumns = $subPageElementsInAvailableColumnsQuery->fetch()) {
+                        while ($subPageElementInAvailableColumns = $subPageElementsInAvailableColumnsQuery->fetch(PDO::FETCH_BOTH)) {
                             $subPageElementsInAvailableColumns[] = $subPageElementInAvailableColumns['uid'];
                         }
                         if (!empty($subPageElementsInAvailableColumns)) {

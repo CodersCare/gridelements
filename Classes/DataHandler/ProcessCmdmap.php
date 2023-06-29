@@ -112,7 +112,7 @@ class ProcessCmdmap extends AbstractDataHandler
                     )
                 )
                 ->execute()
-                ->fetch();
+                ->fetch(PDO::FETCH_BOTH);
 
             if (!empty($originalElement['tx_gridelements_container'])) {
                 $containerUpdateArray[$originalElement['tx_gridelements_container']] = -1;

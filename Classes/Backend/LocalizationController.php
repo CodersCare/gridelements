@@ -17,6 +17,7 @@ namespace GridElementsTeam\Gridelements\Backend;
  * The TYPO3 project - inspiring people to share!
  */
 
+use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Domain\Repository\Localization\LocalizationRepository;
@@ -90,7 +91,7 @@ class LocalizationController
             $languageId
         );
 
-        while ($row = $result->fetch()) {
+        while ($row = $result->fetch(PDO::FETCH_BOTH)) {
             BackendUtility::workspaceOL('tt_content', $row, -99, true);
             if (!$row || VersionState::cast($row['t3ver_state'])->equals(VersionState::DELETE_PLACEHOLDER)) {
                 continue;

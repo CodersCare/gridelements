@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\Backend;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use PDO;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -237,7 +238,7 @@ class TtContent
                 )
                 ->execute();
             $containers = [];
-            while ($container = $containerQuery->fetch()) {
+            while ($container = $containerQuery->fetch(PDO::FETCH_BOTH)) {
                 $containers[$container['uid']] = $container;
             }
             foreach ($params['items'] as $key => $container) {
