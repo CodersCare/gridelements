@@ -81,7 +81,7 @@ abstract class AbstractDataHandler
     public function init(string $table, string $uidPid, DataHandler $dataHandler)
     {
         $this->setTable($table);
-        if ($table === 'tt_content' && (int)$uidPid < 0) {
+        if ($table === 'tt_content') {
             $this->setContentUid(abs((int)$uidPid));
             $pageUid = Helper::getInstance()->getPidFromUid($this->getContentUid());
             $this->setPageUid($pageUid);
