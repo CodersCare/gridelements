@@ -244,7 +244,7 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
      */
     OnReady.setAllowedData = function () {
         $('table.t3js-page-columns > tbody > tr > td:not(.t3-grid-container-cell)').each(function () {
-            var colPos = $(this).data('colpos') ? $(this).data('colpos') : $(this).find('> .t3-page-ce-wrapper').data('colpos');
+            var colPos = (typeof $(this).data('colpos') !== 'undefined') ? $(this).data('colpos') : $(this).find('> .t3-page-ce-wrapper').data('colpos');
             if (typeof colPos !== 'undefined') {
                 if (typeof top.pageColumnsAllowed[colPos] !== 'undefined') {
                     $(this).attr('data-allowed-ctype', top.pageColumnsAllowed[colPos]['CType']);
