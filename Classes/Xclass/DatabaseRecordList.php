@@ -830,7 +830,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                                 <td colspan="' . (count($this->fieldArray) - $level - 2 + $this->maxDepth) . '" style="padding:5px;">
                                 <br>
                                     <strong>' . $this->getLanguageService()->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.containerColumnName')
-                            . ' ' . $theData['_CONTAINER_COLUMNS_']['columns'][(int)$child['tx_gridelements_columns']] . '</strong>
+                            . ' ' . $this->getLanguageService()->sL($theData['_CONTAINER_COLUMNS_']['columns'][(int)$child['tx_gridelements_columns']]) . '</strong>
                                 </td>
                             </tr>';
                 } else {
