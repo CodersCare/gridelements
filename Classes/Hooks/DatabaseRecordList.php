@@ -22,15 +22,13 @@ namespace GridElementsTeam\Gridelements\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use GridElementsTeam\Gridelements\Helper\Helper;
 use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList as DatabaseRecordListXclass;
-use TYPO3\CMS\Backend\RecordList\RecordListGetTableHookInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Recordlist\RecordList\RecordListHookInterface;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 /**
  * Class/Function which offers TCE main hook functions.
@@ -38,7 +36,7 @@ use TYPO3\CMS\Recordlist\RecordList\RecordListHookInterface;
  * @author Jo Hasenau <info@cybercraft.de>
  * @author Dirk Hoffmann <hoffmann@vmd-jena.de>
  */
-class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableHookInterface, SingletonInterface
+class DatabaseRecordList implements SingletonInterface
 {
     /**
      * @var Iconfactory
@@ -57,22 +55,6 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
     {
         $this->setLanguageService($GLOBALS['LANG']);
         $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
-    }
-
-    /**
-     * modifies the DB list query
-     *
-     * @param string $table The current database table
-     * @param int $pageId The record's page ID
-     * @param string $additionalWhereClause An additional WHERE clause
-     * @param string $selectedFieldsList Comma separated list of selected fields
-     * @param \TYPO3\CMS\Recordlist\RecordList\DatabaseRecordList $parentObject Parent \TYPO3\CMS\Recordlist\RecordList\DatabaseRecordList object
-     */
-    public function getDBlistQuery($table, $pageId, &$additionalWhereClause, &$selectedFieldsList, &$parentObject)
-    {
-        if ($table === 'tt_content') {
-            $additionalWhereClause .= ' AND colPos != -1 ';
-        }
     }
 
     /**
@@ -136,40 +118,6 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
     }
 
     /**
-     * check if current row has child elements and add info to $theData array
-     *
-     * @param string $table
-     * @param array $row
-     * @param int $level
-     * @param array $theData
-     * @param DatabaseRecordListXclass $parentObj
-     */
-    public function checkChildren(string $table, array $row, int $level, array &$theData, DatabaseRecordListXclass $parentObj)
-    {
-        if ($table === 'tt_content' && $row['CType'] === 'gridelements_pi1') {
-            $elementChildren = Helper::getInstance()->getChildren(
-                $table,
-                $row['uid'],
-                $row['pid'],
-                '',
-                0,
-                $parentObj->selectFields
-            );
-            if (!empty($row['tx_gridelements_backend_layout'])) {
-                $layoutColumns = $parentObj->getGridelementsBackendLayouts()->getLayoutColumns((string)$row['tx_gridelements_backend_layout']);
-                if (!empty($elementChildren)) {
-                    $theData['_CONTAINER_COLUMNS_'] = $layoutColumns;
-                    $theData['_EXPANDABLE_'] = true;
-                    $theData['_EXPAND_ID_'] = $table . ':' . $row['uid'];
-                    $theData['_EXPAND_TABLE_'] = $table;
-                    $theData['_LEVEL_'] = $level;
-                    $theData['_CHILDREN_'] = $elementChildren;
-                }
-            }
-        }
-    }
-
-    /**
      * return content collapse icon
      *
      * @param array $data
@@ -186,8 +134,8 @@ class DatabaseRecordList implements RecordListHookInterface, RecordListGetTableH
         DatabaseRecordListXclass $parentObj
     ) {
         if (!empty($data['_EXPAND_TABLE_']) && $data['_EXPAND_TABLE_'] === 'tt_content') {
-            $expandTitle = htmlspecialchars($this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.expandElement'));
-            $collapseTitle = htmlspecialchars($this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.collapseElement'));
+            $expandTitle = htmlspecialchars(LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.expandElement'));
+            $collapseTitle = htmlspecialchars(LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.collapseElement'));
             $expandedGridelements = $parentObj->getExpandedGridelements();
             if (!empty($expandedGridelements[$data['uid']])) {
                 $href = htmlspecialchars(($parentObj->listURL() . '&gridelementsExpand[' . (int)$data['uid'] . ']=0'));

@@ -23,9 +23,11 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use PDO;
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Http\ServerRequestFactory;
 
 /**
  * Class/Function which offers TCE main hook functions.
@@ -34,6 +36,12 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class ProcessCmdmap extends AbstractDataHandler
 {
+    public function __construct(
+        protected ServerRequestInterface|null $request = null
+    ) {
+        $this->request = $GLOBALS['TYPO3_REQUEST'] ?? ServerRequestFactory::fromGlobals();
+    }
+
     /**
      * Function to process the drag & drop copy action
      *
@@ -44,82 +52,69 @@ class ProcessCmdmap extends AbstractDataHandler
      * @param bool $commandIsProcessed A switch to tell the parent object, if the record has been copied
      * @param DataHandler|null $parentObj The parent object that triggered this hook
      * @param array|bool $pasteUpdate Values to be updated after the record is pasted
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws Exception
      */
     public function execute_processCmdmap(
-        string      $command,
-        string      $table,
-        int         $id,
-                    $value,
-        bool        &$commandIsProcessed,
+        string $command,
+        string $table,
+        int $id,
+        $value,
+        bool &$commandIsProcessed,
         DataHandler $parentObj = null,
-                    $pasteUpdate = false
-    )
-    {
+        $pasteUpdate = false
+    ) {
         $this->init($table, (string)$id, $parentObj);
-        $reference = (int)GeneralUtility::_GET('reference');
 
-        if (($command === 'copy' || $command === 'move') && !$commandIsProcessed && $table === 'tt_content' && !$this->getTceMain()->isImporting) {
-            if ($reference === 1) {
-                $dataArray = [
-                    'pid' => $value,
-                    'CType' => 'shortcut',
-                    'records' => $id,
-                    'header' => 'Reference',
-                ];
+        $reference = (int)($this->request->getQueryParams()['reference'] ?? 0);
 
-                // used for overriding container and column with real target values
-                if (is_array($pasteUpdate) && !empty($pasteUpdate)) {
-                    $dataArray = array_merge($dataArray, $pasteUpdate);
-                }
+        if ($command === 'copy' && $reference === 1 && !$commandIsProcessed && $table === 'tt_content' && !$this->getTceMain()->isImporting) {
+            $dataArray = [
+                'pid' => $value,
+                'CType' => 'shortcut',
+                'records' => $id,
+                'header' => 'Reference',
+            ];
 
-                $clipBoard = GeneralUtility::_GET('CB');
-                if (!empty($clipBoard)) {
-                    $updateArray = $clipBoard['update'];
-                    if (!empty($updateArray)) {
-                        $dataArray = array_merge($dataArray, $updateArray);
-                    }
-                }
-
-                $data = [];
-                $data['tt_content']['NEW234134'] = $dataArray;
-
-                $this->getTceMain()->start($data, []);
-                $this->getTceMain()->process_datamap();
-
-                $parentObj->registerDBList = null;
-                $parentObj->remapStack = null;
-                $commandIsProcessed = true;
-
+            // used for overriding container and column with real target values
+            if (is_array($pasteUpdate) && !empty($pasteUpdate)) {
+                $dataArray = array_merge($dataArray, $pasteUpdate);
             }
-            $containerUpdateArray = [];
-            if (!empty($pasteUpdate) && !empty($pasteUpdate['tx_gridelements_container'])) {
-                $containerUpdateArray[$pasteUpdate['tx_gridelements_container']] = 1;
-                $this->doGridContainerUpdate($containerUpdateArray, 'cmdmap: ' . $command);
+
+            $clipBoard = ($this->request->getQueryParams()['CB'] ?? null);
+            if (!empty($clipBoard)) {
+                $updateArray = $clipBoard['update'];
+                if (!empty($updateArray)) {
+                    $dataArray = array_merge($dataArray, $updateArray);
+                }
             }
+
+            $data = [];
+            $data['tt_content']['NEW234134'] = $dataArray;
+
+            $this->getTceMain()->start($data, []);
+            $this->getTceMain()->process_datamap();
+
+            $parentObj->registerDBList = null;
+            $parentObj->remapStack = null;
+            $commandIsProcessed = true;
         }
 
-        if (($command === 'delete' || $command === 'move') && $table === 'tt_content') {
+        if ($command === 'delete' && $table === 'tt_content') {
             $containerUpdateArray = [];
             $queryBuilder = $this->getQueryBuilder();
-            $originalElement = $queryBuilder
+            $originalContainer = $queryBuilder
                 ->select('tx_gridelements_container', 'sys_language_uid')
-                ->from('tt_content')
-                ->where(
-                    $queryBuilder->expr()->eq(
-                        'uid',
-                        $queryBuilder->createNamedParameter($id, PDO::PARAM_INT)
-                    )
-                )
-                ->execute()
-                ->fetch();
+                ->from('tt_content')->where($queryBuilder->expr()->eq(
+                    'uid',
+                    $queryBuilder->createNamedParameter($id, PDO::PARAM_INT)
+                ))->executeQuery()
+                ->fetchAssociative();
 
-            if (!empty($originalElement['tx_gridelements_container'])) {
-                $containerUpdateArray[$originalElement['tx_gridelements_container']] = -1;
-                $this->doGridContainerUpdate($containerUpdateArray, 'cmdmap: ' . $command);
+            if (!empty($originalContainer)) {
+                $containerUpdateArray[$originalContainer['tx_gridelements_container']] = -1;
+                $this->doGridContainerUpdate($containerUpdateArray);
             }
         }
-
         if ($table === 'tt_content') {
             $this->cleanupWorkspacesAfterFinalizing();
         }

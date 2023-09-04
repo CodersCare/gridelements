@@ -310,7 +310,7 @@ class GridChildrenProcessor implements DataProcessorInterface
             }
             $childProcessorConfiguration['dataProcessing.']['0.'] = $this->processorConfiguration;
             $childProcessorConfiguration['dataProcessing.']['0.']['recursive'] = (int)$this->options['recursive'] - 1;
-            $childProcessorConfiguration['dataProcessing.']['0'] = 'GridElementsTeam\Gridelements\DataProcessing\GridChildrenProcessor';
+            $childProcessorConfiguration['dataProcessing.']['0'] = \GridElementsTeam\Gridelements\DataProcessing\GridChildrenProcessor::class;
             $this->processedRecordVariables[$id] = $this->contentDataProcessor->process(
                 $recordContentObjectRenderer,
                 $childProcessorConfiguration,

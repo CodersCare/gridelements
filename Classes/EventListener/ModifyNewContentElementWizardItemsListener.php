@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GridElementsTeam\Gridelements\Hooks;
+namespace GridElementsTeam\Gridelements\EventListener;
 
 /***************************************************************
  *  Copyright notice
@@ -23,102 +23,133 @@ namespace GridElementsTeam\Gridelements\Hooks;
  ***************************************************************/
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
-use TYPO3\CMS\Backend\Controller\ContentElement\NewContentElementController;
+
+use function str_ends_with;
+use function str_starts_with;
+
+use TYPO3\CMS\Backend\Controller\Event\ModifyNewContentElementWizardItemsEvent;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Backend\Wizard\NewContentElementWizardHookInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider;
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
 use TYPO3\CMS\Core\Imaging\IconRegistry;
-use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\StringUtility;
 
-/**
- * Class/Function which manipulates the rendering of items within the new content element wizard
- *
- * @author Jo Hasenau <info@cybercraft.de>, Tobias Ferger <tobi@tt36.de>
- */
-class WizardItems implements NewContentElementWizardHookInterface
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
+
+final class ModifyNewContentElementWizardItemsListener
 {
     /**
-     * @var LayoutSetup
-     */
-    protected LayoutSetup $layoutSetup;
-
-    /**
-     * inject layout setup
-     *
+     * @param array $gridElementsExtensionConfiguration
      * @param LayoutSetup $layoutSetup
      */
-    public function injectLayoutSetup(LayoutSetup $layoutSetup)
-    {
-        $this->layoutSetup = $layoutSetup;
+    public function __construct(
+        private readonly array $gridElementsExtensionConfiguration,
+        private readonly LayoutSetup $layoutSetup
+    ) {
     }
 
     /**
-     * Processes the items of the new content element wizard
-     * and inserts necessary default values for items created within a grid
+     * This listener should only be processed if the user has permissions to use gridelements
      *
-     * @param array $wizardItems The array containing the current status of the wizard item list before rendering
-     * @param NewContentElementController $parentObject The parent object that triggered this hook
+     * @return bool
      */
-    public function manipulateWizardItems(&$wizardItems, &$parentObject)
+    private function canBeExecuted(): bool
     {
-        if (!$this->getBackendUser()->checkAuthMode('tt_content', 'CType', 'gridelements_pi1', $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode'])) {
+        return $this->getBackendUser()->checkAuthMode('tt_content', 'CType', 'gridelements_pi1');
+    }
+
+    /**
+     * @param ModifyNewContentElementWizardItemsEvent $event
+     */
+    public function __invoke(ModifyNewContentElementWizardItemsEvent $event): void
+    {
+        if (!$this->canBeExecuted()) {
             return;
         }
-        $pageInfo = $parentObject->getPageInfo();
-        $pageId = (int)$pageInfo['uid'];
-        $this->init($pageId);
 
-        $container = (int)GeneralUtility::_GP('tx_gridelements_container');
-        $column = (int)GeneralUtility::_GP('tx_gridelements_columns');
-        $allowed_GP = (string)GeneralUtility::_GP('tx_gridelements_allowed');
-        $disallowed_GP = (string)GeneralUtility::_GP('tx_gridelements_disallowed');
-        if (!empty($allowed_GP) || !empty($disallowed_GP)) {
-            $allowed = json_decode(base64_decode($allowed_GP), true) ?: [];
-            if (!empty($allowed)) {
-                foreach ($allowed as &$item) {
-                    if (!is_array($item)) {
-                        $item = array_flip(GeneralUtility::trimExplode(',', $item));
-                    }
-                }
-            }
-            $disallowed = json_decode(base64_decode($disallowed_GP), true) ?: [];
-            if (!empty($disallowed)) {
-                foreach ($disallowed as &$item) {
-                    if (!is_array($item)) {
-                        $item = array_flip(GeneralUtility::trimExplode(',', $item));
-                    }
-                }
-            }
+        $this->layoutSetup->init($event->getUidPid());
+
+        $requestArguments = $this->getRequestArguments();
+        $wizardItems = $event->getWizardItems();
+
+        $allowed = $requestArguments['allowed'] ?? [];
+        $disallowed = $requestArguments['disallowed'] ?? [];
+
+        if (!empty($allowed) || !empty($disallowed)) {
             $this->removeDisallowedWizardItems($allowed, $disallowed, $wizardItems);
         } else {
-            $allowed = null;
-            $disallowed = null;
+            $allowed = [];
+            $disallowed = [];
         }
+
         if (
             (empty($allowed['CType']) || isset($allowed['CType']['gridelements_pi1']) || isset($allowed['CType']['*']))
-            && !isset($disallowed['CType']['gridelements_pi1'])
-            && !isset($disallowed['tx_gridelements_backend_layout']['*'])
+            && (!isset($disallowed['CType']['gridelements_pi1']))
+            && (!isset($disallowed['tx_gridelements_backend_layout']['*']))
         ) {
             $allowedGridTypes = $allowed['tx_gridelements_backend_layout'] ?? [];
             $disallowedGridTypes = $disallowed['tx_gridelements_backend_layout'] ?? [];
-            $excludeLayouts = $this->getExcludeLayouts($container, $pageId);
+            $excludeLayouts = $this->getExcludeLayouts((int)$requestArguments['container'], $event->getUidPid());
 
             $gridItems = $this->layoutSetup->getLayoutWizardItems(
-                (int)$parentObject->getColPos(),
+                (int)$event->getColPos(),
                 $excludeLayouts,
                 $allowedGridTypes,
                 $disallowedGridTypes
             );
             $this->addGridItemsToWizard($gridItems, $wizardItems);
         }
+        $this->addGridValuesToWizardItems($wizardItems, (int)$requestArguments['container'], (int)$requestArguments['column']);
+        $event->setWizardItems($wizardItems);
+    }
 
-        $this->addGridValuesToWizardItems($wizardItems, $container, $column);
+    /**
+     * @return array|null
+     */
+    private function getRequestArguments(): array|null
+    {
+        $request = $this->getServerRequest();
+        if ($request === null) {
+            return null;
+        }
 
-        $this->removeEmptyHeadersFromWizard($wizardItems);
+        $queryParams = $request->getQueryParams();
+
+        $allowed = json_decode(base64_decode($queryParams['tx_gridelements_allowed'] ?? ''), true) ?: [];
+        if (!empty($allowed)) {
+            foreach ($allowed as &$item) {
+                if (!is_array($item)) {
+                    $item = array_flip(GeneralUtility::trimExplode(',', $item));
+                }
+            }
+        }
+        $disallowed = json_decode(base64_decode($queryParams['tx_gridelements_disallowed'] ?? ''), true) ?: [];
+        if (!empty($disallowed)) {
+            foreach ($disallowed as &$item) {
+                if (!is_array($item)) {
+                    $item = array_flip(GeneralUtility::trimExplode(',', $item));
+                }
+            }
+        }
+
+        return [
+            'container' => $queryParams['tx_gridelements_container'] ?? 0,
+            'column' => $queryParams['tx_gridelements_columns'] ?? 0,
+            'allowed' => $allowed,
+            'disallowed' => $disallowed,
+        ];
+    }
+
+    /**
+     * Get the server request used for fetching query params
+     *
+     * @return ServerRequest|null
+     */
+    private function getServerRequest(): ServerRequest|null
+    {
+        return $GLOBALS['TYPO3_REQUEST'] ?? null;
     }
 
     /**
@@ -129,56 +160,6 @@ class WizardItems implements NewContentElementWizardHookInterface
     public function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
-    }
-
-    /**
-     * initializes this class
-     *
-     * @param int $pageUid
-     */
-    public function init(int $pageUid)
-    {
-        $this->layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($pageUid);
-    }
-
-    /**
-     * remove disallowed content elements from wizard items
-     *
-     * @param array $allowed
-     * @param array $disallowed
-     * @param array $wizardItems
-     */
-    public function removeDisallowedWizardItems(array $allowed, array $disallowed, array &$wizardItems)
-    {
-        foreach ($wizardItems as $key => $wizardItem) {
-            if (empty($wizardItem['header'])) {
-                if (
-                    (
-                        !empty($allowed['CType'])
-                        && !isset($allowed['CType'][$wizardItem['tt_content_defValues']['CType']])
-                        && !isset($allowed['CType']['*'])
-                    ) || (
-                        !empty($disallowed) && (
-                            isset($disallowed['CType'][$wizardItem['tt_content_defValues']['CType']])
-                            || isset($disallowed['CType']['*'])
-                        )
-                    ) || (
-                        isset($wizardItem['tt_content_defValues']['list_type'])
-                            && !empty($allowed['list_type'])
-                            && !isset($allowed['list_type'][$wizardItem['tt_content_defValues']['list_type']])
-                            && !isset($allowed['list_type']['*'])
-                    ) || (
-                        isset($wizardItem['tt_content_defValues']['list_type'])
-                        && !empty($disallowed) && (
-                            isset($disallowed['list_type'][$wizardItem['tt_content_defValues']['list_type']])
-                            || isset($disallowed['list_type']['*'])
-                        )
-                    )
-                ) {
-                    unset($wizardItems[$key]);
-                }
-            }
-        }
     }
 
     /**
@@ -220,139 +201,43 @@ class WizardItems implements NewContentElementWizardHookInterface
     }
 
     /**
-     * add gridelements to wizard items
+     * remove disallowed content elements from wizard items
      *
-     * @param array $gridItems
+     * @param array $allowed
+     * @param array $disallowed
      * @param array $wizardItems
      */
-    public function addGridItemsToWizard(array &$gridItems, array &$wizardItems)
+    public function removeDisallowedWizardItems(array $allowed, array $disallowed, array &$wizardItems)
     {
-        if (empty($gridItems)) {
-            return;
-        }
-        // create gridelements node
-        $wizardItems['gridelements'] = [];
-
-        // set header label
-        $wizardItems['gridelements']['header'] = $this->getLanguageService()->sL(
-            'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_backend_layout_wizard_label'
-        );
-
-        $iconRegistry = GeneralUtility::makeInstance(IconRegistry::class);
-
-        // traverse the gridelements and create wizard item for each gridelement
-        foreach ($gridItems as $key => $item) {
-            $largeIcon = '';
-            if (empty($item['iconIdentifierLarge'])) {
-                if (!empty($item['icon']) && is_array($item['icon']) && isset($item['icon'][1])) {
-                    $item['iconIdentifierLarge'] = 'gridelements-large-' . $key;
-                    $largeIcon = $item['icon'][1];
-                    if (StringUtility::beginsWith($largeIcon, '../typo3conf/ext/')) {
-                        $largeIcon = str_replace('../typo3conf/ext/', 'EXT:', $largeIcon);
-                    }
-                    if (StringUtility::beginsWith($largeIcon, '../uploads/tx_gridelements/')) {
-                        $largeIcon = str_replace('../', '', $largeIcon);
-                    } else {
-                        if (!StringUtility::beginsWith($largeIcon, 'EXT:') && strpos(
-                            $largeIcon,
-                            '/'
-                        ) === false
-                        ) {
-                            $largeIcon = GeneralUtility::resolveBackPath($item['icon'][1]);
-                        }
-                    }
-                    if (!empty($largeIcon)) {
-                        if (StringUtility::endsWith($largeIcon, '.svg')) {
-                            $iconRegistry->registerIcon($item['iconIdentifierLarge'], SvgIconProvider::class, [
-                                'source' => $largeIcon,
-                            ]);
-                        } else {
-                            $iconRegistry->registerIcon(
-                                $item['iconIdentifierLarge'],
-                                BitmapIconProvider::class,
-                                [
-                                    'source' => $largeIcon,
-                                ]
-                            );
-                        }
-                    }
-                } else {
-                    $item['iconIdentifierLarge'] = 'gridelements-large-' . $key;
-                    $iconRegistry->registerIcon($item['iconIdentifierLarge'], SvgIconProvider::class, [
-                        'source' => 'EXT:gridelements/Resources/Public/Icons/gridelements.svg',
-                    ]);
-                }
-            }
-
-            // Traverse defVals
-            $defVals = '';
-
-            if (!empty($item['tt_content_defValues'])) {
-                foreach ($item['tt_content_defValues'] as $field => $value) {
-                    $value = $this->getLanguageService()->sL($value);
-                    $defVals .= '&defVals[tt_content][' . $field . ']=' . $value;
-                }
-            }
-
-            $itemIdentifier = $item['alias'] ?? $item['uid'];
-            $wizardItems['gridelements_' . $itemIdentifier] = [
-                'title' => $item['title'] ?? '',
-                'description' => $item['description'] ?? '',
-                'params' => ($largeIcon ? '&largeIconImage=' . $largeIcon : '')
-                    . '&defVals[tt_content][CType]=gridelements_pi1' . $defVals . '&defVals[tt_content][tx_gridelements_backend_layout]=' . $item['uid']
-                    . ($item['tll'] ? '&isTopLevelLayout' : ''),
-                'tt_content_defValues' => [
-                    'CType' => 'gridelements_pi1',
-                    'tx_gridelements_backend_layout' => $item['uid'],
-                ],
-            ];
-            $icon = '';
-            if (!empty($item['iconIdentifier'])) {
-                $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = $item['iconIdentifier'];
-            } elseif (!empty($item['icon']) && is_array($item['icon']) && isset($item['icon'][0])) {
-                $item['iconIdentifier'] = 'gridelements-' . $key;
-                $icon = $item['icon'][0];
-                if (StringUtility::beginsWith($icon, '../typo3conf/ext/')) {
-                    $icon = str_replace('../typo3conf/ext/', 'EXT:', $icon);
-                }
-                if (StringUtility::beginsWith($icon, '../uploads/tx_gridelements/')) {
-                    $icon = str_replace('../', '', $icon);
-                } else {
-                    if (!StringUtility::beginsWith($icon, 'EXT:') && strpos($icon, '/') !== false) {
-                        $icon = GeneralUtility::resolveBackPath($item['icon'][0]);
-                    }
-                }
-                if (StringUtility::endsWith($icon, '.svg')) {
-                    $iconRegistry->registerIcon($item['iconIdentifier'], SvgIconProvider::class, [
-                        'source' => $icon,
-                    ]);
-                } else {
-                    $iconRegistry->registerIcon($item['iconIdentifier'], BitmapIconProvider::class, [
-                        'source' => $icon,
-                    ]);
-                }
-            } else {
-                $item['iconIdentifier'] = 'gridelements-' . $key;
-                $iconRegistry->registerIcon($item['iconIdentifier'], SvgIconProvider::class, [
-                    'source' => 'EXT:gridelements/Resources/Public/Icons/gridelements.svg',
-                ]);
-            }
-            if ($icon && !isset($wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'])) {
-                $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = 'gridelements-' . $key;
-            } else {
-                if (!isset($wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'])) {
-                    $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = 'gridelements-default';
+        foreach ($wizardItems as $key => $wizardItem) {
+            if (empty($wizardItem['header'])) {
+                if (
+                    (
+                        !empty($allowed['CType'])
+                        && !isset($allowed['CType'][$wizardItem['tt_content_defValues']['CType']])
+                        && !isset($allowed['CType']['*'])
+                    ) || (
+                        !empty($disallowed) && (
+                            isset($disallowed['CType'][$wizardItem['tt_content_defValues']['CType']])
+                            || isset($disallowed['CType']['*'])
+                        )
+                    ) || (
+                        isset($wizardItem['tt_content_defValues']['list_type'])
+                        && !empty($allowed['list_type'])
+                        && !isset($allowed['list_type'][$wizardItem['tt_content_defValues']['list_type']])
+                        && !isset($allowed['list_type']['*'])
+                    ) || (
+                        isset($wizardItem['tt_content_defValues']['list_type'])
+                        && !empty($disallowed) && (
+                            isset($disallowed['list_type'][$wizardItem['tt_content_defValues']['list_type']])
+                            || isset($disallowed['list_type']['*'])
+                        )
+                    )
+                ) {
+                    unset($wizardItems[$key]);
                 }
             }
         }
-    }
-
-    /**
-     * @return LanguageService
-     */
-    public function getLanguageService(): LanguageService
-    {
-        return $GLOBALS['LANG'];
     }
 
     /**
@@ -390,27 +275,128 @@ class WizardItems implements NewContentElementWizardHookInterface
     }
 
     /**
-     * remove unnecessary headers from wizard items
+     * add gridelements to wizard items
      *
+     * @param array $gridItems
      * @param array $wizardItems
      */
-    public function removeEmptyHeadersFromWizard(array &$wizardItems)
+    public function addGridItemsToWizard(array &$gridItems, array &$wizardItems)
     {
-        $headersWithElements = [];
-        foreach ($wizardItems as $key => $wizardItem) {
-            $keyParts = GeneralUtility::trimExplode('_', $key);
-            if (!empty($keyParts[1])) {
-                $keyChunk = '';
-                foreach ($keyParts as $keyPart) {
-                    $keyChunk .= $keyChunk ? '_' . $keyPart : $keyPart;
-                    $headersWithElements[$keyChunk] = true;
+        if (empty($gridItems)) {
+            return;
+        }
+        // create gridelements node
+        $wizardItems['gridelements'] = [];
+
+        // set header label
+        $wizardItems['gridelements']['header'] = LocalizationUtility::translate(
+            'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_backend_layout_wizard_label'
+        );
+
+        $iconRegistry = GeneralUtility::makeInstance(IconRegistry::class);
+
+        // traverse the gridelements and create wizard item for each gridelement
+        foreach ($gridItems as $key => $item) {
+            $largeIcon = '';
+            if (empty($item['iconIdentifierLarge'])) {
+                if (!empty($item['icon']) && is_array($item['icon']) && isset($item['icon'][1])) {
+                    $item['iconIdentifierLarge'] = 'gridelements-large-' . $key;
+                    $largeIcon = $item['icon'][1];
+                    if (str_starts_with($largeIcon, '../typo3conf/ext/')) {
+                        $largeIcon = str_replace('../typo3conf/ext/', 'EXT:', $largeIcon);
+                    }
+                    if (str_starts_with($largeIcon, '../uploads/tx_gridelements/')) {
+                        $largeIcon = str_replace('../', '', $largeIcon);
+                    } else {
+                        if (!str_starts_with($largeIcon, 'EXT:') && !str_contains(
+                            $largeIcon,
+                            '/'
+                        )
+                        ) {
+                            $largeIcon = GeneralUtility::resolveBackPath($item['icon'][1]);
+                        }
+                    }
+                    if (!empty($largeIcon)) {
+                        if (str_ends_with($largeIcon, '.svg')) {
+                            $iconRegistry->registerIcon($item['iconIdentifierLarge'], SvgIconProvider::class, [
+                                'source' => $largeIcon,
+                            ]);
+                        } else {
+                            $iconRegistry->registerIcon(
+                                $item['iconIdentifierLarge'],
+                                BitmapIconProvider::class,
+                                [
+                                    'source' => $largeIcon,
+                                ]
+                            );
+                        }
+                    }
+                } else {
+                    $item['iconIdentifierLarge'] = 'gridelements-large-' . $key;
+                    $iconRegistry->registerIcon($item['iconIdentifierLarge'], SvgIconProvider::class, [
+                        'source' => 'EXT:gridelements/Resources/Public/Icons/gridelements.svg',
+                    ]);
                 }
             }
-        }
-        foreach ($wizardItems as $key => $wizardItem) {
-            if (!empty($wizardItem['header'])) {
-                if (!isset($headersWithElements[$key])) {
-                    unset($wizardItems[$key]);
+
+            // Traverse defVals
+            $defVals = '';
+
+            if (!empty($item['tt_content_defValues'])) {
+                foreach ($item['tt_content_defValues'] as $field => $value) {
+                    $value = LocalizationUtility::translate($value);
+                    $defVals .= '&defVals[tt_content][' . $field . ']=' . $value;
+                }
+            }
+
+            $itemIdentifier = $item['alias'] ?? $item['uid'];
+            $wizardItems['gridelements_' . $itemIdentifier] = [
+                'title' => $item['title'] ?? '',
+                'description' => $item['description'] ?? '',
+                'params' => ($largeIcon ? '&largeIconImage=' . $largeIcon : '')
+                    . '&defVals[tt_content][CType]=gridelements_pi1' . $defVals . '&defVals[tt_content][tx_gridelements_backend_layout]=' . $item['uid']
+                    . ($item['tll'] ? '&isTopLevelLayout' : ''),
+                'tt_content_defValues' => [
+                    'CType' => 'gridelements_pi1',
+                    'tx_gridelements_backend_layout' => $item['uid'],
+                ],
+            ];
+            $icon = '';
+            if (!empty($item['iconIdentifier'])) {
+                $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = $item['iconIdentifier'];
+            } elseif (!empty($item['icon']) && is_array($item['icon']) && isset($item['icon'][0])) {
+                $item['iconIdentifier'] = 'gridelements-' . $key;
+                $icon = $item['icon'][0];
+                if (str_starts_with($icon, '../typo3conf/ext/')) {
+                    $icon = str_replace('../typo3conf/ext/', 'EXT:', $icon);
+                }
+                if (str_starts_with($icon, '../uploads/tx_gridelements/')) {
+                    $icon = str_replace('../', '', $icon);
+                } else {
+                    if (!str_starts_with($icon, 'EXT:') && str_contains($icon, '/')) {
+                        $icon = GeneralUtility::resolveBackPath($item['icon'][0]);
+                    }
+                }
+                if (str_ends_with($icon, '.svg')) {
+                    $iconRegistry->registerIcon($item['iconIdentifier'], SvgIconProvider::class, [
+                        'source' => $icon,
+                    ]);
+                } else {
+                    $iconRegistry->registerIcon($item['iconIdentifier'], BitmapIconProvider::class, [
+                        'source' => $icon,
+                    ]);
+                }
+            } else {
+                $item['iconIdentifier'] = 'gridelements-' . $key;
+                $iconRegistry->registerIcon($item['iconIdentifier'], SvgIconProvider::class, [
+                    'source' => 'EXT:gridelements/Resources/Public/Icons/gridelements.svg',
+                ]);
+            }
+            if ($icon && !isset($wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'])) {
+                $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = 'gridelements-' . $key;
+            } else {
+                if (!isset($wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'])) {
+                    $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = 'gridelements-default';
                 }
             }
         }

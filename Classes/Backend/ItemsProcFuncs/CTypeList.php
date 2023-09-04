@@ -23,7 +23,9 @@ namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
  ***************************************************************/
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
+use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -31,7 +33,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  *
  * @author Jo Hasenau <info@cybercraft.de>
  */
-class CTypeList extends AbstractItemsProcFunc
+class CTypeList implements SingletonInterface
 {
     /**
      * @var LayoutSetup
@@ -55,11 +57,12 @@ class CTypeList extends AbstractItemsProcFunc
                 (int)$params['row']['tx_gridelements_columns']
             );
         } else {
-            $this->init((int)$params['row']['pid']);
             // negative uid_pid values indicate that the element has been inserted after an existing element
             // so there is no pid to get the backendLayout for and we have to get that first
-            $existingElement = BackendUtility::getRecordWSOL('tt_content', -((int)$params['row']['pid']), 'pid,CType,colPos,tx_gridelements_container,tx_gridelements_columns');
+            $existingElement = BackendUtility::getRecordWSOL('tt_content', abs((int)$params['row']['pid']), 'pid,CType,colPos,tx_gridelements_container,tx_gridelements_columns');
             if ((int)$existingElement['pid'] > 0) {
+                $this->init((int)$existingElement['pid']);
+
                 $this->checkForAllowedCTypes(
                     $params['items'],
                     (int)$existingElement['pid'],
@@ -84,13 +87,14 @@ class CTypeList extends AbstractItemsProcFunc
     {
         if ($pageColumn >= 0 || $pageColumn === -2) {
             $column = $pageColumn ?: 0;
-            $layout = $this->getSelectedBackendLayout($pageId);
+            $layout = GridElementsHelper::getSelectedBackendLayout($pageId);
         } else {
             $this->init($pageId);
             $column = $gridColumn ?: 0;
             $gridElement = $this->layoutSetup->cacheCurrentParent($gridContainerId, true);
             $layout = $this->layoutSetup->getLayoutSetup($gridElement['tx_gridelements_backend_layout'] ?? '');
         }
+
         if (!empty($layout)) {
             $allowed = $layout['allowed'][$column]['CType'] ?? [];
             $disallowed = $layout['disallowed'][$column]['CType'] ?? [];
@@ -123,7 +127,6 @@ class CTypeList extends AbstractItemsProcFunc
      */
     public function init(int $pageId = 0)
     {
-        parent::init();
         $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
     }
 

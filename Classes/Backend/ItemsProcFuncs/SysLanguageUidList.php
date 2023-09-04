@@ -23,13 +23,14 @@ namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
  ***************************************************************/
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\SingletonInterface;
 
 /**
  * Class/Function which manipulates the item-array for table/field tt_content CType.
  *
  * @author Jo Hasenau <info@cybercraft.de>
  */
-class SysLanguageUidList extends AbstractItemsProcFunc
+class SysLanguageUidList implements SingletonInterface
 {
     /**
      * ItemProcFunc for CType items

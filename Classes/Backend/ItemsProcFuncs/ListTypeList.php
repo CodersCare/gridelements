@@ -23,20 +23,21 @@ namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
  ***************************************************************/
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
+use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\SingletonInterface;
 
 /**
  * Class/Function which manipulates the item-array for table/field tt_content CType.
  *
  * @author Jo Hasenau <info@cybercraft.de>
  */
-class ListTypeList extends AbstractItemsProcFunc
+class ListTypeList implements SingletonInterface
 {
-    /**
-     * @var LayoutSetup
-     */
-    protected LayoutSetup $layoutSetup;
+    public function __construct(
+        protected LayoutSetup $layoutSetup
+    ) {
+    }
 
     /**
      * ItemProcFunc for CType items
@@ -45,6 +46,8 @@ class ListTypeList extends AbstractItemsProcFunc
      */
     public function itemsProcFunc(array &$params)
     {
+        $this->layoutSetup->init((int)$params['row']['pid']);
+
         if ((int)$params['row']['pid'] > 0) {
             $colPos = is_array($params['row']['colPos']) ? ($params['row']['colPos'][0] ?? 0) : $params['row']['colPos'];
             $this->checkForAllowedListTypes(
@@ -55,7 +58,6 @@ class ListTypeList extends AbstractItemsProcFunc
                 (int)$params['row']['tx_gridelements_columns']
             );
         } else {
-            $this->init((int)$params['row']['pid']);
             // negative uid_pid values indicate that the element has been inserted after an existing element
             // so there is no pid to get the backendLayout for and we have to get that first
             $existingElement = BackendUtility::getRecordWSOL('tt_content', -((int)$params['row']['pid']), 'pid,list_type,colPos,tx_gridelements_container,tx_gridelements_columns');
@@ -84,9 +86,8 @@ class ListTypeList extends AbstractItemsProcFunc
     {
         if ($pageColumn >= 0 || $pageColumn === -2) {
             $column = $pageColumn ?: 0;
-            $layout = $this->getSelectedBackendLayout($pageId);
+            $layout = GridElementsHelper::getSelectedBackendLayout($pageId);
         } else {
-            $this->init($pageId);
             $column = $gridColumn ?: 0;
             $gridElement = $this->layoutSetup->cacheCurrentParent($gridContainerId, true);
             $layout = $this->layoutSetup->getLayoutSetup($gridElement['tx_gridelements_backend_layout'] ?? '');
@@ -114,26 +115,5 @@ class ListTypeList extends AbstractItemsProcFunc
                 }
             }
         }
-    }
-
-    /**
-     * initializes this class
-     *
-     * @param int $pageId
-     */
-    public function init(int $pageId = 0)
-    {
-        parent::init();
-        $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
-    }
-
-    /**
-     * injects layout setup
-     *
-     * @param LayoutSetup $layoutSetup
-     */
-    public function injectLayoutSetup(LayoutSetup $layoutSetup)
-    {
-        $this->layoutSetup = $layoutSetup;
     }
 }

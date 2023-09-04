@@ -3,7 +3,9 @@
         <f:then>
             <div class="t3-page-column-header-icons">
                 <f:if condition="{allowEditContent} && {column.editUrl}">
-                    <a href="{column.editUrl}" title="{column.editLinkTitle}"><core:icon identifier="actions-document-open" /></a>
+                    <a href="{column.editUrl}" title="{f:translate(key: 'LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:editColumn')}">
+                        <core:icon identifier="actions-document-open" />
+                    </a>
                 </f:if>
                 <f:if condition="{column.gridContainerId}">
                     <f:if condition="{column.collapsed}">
@@ -40,33 +42,38 @@
         </f:else>
     </f:if>
 </div>
+<f:format.raw>{column.beforeSectionMarkup}</f:format.raw>
+
 <f:if condition="{column.maxItems}">
     <span class="t3-grid-cell-number-of-items {column.maxItemsClass}">{column.numberOfItems}/{column.maxItems}</span>
 </f:if>
 <f:if condition="{allowEditContent} && {column.contentEditable} && {column.context.allowNewContent}">
     <f:if condition="{column.gridContainerId}">
         <f:then>
-            <div class="t3-page-ce t3js-page-ce" data-container="{column.gridContainerId}" id="{column.uniqueId}">
-                    <div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce" id="colpos-{column.columnNumber}-container-{column.gridContainerId}-{column.uniqueId}">
-                        <a href="{column.newContentUrlWithRestrictions}" title="{newContentTitle}" data-title="{newContentTitle}"
-                           class="btn btn-default btn-sm {f:if(condition:column.context.drawingConfiguration.showNewContentWizard, then: 't3js-toggle-new-content-element-wizard disabled')}">
-                            <core:icon identifier="actions-add" />
-                            {newContentTitleShort}
-                        </a>
-                    </div>
-                <div class="t3-page-ce-dropzone-available t3js-page-ce-dropzone-available"></div>
+            <div class="t3-page-ce t3js-page-ce" data-container="{column.gridContainerId}" data-page="{column.context.pageId}" id="{column.uniqueId}">
+                <div class="t3-page-ce-actions t3js-page-new-ce" id="colpos-{column.columnNumber}-container-{column.context.pageId}-{column.uniqueId}">
+                    <typo3-backend-new-content-element-wizard-button
+                            class="btn btn-default btn-sm"
+                            title="{f:translate(key: 'LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:newContentElement')}"
+                            id="colpos-{column.columnNumber}-container-{column.gridContainerId}-{column.uniqueId}"
+                            url="{column.newContentUrlWithRestrictions}"
+                    >
+                        <core:icon identifier="actions-plus" />
+                        <f:translate key="LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:content" />
+                    </typo3-backend-new-content-element-wizard-button>
+                </div>
+                <div class="t3-page-ce-dropzone t3js-page-ce-dropzone-available"></div>
             </div>
         </f:then>
         <f:else>
             <div class="t3-page-ce t3js-page-ce" data-page="{column.context.pageId}" id="{column.uniqueId}">
-                <div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce" id="colpos-{column.columnNumber}-page-{column.context.pageId}-{column.uniqueId}">
-                    <a href="{column.newContentUrlWithRestrictions}" title="{newContentTitle}" data-title="{newContentTitle}"
-                       class="btn btn-default btn-sm {f:if(condition:column.context.drawingConfiguration.showNewContentWizard, then: 't3js-toggle-new-content-element-wizard disabled')}">
-                        <core:icon identifier="actions-add" />
+                <div class="t3-page-ce-actions t3js-page-new-ce" id="colpos-{column.columnNumber}-page-{column.context.pageId}-{column.uniqueId}">
+                    <typo3-backend-new-content-element-wizard-button class="btn btn-default btn-sm" url="{column.newContentUrlWithRestrictions}" title="{newContentTitle}">
+                        <core:icon identifier="actions-plus" />
                         {newContentTitleShort}
-                    </a>
+                    </typo3-backend-new-content-element-wizard-button>
                 </div>
-                <div class="t3-page-ce-dropzone-available t3js-page-ce-dropzone-available"></div>
+                <div class="t3-page-ce-dropzone t3js-page-ce-dropzone-available"></div>
             </div>
         </f:else>
     </f:if>

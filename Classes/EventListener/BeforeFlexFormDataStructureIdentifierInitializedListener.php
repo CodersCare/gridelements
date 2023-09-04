@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GridElementsTeam\Gridelements\Hooks;
+namespace GridElementsTeam\Gridelements\EventListener;
 
 /***************************************************************
  *  Copyright notice
@@ -23,11 +23,10 @@ namespace GridElementsTeam\Gridelements\Hooks;
  ***************************************************************/
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Configuration\Event\BeforeFlexFormDataStructureIdentifierInitializedEvent;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 
 /**
  * Manipulate and find flex forms for gridelements tt_content plugin
@@ -36,25 +35,19 @@ use TYPO3\CMS\Core\Utility\VersionNumberUtility;
  * @author Dirk Hoffmann <hoffmann@vmd-jena.de>
  * @author Stephan Schuler <stephan.schuler@netlogix.de>
  */
-class TtContentFlexForm
+final class BeforeFlexFormDataStructureIdentifierInitializedListener
 {
     /**
-     * Method to find flex form configuration of a tt_content gridelements
-     * content element.
-     *
-     * @param array $tca
-     * @param string $tableName
-     * @param string $fieldName
-     * @param array $row
-     * @return array
+     * @param BeforeFlexFormDataStructureIdentifierInitializedEvent $event
      */
-    public function getDataStructureIdentifierPreProcess(array $tca, string $tableName, string $fieldName, array $row): array
+    public function __invoke(BeforeFlexFormDataStructureIdentifierInitializedEvent $event)
     {
+        $row = $event->getRow();
+        $tableName = $event->getTableName();
+        $fieldName = $event->getFieldName();
+
         if ($tableName === 'tt_content' && $fieldName === 'pi_flexform' && $row['CType'] === 'gridelements_pi1') {
-            if (!empty($row['tx_gridelements_backend_layout']) && !empty($row['uid']) && !empty($row['pid'])) {
-                if (VersionNumberUtility::convertVersionNumberToInteger(TYPO3_version) < 11000000) {
-                    BackendUtility::fixVersioningPid($tableName, $row);
-                }
+            if (!empty($row['tx_gridelements_backend_layout'])) {
                 $pageUid = $row['pid'];
                 $layoutId = $row['tx_gridelements_backend_layout'];
                 /** @var LayoutSetup $layoutSetupInstance */
@@ -116,27 +109,8 @@ class TtContentFlexForm
                     'type' => 'gridelements-dummy',
                 ];
             }
-        } else {
-            // Not my business
-            $identifier = [];
-        }
-        return $identifier;
-    }
 
-    /**
-     * Deliver a dummy flex form if identifier tells us to do so.
-     *
-     * @param array $identifier
-     * @return string
-     */
-    public function parseDataStructureByIdentifierPreProcess(array $identifier): string
-    {
-        if (!empty($identifier['type']) && $identifier['type'] === 'gridelements-dummy') {
-            return 'FILE:EXT:gridelements/Configuration/FlexForms/default_flexform_configuration.xml';
+            $event->setIdentifier($identifier);
         }
-        if (!empty($identifier['flexformDS'])) {
-            return $identifier['flexformDS'];
-        }
-        return '';
     }
 }

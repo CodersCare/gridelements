@@ -1,6 +1,84 @@
 services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+    bind:
+      $gridElementsExtensionConfiguration: '@extensionconfiguration.gridelements'
+      $ttContentQueryBuilder: '@querybuilder.tt_content'
+
+  GridElementsTeam\Gridelements\:
+    public: true
+    resource: '../Classes/*'
+    exclude:
+      - '../Classes/Event/*'
+      - '../Classes/EventListener/*'
+      - '../Classes/View/*'
+
   GridElementsTeam\Gridelements\EventListener\ExtTablesInclusionPostProcessing:
     tags:
       - name: event.listener
         identifier: 'gridelements/ext-table-inclusion-post-proc'
         event: TYPO3\CMS\Core\Configuration\Event\AfterTcaCompilationEvent
+  GridElementsTeam\Gridelements\EventListener\BeforeFlexFormDataStructureIdentifierInitializedListener:
+    tags:
+      - name: event.listener
+        identifier: 'gridelements-ttcontent-flex-identifier'
+        event: TYPO3\CMS\Core\Configuration\Event\BeforeFlexFormDataStructureIdentifierInitializedEvent
+  GridElementsTeam\Gridelements\EventListener\BeforeFlexFormDataStructureParsedListener:
+    tags:
+      - name: event.listener
+        identifier: 'gridelements-ttcontent-flex-parse'
+        event: TYPO3\CMS\Core\Configuration\Event\BeforeFlexFormDataStructureParsedEvent
+  GridElementsTeam\Gridelements\EventListener\ModifyDatabaseQueryForRecordListingListener:
+    tags:
+      - name: event.listener
+        identifier: 'gridelements-ttcontent-recordlist-enhance'
+        event: TYPO3\CMS\Core\Configuration\Event\ModifyDatabaseQueryForRecordListingEvent
+  GridElementsTeam\Gridelements\EventListener\ModifyRecordListElementDataListener:
+    tags:
+      - name: event.listener
+        identifier: 'gridelements-ttcontent-recordlist-add-child-attr'
+        event: GridElementsTeam\Gridelements\Event\ModifyRecordListElementDataEvent
+  GridElementsTeam\Gridelements\EventListener\ModifyNewContentElementWizardItemsListener:
+    tags:
+      - name: event.listener
+        identifier: 'gridelements-ttcontent-new-content-wizard'
+        event: TYPO3\CMS\Backend\Controller\Event\ModifyNewContentElementWizardItemsEvent
+  GridElementsTeam\Gridelements\EventListener\IsContentUsedOnPageLayoutListener:
+    tags:
+      - name: event.listener
+        identifier: 'gridelements-ttcontent-element-used'
+        event: TYPO3\CMS\Backend\View\Event\IsContentUsedOnPageLayoutEvent
+  GridElementsTeam\Gridelements\EventListener\AfterBackendPageRendererEventListener:
+    tags:
+      - name: event.listener
+        identifier: 'gridelements-inject-js-labels'
+        event: TYPO3\CMS\Backend\Controller\Event\AfterBackendPageRenderEvent
+  GridElementsTeam\Gridelements\Command\GridelementsColPosFixer:
+    tags:
+      - name: console.command
+        identifier: 'gridelements-col-pos-fixer'
+        description: 'Fixes Gridelements child records with broken colPos values'
+  GridElementsTeam\Gridelements\Command\GridelementsNumberOfChildrenFixer:
+    tags:
+      - name: console.command
+        identifier: 'gridelements-number-of-children-fixer'
+        description: 'Fixes Gridelements parent records with broken tx_gridelements_children value'
+
+
+  querybuilder.tt_content:
+    class: 'TYPO3\CMS\Core\Database\Query\QueryBuilder'
+    factory:
+      - '@TYPO3\CMS\Core\Database\ConnectionPool'
+      - 'getQueryBuilderForTable'
+    arguments:
+      - 'tt_content'
+
+  extensionconfiguration.gridelements:
+    class: 'array'
+    factory:
+      - '@TYPO3\CMS\Core\Configuration\ExtensionConfiguration'
+      - 'get'
+    arguments:
+      - 'gridelements'

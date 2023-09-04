@@ -10,9 +10,6 @@ disableCopyFromPageButton = 0
 # cat=basic; type=boolean; label=LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:disableDragInWizard
 disableDragInWizard = 0
 
-# cat=basic; type=boolean; label=LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:fluidBasedPageModule
-fluidBasedPageModule = 0
-
 # cat=basic; type=boolean; label=LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:nestingInListModule
 nestingInListModule = 0
 

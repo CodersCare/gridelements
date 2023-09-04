@@ -19,9 +19,6 @@
 		<trans-unit id="allowedGridElementTypesHelp">
 			<source>Fill in the Gridelements types that may be created or moved here.</source>
 		</trans-unit>
-		<trans-unit id="dragAndDropHideNewElementWizardInfoOverlay">
-			<source>Hide info overlays for the new content element drag in wizard.</source>
-		</trans-unit>
 		<trans-unit id="gridElements">
 			<source>Grid Elements</source>
 		</trans-unit>
@@ -189,6 +186,12 @@
 		</trans-unit>
 		<trans-unit id="tx_gridelements_contentcollapsed">
 			<source>This column is collapsed!</source>
+		</trans-unit>
+		<trans-unit id="tx_gridelements_cannot_copy_into_container">
+			<source>Copying the current element into the target container is not allowed.</source>
+		</trans-unit>
+		<trans-unit id="tx_gridelements_cannot_move_into_container">
+			<source>Moving the current element into the target container is not allowed.</source>
 		</trans-unit>
 		</body>
 	</file>

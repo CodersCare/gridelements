@@ -10,12 +10,6 @@ parameters:
     bootstrapFiles:
         - .Build/vendor/autoload.php
 
-    scanFiles:
-        - ext_localconf.php
-
-    scanDirectories:
-        - public
-
     paths:
         - Classes
 

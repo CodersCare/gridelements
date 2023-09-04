@@ -1,5 +1,8 @@
 <?php
 
+use GridElementsTeam\Gridelements\PageLayoutView\GridelementsPreviewRenderer;
+use GridElementsTeam\Gridelements\PageLayoutView\ShortcutPreviewRenderer;
+
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile('gridelements', 'Configuration/TypoScript/', 'Gridelements (deprecated)');
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile('gridelements', 'Configuration/TypoScript/DataProcessingLibContentElement', 'Gridelements w/DataProcessing (recommended)');
 
@@ -76,17 +79,11 @@
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'items' => [
-                    [
-                        '',
-                        0,
-                    ],
-                ],
                 'default' => 0,
                 'foreign_table' => 'tt_content',
                 'foreign_table_where' => 'AND ({#tt_content}.{#sys_language_uid} = ###REC_FIELD_sys_language_uid### OR {#tt_content}.{#sys_language_uid} = -1) AND {#tt_content}.{#pid}=###CURRENT_PID### AND {#tt_content}.{#CType}=\'gridelements_pi1\' AND ({#tt_content}.{#uid} != ###THIS_UID###) AND ({#tt_content}.{#tx_gridelements_container} != ###THIS_UID### OR {#tt_content}.{#tx_gridelements_container}=0)',
                 'dontRemapTablesOnCopy' => 'tt_content',
-                'itemsProcFunc' => 'GridElementsTeam\Gridelements\Backend\TtContent->containerItemsProcFunc',
+                'itemsProcFunc' => \GridElementsTeam\Gridelements\Backend\TtContent::class . '->containerItemsProcFunc',
                 'size' => 1,
                 'minitems' => 0,
                 'maxitems' => 1,
@@ -99,7 +96,7 @@
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'itemsProcFunc' => 'GridElementsTeam\Gridelements\Backend\TtContent->columnsItemsProcFunc',
+                'itemsProcFunc' => \GridElementsTeam\Gridelements\Backend\TtContent::class . '->columnsItemsProcFunc',
                 'size' => 1,
                 'maxitems' => 1,
                 'default' => 0,
@@ -111,11 +108,11 @@
 
 $GLOBALS['TCA']['tt_content']['ctrl']['useColumnsForDefaultValues'] .= ',tx_gridelements_container,tx_gridelements_columns';
 $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes']['gridelements_pi1'] = 'gridelements-default';
-$GLOBALS['TCA']['tt_content']['columns']['colPos']['config']['itemsProcFunc'] = 'GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\ColPosList->itemsProcFunc';
+$GLOBALS['TCA']['tt_content']['columns']['colPos']['config']['itemsProcFunc'] = \GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\ColPosList::class . '->itemsProcFunc';
 $GLOBALS['TCA']['tt_content']['columns']['colPos']['onChange'] = 'reload';
-$GLOBALS['TCA']['tt_content']['columns']['CType']['config']['itemsProcFunc'] = 'GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\CTypeList->itemsProcFunc';
-$GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['itemsProcFunc'] = 'GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\ListTypeList->itemsProcFunc';
-$GLOBALS['TCA']['tt_content']['columns']['sys_language_uid']['config']['itemsProcFunc'] = 'GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\SysLanguageUidList->itemsProcFunc';
+$GLOBALS['TCA']['tt_content']['columns']['CType']['config']['itemsProcFunc'] = \GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\CTypeList::class . '->itemsProcFunc';
+$GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['itemsProcFunc'] = \GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\ListTypeList::class . '->itemsProcFunc';
+$GLOBALS['TCA']['tt_content']['columns']['sys_language_uid']['config']['itemsProcFunc'] = \GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\SysLanguageUidList::class . '->itemsProcFunc';
 $GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds']['*,gridelements_pi1'] = '';
 $GLOBALS['TCA']['tt_content']['columns']['records']['config']['allowed'] .= ',pages';
 
@@ -138,7 +135,5 @@ $GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['showitem'] = '
     --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:notes,rowDescription
 	';
 
-if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger(TYPO3_version) < 11000000) {
-    $GLOBALS['TCA']['tt_content']['ctrl']['shadowColumnsForNewPlaceholders'] .= ',tx_gridelements_container,tx_gridelements_columns';
-    $GLOBALS['TCA']['tt_content']['columns']['tx_gridelements_children']['config']['appearance']['showRemovedLocalizationRecords'] = true;
-}
+$GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['previewRenderer'] = GridelementsPreviewRenderer::class;
+$GLOBALS['TCA']['tt_content']['types']['shortcut']['previewRenderer'] = ShortcutPreviewRenderer::class;

@@ -1,12 +1,12 @@
 <?php
 
 declare(strict_types=1);
-
 use GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\SysLanguageUidList;
+
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Tests\UnitTestCase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 class SysLanguageUidListTest extends UnitTestCase
 {

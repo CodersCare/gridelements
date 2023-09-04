@@ -161,7 +161,7 @@ class GridelementsBackendLayoutIconUpdateWizard implements UpgradeWizardInterfac
      * and also not numeric (which means that it is migrated)
      *
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function getRecordsFromTable(): array
     {
@@ -182,9 +182,7 @@ class GridelementsBackendLayoutIconUpdateWizard implements UpgradeWizardInterfac
                     ExpressionBuilder::NEQ,
                     'CAST(' . $queryBuilder->quoteIdentifier($this->fieldToMigrate) . ' AS CHAR)'
                 )
-            )
-            ->orderBy('uid')
-            ->execute()
+            )->orderBy('uid')->executeQuery()
             ->fetchAll();
     }
 
@@ -223,16 +221,13 @@ class GridelementsBackendLayoutIconUpdateWizard implements UpgradeWizardInterfac
 
                 $queryBuilder = $connectionPool->getQueryBuilderForTable('sys_file');
                 $queryBuilder->getRestrictions()->removeAll();
-                $existingFileRecord = $queryBuilder->select('uid')->from('sys_file')->where(
-                    $queryBuilder->expr()->eq(
-                        'sha1',
-                        $queryBuilder->createNamedParameter($fileSha1)
-                    ),
-                    $queryBuilder->expr()->eq(
-                        'storage',
-                        $queryBuilder->createNamedParameter($storageUid, PDO::PARAM_INT)
-                    )
-                )->execute()->fetch();
+                $existingFileRecord = $queryBuilder->select('uid')->from('sys_file')->where($queryBuilder->expr()->eq(
+                    'sha1',
+                    $queryBuilder->createNamedParameter($fileSha1)
+                ), $queryBuilder->expr()->eq(
+                    'storage',
+                    $queryBuilder->createNamedParameter($storageUid, PDO::PARAM_INT)
+                ))->executeQuery()->fetch();
 
                 // the file exists, the file does not have to be moved again
                 if (is_array($existingFileRecord)) {
@@ -288,7 +283,7 @@ class GridelementsBackendLayoutIconUpdateWizard implements UpgradeWizardInterfac
                 ];
 
                 $queryBuilder = $connectionPool->getQueryBuilderForTable('sys_file_reference');
-                $queryBuilder->insert('sys_file_reference')->values($fields)->execute();
+                $queryBuilder->insert('sys_file_reference')->values($fields)->executeStatement();
                 ++$i;
             }
         }
@@ -302,7 +297,7 @@ class GridelementsBackendLayoutIconUpdateWizard implements UpgradeWizardInterfac
                     'uid',
                     $queryBuilder->createNamedParameter($row['uid'], PDO::PARAM_INT)
                 )
-            )->set($this->fieldToMigrate, $i)->execute();
+            )->set($this->fieldToMigrate, $i)->executeStatement();
         }
     }
 }

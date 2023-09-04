@@ -2,23 +2,31 @@
 
 declare(strict_types=1);
 
-namespace GridElementsTeam\Gridelements\Task;
+namespace GridElementsTeam\Gridelements\Command;
 
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Scheduler\Task\AbstractTask;
 
-class GridelementsColPosFixer extends AbstractTask
+class GridelementsColPosFixer extends Command
 {
+    protected function configure(): void
+    {
+        $this->setHelp('Fixes Gridelements child records with broken colPos values');
+    }
 
     /**
      * Fixes Gridelements child records with broken colPos values
      * after falsely updating the DB during major core upgrades
      * with Gridelements being uninstalled.
      *
-     * @return bool TRUE if task run was successful
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
      */
-    public function execute(): bool
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tt_content');
@@ -29,15 +37,12 @@ class GridelementsColPosFixer extends AbstractTask
                 -1,
                 true,
                 \PDO::PARAM_INT
-            )
-            ->where(
+            )->where(
                 $queryBuilder->expr()->gt(
                     'tx_gridelements_container',
                     0
                 )
-            )
-            ->execute();
-        return true;
+            )->executeStatement();
+        return Command::SUCCESS;
     }
-
 }

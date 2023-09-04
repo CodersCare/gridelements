@@ -5,43 +5,22 @@ declare(strict_types=1);
 namespace GridElementsTeam\Gridelements\PageLayoutView;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
-use GridElementsTeam\Gridelements\Helper\Helper;
+use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use GridElementsTeam\Gridelements\View\BackendLayout\Grid\GridelementsGridColumn;
 use GridElementsTeam\Gridelements\View\BackendLayout\Grid\GridelementsGridColumnItem;
-use TYPO3\CMS\Backend\Preview\PreviewRendererInterface;
 use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\Grid;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridRow;
-use TYPO3\CMS\Backend\View\PageLayoutView;
-use TYPO3\CMS\Backend\View\PageLayoutViewDrawItemHookInterface;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\BackendConfigurationManager;
 use TYPO3\CMS\Fluid\View\StandaloneView;
-use UnexpectedValueException;
 
-class GridelementsPreviewRenderer extends StandardContentPreviewRenderer implements PreviewRendererInterface
+class GridelementsPreviewRenderer extends StandardContentPreviewRenderer
 {
-    /**
-     * @var array
-     */
-    protected $extentensionConfiguration;
-
-    /**
-     * @var Helper
-     */
-    protected Helper $helper;
-
-    /**
-     * @var IconFactory
-     */
-    protected $iconFactory;
-
     /**
      * @var LanguageService
      */
@@ -55,11 +34,6 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
     protected array $languageHasTranslationsCache = [];
 
     /**
-     * @var QueryGenerator
-     */
-    protected QueryGenerator $tree;
-
-    /**
      * @var bool
      */
     protected bool $showHidden;
@@ -70,14 +44,15 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
     protected string $backPath = '';
 
     /**
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @param IconFactory $iconFactory
+     * @param array $gridElementsExtensionConfiguration
+     *
+     * @noinspection PhpPropertyOnlyWrittenInspection
      */
-    public function __construct()
-    {
-        $this->extentensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
-        $this->helper = Helper::getInstance();
-        $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+    public function __construct(
+        private IconFactory $iconFactory,
+        private readonly array $gridElementsExtensionConfiguration
+    ) {
         $this->cleanupCollapsedStatesInUC();
     }
 
@@ -96,7 +71,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
                 }
             }
             $backendUser->uc['moduleData']['page']['gridelementsCollapsedColumns'] = $collapsedGridelementColumns;
-            $backendUser->writeUC($backendUser->uc);
+            $backendUser->writeUC();
         }
     }
 
@@ -111,28 +86,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
      */
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
-        $drawItem = true;
-        $hookPreviewContent = '';
         $record = $item->getRecord();
-        // Hook: Render an own preview of a record
-        if (!empty($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawItem'])) {
-            $pageLayoutView = PageLayoutView::createFromPageLayoutContext($item->getContext());
-            foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawItem'] ?? [] as $className) {
-                $hookObject = GeneralUtility::makeInstance($className);
-                if (!$hookObject instanceof PageLayoutViewDrawItemHookInterface) {
-                    throw new UnexpectedValueException(
-                        $className . ' must implement interface ' . PageLayoutViewDrawItemHookInterface::class,
-                        1582574553
-                    );
-                }
-                $hookObject->preProcess($pageLayoutView, $drawItem, $previewHeader, $hookPreviewContent, $record);
-            }
-            $item->setRecord($record);
-        }
-
-        if (!$drawItem) {
-            return $hookPreviewContent;
-        }
         // Check if a Fluid-based preview template was defined for this CType
         // and render it via Fluid. Possible option:
         // mod.web_layout.tt_content.preview.media = EXT:site_mysite/Resources/Private/Templates/Preview/Media.html
@@ -158,7 +112,6 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         $context = $item->getContext();
         $record = $item->getRecord();
         $grid = GeneralUtility::makeInstance(Grid::class, $context);
-        $helper = GeneralUtility::makeInstance(Helper::class);
         $gridContainerId = $record['uid'];
         $pageId = $record['pid'];
         if ($pageId < 0) {
@@ -177,7 +130,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         }
 
         if (isset($layout['config']['rows.'])) {
-            $children = $helper->getChildren('tt_content', $gridContainerId, $pageId, 'sorting', 0, '*');
+            $children = GridElementsHelper::getChildren('tt_content', $gridContainerId, $pageId, 'sorting', 0, '*');
             $childColumns = [];
             foreach ($children as $childRecord) {
                 if (isset($childRecord['tx_gridelements_columns'])) {
@@ -195,7 +148,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
                         }
                         $gridRow->addColumn($gridColumn);
                         if (isset($column['colPos']) && isset($childColumns[$column['colPos']])) {
-                            $gridColumn->setCollapsed(!empty($this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$gridContainerId . '_' . $column['colPos']]));
+                            $gridColumn->setCollapsed(!empty(GridElementsHelper::getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$gridContainerId . '_' . $column['colPos']]));
                             foreach ($childColumns[$column['colPos']] as $child) {
                                 $gridColumnItem = GeneralUtility::makeInstance(GridelementsGridColumnItem::class, $context, $gridColumn, $child, $layoutColumns);
                                 $gridColumn->addItem($gridColumnItem);
@@ -214,14 +167,18 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         $view->setLayoutRootPaths($configuration['backendContainer']['view']['layoutRootPaths'] ?? '');
         $view->setTemplateRootPaths($configuration['backendContainer']['view']['templateRootPaths'] ?? '');
         $view->setPartialRootPaths($configuration['backendContainer']['view']['partialRootPaths'] ?? '');
-        $view->assign('hideRestrictedColumns', !empty(BackendUtility::getPagesTSconfig($context->getPageId())['mod.']['web_layout.']['hideRestrictedCols']));
-        $view->assign('newContentTitle', $this->getLanguageService()->getLL('newContentElement'));
-        $view->assign('newContentTitleShort', $this->getLanguageService()->getLL('content'));
-        $view->assign('allowEditContent', $this->getBackendUser()->check('tables_modify', 'tt_content'));
-        $view->assign('gridElementsBackendLayout', $layout);
-        $view->assign('gridElementsContainer', $grid);
-        $rendered = $view->render();
 
-        return $rendered;
+        $view->assignMultiple([
+            'context' => $context,
+            'hideRestrictedColumns' => (bool)(BackendUtility::getPagesTSconfig($context->getPageId())['mod.']['web_layout.']['hideRestrictedCols'] ?? false),
+            'newContentTitle' => $this->getLanguageService()->sL('LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:newContentElement'),
+            'newContentTitleShort' => $this->getLanguageService()->sL('LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:content'),
+            'allowEditContent' => $this->getBackendUser()->check('tables_modify', 'tt_content'),
+            'maxTitleLength' => $this->getBackendUser()->uc['titleLen'] ?? 20,
+            'gridElementsBackendLayout' => $layout,
+            'gridElementsContainer' => $grid,
+        ]);
+
+        return $view->render();
     }
 }

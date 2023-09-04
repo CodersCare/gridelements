@@ -22,11 +22,17 @@ namespace GridElementsTeam\Gridelements\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\DataHandler\AfterDatabaseOperations;
 use GridElementsTeam\Gridelements\DataHandler\PreProcessFieldArray;
 use GridElementsTeam\Gridelements\DataHandler\ProcessCmdmap;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 /**
  * Class/Function which offers TCE main hook functions.
@@ -85,7 +91,7 @@ class DataHandler implements SingletonInterface
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
             /** @var AfterDatabaseOperations $hook */
             $hook = GeneralUtility::makeInstance(AfterDatabaseOperations::class);
-            if (strpos($recordUid, 'NEW') !== false) {
+            if (str_contains($recordUid, 'NEW')) {
                 $recordUid = $parentObj->substNEWwithIDs[$recordUid];
             } else {
                 if ($table === 'tt_content' && $status === 'update') {
@@ -121,5 +127,123 @@ class DataHandler implements SingletonInterface
             $hook = GeneralUtility::makeInstance(ProcessCmdmap::class);
             $hook->execute_processCmdmap($command, $table, $id, $value, $commandIsProcessed, $parentObj, $pasteUpdate);
         }
+    }
+
+    public function processCmdmap_beforeStart(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler)
+    {
+        $cmdmap = $dataHandler->cmdmap;
+        if (empty($cmdmap['tt_content']) || $dataHandler->bypassAccessCheckForRecords) {
+            return;
+        }
+
+        foreach ($cmdmap['tt_content'] as $id => $incomingFieldArray) {
+            foreach ($incomingFieldArray as $command => $value) {
+                if (!in_array($command, ['copy', 'move'], true)) {
+                    continue;
+                }
+
+                $currentRecord = BackendUtility::getRecord('tt_content', $id);
+
+                if (is_array($value)
+                    && !empty($value['action'])
+                    && $value['action'] === 'paste'
+                    && (
+                        isset($value['update']['colPos']) ||
+                        isset($value['update']['tx_gridelements_container']) ||
+                        isset($value['update']['tx_gridelements_columns'])
+                    )
+                ) {
+                    $pageId = (int)$value['target'];
+                    $colPos = (int)$value['update']['colPos'];
+                    $gridContainer = (int)$value['update']['tx_gridelements_container'];
+                    $gridColumn = (int)$value['update']['tx_gridelements_columns'];
+                    $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
+                } else {
+                    $pageId = (int)$value;
+                    $colPos = (int)$currentRecord['colPos'];
+                    $gridContainer = (int)$currentRecord['tx_gridelements_container'];
+                    $gridColumn = (int)$currentRecord['tx_gridelements_columns'];
+                    $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
+                }
+
+                if ($pageId < 0) {
+                    $targetRecord = BackendUtility::getRecordWSOL('tt_content', abs($pageId), 'pid,colPos,tx_gridelements_container,tx_gridelements_columns');
+                    $pageId = (int)$targetRecord['pid'];
+                    $colPos = (int)$targetRecord['colPos'];
+                    $gridContainer = (int)$targetRecord['tx_gridelements_container'];
+                    $gridColumn = (int)$targetRecord['tx_gridelements_columns'];
+                    $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
+                }
+
+                if ($colPos !== -1) {
+                    continue;
+                }
+
+                $currentLayoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($currentRecord['pid']);
+                $currentLayout = $currentLayoutSetup->getLayoutSetup($currentRecord['tx_gridelements_backend_layout']);
+
+                if ((int)($currentLayout['top_level_layout'] ?? 0) === 1) {
+                    $this->flashNotAllowedError($dataHandler, $id, $command);
+                    continue;
+                }
+
+                $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId);
+                $layout = $layoutSetup->getLayoutSetup($containerRecord['tx_gridelements_backend_layout']);
+
+                $allowed = $layout['allowed'][$gridColumn]['CType'] ?? [];
+                $disallowed = $layout['disallowed'][$gridColumn]['CType'] ?? [];
+
+                if (empty($allowed) && empty($disallowed)) {
+                    continue;
+                }
+
+                if (
+                    !$this->isDisallowedContentElement($allowed, $disallowed, $currentRecord['CType'])
+                ) {
+                    continue;
+                }
+
+                $this->flashNotAllowedError($dataHandler, $id, $command);
+            }
+        }
+    }
+
+    /**
+     * @param array $allowed
+     * @param string $CType
+     * @param array $disallowed
+     * @return bool
+     */
+    public function isDisallowedContentElement(array $allowed, array $disallowed, string $CType): bool
+    {
+        return (
+            !empty($allowed)
+            && !isset($allowed['*'])
+            && !isset($allowed[$CType])
+        ) || (
+            !empty($disallowed)
+            && (
+                isset($disallowed['*'])
+                || isset($disallowed[$CType])
+            )
+        );
+    }
+
+    /**
+     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+     * @param int|string $id
+     * @param string $command
+     * @throws \TYPO3\CMS\Core\Exception
+     */
+    public function flashNotAllowedError(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler, int|string $id, string $command): void
+    {
+        unset($dataHandler->cmdmap['tt_content'][$id]);
+
+        $message = LocalizationUtility::translate(sprintf('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_cannot_%s_into_container', $command));
+
+        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', ContextualFeedbackSeverity::ERROR, true);
+        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+        $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
+        $defaultFlashMessageQueue->enqueue($flashMessage);
     }
 }

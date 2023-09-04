@@ -15,10 +15,6 @@
 			<source>Select the content element types that may be created or moved here.</source>
 			<target>Selecteer de content element types die hier aangemaakt of naar toe verplaatst mogen worden.</target>
 		</trans-unit>
-		<trans-unit id="dragAndDropHideNewElementWizardInfoOverlay" approved="yes">
-			<source>Hide info overlays for the new content element drag in wizard.</source>
-			<target>Verberg informatie overlays voor de nieuwe 'content element drag in wizard'.</target>
-		</trans-unit>
 		<trans-unit id="gridElements" approved="yes">
 			<source>Grid Elements</source>
 			<target>Grid elementen</target>
@@ -174,6 +170,14 @@
 		<trans-unit id="tx_gridelements_js.pasteref" approved="yes">
 			<source>Paste reference into this column</source>
 			<target>Plak referentie in</target>
+		</trans-unit>
+		<trans-unit id="tx_gridelements_cannot_copy_into_container">
+			<source>Copying the current element into the target container is not allowed.</source>
+			<target>Het kopiëren van het huidige element naar de doelcontainer is niet toegestaan.</target>
+		</trans-unit>
+		<trans-unit id="tx_gridelements_cannot_move_into_container">
+			<source>Moving the current element into the target container is not allowed.</source>
+			<target>Het verplaatsen van het huidige element naar de doelcontainer is niet toegestaan.</target>
 		</trans-unit>
 		</body>
 	</file>

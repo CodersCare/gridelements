@@ -1,12 +1,13 @@
 <?php
 
 declare(strict_types=1);
-
 use GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\ColPosList;
+
+use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Tests\UnitTestCase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 class ColPosListTest extends UnitTestCase
 {
@@ -34,7 +35,7 @@ class ColPosListTest extends UnitTestCase
         $itemsProcFunc = GeneralUtility::makeInstance(ColPosList::class);
         $backendUserAuthentication = GeneralUtility::makeInstance(BackendUserAuthentication::class);
         $GLOBALS['BE_USER'] = $backendUserAuthentication;
-        $result = $itemsProcFunc->getBackendUser();
+        $result = GridElementsHelper::getBackendUser();
         self::assertEquals($backendUserAuthentication, $result);
     }
 

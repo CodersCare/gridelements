@@ -17,12 +17,12 @@ namespace GridElementsTeam\Gridelements\ContextMenu;
  * The TYPO3 project - inspiring people to share!
  */
 
+use TYPO3\CMS\Backend\ContextMenu\ItemProviders\ProviderInterface;
 use TYPO3\CMS\Backend\ContextMenu\ItemProviders\RecordProvider;
-use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class ItemProvider extends RecordProvider
+class ItemProvider extends RecordProvider implements ProviderInterface
 {
     protected $itemsConfiguration = [
         'pastereference' => [
@@ -77,13 +77,11 @@ class ItemProvider extends RecordProvider
 
         $attributes = $this->getPasteAdditionalAttributes('after');
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        try {
-            $attributes += [
-                    'data-callback-module' => 'TYPO3/CMS/Gridelements/ContextMenuActions',
-                    'data-action-url' => htmlspecialchars((string)$uriBuilder->buildUriFromRoute('tce_db', $urlParameters)),
-            ];
-        } catch (RouteNotFoundException $e) {
-        }
+        $attributes += [
+            'data-callback-module' => '@gridelementsteam/gridelements/context-menu-actions',
+            'data-action-url' => htmlspecialchars((string)$uriBuilder->buildUriFromRoute('tce_db', $urlParameters)),
+        ];
+
         return $attributes;
     }
 
@@ -116,7 +114,6 @@ class ItemProvider extends RecordProvider
                 'tt_content',
                 'CType',
                 'shortcut',
-                $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode'] ?? ''
             );
         }
         return $canRender;

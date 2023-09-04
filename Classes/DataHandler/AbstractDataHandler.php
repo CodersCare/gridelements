@@ -22,8 +22,9 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
-use GridElementsTeam\Gridelements\Helper\Helper;
+use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use PDO;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -83,7 +84,7 @@ abstract class AbstractDataHandler
         $this->setTable($table);
         if ($table === 'tt_content' && (int)$uidPid < 0) {
             $this->setContentUid(abs((int)$uidPid));
-            $pageUid = Helper::getInstance()->getPidFromUid($this->getContentUid());
+            $pageUid = GridElementsHelper::getPidFromUid($this->getContentUid());
             $this->setPageUid($pageUid);
         } else {
             $this->setPageUid((int)$uidPid);
@@ -155,28 +156,22 @@ abstract class AbstractDataHandler
     /**
      * Function to remove any remains of versioned records after finalizing a workspace action
      * via 'Discard' or 'Publish' commands
-     * @throws \Doctrine\DBAL\DBALException
      */
     public function cleanupWorkspacesAfterFinalizing()
     {
         $queryBuilder = $this->getQueryBuilder();
 
         $constraints = [
-            $queryBuilder->expr()->andX(
-                $queryBuilder->expr()->eq(
-                    'pid',
-                    $queryBuilder->createNamedParameter(-1, PDO::PARAM_INT)
-                ),
-                $queryBuilder->expr()->eq(
-                    't3ver_wsid',
-                    $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
-                )
-            ),
+            $queryBuilder->expr()->and($queryBuilder->expr()->eq(
+                'pid',
+                $queryBuilder->createNamedParameter(-1, PDO::PARAM_INT)
+            ), $queryBuilder->expr()->eq(
+                't3ver_wsid',
+                $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
+            )),
         ];
 
-        $queryBuilder->delete('tt_content')
-            ->where(...$constraints)
-            ->execute();
+        $queryBuilder->delete('tt_content')->where(...$constraints)->executeStatement();
     }
 
     /**
@@ -203,7 +198,7 @@ abstract class AbstractDataHandler
      * as well as translated references
      *
      * @param int $uid
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws Exception
      */
     public function checkAndUpdateTranslatedElements(int $uid)
     {
@@ -223,10 +218,8 @@ abstract class AbstractDataHandler
             ->from('tt_content')
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
-            )
-            ->setMaxResults(1)
-            ->execute()
-            ->fetch();
+            )->setMaxResults(1)->executeQuery()
+            ->fetchAssociative();
         if (!empty($currentValues['l18n_parent'])) {
             $originalUid = (int)$currentValues['uid'];
             $queryBuilder = $this->getQueryBuilder();
@@ -245,10 +238,8 @@ abstract class AbstractDataHandler
                         'uid',
                         $queryBuilder->createNamedParameter((int)$currentValues['l18n_parent'], PDO::PARAM_INT)
                     )
-                )
-                ->setMaxResults(1)
-                ->execute()
-                ->fetch();
+                )->setMaxResults(1)->executeQuery()
+                ->fetchAssociative();
 
             if (is_array($currentValues)) {
                 $updateArray = $currentValues;
@@ -275,16 +266,12 @@ abstract class AbstractDataHandler
                 'colPos',
                 'l18n_parent'
             )
-            ->from('tt_content')
-            ->where(
-                $queryBuilder->expr()->eq(
-                    'l18n_parent',
-                    $queryBuilder->createNamedParameter((int)$currentValues['uid'], PDO::PARAM_INT)
-                )
-            )
-            ->execute();
+            ->from('tt_content')->where($queryBuilder->expr()->eq(
+                'l18n_parent',
+                $queryBuilder->createNamedParameter((int)$currentValues['uid'], PDO::PARAM_INT)
+            ))->executeQuery();
         $translatedElements = [];
-        while ($translatedElement = $translatedElementQuery->fetch()) {
+        while ($translatedElement = $translatedElementQuery->fetchAssociative()) {
             $translatedElements[$translatedElement['uid']] = $translatedElement;
         }
         if (empty($translatedElements)) {
@@ -295,22 +282,17 @@ abstract class AbstractDataHandler
             $queryBuilder = $this->getQueryBuilder();
             $translatedContainerQuery = $queryBuilder
                 ->select('uid', 'sys_language_uid')
-                ->from('tt_content')
-                ->where(
-                    $queryBuilder->expr()->eq(
-                        'l18n_parent',
-                        $queryBuilder->createNamedParameter(
-                            (int)$currentValues['tx_gridelements_container'],
-                            PDO::PARAM_INT
-                        )
-                    ),
-                    $queryBuilder->expr()->eq(
-                        't3ver_oid',
-                        $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
+                ->from('tt_content')->where($queryBuilder->expr()->eq(
+                    'l18n_parent',
+                    $queryBuilder->createNamedParameter(
+                        (int)$currentValues['tx_gridelements_container'],
+                        PDO::PARAM_INT
                     )
-                )
-                ->execute();
-            while ($translatedContainer = $translatedContainerQuery->fetch()) {
+                ), $queryBuilder->expr()->eq(
+                    't3ver_oid',
+                    $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
+                ))->executeQuery();
+            while ($translatedContainer = $translatedContainerQuery->fetchAssociative()) {
                 $translatedContainers[$translatedContainer['sys_language_uid']] = $translatedContainer;
             }
         }
@@ -382,20 +364,16 @@ abstract class AbstractDataHandler
      * Function to handle record actions between different grid containers
      *
      * @param array $containerUpdateArray
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws Exception
      */
-    public function doGridContainerUpdate(array $containerUpdateArray = [], $action = '')
+    public function doGridContainerUpdate(array $containerUpdateArray = [], $action = ''): void
     {
         if (is_array($containerUpdateArray) && !empty($containerUpdateArray)) {
             $queryBuilder = $this->getQueryBuilder();
             $currentContainers = $queryBuilder
                 ->select('uid', 'tx_gridelements_children')
-                ->from('tt_content')
-                ->where(
-                    $queryBuilder->expr()->in('uid', implode(',', array_keys($containerUpdateArray)))
-                )
-                ->execute()
-                ->fetchAll();
+                ->from('tt_content')->where($queryBuilder->expr()->in('uid', implode(',', array_keys($containerUpdateArray))))->executeQuery()
+                ->fetchAllAssociative();
             if (!empty($currentContainers)) {
                 foreach ($currentContainers as $fieldArray) {
                     $fieldArray['tx_gridelements_children'] = (int)$fieldArray['tx_gridelements_children'] + (int)$containerUpdateArray[$fieldArray['uid']];

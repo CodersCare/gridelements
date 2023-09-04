@@ -2,23 +2,33 @@
 
 declare(strict_types=1);
 
-namespace GridElementsTeam\Gridelements\Task;
+namespace GridElementsTeam\Gridelements\Command;
 
+use Doctrine\DBAL\Exception;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Scheduler\Task\AbstractTask;
 
-class GridelementsNumberOfChildrenFixer extends AbstractTask
+class GridelementsNumberOfChildrenFixer extends Command
 {
+    protected function configure(): void
+    {
+        $this->setHelp('Fixes Gridelements parent records with broken tx_gridelements_children value');
+    }
 
     /**
      * Fixes Gridelements parent records with broken tx_gridelements_children value
-     * due to buggy behaviour of Cut/Copy/Paste or Drag/Drop methods.
+     *  due to buggy behaviour of Cut/Copy/Paste or Drag/Drop methods.
      *
-     * @return bool TRUE if task run was successful
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     * @throws Exception
      */
-    public function execute(): bool
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tt_content');
@@ -36,9 +46,7 @@ class GridelementsNumberOfChildrenFixer extends AbstractTask
                     $queryBuilder->createNamedParameter('gridelements_pi1')
                 )
             )
-            ->orderBy('pid')
-            ->addOrderBy('uid')
-            ->execute();
+            ->orderBy('pid')->addOrderBy('uid')->executeQuery();
 
         if (!empty($containers)) {
             while ($container = $containers->fetchAssociative()) {
@@ -51,14 +59,10 @@ class GridelementsNumberOfChildrenFixer extends AbstractTask
 
                 $children = $queryBuilder
                     ->select('uid', 'pid', 'tx_gridelements_container')
-                    ->from('tt_content')
-                    ->where(
-                        $queryBuilder->expr()->eq(
-                            'tx_gridelements_container',
-                            $queryBuilder->createNamedParameter($container['uid'])
-                        )
-                    )
-                    ->execute()
+                    ->from('tt_content')->where($queryBuilder->expr()->eq(
+                        'tx_gridelements_container',
+                        $queryBuilder->createNamedParameter($container['uid'])
+                    ))->executeQuery()
                     ->fetchAllAssociative();
 
                 if (empty($children)) {
@@ -72,17 +76,12 @@ class GridelementsNumberOfChildrenFixer extends AbstractTask
                         count($children),
                         true,
                         \PDO::PARAM_INT
-                    )
-                    ->where(
-                        $queryBuilder->expr()->eq(
-                            'uid',
-                            $container['uid']
-                        )
-                    )
-                    ->execute();
+                    )->where($queryBuilder->expr()->eq(
+                        'uid',
+                        $container['uid']
+                    ))->executeStatement();
             }
         }
-        return true;
+        return Command::SUCCESS;
     }
-
 }

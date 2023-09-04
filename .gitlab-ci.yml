@@ -8,15 +8,21 @@ stages:
 include:
   - template: Composer.gitlab-ci.yml
 
-# Speed up builds
-cache:
-  key: $CI_COMMIT_REF_SLUG
-  paths:
-    - .Build/vendor
-    - public
+
+package_install:
+  stage: build
+  image: mallardduck/gitlab-ci-pipeline-php:8.1-alpine
+  when: always
+  script:
+    - composer install --ignore-platform-reqs
+  artifacts:
+    paths:
+      - .Build/
 
 default:
-  image: edbizarro/gitlab-ci-pipeline-php:7.4-alpine
+  image: mallardduck/gitlab-ci-pipeline-php:8.1-alpine
+  tags:
+    - docker
 
 create-extension:
   stage: build
@@ -25,15 +31,21 @@ create-extension:
 
 php-lint:
   stage: code-quality
+  needs:
+    - package_install
   script:
     - composer run ci:php:lint
 
 php-cs-fixer:
   stage: code-quality
+  needs:
+    - package_install
   script:
-    - composer run ci:php:fixer
+    - composer run ci:php:cs
 
 php-stan:
   stage: code-quality
+  needs:
+    - package_install
   script:
     - composer run ci:php:stan

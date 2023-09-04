@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\View\BackendLayout\Grid;
 
-use GridElementsTeam\Gridelements\Helper\Helper;
+use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\PageLayoutContext;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -79,43 +79,30 @@ class GridelementsGridColumnItem extends GridColumnItem
 
     /**
      * @return string
-     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
+     * @throws RouteNotFoundException
      */
     public function getNewContentAfterUrlWithRestrictions(): string
     {
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $pageId = $this->context->getPageId();
 
-        $specificIds = GeneralUtility::makeInstance(Helper::class)->getSpecificIds($this->record);
+        $specificIds = GridElementsHelper::getSpecificIds($this->record);
         $allowed = base64_encode(json_encode($this->column->getAllowed()));
         $disallowed = base64_encode(json_encode($this->column->getDisallowed()));
 
-        if ($this->context->getDrawingConfiguration()->getShowNewContentWizard()) {
-            $urlParameters = [
-                'id' => $pageId,
-                'sys_language_uid' => $this->context->getSiteLanguage()->getLanguageId(),
-                'tx_gridelements_allowed' => $allowed,
-                'tx_gridelements_disallowed' => $disallowed,
-                'tx_gridelements_container' => $this->column->getGridContainerId(),
-                'tx_gridelements_columns' => $this->column->getColumnNumber(),
-                'colPos' => -1,
-                'uid_pid' => -$this->record['uid'],
-                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
+        $urlParameters = [
+            'id' => $pageId,
+            'sys_language_uid' => $this->context->getSiteLanguage()->getLanguageId(),
+            'tx_gridelements_allowed' => $allowed,
+            'tx_gridelements_disallowed' => $disallowed,
+            'tx_gridelements_container' => $this->column->getGridContainerId(),
+            'tx_gridelements_columns' => $this->column->getColumnNumber(),
+            'colPos' => -1,
+            'uid_pid' => -$this->record['uid'],
+            'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
 
-            ];
-            $routeName = BackendUtility::getPagesTSconfig($pageId)['mod.']['newContentElementWizard.']['override']
-                ?? 'new_content_element_wizard';
-        } else {
-            $urlParameters = [
-                'edit' => [
-                    'tt_content' => [
-                        -$this->record['uid'] => 'new',
-                    ],
-                ],
-                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
-            ];
-            $routeName = 'record_edit';
-        }
+        ];
+        $routeName = 'new_content_element_wizard';
 
         return (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
     }

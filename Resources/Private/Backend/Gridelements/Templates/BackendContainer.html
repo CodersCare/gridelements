@@ -3,10 +3,16 @@
     data-namespace-typo3-fluid="true"
 >
 
-<f:be.pageRenderer includeRequireJsModules="{
-   0:'TYPO3/CMS/Gridelements/GridElementsOnReady',
-   1:'TYPO3/CMS/Gridelements/GridElementsDragDrop'
-}" />
+<f:be.pageRenderer
+    includeJavaScriptModules="{
+        0: '@gridelementsteam/gridelements/context-menu-actions.js',
+        1: '@gridelementsteam/gridelements/gridelements-toggleable.js',
+    }"
+    includeCssFiles="{
+        0: 'EXT:gridelements/Resources/Public/Backend/Css/Skin/t3skin_override.css'
+    }"
+
+/>
 
 <f:render partial="PageLayout/Grid" arguments="{grid: gridElementsContainer, gridElementsBackendLayout: gridElementsBackendLayout, hideRestrictedColumns: hideRestrictedColumns, newContentTitle: newContentTitle, newContentTitleShort: newContentTitleShort, allowEditContent: allowEditContent, isGridelementsContainer: 'TRUE'}" />
 

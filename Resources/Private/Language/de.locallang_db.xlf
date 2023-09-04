@@ -23,10 +23,6 @@
 			<source>Fill in the Gridelements types that may be created or moved here.</source>
 			<target>Tragen Sie die Raster-Element-Typen ein, die innerhalb dieser Spalte angelegt oder dorthin bewegt werden dürfen.</target>
 		</trans-unit>
-		<trans-unit id="dragAndDropHideNewElementWizardInfoOverlay" approved="yes">
-			<source>Hide info overlays for the new content element drag in wizard.</source>
-			<target>Info-Overlays beim Drag-In-Wizard für neue Inhaltselemente ausblenden.</target>
-		</trans-unit>
 		<trans-unit id="gridElements" approved="yes">
 			<source>Grid Elements</source>
 			<target>Raster-Elemente</target>
@@ -242,6 +238,14 @@
 		<trans-unit id="tx_gridelements_contentcollapsed">
 			<source>This column is collapsed!</source>
 			<target>Diese Spalte ist ausgeblendet!</target>
+		</trans-unit>
+		<trans-unit id="tx_gridelements_cannot_copy_into_container">
+			<source>Copying the current element into the target container is not allowed.</source>
+			<target>Das Kopieren des aktuellen Elements in den Zielcontainer ist nicht erlaubt.</target>
+		</trans-unit>
+		<trans-unit id="tx_gridelements_cannot_move_into_container">
+			<source>Moving the current element into the target container is not allowed.</source>
+			<target>Das Verschieben des aktuellen Elements in den Zielcontainer ist nicht erlaubt.</target>
 		</trans-unit>
 		</body>
 	</file>

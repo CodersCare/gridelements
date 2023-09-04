@@ -1,12 +1,12 @@
 <?php
 
 declare(strict_types=1);
-
 use GridElementsTeam\Gridelements\Hooks\DatabaseRecordList;
+
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Tests\UnitTestCase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 class DatabaseRecordListTest extends UnitTestCase
 {

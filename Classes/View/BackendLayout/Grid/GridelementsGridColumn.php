@@ -17,8 +17,8 @@ declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\View\BackendLayout\Grid;
 
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumn;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\PageLayoutContext;
@@ -530,7 +530,7 @@ class GridelementsGridColumn extends GridColumn
 
     /**
      * @return string
-     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
+     * @throws RouteNotFoundException
      */
     public function getNewContentUrlWithRestrictions(): string
     {
@@ -540,39 +540,16 @@ class GridelementsGridColumn extends GridColumn
         $allowed = base64_encode(json_encode($this->getAllowed()));
         $disallowed = base64_encode(json_encode($this->getDisallowed()));
 
-        if ($this->context->getDrawingConfiguration()->getShowNewContentWizard()) {
-            $urlParameters = [
-                'id' => $pageId,
-                'sys_language_uid' => $this->context->getSiteLanguage()->getLanguageId(),
-                'tx_gridelements_allowed' => $allowed,
-                'tx_gridelements_disallowed' => $disallowed,
-                'tx_gridelements_container' => $this->getGridContainerId(),
-                'tx_gridelements_columns' => $this->getColumnNumber(),
-                'colPos' => -1,
-                'uid_pid' => $pageId,
-                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
-
-            ];
-            $routeName = BackendUtility::getPagesTSconfig($pageId)['mod.']['newContentElementWizard.']['override']
-                ?? 'new_content_element_wizard';
-        } else {
-            $urlParameters = [
-                'edit' => [
-                    'tt_content' => [
-                        $pageId => 'new',
-                    ],
-                ],
-                'defVals' => [
-                    'tt_content' => [
-                        'colPos' => $this->getColumnNumber(),
-                        'sys_language_uid' => $this->context->getSiteLanguage()->getLanguageId(),
-                    ],
-                ],
-                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
-            ];
-            $routeName = 'record_edit';
-        }
-
-        return (string)$uriBuilder->buildUriFromRoute($routeName, $urlParameters);
+        return (string)$uriBuilder->buildUriFromRoute('new_content_element_wizard', [
+            'id' => $pageId,
+            'sys_language_uid' => $this->context->getSiteLanguage()->getLanguageId(),
+            'tx_gridelements_allowed' => $allowed,
+            'tx_gridelements_disallowed' => $disallowed,
+            'tx_gridelements_container' => $this->getGridContainerId(),
+            'tx_gridelements_columns' => $this->getColumnNumber(),
+            'colPos' => -1,
+            'uid_pid' => $pageId,
+            'returnUrl' => $GLOBALS['TYPO3_REQUEST']->getAttribute('normalizedParams')->getRequestUri(),
+        ]);
     }
 }

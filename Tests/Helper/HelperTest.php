@@ -1,10 +1,10 @@
 <?php
 
 declare(strict_types=1);
+use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 
-use GridElementsTeam\Gridelements\Helper\Helper;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Tests\UnitTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 class HelperTest extends UnitTestCase
 {
@@ -33,7 +33,6 @@ class HelperTest extends UnitTestCase
      */
     public function testGetSpecificIdsWithoutWorkspaceAndOriginalId()
     {
-        $helper = Helper::getInstance();
         $record = [
             'uid' => '1',
             'pid' => '2',
@@ -43,7 +42,7 @@ class HelperTest extends UnitTestCase
             'uid' => 1,
             'pid' => 2,
         ];
-        $result = $helper->getSpecificIds($record);
+        $result = GridElementsHelper::getSpecificIds($record);
         self::assertEquals($expected, $result);
     }
 
@@ -54,17 +53,16 @@ class HelperTest extends UnitTestCase
      */
     public function testGetSpecificIdsWithoutWorkspaceButWithOriginalId()
     {
-        $helper = Helper::getInstance();
         $record = [
-            'uid' => '1',
-            'pid' => '2',
-            't3ver_oid' => '3',
+           'uid' => '1',
+           'pid' => '2',
+           't3ver_oid' => '3',
         ];
         $expected = [
             'uid' => 1,
             'pid' => 2,
         ];
-        $result = $helper->getSpecificIds($record);
+        $result = GridElementsHelper::getSpecificIds($record);
         self::assertEquals($expected, $result);
     }
 
@@ -75,7 +73,6 @@ class HelperTest extends UnitTestCase
      */
     public function testGetSpecificIdsWithWorkspaceAndWithOriginalId()
     {
-        $helper = Helper::getInstance();
         $GLOBALS['BE_USER'] = $this->getMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->workspace = 1;
         $record = [
@@ -87,7 +84,7 @@ class HelperTest extends UnitTestCase
             'uid' => 3,
             'pid' => -1,
         ];
-        $result = $helper->getSpecificIds($record);
+        $result = GridElementsHelper::getSpecificIds($record);
         self::assertEquals($expected, $result);
     }
 
@@ -98,7 +95,6 @@ class HelperTest extends UnitTestCase
      */
     public function testGetSpecificIdsWithWorkspaceButWithoutOriginalId()
     {
-        $helper = Helper::getInstance();
         $GLOBALS['BE_USER'] = $this->getMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->workspace = 1;
         $record = [
@@ -110,7 +106,7 @@ class HelperTest extends UnitTestCase
             'uid' => 1,
             'pid' => 2,
         ];
-        $result = $helper->getSpecificIds($record);
+        $result = GridElementsHelper::getSpecificIds($record);
         self::assertEquals($expected, $result);
     }
 }

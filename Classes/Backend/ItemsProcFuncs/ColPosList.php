@@ -22,14 +22,17 @@ namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 /**
  * Class/Function which manipulates the item-array for table/field tt_content colPos.
  *
  * @author Jo Hasenau <info@cybercraft.de>
  */
-class ColPosList extends AbstractItemsProcFunc
+class ColPosList implements SingletonInterface
 {
     /**
      * ItemProcFunc for colpos items
@@ -38,7 +41,6 @@ class ColPosList extends AbstractItemsProcFunc
      */
     public function itemsProcFunc(array &$params)
     {
-        $this->init();
         if ((int)$params['row']['pid'] > 0) {
             if (isset($params['row']['CType'])) {
                 $contentType = is_array($params['row']['CType']) ? ($params['row']['CType'][0] ?? '') : $params['row']['CType'];
@@ -99,11 +101,11 @@ class ColPosList extends AbstractItemsProcFunc
         int $container = 0
     ): array {
         if (empty($container)) {
-            $layout = $this->getSelectedBackendLayout($pageId);
+            $layout = GridElementsHelper::getSelectedBackendLayout($pageId);
             if ($layout) {
                 if ($contentType !== '' && !empty($layout['__items'])) {
                     foreach ($layout['__items'] as $itemKey => $itemArray) {
-                        $column = $itemArray[1];
+                        $column = $itemArray['value'];
                         if (
                             (
                                 isset($layout['allowed'][$column]) &&
@@ -159,7 +161,7 @@ class ColPosList extends AbstractItemsProcFunc
         } else {
             $items = [];
             $items[] = [
-                $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tt_content.tx_gridelements_container'),
+                LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tt_content.tx_gridelements_container'),
                 '-1',
                 null,
                 null,

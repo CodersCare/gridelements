@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\Helper;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use PDO;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -38,25 +39,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  *
  * @author Dirk Hoffmann <dirk-hoffmann@telekom.de>
  */
-class Helper implements SingletonInterface
+class GridElementsHelper implements SingletonInterface
 {
-    /**
-     * Local instance of the helper
-     *
-     * @var Helper
-     */
-    protected static Helper $instance;
-
-    /**
-     * Get instance from the class.
-     *
-     * @return Helper
-     */
-    public static function getInstance(): Helper
-    {
-        return new self();
-    }
-
     /**
      * @param string $table
      * @param int $uid
@@ -65,9 +49,9 @@ class Helper implements SingletonInterface
      * @param int $sortRev
      * @param string $selectFieldList
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws Exception
      */
-    public function getChildren(string $table = '', int $uid = 0, int $pid = 0, string $sortingField = '', int $sortRev = 0, string $selectFieldList = ''): array
+    public static function getChildren(string $table = '', int $uid = 0, int $pid = 0, string $sortingField = '', int $sortRev = 0, string $selectFieldList = ''): array
     {
         $retVal = [];
 
@@ -77,21 +61,14 @@ class Helper implements SingletonInterface
             $queryBuilder = self::getQueryBuilder();
             $children = $queryBuilder
                 ->select(...$selectFieldArray)
-                ->from('tt_content')
-                ->where(
-                    $queryBuilder->expr()->andX(
-                        $queryBuilder->expr()->eq(
-                            'tx_gridelements_container',
-                            $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)
-                        ),
-                        $queryBuilder->expr()->eq(
-                            'pid',
-                            $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
-                        )
-                    )
-                )
-                ->execute()
-                ->fetchAll();
+                ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq(
+                    'tx_gridelements_container',
+                    $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)
+                ), $queryBuilder->expr()->eq(
+                    'pid',
+                    $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                )))->executeQuery()
+                ->fetchAllAssociative();
 
             foreach ($children as $child) {
                 if (trim($sortingField) && isset($child[$sortingField]) && $sortingField !== 'sorting') {
@@ -121,15 +98,15 @@ class Helper implements SingletonInterface
      * @param bool $csvValues
      * @return array
      */
-    public function mergeAllowedDisallowedSettings(array $backendLayout, bool $csvValues = false)
+    public static function mergeAllowedDisallowedSettings(array $backendLayout, bool $csvValues = false)
     {
         if (!empty($backendLayout['allowed'])) {
             foreach ($backendLayout['allowed'] as &$allowedFields) {
                 if (isset($allowedFields['CType']) && $allowedFields['CType'] !== '*') {
-                    if (!empty($allowedFields['list_type']) && strpos($allowedFields['CType'], 'list') === false) {
+                    if (!empty($allowedFields['list_type']) && !str_contains($allowedFields['CType'], 'list')) {
                         $allowedFields['CType'] .= ',list';
                     }
-                    if (!empty($allowedFields['tx_gridelements_backend_layout']) && strpos($allowedFields['CType'], 'gridelements_pi1') === false) {
+                    if (!empty($allowedFields['tx_gridelements_backend_layout']) && !str_contains($allowedFields['CType'], 'gridelements_pi1')) {
                         $allowedFields['CType'] .= ',gridelements_pi1';
                     }
                 }
@@ -169,24 +146,19 @@ class Helper implements SingletonInterface
      * @param int $uid the uid value of a tt_content record
      *
      * @return int
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws Exception
      */
-    public function getPidFromUid(int $uid = 0): int
+    public static function getPidFromUid(int $uid = 0): int
     {
         $queryBuilder = self::getQueryBuilder();
         $triggerElement = $queryBuilder
             ->select('pid')
-            ->from('tt_content')
-            ->where(
-                $queryBuilder->expr()->eq(
-                    'uid',
-                    $queryBuilder->createNamedParameter(abs($uid), PDO::PARAM_INT)
-                )
-            )
-            ->execute()
-            ->fetch();
-        $pid = (int)$triggerElement['pid'];
-        return is_array($triggerElement) && $pid ? $pid : 0;
+            ->from('tt_content')->where($queryBuilder->expr()->eq(
+                'uid',
+                $queryBuilder->createNamedParameter(abs($uid), PDO::PARAM_INT)
+            ))->executeQuery()
+            ->fetchAssociative();
+        return (int)($triggerElement['pid'] ?? 0);
     }
 
     /**
@@ -194,7 +166,7 @@ class Helper implements SingletonInterface
      *
      * @return QueryBuilder queryBuilder
      */
-    public function getQueryBuilder(): QueryBuilder
+    public static function getQueryBuilder(): QueryBuilder
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -215,7 +187,7 @@ class Helper implements SingletonInterface
      *
      * @return int[]
      */
-    public function getSpecificIds(array $record): array
+    public static function getSpecificIds(array $record): array
     {
         $specificIds = [];
         $specificIds['uid'] = (int)$record['uid'];
@@ -233,14 +205,10 @@ class Helper implements SingletonInterface
      * @param int $pageId
      * @return mixed
      */
-    public function getSelectedBackendLayout(int $pageId)
+    public static function getSelectedBackendLayout(int $pageId)
     {
         if (empty($GLOBALS['tx_gridelements']['pageBackendLayoutData'][$pageId])) {
-            $backendLayoutData = GeneralUtility::callUserFunction(
-                BackendLayoutView::class . '->getSelectedBackendLayout',
-                $pageId,
-                $this
-            );
+            $backendLayoutData = GeneralUtility::makeInstance(BackendLayoutView::class)?->getSelectedBackendLayout($pageId);
             // add allowed CTypes to the columns, since this is not done by the native core methods
             if (!empty($backendLayoutData['__items'])) {
                 $backendLayoutData['columns']['CSV'] = '-2,-1';
@@ -289,7 +257,7 @@ class Helper implements SingletonInterface
                         $backendLayoutData['maxitems'] = $maxItems;
                     }
                 }
-                $backendLayoutData = $this->mergeAllowedDisallowedSettings($backendLayoutData);
+                $backendLayoutData = self::mergeAllowedDisallowedSettings($backendLayoutData);
             }
             $GLOBALS['tx_gridelements']['pageBackendLayoutData'][$pageId] = $backendLayoutData;
         }
@@ -301,7 +269,7 @@ class Helper implements SingletonInterface
      *
      * @return BackendUserAuthentication
      */
-    public function getBackendUser(): BackendUserAuthentication
+    public static function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }

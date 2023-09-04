@@ -22,12 +22,17 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use PDO;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\ParameterType;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -45,15 +50,23 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param array $fieldArray The array of fields and values that have been saved to the datamap
      * @param int $uid the ID of the record
      * @param DataHandler $parentObj The parent object that triggered this hook
+     * @throws AspectNotFoundException
      */
     public function adjustValuesAfterWorkspaceOperations(array $fieldArray, int $uid, DataHandler $parentObj)
     {
-        $workspace = $this->getBackendUser()->workspace;
-        if ($workspace && (isset($fieldArray['colPos']) || isset($fieldArray['tx_gridelements_container']) || isset($fieldArray['tx_gridelements_columns']))) {
-            $originalRecord = $parentObj->recordInfo('tt_content', $uid, '*');
+        if (class_exists(Context::class)) {
+            /** @var Context $context */
+            $context = GeneralUtility::makeInstance(Context::class);
+            $workspaceId = $context->getPropertyFromAspect('workspace', 'id');
+        } else {
+            $workspaceId = $GLOBALS['BE_USER']->workspace;
+        }
+
+        if ($workspaceId && (isset($fieldArray['colPos']) || isset($fieldArray['tx_gridelements_container']) || isset($fieldArray['tx_gridelements_columns']))) {
+            $originalRecord = $parentObj->recordInfo('tt_content', $uid);
             if ($originalRecord['t3ver_state'] === 4) {
                 $updateArray = [];
-                $movePlaceholder = BackendUtility::getMovePlaceholder('tt_content', $uid, 'uid', $workspace);
+                $movePlaceholder = BackendUtility::getWorkspaceVersionOfRecord($workspaceId, 'tt_content', $uid, 'uid');
                 if (isset($fieldArray['colPos'])) {
                     $updateArray['colPos'] = (int)$fieldArray['colPos'];
                 }
@@ -91,6 +104,9 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param string $table The name of the table the data should be saved to
      * @param int $uid the ID of the record
      * @param DataHandler $parentObj The parent object that triggered this hook
+     * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function execute_afterDatabaseOperations(array &$fieldArray, string $table, int $uid, DataHandler $parentObj)
     {
@@ -112,6 +128,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * save cleaned up field array
      *
      * @param array $changedFieldArray
+     * @throws Exception
      */
     public function saveCleanedUpFieldArray(array $changedFieldArray)
     {
@@ -128,7 +145,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * Function to move elements to/from the unused elements column while changing the layout of a page or a grid element
      *
      * @param array $fieldArray The array of fields and values that have been saved to the datamap
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws Exception
      */
     public function setUnusedElements(array &$fieldArray)
     {
@@ -146,23 +163,15 @@ class AfterDatabaseOperations extends AbstractDataHandler
                 $queryBuilder = $this->getQueryBuilder();
                 $childElementsInUnavailableColumnsQuery = $queryBuilder
                     ->select('uid')
-                    ->from('tt_content')
-                    ->where(
-                        $queryBuilder->expr()->andX(
-                            $queryBuilder->expr()->gt('tx_gridelements_container', 0),
-                            $queryBuilder->expr()->eq(
-                                'tx_gridelements_container',
-                                $queryBuilder->createNamedParameter($this->getContentUid(), PDO::PARAM_INT)
-                            ),
-                            $queryBuilder->expr()->notIn(
-                                'tx_gridelements_columns',
-                                $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
-                            )
-                        )
-                    )
-                    ->execute();
+                    ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->gt('tx_gridelements_container', 0), $queryBuilder->expr()->eq(
+                        'tx_gridelements_container',
+                        $queryBuilder->createNamedParameter($this->getContentUid(), ParameterType::INTEGER)
+                    ), $queryBuilder->expr()->notIn(
+                        'tx_gridelements_columns',
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
+                    )))->executeQuery();
                 $childElementsInUnavailableColumns = [];
-                while ($childElementInUnavailableColumns = $childElementsInUnavailableColumnsQuery->fetch()) {
+                while ($childElementInUnavailableColumns = $childElementsInUnavailableColumnsQuery->fetchAssociative()) {
                     $childElementsInUnavailableColumns[] = $childElementInUnavailableColumns['uid'];
                 }
                 if (!empty($childElementsInUnavailableColumns)) {
@@ -173,36 +182,26 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $childElementsInUnavailableColumns,
-                                    Connection::PARAM_INT_ARRAY
+                                    ArrayParameterType::INTEGER
                                 )
                             )
                         )
-                        ->set('colPos', -2)
-                        ->set('backupColPos', -1)
-                        ->execute();
+                        ->set('colPos', -2)->set('backupColPos', -1)->executeStatement();
                     array_flip($childElementsInUnavailableColumns);
                 }
 
                 $queryBuilder = $this->getQueryBuilder();
                 $childElementsInAvailableColumnsQuery = $queryBuilder
                     ->select('uid')
-                    ->from('tt_content')
-                    ->where(
-                        $queryBuilder->expr()->andX(
-                            $queryBuilder->expr()->gt('tx_gridelements_container', 0),
-                            $queryBuilder->expr()->eq(
-                                'tx_gridelements_container',
-                                $queryBuilder->createNamedParameter($this->getContentUid(), PDO::PARAM_INT)
-                            ),
-                            $queryBuilder->expr()->in(
-                                'tx_gridelements_columns',
-                                $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
-                            )
-                        )
-                    )
-                    ->execute();
+                    ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->gt('tx_gridelements_container', 0), $queryBuilder->expr()->eq(
+                        'tx_gridelements_container',
+                        $queryBuilder->createNamedParameter($this->getContentUid(), ParameterType::INTEGER)
+                    ), $queryBuilder->expr()->in(
+                        'tx_gridelements_columns',
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
+                    )))->executeQuery();
                 $childElementsInAvailableColumns = [];
-                while ($childElementInAvailableColumns = $childElementsInAvailableColumnsQuery->fetch()) {
+                while ($childElementInAvailableColumns = $childElementsInAvailableColumnsQuery->fetchAssociative()) {
                     $childElementsInAvailableColumns[] = $childElementInAvailableColumns['uid'];
                 }
                 if (!empty($childElementsInAvailableColumns)) {
@@ -213,13 +212,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $childElementsInAvailableColumns,
-                                    Connection::PARAM_INT_ARRAY
+                                    ArrayParameterType::INTEGER
                                 )
                             )
                         )
-                        ->set('colPos', -1)
-                        ->set('backupColPos', -2)
-                        ->execute();
+                        ->set('colPos', -1)->set('backupColPos', -2)->executeStatement();
                     array_flip($childElementsInAvailableColumns);
                 }
             }
@@ -272,22 +269,15 @@ class AfterDatabaseOperations extends AbstractDataHandler
                 $queryBuilder = $this->getQueryBuilder();
                 $elementsInUnavailableColumnsQuery = $queryBuilder
                     ->select('uid')
-                    ->from('tt_content')
-                    ->where(
-                        $queryBuilder->expr()->andX(
-                            $queryBuilder->expr()->eq(
-                                'pid',
-                                $queryBuilder->createNamedParameter($this->getPageUid(), PDO::PARAM_INT)
-                            ),
-                            $queryBuilder->expr()->notIn(
-                                'colPos',
-                                $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
-                            )
-                        )
-                    )
-                    ->execute();
+                    ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq(
+                        'pid',
+                        $queryBuilder->createNamedParameter($this->getPageUid(), ParameterType::INTEGER)
+                    ), $queryBuilder->expr()->notIn(
+                        'colPos',
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
+                    )))->executeQuery();
                 $elementsInUnavailableColumns = [];
-                while ($elementInUnavailableColumns = $elementsInUnavailableColumnsQuery->fetch()) {
+                while ($elementInUnavailableColumns = $elementsInUnavailableColumnsQuery->fetchAssociative()) {
                     $elementsInUnavailableColumns[] = $elementInUnavailableColumns['uid'];
                 }
                 if (!empty($elementsInUnavailableColumns)) {
@@ -298,39 +288,29 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $elementsInUnavailableColumns,
-                                    Connection::PARAM_INT_ARRAY
+                                    ArrayParameterType::INTEGER
                                 )
                             )
                         )
-                        ->set('backupColPos', $queryBuilder->quoteIdentifier('colPos'), false)
-                        ->set('colPos', -2)
-                        ->execute();
+                        ->set('backupColPos', $queryBuilder->quoteIdentifier('colPos'), false)->set('colPos', -2)->executeStatement();
                     array_flip($elementsInUnavailableColumns);
                 }
 
                 $queryBuilder = $this->getQueryBuilder();
                 $elementsInAvailableColumnsQuery = $queryBuilder
                     ->select('uid')
-                    ->from('tt_content')
-                    ->where(
-                        $queryBuilder->expr()->andX(
-                            $queryBuilder->expr()->eq(
-                                'pid',
-                                $queryBuilder->createNamedParameter($this->getPageUid(), PDO::PARAM_INT)
-                            ),
-                            $queryBuilder->expr()->neq(
-                                'backupColPos',
-                                $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)
-                            ),
-                            $queryBuilder->expr()->in(
-                                'backupColPos',
-                                $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
-                            )
-                        )
-                    )
-                    ->execute();
+                    ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq(
+                        'pid',
+                        $queryBuilder->createNamedParameter($this->getPageUid(), ParameterType::INTEGER)
+                    ), $queryBuilder->expr()->neq(
+                        'backupColPos',
+                        $queryBuilder->createNamedParameter(-2, ParameterType::INTEGER)
+                    ), $queryBuilder->expr()->in(
+                        'backupColPos',
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
+                    )))->executeQuery();
                 $elementsInAvailableColumns = [];
-                while ($elementInAvailableColumns = $elementsInAvailableColumnsQuery->fetch()) {
+                while ($elementInAvailableColumns = $elementsInAvailableColumnsQuery->fetchAssociative()) {
                     $elementsInAvailableColumns[] = $elementInAvailableColumns['uid'];
                 }
                 if (!empty($elementsInAvailableColumns)) {
@@ -341,13 +321,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $elementsInAvailableColumns,
-                                    Connection::PARAM_INT_ARRAY
+                                    ArrayParameterType::INTEGER
                                 )
                             )
                         )
-                        ->set('colPos', $queryBuilder->quoteIdentifier('backupColPos'), false)
-                        ->set('backupColPos', -2)
-                        ->execute();
+                        ->set('colPos', $queryBuilder->quoteIdentifier('backupColPos'), false)->set('backupColPos', -2)->executeStatement();
                     array_flip($elementsInAvailableColumns);
                 }
                 $changedElements = $elementsInUnavailableColumns + $elementsInAvailableColumns;
@@ -365,25 +343,18 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder = $this->getQueryBuilder();
                         $subPageElementsInUnavailableColumnsQuery = $queryBuilder
                             ->select('uid')
-                            ->from('tt_content')
-                            ->where(
-                                $queryBuilder->expr()->andX(
-                                    $queryBuilder->expr()->eq(
-                                        'pid',
-                                        $queryBuilder->createNamedParameter((int)$page['uid'], PDO::PARAM_INT)
-                                    ),
-                                    $queryBuilder->expr()->notIn(
-                                        'colPos',
-                                        $queryBuilder->createNamedParameter(
-                                            $availableColumns,
-                                            Connection::PARAM_INT_ARRAY
-                                        )
-                                    )
+                            ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq(
+                                'pid',
+                                $queryBuilder->createNamedParameter((int)$page['uid'], ParameterType::INTEGER)
+                            ), $queryBuilder->expr()->notIn(
+                                'colPos',
+                                $queryBuilder->createNamedParameter(
+                                    $availableColumns,
+                                    ArrayParameterType::INTEGER
                                 )
-                            )
-                            ->execute();
+                            )))->executeQuery();
                         $subPageElementsInUnavailableColumns = [];
-                        while ($subPageElementInUnavailableColumns = $subPageElementsInUnavailableColumnsQuery->fetch()) {
+                        while ($subPageElementInUnavailableColumns = $subPageElementsInUnavailableColumnsQuery->fetchAssociative()) {
                             $subPageElementsInUnavailableColumns[] = $subPageElementInUnavailableColumns['uid'];
                         }
                         if (!empty($subPageElementsInUnavailableColumns)) {
@@ -394,42 +365,32 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                         'uid',
                                         $queryBuilder->createNamedParameter(
                                             $subPageElementsInUnavailableColumns,
-                                            Connection::PARAM_INT_ARRAY
+                                            ArrayParameterType::INTEGER
                                         )
                                     )
                                 )
-                                ->set('backupColPos', $queryBuilder->quoteIdentifier('colPos'), false)
-                                ->set('colPos', -2)
-                                ->execute();
+                                ->set('backupColPos', $queryBuilder->quoteIdentifier('colPos'), false)->set('colPos', -2)->executeStatement();
                             array_flip($subPageElementsInUnavailableColumns);
                         }
 
                         $queryBuilder = $this->getQueryBuilder();
                         $subPageElementsInAvailableColumnsQuery = $queryBuilder
                             ->select('uid')
-                            ->from('tt_content')
-                            ->where(
-                                $queryBuilder->expr()->andX(
-                                    $queryBuilder->expr()->eq(
-                                        'pid',
-                                        $queryBuilder->createNamedParameter((int)$page['uid'], PDO::PARAM_INT)
-                                    ),
-                                    $queryBuilder->expr()->neq(
-                                        'backupColPos',
-                                        $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)
-                                    ),
-                                    $queryBuilder->expr()->in(
-                                        'backupColPos',
-                                        $queryBuilder->createNamedParameter(
-                                            $availableColumns,
-                                            Connection::PARAM_INT_ARRAY
-                                        )
-                                    )
+                            ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq(
+                                'pid',
+                                $queryBuilder->createNamedParameter((int)$page['uid'], ParameterType::INTEGER)
+                            ), $queryBuilder->expr()->neq(
+                                'backupColPos',
+                                $queryBuilder->createNamedParameter(-2, ParameterType::INTEGER)
+                            ), $queryBuilder->expr()->in(
+                                'backupColPos',
+                                $queryBuilder->createNamedParameter(
+                                    $availableColumns,
+                                    ArrayParameterType::INTEGER
                                 )
-                            )
-                            ->execute();
+                            )))->executeQuery();
                         $subPageElementsInAvailableColumns = [];
-                        while ($subPageElementInAvailableColumns = $subPageElementsInAvailableColumnsQuery->fetch()) {
+                        while ($subPageElementInAvailableColumns = $subPageElementsInAvailableColumnsQuery->fetchAssociative()) {
                             $subPageElementsInAvailableColumns[] = $subPageElementInAvailableColumns['uid'];
                         }
                         if (!empty($subPageElementsInAvailableColumns)) {
@@ -440,13 +401,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                         'uid',
                                         $queryBuilder->createNamedParameter(
                                             $subPageElementsInAvailableColumns,
-                                            Connection::PARAM_INT_ARRAY
+                                            ArrayParameterType::INTEGER
                                         )
                                     )
                                 )
-                                ->set('colPos', $queryBuilder->quoteIdentifier('backupColPos'), false)
-                                ->set('backupColPos', -2)
-                                ->execute();
+                                ->set('colPos', $queryBuilder->quoteIdentifier('backupColPos'), false)->set('backupColPos', -2)->executeStatement();
                             array_flip($subPageElementsInAvailableColumns);
                         }
 
@@ -493,8 +452,8 @@ class AfterDatabaseOperations extends AbstractDataHandler
             );
             $temp = [];
             foreach ($tcaColumns as $item) {
-                if (trim($item[1]) !== '') {
-                    $temp[] = (int)$item[1];
+                if (trim($item['value']) !== '') {
+                    $temp[] = (int)$item['value'];
                 }
             }
             // Implode into a CSV string as BackendLayoutView->getColPosListItemsParsed returns an array
@@ -508,22 +467,18 @@ class AfterDatabaseOperations extends AbstractDataHandler
      *
      * @param int $pageUid
      * @param array $subPages
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws Exception
      */
     public function getSubPagesRecursively(int $pageUid, array &$subPages)
     {
         $queryBuilder = $this->getQueryBuilder('pages');
         $childPages = $queryBuilder
             ->select('uid', 'backend_layout', 'backend_layout_next_level')
-            ->from('pages')
-            ->where(
-                $queryBuilder->expr()->eq(
-                    'pid',
-                    $queryBuilder->createNamedParameter($pageUid, PDO::PARAM_INT)
-                )
-            )
-            ->execute()
-            ->fetchAll();
+            ->from('pages')->where($queryBuilder->expr()->eq(
+                'pid',
+                $queryBuilder->createNamedParameter($pageUid, ParameterType::INTEGER)
+            ))->executeQuery()
+            ->fetchAllAssociative();
 
         if (!empty($childPages)) {
             foreach ($childPages as $page) {

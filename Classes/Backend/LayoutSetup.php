@@ -22,8 +22,7 @@ namespace GridElementsTeam\Gridelements\Backend;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use GridElementsTeam\Gridelements\Helper\Helper;
-use PDO;
+use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -31,16 +30,15 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DefaultRestrictionContainer;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
+use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider;
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
 use TYPO3\CMS\Core\Imaging\IconRegistry;
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Resource\FileRepository;
-use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
-use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
  * Utilities for gridelements.
@@ -50,34 +48,29 @@ use TYPO3\CMS\Core\Utility\StringUtility;
 class LayoutSetup
 {
     /**
-     * @var DefaultRestrictionContainer
+     * @var LanguageService|null
      */
-    protected DefaultRestrictionContainer $restrictions;
+    private LanguageService|null $languageService = null;
 
     /**
-     * @var array
+     * @param DefaultRestrictionContainer $restrictions
+     * @param LanguageService|null $languageService
+     * @param array $layoutSetup
+     * @param array $typoScriptSetup
+     * @param string $flexformConfigurationPathAndFileName
+     * @param int $realPid
      */
-    protected array $layoutSetup = [];
-
-    /**
-     * @var LanguageService
-     */
-    protected LanguageService $languageService;
-
-    /**
-     * @var array
-     */
-    protected array $typoScriptSetup;
-
-    /**
-     * @var string
-     */
-    protected string $flexformConfigurationPathAndFileName = 'EXT:gridelements/Configuration/FlexForms/default_flexform_configuration.xml';
-
-    /**
-     * @var int
-     */
-    protected int $realPid = 0;
+    public function __construct(
+        private DefaultRestrictionContainer $restrictions,
+        private readonly LanguageServiceFactory $languageServiceFactory,
+        protected array $layoutSetup = [],
+        protected array $typoScriptSetup = [],
+        protected string $flexformConfigurationPathAndFileName = 'EXT:gridelements/Configuration/FlexForms/default_flexform_configuration.xml',
+        protected int $realPid = 0
+    ) {
+        $GLOBALS['LANG'] = $GLOBALS['LANG'] ?? $this->languageServiceFactory->create('default');
+        $this->setLanguageService($GLOBALS['LANG']);
+    }
 
     /**
      * Load page TSconfig
@@ -89,10 +82,9 @@ class LayoutSetup
      */
     public function init(int $pageId, array $typoScriptSetup = []): LayoutSetup
     {
-        $this->setLanguageService($GLOBALS['LANG'] ?? null);
-        $pageId = (strpos((string)$pageId, 'NEW') === 0) ? 0 : $pageId;
+        $pageId = (str_starts_with((string)$pageId, 'NEW')) ? 0 : $pageId;
         if ($pageId < 0) {
-            $pageId = Helper::getInstance()->getPidFromUid($pageId);
+            $pageId = GridElementsHelper::getPidFromUid($pageId);
         }
         $this->realPid = $pageId;
         $this->loadLayoutSetup($pageId);
@@ -114,12 +106,11 @@ class LayoutSetup
      * Returns the page TSconfig merged with the grid layout records
      *
      * @param int $pageId The uid of the page we are currently working on
-     * @throws \Doctrine\DBAL\DBALException
      */
     protected function loadLayoutSetup(int $pageId)
     {
         // Load page TSconfig.
-        if (TYPO3_MODE === 'FE') {
+        if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
             $pageTSconfig = $GLOBALS['TSFE']->getPagesTSconfig();
         } else {
             $pageTSconfig = BackendUtility::getPagesTSconfig($pageId);
@@ -127,9 +118,6 @@ class LayoutSetup
         $excludeLayoutIds = !empty($pageTSconfig['tx_gridelements.']['excludeLayoutIds'])
             ? array_flip(GeneralUtility::trimExplode(',', $pageTSconfig['tx_gridelements.']['excludeLayoutIds']))
             : [];
-
-        $overruleRecords = isset($pageTSconfig['tx_gridelements.']['overruleRecords'])
-            && (int)$pageTSconfig['tx_gridelements.']['overruleRecords'] === 1;
 
         $gridLayoutConfig = [];
         if (!empty($pageTSconfig['tx_gridelements.']['setup.'])) {
@@ -174,98 +162,7 @@ class LayoutSetup
             }
         }
 
-        $storagePid = isset($pageTSconfig['TCEFORM.']['pages.']['_STORAGE_PID'])
-            ? (int)$pageTSconfig['TCEFORM.']['pages.']['_STORAGE_PID']
-            : 0;
-        $pageTSconfigId = isset($pageTSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['PAGE_TSCONFIG_ID'])
-            ? implode(',', GeneralUtility::intExplode(
-                ',',
-                $pageTSconfig['TCEFORM.']['tt_content.']['tx_gridelements_backend_layout.']['PAGE_TSCONFIG_ID']
-            ))
-            : 0;
-
-        // Load records.
-        $queryBuilder = $this->getQueryBuilder();
-        $layoutQuery = $queryBuilder
-            ->select('*')
-            ->from('tx_gridelements_backend_layout')
-            ->where(
-                $queryBuilder->expr()->orX(
-                    $queryBuilder->expr()->andX(
-                        $queryBuilder->expr()->comparison($pageTSconfigId, '=', 0),
-                        $queryBuilder->expr()->comparison($storagePid, '=', 0)
-                    ),
-                    $queryBuilder->expr()->orX(
-                        $queryBuilder->expr()->eq(
-                            'pid',
-                            $queryBuilder->createNamedParameter((int)$pageTSconfigId, PDO::PARAM_INT)
-                        ),
-                        $queryBuilder->expr()->eq(
-                            'pid',
-                            $queryBuilder->createNamedParameter($storagePid, PDO::PARAM_INT)
-                        )
-                    ),
-                    $queryBuilder->expr()->andX(
-                        $queryBuilder->expr()->comparison($pageTSconfigId, '=', 0),
-                        $queryBuilder->expr()->eq(
-                            'pid',
-                            $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)
-                        )
-                    )
-                )
-            )
-            ->orderBy('sorting', 'ASC');
-
-        $layoutItems = $layoutQuery->execute()->fetchAll();
-
-        $gridLayoutRecords = [];
-
-        $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-
-        foreach ($layoutItems as $item) {
-            if (isset($item['alias']) && (string)$item['alias'] !== '') {
-                $layoutId = $item['alias'];
-            } else {
-                $layoutId = $item['uid'];
-            }
-            // Continue if layout is excluded.
-            if (isset($excludeLayoutIds[$layoutId])) {
-                continue;
-            }
-
-            // Prepend icon path for records.
-            if (!empty($item['icon'])) {
-                if (MathUtility::canBeInterpretedAsInteger($item['icon'])) {
-                    $icons = [];
-                    $fileObjects = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'icon', $item['uid']);
-                    foreach ($fileObjects as $fileObject) {
-                        $icons[] = $fileObject->getPublicUrl();
-                    }
-                } else {
-                    $icons = explode(',', $item['icon']);
-                }
-                $item['icon'] = $icons;
-            }
-
-            // parse config
-            if (!empty($item['config'])) {
-                $parser = GeneralUtility::makeInstance(TypoScriptParser::class);
-                $parser->parse($parser::checkIncludeLines($item['config']));
-                if (isset($parser->setup['backend_layout.'])) {
-                    $item['config'] = $parser->setup['backend_layout.'];
-                }
-            }
-
-            $gridLayoutRecords[$layoutId] = $item;
-        }
-
-        if ($overruleRecords === true) {
-            ArrayUtility::mergeRecursiveWithOverrule($gridLayoutRecords, $gridLayoutConfig, true, false);
-            $this->setLayoutSetup($gridLayoutRecords);
-        } else {
-            ArrayUtility::mergeRecursiveWithOverrule($gridLayoutConfig, $gridLayoutRecords, true, false);
-            $this->setLayoutSetup($gridLayoutConfig);
-        }
+        $this->setLayoutSetup($gridLayoutConfig);
     }
 
     /**
@@ -362,7 +259,7 @@ class LayoutSetup
         if (!empty($maxItems)) {
             $availableColumns['maxitems'] = $maxItems;
         }
-        return Helper::getInstance()->mergeAllowedDisallowedSettings($availableColumns, $csvValues);
+        return GridElementsHelper::mergeAllowedDisallowedSettings($availableColumns, $csvValues);
     }
 
     /**
@@ -446,7 +343,7 @@ class LayoutSetup
                 $disallowed = $containerLayout['disallowed'][$gridColPos]['tx_gridelements_backend_layout'] ?? [];
             }
         } elseif ($pageId > 0) {
-            $pageLayout = Helper::getInstance()->getSelectedBackendLayout($pageId);
+            $pageLayout = GridElementsHelper::getSelectedBackendLayout($pageId);
             if (!empty($pageLayout)) {
                 $allowed = $pageLayout['allowed'][$colPos]['tx_gridelements_backend_layout'] ?? [];
                 $disallowed = $pageLayout['disallowed'][$colPos]['tx_gridelements_backend_layout'] ?? [];
@@ -493,7 +390,7 @@ class LayoutSetup
 
                 if ($source !== '') {
                     $iconRegistry = GeneralUtility::makeInstance(IconRegistry::class);
-                    if (StringUtility::endsWith($source, '.svg')) {
+                    if (\str_ends_with($source, '.svg')) {
                         $iconRegistry->registerIcon('gridelements-select-icon-' . $layoutId, SvgIconProvider::class, [
                             'source' => $source,
                         ]);
@@ -642,7 +539,7 @@ class LayoutSetup
             ) {
                 continue;
             }
-            if (isset($excludeLayouts[$layoutId]) || $colPos === -1 && !empty($item['top_level_layout'])) {
+            if (isset($excludeLayouts[$layoutId]) || ($colPos === -1 && !empty($item['top_level_layout']))) {
                 continue;
             }
 
@@ -692,7 +589,7 @@ class LayoutSetup
         // Get flexform file from pi_flexform_ds if pi_flexform_ds_file not set and "FILE:" found in pi_flexform_ds for backward compatibility.
         if (!empty($layoutSetup['pi_flexform_ds_file'])) {
             $flexformConfiguration = GeneralUtility::getUrl(GeneralUtility::getFileAbsFileName($layoutSetup['pi_flexform_ds_file']));
-        } elseif (!empty($layoutSetup['pi_flexform_ds']) && strpos($layoutSetup['pi_flexform_ds'], 'FILE:') === 0) {
+        } elseif (!empty($layoutSetup['pi_flexform_ds']) && str_starts_with($layoutSetup['pi_flexform_ds'], 'FILE:')) {
             $flexformConfiguration = GeneralUtility::getUrl(GeneralUtility::getFileAbsFileName(substr(
                 $layoutSetup['pi_flexform_ds'],
                 5
