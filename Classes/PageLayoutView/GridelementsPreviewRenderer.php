@@ -163,10 +163,10 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer
         $view = GeneralUtility::makeInstance(StandaloneView::class);
         $configurationManager = GeneralUtility::makeInstance(BackendConfigurationManager::class);
         $configuration = $configurationManager->getConfiguration('gridelements');
-        $view->setTemplate($configuration['backendContainer']['view']['defaultTemplate'] ?? '');
-        $view->setLayoutRootPaths($configuration['backendContainer']['view']['layoutRootPaths'] ?? '');
-        $view->setTemplateRootPaths($configuration['backendContainer']['view']['templateRootPaths'] ?? '');
-        $view->setPartialRootPaths($configuration['backendContainer']['view']['partialRootPaths'] ?? '');
+        $view->setTemplate($configuration['backendContainer']['view']['defaultTemplate'] ?? 'BackendContainer');
+        $view->setLayoutRootPaths($configuration['backendContainer']['view']['layoutRootPaths'] ?? []);
+        $view->setTemplateRootPaths($configuration['backendContainer']['view']['templateRootPaths'] ?? []);
+        $view->setPartialRootPaths($configuration['backendContainer']['view']['partialRootPaths'] ?? []);
 
         $view->assignMultiple([
             'context' => $context,
