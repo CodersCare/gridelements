@@ -180,7 +180,8 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
             $children = $helper->getChildren('tt_content', $gridContainerId, $pageId, 'sorting', 0, '*');
             $childColumns = [];
             foreach ($children as $childRecord) {
-                if (isset($childRecord['tx_gridelements_columns'])) {
+                if ($childRecord['sys_language_uid'] === $context->getSiteLanguage()->getLanguageId()
+                    && isset($childRecord['tx_gridelements_columns'])) {
                     $childColumns[$childRecord['tx_gridelements_columns']][] = $childRecord;
                 }
             }
