@@ -63,7 +63,7 @@ class ProcessCmdmap extends AbstractDataHandler
             unset($this->getTceMain()->cmdmap[$table][$id][$command]['update']['paste_reference']);
         }
 
-        if ($command === 'copy' && $isPasteReference === 1 && !$commandIsProcessed && $table === 'tt_content' && !$this->getTceMain()->isImporting) {
+        if ($command === 'copy' && $isPasteReference && !$commandIsProcessed && $table === 'tt_content' && !$this->getTceMain()->isImporting) {
             $dataArray = [
                 'pid' => $value,
                 'CType' => 'shortcut',
