@@ -9,7 +9,7 @@ It offers a lot of new features like advanced drag & drop or real references, th
     'author_email' => 'info@cybercraft.de',
     'author_company' => '',
     'state' => 'alpha',
-    'version' => '1.0.0',
+    'version' => '12.0.0',
     'constraints' => [
         'depends' => [
             'typo3' => '12.0.0-12.4.99',
