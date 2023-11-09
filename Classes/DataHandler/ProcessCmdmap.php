@@ -25,9 +25,7 @@ namespace GridElementsTeam\Gridelements\DataHandler;
 
 use Doctrine\DBAL\Exception;
 use PDO;
-use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Http\ServerRequestFactory;
 
 /**
  * Class/Function which offers TCE main hook functions.
@@ -36,12 +34,6 @@ use TYPO3\CMS\Core\Http\ServerRequestFactory;
  */
 class ProcessCmdmap extends AbstractDataHandler
 {
-    public function __construct(
-        protected ServerRequestInterface|null $request = null
-    ) {
-        $this->request = $GLOBALS['TYPO3_REQUEST'] ?? ServerRequestFactory::fromGlobals();
-    }
-
     /**
      * Function to process the drag & drop copy action
      *
@@ -65,9 +57,13 @@ class ProcessCmdmap extends AbstractDataHandler
     ) {
         $this->init($table, (string)$id, $parentObj);
 
-        $reference = (int)($this->request->getQueryParams()['reference'] ?? 0);
+        $isPasteReference = false;
+        if (isset($this->getTceMain()->cmdmap[$table][$id][$command]['update']['paste_reference'])) {
+            $isPasteReference = $this->getTceMain()->cmdmap[$table][$id][$command]['update']['paste_reference'];
+            unset($this->getTceMain()->cmdmap[$table][$id][$command]['update']['paste_reference']);
+        }
 
-        if ($command === 'copy' && $reference === 1 && !$commandIsProcessed && $table === 'tt_content' && !$this->getTceMain()->isImporting) {
+        if ($command === 'copy' && $isPasteReference === 1 && !$commandIsProcessed && $table === 'tt_content' && !$this->getTceMain()->isImporting) {
             $dataArray = [
                 'pid' => $value,
                 'CType' => 'shortcut',
@@ -80,7 +76,7 @@ class ProcessCmdmap extends AbstractDataHandler
                 $dataArray = array_merge($dataArray, $pasteUpdate);
             }
 
-            $clipBoard = ($this->request->getQueryParams()['CB'] ?? null);
+            $clipBoard = ($this->getTceMain()->cmdmap[$table][$id][$command]);
             if (!empty($clipBoard)) {
                 $updateArray = $clipBoard['update'];
                 if (!empty($updateArray)) {

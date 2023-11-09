@@ -79,7 +79,6 @@ class PreProcessFieldArray extends AbstractDataHandler
             $action = '';
             $this->init($table, $id, $parentObj);
             if (!$this->getTceMain()->isImporting) {
-
                 $new = false;
                 if (!empty($parentObj->cmdmap['tt_content']) && is_array($parentObj->cmdmap['tt_content'])) {
                     $cmdId = (int)key($parentObj->cmdmap['tt_content']);
@@ -108,7 +107,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      */
     public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false, $action = '')
     {
-        $pid = (int)($this?->request->getQueryParams()['DDinsertNew'] ?? 0);
+        $pid = (int)($this->request->getQueryParams()['DDinsertNew'] ?? 0);
 
         if (abs($pid) > 0) {
             $this->setDefaultFieldValues($fieldArray, $pid);
@@ -160,8 +159,8 @@ class PreProcessFieldArray extends AbstractDataHandler
         }
 
         // Default values as submitted:
-        $this->definitionValues =  $this?->request->getQueryParams()['defVals'] ?? $this->getTceMain()->defaultValues;
-        $this->overrideValues = $this?->request->getQueryParams()['overrideVals'] ?? $this->getTceMain()->overrideValues;
+        $this->definitionValues =  $this->request->getQueryParams()['defVals'] ?? $this->getTceMain()->defaultValues;
+        $this->overrideValues = $this->request->getQueryParams()['overrideVals'] ?? $this->getTceMain()->overrideValues;
         if (empty($this->definitionValues) && !empty($this->overrideValues)) {
             $this->definitionValues = $this->overrideValues;
         }

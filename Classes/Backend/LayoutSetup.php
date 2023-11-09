@@ -25,6 +25,7 @@ namespace GridElementsTeam\Gridelements\Backend;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DefaultRestrictionContainer;
@@ -110,7 +111,9 @@ class LayoutSetup
     protected function loadLayoutSetup(int $pageId)
     {
         // Load page TSconfig.
-        if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
+        if (Environment::isCli()) {
+            $pageTSconfig = BackendUtility::getPagesTSconfig($pageId);
+        } elseif (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
             $pageTSconfig = $GLOBALS['TSFE']->getPagesTSconfig();
         } else {
             $pageTSconfig = BackendUtility::getPagesTSconfig($pageId);

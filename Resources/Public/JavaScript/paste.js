@@ -131,14 +131,11 @@ class Paste {
                     colPos: colPos,
                     sys_language_uid: language,
                     tx_gridelements_container: gridContainer,
-                    tx_gridelements_columns: gridColPos
+                    tx_gridelements_columns: gridColPos,
+                    paste_reference: pasteReference,
                 },
             },
         };
-
-        if (pasteReference) {
-            parameters['reference'] = 1;
-        }
 
         DataHandler.process(parameters).then((result) => {
             if (!result.hasErrors) {
