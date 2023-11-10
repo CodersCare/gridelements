@@ -59,7 +59,10 @@ class ProcessCmdmap extends AbstractDataHandler
 
         $isPasteReference = false;
         if (isset($this->getTceMain()->cmdmap[$table][$id][$command]['update']['paste_reference'])) {
-            $isPasteReference = $this->getTceMain()->cmdmap[$table][$id][$command]['update']['paste_reference'];
+            $isPasteReference = filter_var(
+                $this->getTceMain()->cmdmap[$table][$id][$command]['update']['paste_reference'],
+                FILTER_VALIDATE_BOOLEAN
+            );
             unset($this->getTceMain()->cmdmap[$table][$id][$command]['update']['paste_reference']);
         }
 
