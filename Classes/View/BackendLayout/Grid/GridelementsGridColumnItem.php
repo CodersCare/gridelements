@@ -9,6 +9,7 @@ use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\PageLayoutContext;
+use TYPO3\CMS\Core\Database\ReferenceIndex;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -45,6 +46,52 @@ class GridelementsGridColumnItem extends GridColumnItem
     {
         parent::__construct($context, $column, $record);
         $this->layoutColumns = $layoutColumns;
+    }
+
+    /**
+     * Get delete message which is displayed when trying to delete CE
+     * with references.
+     *
+     * This function can be removed for TYPO3 versions >= v11 (when support
+     * for v10 is dropped).
+     * see https://review.typo3.org/c/Packages/TYPO3.CMS/+/80116
+     */
+    public function getDeleteMessage(): string
+    {
+        $recordInfo = $this->record['header'] ?? '';
+        if ($this->getBackendUser()->shallDisplayDebugInformation()) {
+            $recordInfo .= ' [tt:content:' . $this->record['uid'] . ']';
+        }
+
+        $refCountMsg = BackendUtility::referenceCount(
+                'tt_content',
+                $this->record['uid'],
+                LF . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.referencesToRecord'),
+                (string)$this->getReferenceCount($this->record['uid'])
+            ) . BackendUtility::translationCount(
+                'tt_content',
+                $this->record['uid'],
+                LF . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.translationsOfRecord')
+            );
+
+        return sprintf($this->getLanguageService()->sL('LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:deleteWarning'), trim($recordInfo)) . $refCountMsg;
+    }
+
+    /**
+     * Gets the number of records referencing the record with the UID $uid in
+     * the table tt_content.
+     *
+     * This function can be removed for TYPO3 versions >= v11 (when support
+     * for v10 is dropped).
+     * https://review.typo3.org/c/Packages/TYPO3.CMS/+/80116
+     *
+     * @param int $uid
+     * @return int The number of references to record $uid in table
+     */
+    protected function getReferenceCount(int $uid): int
+    {
+        return GeneralUtility::makeInstance(ReferenceIndex::class)
+            ->getNumberOfReferencedRecords('tt_content', $uid);
     }
 
     /**
