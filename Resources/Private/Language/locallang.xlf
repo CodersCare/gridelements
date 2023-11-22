@@ -37,6 +37,12 @@
 			<trans-unit id="gridelementsNumberOfChildrenFixer.description" xml:space="preserve">
 				<source>Recalculates the value of tx_gridelements_children due to buggy container update behaviour of Cut/Copy/Paste and/or Drag/Drop methods.</source>
 			</trans-unit>
+			<trans-unit id="gridelementsOrphanedChildFixer.name" xml:space="preserve">
+				<source>Gridelements Orphaned Children Fixer</source>
+			</trans-unit>
+			<trans-unit id="ggridelementsOrphanedChildFixer.description" xml:space="preserve">
+				<source>Fixes content elements which are a child of a content element which is no longer a gridelement. These elemens will then be displayed in BE again, but are hidden.</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
