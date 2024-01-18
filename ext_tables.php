@@ -63,7 +63,8 @@ $GLOBALS['TYPO3_USER_SETTINGS']['columns']['disableCopyFromPageButton'] = [
     'label' => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:disableCopyFromPageButton',
 ];
 
-$GLOBALS['TYPO3_USER_SETTINGS']['showitem'] .= ',
+if (isset($GLOBALS['TYPO3_USER_SETTINGS']['showitem'])) {
+    $GLOBALS['TYPO3_USER_SETTINGS']['showitem'] .= ',
     --div--;LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:gridElements,
         dragAndDropHideNewElementWizardInfoOverlay,
         hideColumnHeaders,
@@ -72,6 +73,7 @@ $GLOBALS['TYPO3_USER_SETTINGS']['showitem'] .= ',
         disableDragInWizard,
         disableCopyFromPageButton
         ';
+}
 
 // Hooks
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'][\TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools::class]['flexParsing']['gridelements'] = \GridElementsTeam\Gridelements\Hooks\TtContentFlexForm::class;
