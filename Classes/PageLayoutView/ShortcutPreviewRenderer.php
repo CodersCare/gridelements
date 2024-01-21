@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\PageLayoutView;
 
-use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use PDO;
+use TYPO3\CMS\Backend\Preview\PreviewRendererInterface;
 use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
+use TYPO3\CMS\Backend\View\PageLayoutView;
+use TYPO3\CMS\Backend\View\PageLayoutViewDrawItemHookInterface;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use UnexpectedValueException;
 
-class ShortcutPreviewRenderer extends StandardContentPreviewRenderer
+class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements PreviewRendererInterface
 {
     /**
      * @var bool
@@ -54,12 +58,45 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer
     {
         $record = $item->getRecord();
 
+        $drawItem = true;
+        $hookPreviewContent = '';
+        // Hook: Render an own preview of a record
+        if (!empty($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawItem'])) {
+            $pageLayoutView = PageLayoutView::createFromPageLayoutContext($item->getContext());
+            foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawItem'] ?? [] as $className) {
+                $hookObject = GeneralUtility::makeInstance($className);
+                if (!$hookObject instanceof PageLayoutViewDrawItemHookInterface) {
+                    throw new UnexpectedValueException(
+                        $className . ' must implement interface ' . PageLayoutViewDrawItemHookInterface::class,
+                        1582574553
+                    );
+                }
+                $hookObject->preProcess($pageLayoutView, $drawItem, $previewHeader, $hookPreviewContent, $record);
+            }
+            $item->setRecord($record);
+        }
+
+        if (!$drawItem) {
+            return $hookPreviewContent;
+        }
+        // Check if a Fluid-based preview template was defined for this CType
+        // and render it via Fluid. Possible option:
+        // mod.web_layout.tt_content.preview.media = EXT:site_mysite/Resources/Private/Templates/Preview/Media.html
+        $infoArr = [];
+        $this->getProcessedValue($item, 'header_position,header_layout,header_link', $infoArr);
+        $tsConfig = BackendUtility::getPagesTSconfig($record['pid'])['mod.']['web_layout.']['tt_content.']['preview.'] ?? [];
+        if (!empty($tsConfig[$record['CType']]) || !empty($tsConfig[$record['CType'] . '.'])) {
+            $fluidPreview = $this->renderContentElementPreviewFromFluidTemplate($record);
+            if ($fluidPreview !== null) {
+                return $fluidPreview;
+            }
+        }
+
         if (!empty($record['records'])) {
             $shortCutRenderItems = $this->addShortcutRenderItems($item);
             $preview = '';
             foreach ($shortCutRenderItems as $shortcutRecord) {
                 $shortcutItem = GeneralUtility::makeInstance(GridColumnItem::class, $item->getContext(), $item->getColumn(), $shortcutRecord);
-                $preview .= '<p class="pt-2 small"><b><a href="' . $shortcutItem->getEditUrl() . '">' . $this->getLanguageService()->sL('LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:edit') . '</a></b></p>';
                 $preview .= '<div class="mb-2 p-2 border reference">' . $shortcutItem->getPreview() . '<div class="reference-overlay"></div></div>';
             }
             return $preview;
@@ -159,6 +196,10 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer
         }
         $itemList = GeneralUtility::intExplode(',', $itemList);
 
+        if (empty($itemList)) {
+            return;
+        }
+
         $queryBuilder = $this->ttContentQueryBuilder;
         $queryBuilder->resetQueryParts();
         $queryBuilder->resetRestrictions();
@@ -173,25 +214,24 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer
             ->where(
                 $queryBuilder->expr()->neq(
                     'uid',
-                    $queryBuilder->createNamedParameter($parentUid, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($parentUid, Connection::PARAM_INT)
                 ),
                 $queryBuilder->expr()->in(
                     'pid',
-                    $queryBuilder->createNamedParameter($itemList, ArrayParameterType::INTEGER)
+                    $queryBuilder->createNamedParameter($itemList, Connection::PARAM_INT)
                 ),
-                $queryBuilder->expr()->gte('colPos', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)),
+                $queryBuilder->expr()->gte('colPos', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
                 $queryBuilder->expr()->in(
                     'sys_language_uid',
-                    $queryBuilder->createNamedParameter([0, -1], ArrayParameterType::INTEGER)
+                    $queryBuilder->createNamedParameter([0, -1], Connection::PARAM_INT_ARRAY)
                 )
             )
             ->orderBy('inSet')
             ->addOrderBy('colPos')->addOrderBy('sorting')
-            ->setParameter('itemList', $itemList, ArrayParameterType::INTEGER)
+            ->setParameter('itemList', $itemList, Connection::PARAM_INT)
             ->executeQuery()->fetchAllAssociative();
 
-        //->executeQuery()
-        //->fetchAllAssociative();
+        $sortedItemList = array_flip($itemList);
 
         foreach ($items as $item) {
             if (!empty($this->gridElementsExtensionConfiguration['overlayShortcutTranslation']) && $language > 0) {
@@ -205,7 +245,21 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer
                 BackendUtility::workspaceOL('tt_content', $item, GridElementsHelper::getBackendUser()->workspace);
             }
             $item['tx_gridelements_reference_container'] = $item['pid'];
-            $collectedItems[] = $item;
+
+            if (array_key_exists($item['pid'], $sortedItemList)) {
+                if (!is_array($sortedItemList[$item['pid']])) {
+                    $sortedItemList[$item['pid']] = [];
+                }
+                $sortedItemList[$item['pid']][] = $item;
+            }
+        }
+
+        foreach ($sortedItemList as $pid) {
+            if (is_array($pid)) {
+                foreach ($pid as $item) {
+                    $collectedItems[] = $item;
+                }
+            }
         }
     }
 
@@ -236,7 +290,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer
                 ->where(
                     $queryBuilder->expr()->eq(
                         'uid',
-                        $queryBuilder->createNamedParameter((int)$shortcutItem, PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter((int)$shortcutItem, Connection::PARAM_INT)
                     )
                 )->setMaxResults(1)->executeQuery()
                 ->fetchAssociative();

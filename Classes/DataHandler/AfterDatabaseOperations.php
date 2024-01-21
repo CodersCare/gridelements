@@ -22,9 +22,7 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\ParameterType;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -33,6 +31,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -165,10 +164,10 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     ->select('uid')
                     ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->gt('tx_gridelements_container', 0), $queryBuilder->expr()->eq(
                         'tx_gridelements_container',
-                        $queryBuilder->createNamedParameter($this->getContentUid(), ParameterType::INTEGER)
+                        $queryBuilder->createNamedParameter($this->getContentUid(), Connection::PARAM_INT)
                     ), $queryBuilder->expr()->notIn(
                         'tx_gridelements_columns',
-                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
+                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
                     )))->executeQuery();
                 $childElementsInUnavailableColumns = [];
                 while ($childElementInUnavailableColumns = $childElementsInUnavailableColumnsQuery->fetchAssociative()) {
@@ -182,7 +181,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $childElementsInUnavailableColumns,
-                                    ArrayParameterType::INTEGER
+                                    Connection::PARAM_INT
                                 )
                             )
                         )
@@ -195,10 +194,10 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     ->select('uid')
                     ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->gt('tx_gridelements_container', 0), $queryBuilder->expr()->eq(
                         'tx_gridelements_container',
-                        $queryBuilder->createNamedParameter($this->getContentUid(), ParameterType::INTEGER)
+                        $queryBuilder->createNamedParameter($this->getContentUid(), Connection::PARAM_INT)
                     ), $queryBuilder->expr()->in(
                         'tx_gridelements_columns',
-                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
+                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
                     )))->executeQuery();
                 $childElementsInAvailableColumns = [];
                 while ($childElementInAvailableColumns = $childElementsInAvailableColumnsQuery->fetchAssociative()) {
@@ -212,7 +211,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $childElementsInAvailableColumns,
-                                    ArrayParameterType::INTEGER
+                                    Connection::PARAM_INT
                                 )
                             )
                         )
@@ -271,10 +270,10 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     ->select('uid')
                     ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq(
                         'pid',
-                        $queryBuilder->createNamedParameter($this->getPageUid(), ParameterType::INTEGER)
+                        $queryBuilder->createNamedParameter($this->getPageUid(), Connection::PARAM_INT)
                     ), $queryBuilder->expr()->notIn(
                         'colPos',
-                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
+                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
                     )))->executeQuery();
                 $elementsInUnavailableColumns = [];
                 while ($elementInUnavailableColumns = $elementsInUnavailableColumnsQuery->fetchAssociative()) {
@@ -288,7 +287,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $elementsInUnavailableColumns,
-                                    ArrayParameterType::INTEGER
+                                    Connection::PARAM_INT
                                 )
                             )
                         )
@@ -301,13 +300,13 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     ->select('uid')
                     ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq(
                         'pid',
-                        $queryBuilder->createNamedParameter($this->getPageUid(), ParameterType::INTEGER)
+                        $queryBuilder->createNamedParameter($this->getPageUid(), Connection::PARAM_INT)
                     ), $queryBuilder->expr()->neq(
                         'backupColPos',
-                        $queryBuilder->createNamedParameter(-2, ParameterType::INTEGER)
+                        $queryBuilder->createNamedParameter(-2, Connection::PARAM_INT)
                     ), $queryBuilder->expr()->in(
                         'backupColPos',
-                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
+                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
                     )))->executeQuery();
                 $elementsInAvailableColumns = [];
                 while ($elementInAvailableColumns = $elementsInAvailableColumnsQuery->fetchAssociative()) {
@@ -321,7 +320,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $elementsInAvailableColumns,
-                                    ArrayParameterType::INTEGER
+                                    Connection::PARAM_INT
                                 )
                             )
                         )
@@ -345,12 +344,12 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             ->select('uid')
                             ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq(
                                 'pid',
-                                $queryBuilder->createNamedParameter((int)$page['uid'], ParameterType::INTEGER)
+                                $queryBuilder->createNamedParameter((int)$page['uid'], Connection::PARAM_INT)
                             ), $queryBuilder->expr()->notIn(
                                 'colPos',
                                 $queryBuilder->createNamedParameter(
                                     $availableColumns,
-                                    ArrayParameterType::INTEGER
+                                    Connection::PARAM_INT_ARRAY
                                 )
                             )))->executeQuery();
                         $subPageElementsInUnavailableColumns = [];
@@ -365,7 +364,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                         'uid',
                                         $queryBuilder->createNamedParameter(
                                             $subPageElementsInUnavailableColumns,
-                                            ArrayParameterType::INTEGER
+                                            Connection::PARAM_INT
                                         )
                                     )
                                 )
@@ -378,15 +377,15 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             ->select('uid')
                             ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq(
                                 'pid',
-                                $queryBuilder->createNamedParameter((int)$page['uid'], ParameterType::INTEGER)
+                                $queryBuilder->createNamedParameter((int)$page['uid'], Connection::PARAM_INT)
                             ), $queryBuilder->expr()->neq(
                                 'backupColPos',
-                                $queryBuilder->createNamedParameter(-2, ParameterType::INTEGER)
+                                $queryBuilder->createNamedParameter(-2, Connection::PARAM_INT)
                             ), $queryBuilder->expr()->in(
                                 'backupColPos',
                                 $queryBuilder->createNamedParameter(
                                     $availableColumns,
-                                    ArrayParameterType::INTEGER
+                                    Connection::PARAM_INT_ARRAY
                                 )
                             )))->executeQuery();
                         $subPageElementsInAvailableColumns = [];
@@ -401,7 +400,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                         'uid',
                                         $queryBuilder->createNamedParameter(
                                             $subPageElementsInAvailableColumns,
-                                            ArrayParameterType::INTEGER
+                                            Connection::PARAM_INT
                                         )
                                     )
                                 )
@@ -476,7 +475,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
             ->select('uid', 'backend_layout', 'backend_layout_next_level')
             ->from('pages')->where($queryBuilder->expr()->eq(
                 'pid',
-                $queryBuilder->createNamedParameter($pageUid, ParameterType::INTEGER)
+                $queryBuilder->createNamedParameter($pageUid, Connection::PARAM_INT)
             ))->executeQuery()
             ->fetchAllAssociative();
 

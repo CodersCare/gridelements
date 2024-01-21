@@ -23,10 +23,10 @@ use TYPO3\CMS\Core\Page\PageRenderer;
 final class AfterBackendPageRendererEventListener
 {
     /**
-     * @param PageRenderer $pageRenderer
+     * @param PageRenderer|null $pageRenderer
      */
     public function __construct(
-        private readonly PageRenderer $pageRenderer
+        private readonly PageRenderer|null $pageRenderer = null
     ) {
     }
 
@@ -35,9 +35,11 @@ final class AfterBackendPageRendererEventListener
      */
     public function __invoke(AfterBackendPageRenderEvent $event): void
     {
-        $this->pageRenderer->addInlineLanguageLabelFile(
-            'EXT:gridelements/Resources/Private/Language/locallang_db.xlf',
-            'tx_gridelements_js'
-        );
+        if (!empty($this->pageRenderer)) {
+            $this->pageRenderer->addInlineLanguageLabelFile(
+                    'EXT:gridelements/Resources/Private/Language/locallang_db.xlf',
+                    'tx_gridelements_js'
+            );
+        }
     }
 }

@@ -250,7 +250,7 @@ final class ModifyNewContentElementWizardItemsListener
     public function addGridValuesToWizardItems(array &$wizardItems, int $container, int $column)
     {
         foreach ($wizardItems as $key => $wizardItem) {
-            if (!isset($wizardItems[$key]['params'])) {
+            if (!isset($wizardItem['params'])) {
                 $wizardItems[$key]['params'] = '';
             }
             if (empty($wizardItem['header'])) {

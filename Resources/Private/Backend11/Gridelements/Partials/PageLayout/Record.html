@@ -1,0 +1,32 @@
+{f:if(condition: '{item.disabled} && {item.context.drawingConfiguration.showHidden} == 0', then: 'display: none;') -> f:variable(name: 'style')}
+<div class="t3-page-ce {item.wrapperClassName} t3js-page-ce t3js-page-ce-sortable"
+     id="element-tt_content-{item.record.uid}"
+     data-table="tt_content" data-uid="{item.record.uid}" data-ctype="{item.record.CType}" data-language-uid="{item.record.sys_language_uid}"
+     data-container="{item.record.tx_gridelements_container}" data-tx_gridelements_backend_layout="{item.record.tx_gridelements_backend_layout}"
+     style="{style}">
+    <div class="t3-page-ce-dragitem" id="{item.uniqueId}">
+        <f:render partial="PageLayout/Record/{item.record.CType}/Header" arguments="{_all}" optional="1">
+            <f:render partial="PageLayout/Record/Header" arguments="{_all}" />
+        </f:render>
+        <div class="t3-page-ce-body">
+            <div class="t3-page-ce-body-inner">
+                <div class="{f:if(condition: item.versioned, then: 'ver-element')}">
+                    <f:render partial="PageLayout/Record/Preview" arguments="{_all}" />
+                </div>
+            </div>
+            <f:render partial="PageLayout/Record/{item.record.CType}/Footer" arguments="{_all}" optional="1">
+                <f:render partial="PageLayout/Record/Footer" arguments="{_all}" />
+            </f:render>
+        </div>
+    </div>
+    <f:if condition="{allowEditContent} && {item.column.contentEditable} && {item.column.context.allowNewContent}">
+        <div class="t3js-page-new-ce t3js-page-new-ce-allowed t3-page-ce-wrapper-new-ce" id="colpos-{item.column.columnNumber}-page-{item.context.pageId}-{item.column.uniqueId}">
+            <a href="{item.newContentAfterUrlWithRestrictions}" title="{newContentTitle}" data-title="{newContentTitle}"
+                class="btn btn-default btn-sm {f:if(condition:item.column.context.drawingConfiguration.showNewContentWizard, then: 't3js-toggle-new-content-element-wizard disabled')}">
+                <core:icon identifier="actions-add" />
+                {newContentTitleShort}
+            </a>
+        </div>
+    </f:if>
+    <div class="t3-page-ce-dropzone-available t3js-page-ce-dropzone-available"></div>
+</div>

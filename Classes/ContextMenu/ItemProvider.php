@@ -66,12 +66,14 @@ class ItemProvider extends RecordProvider implements ProviderInterface
             'CB[paste]' => $this->table . '|' . -$this->record['uid'],
             'CB[pad]' => 'normal',
             'CB[update]' => [
-                'paste_reference' => $itemName === 'pastereference',
                 'colPos' => $this->record['colPos'],
                 'tx_gridelements_container' => (int)$this->record['tx_gridelements_container'],
                 'tx_gridelements_columns' => (int)$this->record['tx_gridelements_columns'],
             ],
         ];
+        if ($itemName === 'pastereference') {
+            $urlParameters['reference'] = 1;
+        }
 
         $attributes = $this->getPasteAdditionalAttributes('after');
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);

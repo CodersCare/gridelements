@@ -1,0 +1,36 @@
+<div class="t3-ctype-identifier" data-ctype="{item.record.CType}" data-list_type="{item.record.list_type}" data-tx_gridelements_backend_layout="{item.record.tx_gridelements_backend_layout}">
+    <div class="t3-page-ce-header {f:if(condition: '{allowEditContent} && {item.dragAndDropAllowed}', then: 't3-page-ce-header-draggable t3js-page-ce-draghandle')}">
+        <div class="col t3-page-ce-header-icons-left">
+            {item.icons -> f:format.raw()}
+            <f:if condition="{item.siteLanguage.flagIdentifier}">
+                <span class="t3js-flag" title="{item.siteLanguage.title}"><core:icon identifier="{item.siteLanguage.flagIdentifier}" /></span>
+            </f:if>
+        </div>
+        <div class="col-auto align-self-end t3-page-ce-header-icons-right">
+            <f:if condition="{item.editable} && {allowEditContent}">
+                <div class="btn-toolbar">
+                    <div class="btn-group btn-group-sm">
+                        <a href="{item.editUrl}" class="btn btn-default">
+                            <core:icon identifier="actions-open" />
+                        </a>
+                        <f:if condition="{item.visibilityToggling}">
+                            <a class="btn btn-default" href="{item.visibilityToggleUrl}" title="{item.visibilityToggleTitle}">
+                                <core:icon identifier="actions-edit-{item.visibilityToggleIconName}" />
+                            </a>
+                        </f:if>
+                        <f:if condition="{item.delible}">
+                            <a class="btn btn-default t3js-modal-trigger" href="{item.deleteUrl}"
+                            data-severity="warning"
+                            data-title="{item.deleteConfirmText}"
+                            data-content="{item.deleteConfirmText}"
+                            data-button-close-text="{item.deleteCancelText}"
+                            title="{item.deleteTitle}">
+                                <core:icon identifier="actions-edit-delete" size="small" />
+                            </a>
+                        </f:if>
+                    </div>
+                </div>
+            </f:if>
+        </div>
+    </div>
+</div>

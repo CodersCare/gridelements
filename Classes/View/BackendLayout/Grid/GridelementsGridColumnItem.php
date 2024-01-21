@@ -7,6 +7,7 @@ namespace GridElementsTeam\Gridelements\View\BackendLayout\Grid;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\PageLayoutContext;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -26,11 +27,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class GridelementsGridColumnItem extends GridColumnItem
 {
     /**
-     * @var GridelementsGridColumn
-     */
-    protected $column;
-
-    /**
      * @var array
      */
     protected array $layoutColumns;
@@ -39,11 +35,12 @@ class GridelementsGridColumnItem extends GridColumnItem
      * @param PageLayoutContext $context
      * @param GridelementsGridColumn $column
      * @param array $record
+     * @param string $table
      * @param array $layoutColumns
      */
-    public function __construct(PageLayoutContext $context, GridelementsGridColumn $column, array $record, array $layoutColumns)
+    public function __construct(PageLayoutContext $context, GridelementsGridColumn $column, array $record, string $table = 'tt_content', array $layoutColumns = [])
     {
-        parent::__construct($context, $column, $record);
+        parent::__construct($context, $column, $record, $table);
         $this->layoutColumns = $layoutColumns;
     }
 
@@ -75,6 +72,15 @@ class GridelementsGridColumnItem extends GridColumnItem
         }
 
         return implode(' ', $wrapperClassNames);
+    }
+
+    public function isInconsistentLanguage(): bool
+    {
+        $allowInconsistentLanguageHandling = (bool)(BackendUtility::getPagesTSconfig($this->getContext()->getPageId())['mod.']['web_layout.']['allowInconsistentLanguageHandling'] ?? false);
+        return !$allowInconsistentLanguageHandling
+            && $this->getSiteLanguage()->getLanguageId() !== 0
+            && $this->getContext()->getLanguageModeIdentifier() === 'mixed'
+            && (int)$this->record['l18n_parent'] === 0;
     }
 
     /**

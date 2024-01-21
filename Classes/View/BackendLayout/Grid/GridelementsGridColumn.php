@@ -118,11 +118,12 @@ class GridelementsGridColumn extends GridColumn
     /**
      * @param PageLayoutContext $context
      * @param array $columnDefinition
+     * @param string $table
      * @param int $gridContainerId
      */
-    public function __construct(PageLayoutContext $context, array $columnDefinition, int $gridContainerId)
+    public function __construct(PageLayoutContext $context, array $columnDefinition,  string $table = 'tt_content', int $gridContainerId = 0)
     {
-        parent::__construct($context, $columnDefinition);
+        parent::__construct($context, $columnDefinition, $table);
         $this->gridContainerId = $gridContainerId;
     }
 

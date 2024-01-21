@@ -42,6 +42,23 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class GridElementsHelper implements SingletonInterface
 {
     /**
+     * Local instance of the helper
+     *
+     * @var GridElementsHelper
+     */
+    protected static GridElementsHelper $instance;
+
+    /**
+     * Get instance from the class.
+     *
+     * @return GridElementsHelper
+     */
+    public static function getInstance(): GridElementsHelper
+    {
+        return new self();
+    }
+
+    /**
      * @param string $table
      * @param int $uid
      * @param int $pid

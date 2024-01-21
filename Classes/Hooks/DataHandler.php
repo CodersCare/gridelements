@@ -187,12 +187,8 @@ class DataHandler implements SingletonInterface
                     continue;
                 }
 
-                if (!$containerRecord) {
-                    continue;
-                }
-
                 $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId);
-                $layout = $layoutSetup->getLayoutSetup($containerRecord['tx_gridelements_backend_layout'] ?? '');
+                $layout = $layoutSetup->getLayoutSetup($containerRecord['tx_gridelements_backend_layout']);
 
                 $allowed = $layout['allowed'][$gridColumn]['CType'] ?? [];
                 $disallowed = $layout['disallowed'][$gridColumn]['CType'] ?? [];

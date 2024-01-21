@@ -23,12 +23,11 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  ***************************************************************/
 
 use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\ParameterType;
+use PDO;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Http\ServerRequestFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -51,9 +50,7 @@ class PreProcessFieldArray extends AbstractDataHandler
         protected array $overrideValues = [],
         protected ?ServerRequestInterface $request = null
     ) {
-        if (!Environment::isCli()) {
-            $this->request = $GLOBALS['TYPO3_REQUEST'] ?? ServerRequestFactory::fromGlobals();
-        }
+        $this->request = $GLOBALS['TYPO3_REQUEST'] ?? ServerRequestFactory::fromGlobals();
     }
 
     /**
@@ -72,9 +69,6 @@ class PreProcessFieldArray extends AbstractDataHandler
      */
     public function execute_preProcessFieldArray(array &$fieldArray, string $table, string $id, DataHandler $parentObj)
     {
-        if (Environment::isCli()) {
-            return;
-        }
         if ($table === 'tt_content') {
             $action = '';
             $this->init($table, $id, $parentObj);
@@ -102,8 +96,6 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param array $fieldArray
      * @param string $id
      * @param bool $new
-     * @param string $action
-     * @throws Exception
      */
     public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false, $action = '')
     {
@@ -159,8 +151,8 @@ class PreProcessFieldArray extends AbstractDataHandler
         }
 
         // Default values as submitted:
-        $this->definitionValues =  $this->request->getQueryParams()['defVals'] ?? $this->getTceMain()->defaultValues;
-        $this->overrideValues = $this->request->getQueryParams()['overrideVals'] ?? $this->getTceMain()->overrideValues;
+        $this->definitionValues = $this->request->getQueryParams()['defVals'] ?? [];
+        $this->overrideValues = $this->request->getQueryParams()['overrideVals'] ?? [];
         if (empty($this->definitionValues) && !empty($this->overrideValues)) {
             $this->definitionValues = $this->overrideValues;
         }
@@ -374,7 +366,7 @@ class PreProcessFieldArray extends AbstractDataHandler
                 $queryBuilder->expr()->eq('t1.uid', $queryBuilder->quoteIdentifier('t2.tx_gridelements_container'))
             )->where($queryBuilder->expr()->eq(
                 't2.uid',
-                $queryBuilder->createNamedParameter($contentId, ParameterType::INTEGER)
+                $queryBuilder->createNamedParameter($contentId, PDO::PARAM_INT)
             ))->executeQuery()
             ->fetchAssociative();
         if (!empty($parent)) {

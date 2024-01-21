@@ -1,8 +1,5 @@
 <?php
 
-use GridElementsTeam\Gridelements\PageLayoutView\GridelementsPreviewRenderer;
-use GridElementsTeam\Gridelements\PageLayoutView\ShortcutPreviewRenderer;
-
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile('gridelements', 'Configuration/TypoScript/', 'Gridelements (deprecated)');
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile('gridelements', 'Configuration/TypoScript/DataProcessingLibContentElement', 'Gridelements w/DataProcessing (recommended)');
 
@@ -134,6 +131,3 @@ $GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['showitem'] = '
 	categories,
     --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:notes,rowDescription
 	';
-
-$GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['previewRenderer'] = GridelementsPreviewRenderer::class;
-$GLOBALS['TCA']['tt_content']['types']['shortcut']['previewRenderer'] = ShortcutPreviewRenderer::class;
