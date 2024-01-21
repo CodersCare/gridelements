@@ -250,6 +250,9 @@ final class ModifyNewContentElementWizardItemsListener
             }
             $previousKey = $key;
         }
+        if (!empty($wizardItems[$previousKey]['header'])) {
+            unset($wizardItems[$previousKey]);
+        }
     }
 
     /**
