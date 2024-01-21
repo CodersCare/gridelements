@@ -42,12 +42,15 @@ final class ModifyNewContentElementWizardItemsListener
 {
     /**
      * @param array $gridElementsExtensionConfiguration
-     * @param LayoutSetup $layoutSetup
+     * @param LayoutSetup|null $layoutSetup
      */
     public function __construct(
         private readonly array $gridElementsExtensionConfiguration,
-        private readonly LayoutSetup $layoutSetup
+        private LayoutSetup|null $layoutSetup = null
     ) {
+        if (empty($layouSetup)) {
+            $this->layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class);
+        }
     }
 
     /**
