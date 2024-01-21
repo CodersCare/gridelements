@@ -105,7 +105,7 @@ class ColPosList implements SingletonInterface
             if ($layout) {
                 if ($contentType !== '' && !empty($layout['__items'])) {
                     foreach ($layout['__items'] as $itemKey => $itemArray) {
-                        $column = $itemArray['value'];
+                        $column = $itemArray['value'] ?? $itemArray[1];
                         if (
                             (
                                 isset($layout['allowed'][$column]) &&

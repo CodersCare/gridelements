@@ -27,6 +27,7 @@ use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -59,8 +60,13 @@ class TtContent
                 : (int)$params['row']['tx_gridelements_container'];
         }
 
-        $params['items'][0]['label'] = '/';
-        $params['items'][0]['value'] = 0;
+        if ((new(Typo3Version::class))->getMajorVersion() >= 12) {
+            $params['items'][0]['label'] = '/';
+            $params['items'][0]['value'] = 0;
+        } else {
+            $params['items'][0][0] = '/';
+            $params['items'][0][1] = 0;
+        }
 
         if ($gridContainerId > 0) {
             $gridElement = $this->layoutSetup->cacheCurrentParent($gridContainerId, true);
@@ -112,7 +118,11 @@ class TtContent
         $possibleContainers = [];
         $this->removeItemsFromListOfSelectableContainers($params, $possibleContainers);
 
-        array_unshift($params['items'], ['label' => '/', 'value' => 0]);
+        if ((new(Typo3Version::class))->getMajorVersion() >= 12) {
+            array_unshift($params['items'], ['label' => '/', 'value' => 0]);
+        } else {
+            array_unshift($params['items'], [0 => '/', 1 => 0]);
+        }
 
         if (!empty($possibleContainers)) {
             $params['items'] = array_merge($params['items'], $possibleContainers);
@@ -120,8 +130,10 @@ class TtContent
         $itemUidList = '';
         if (count($params['items']) > 1) {
             foreach ($params['items'] as $container) {
-                if ($container['value'] > 0) {
+                if (!empty($container['value'])) {
                     $itemUidList .= $itemUidList ? ',' . $container['value'] : $container['value'];
+                } else if (!empty($container[1])) {
+                    $itemUidList .= $itemUidList ? ',' . $container[1] : $container[1];
                 }
             }
         }
@@ -243,13 +255,18 @@ class TtContent
                 $containers[$container['uid']] = $container;
             }
             foreach ($params['items'] as $key => $container) {
-                $backendLayout = $containers[$container['value']]['tx_gridelements_backend_layout'] ?? [];
+                if (!empty($container['value'])) {
+                    $backendLayout = $containers[$container['value']]['tx_gridelements_backend_layout'] ?? [];
+                } else if (!empty($container[1]))  {
+                    $backendLayout = $containers[$container[1]]['tx_gridelements_backend_layout'] ?? [];
+                } else $backendLayout = false;
+
                 $gridColumn = (string)$params['row']['tx_gridelements_columns'];
                 if ($backendLayout && $gridColumn) {
                     $allowed = $layoutSetups[$backendLayout]['allowed'][$gridColumn] ?? [];
                     $disallowed = $layoutSetups[$backendLayout]['disallowed'][$gridColumn] ?? [];
                 }
-                if ($container['value'] > 0 && (!empty($allowed) || !empty($disallowed))) {
+                if ((!empty($container['value']) || !empty($container[1]))  && (!empty($allowed) || !empty($disallowed))) {
                     if (
                         (
                             !empty($allowed)
