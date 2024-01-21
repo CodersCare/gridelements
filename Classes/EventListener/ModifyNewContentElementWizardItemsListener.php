@@ -24,6 +24,7 @@ namespace GridElementsTeam\Gridelements\EventListener;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use function str_ends_with;
 use function str_starts_with;
 
@@ -75,6 +76,7 @@ final class ModifyNewContentElementWizardItemsListener
         $this->layoutSetup->init($event->getUidPid());
 
         $requestArguments = $this->getRequestArguments();
+
         $wizardItems = $event->getWizardItems();
 
         $allowed = $requestArguments['allowed'] ?? [];
@@ -240,6 +242,13 @@ final class ModifyNewContentElementWizardItemsListener
                     unset($wizardItems[$key]);
                 }
             }
+        }
+        $previousKey = '';
+        foreach ($wizardItems as $key => $wizardItem) {
+            if (!empty($wizardItem['header']) && !empty($wizardItems[$previousKey]['header'])) {
+                unset($wizardItems[$previousKey]);
+            }
+            $previousKey = $key;
         }
     }
 
