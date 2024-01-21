@@ -1,3 +1,18 @@
+.t3-page-columns {
+	border-spacing: 10px !important;
+	width: auto;
+	min-width: 100%;
+}
+
+.t3-page-column {
+	max-width: initial;
+}
+
+.t3-grid-container {
+	overflow-x: initial;
+	overflow-y: initial;
+}
+
 .reference {
 	position: relative;
 }
