@@ -52,11 +52,15 @@ class TtContent
     {
         $this->init((int)$params['row']['pid']);
         $gridContainerId = 0;
+
         if (!empty($params['row']['tx_gridelements_container'])) {
             $gridContainerId = is_array($params['row']['tx_gridelements_container'])
-                    ? (int)$params['row']['tx_gridelements_container'][0]
-                    : (int)$params['row']['tx_gridelements_container'];
+                ? (int)$params['row']['tx_gridelements_container'][0]
+                : (int)$params['row']['tx_gridelements_container'];
         }
+
+        $params['items'][0]['label'] = '/';
+        $params['items'][0]['value'] = 0;
 
         if ($gridContainerId > 0) {
             $gridElement = $this->layoutSetup->cacheCurrentParent($gridContainerId, true);
@@ -108,14 +112,16 @@ class TtContent
         $possibleContainers = [];
         $this->removeItemsFromListOfSelectableContainers($params, $possibleContainers);
 
+        array_unshift($params['items'], ['label' => '/', 'value' => 0]);
+
         if (!empty($possibleContainers)) {
             $params['items'] = array_merge($params['items'], $possibleContainers);
         }
         $itemUidList = '';
         if (count($params['items']) > 1) {
             foreach ($params['items'] as $container) {
-                if ($container[1] > 0) {
-                    $itemUidList .= $itemUidList ? ',' . $container[1] : $container[1];
+                if ($container['value'] > 0) {
+                    $itemUidList .= $itemUidList ? ',' . $container['value'] : $container['value'];
                 }
             }
         }
@@ -157,7 +163,6 @@ class TtContent
      * @param string $containerIds : A list determining containers that should be checked
      * @param array $possibleContainers : The result list containing the remaining containers after the check
      * @throws Exception
-     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function lookForChildContainersRecursively(string $containerIds, array &$possibleContainers)
     {
@@ -238,13 +243,13 @@ class TtContent
                 $containers[$container['uid']] = $container;
             }
             foreach ($params['items'] as $key => $container) {
-                $backendLayout = $containers[$container[1]]['tx_gridelements_backend_layout'] ?? [];
+                $backendLayout = $containers[$container['value']]['tx_gridelements_backend_layout'] ?? [];
                 $gridColumn = (string)$params['row']['tx_gridelements_columns'];
                 if ($backendLayout && $gridColumn) {
                     $allowed = $layoutSetups[$backendLayout]['allowed'][$gridColumn] ?? [];
                     $disallowed = $layoutSetups[$backendLayout]['disallowed'][$gridColumn] ?? [];
                 }
-                if ($container[1] > 0 && (!empty($allowed) || !empty($disallowed))) {
+                if ($container['value'] > 0 && (!empty($allowed) || !empty($disallowed))) {
                     if (
                         (
                             !empty($allowed)
@@ -302,6 +307,6 @@ class TtContent
             (int)$params['row']['tx_gridelements_container'],
             $this->layoutSetup->getRealPid()
         );
-        $params['items'] = ArrayUtility::keepItemsInArray($layoutSelectItems, $params['items'], true);
+        $params['items'] = ArrayUtility::keepItemsInArray($layoutSelectItems, $params['items'], fn ($value) => $value[0]);
     }
 }
