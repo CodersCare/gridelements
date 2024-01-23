@@ -26,6 +26,7 @@ use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class/Function which manipulates the item-array for table/field tt_content CType.
@@ -34,10 +35,10 @@ use TYPO3\CMS\Core\SingletonInterface;
  */
 class ListTypeList implements SingletonInterface
 {
-    public function __construct(
-        protected LayoutSetup $layoutSetup
-    ) {
-    }
+    /**
+     * @var LayoutSetup
+     */
+    protected LayoutSetup $layoutSetup;
 
     /**
      * ItemProcFunc for CType items
@@ -116,4 +117,25 @@ class ListTypeList implements SingletonInterface
             }
         }
     }
+
+    /**
+     * initializes this class
+     *
+     * @param int $pageId
+     */
+    public function init(int $pageId = 0)
+    {
+        $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
+    }
+
+    /**
+     * injects layout setup
+     *
+     * @param LayoutSetup $layoutSetup
+     */
+    public function injectLayoutSetup(LayoutSetup $layoutSetup)
+    {
+        $this->layoutSetup = $layoutSetup;
+    }
 }
+
