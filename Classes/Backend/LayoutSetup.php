@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\Backend;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -32,10 +33,12 @@ use TYPO3\CMS\Core\Database\Query\Restriction\DefaultRestrictionContainer;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Http\ApplicationType;
+use TYPO3\CMS\Core\Http\Request;
 use TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider;
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
 use TYPO3\CMS\Core\Imaging\IconRegistry;
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
@@ -86,6 +89,7 @@ class LayoutSetup
      * @param array $typoScriptSetup The PlugIn configuration
      *
      * @return LayoutSetup
+     * @throws Exception
      */
     public function init(int $pageId, array $typoScriptSetup = []): LayoutSetup
     {
@@ -114,9 +118,9 @@ class LayoutSetup
      * Returns the page TSconfig merged with the grid layout records
      *
      * @param int $pageId The uid of the page we are currently working on
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws Exception
      */
-    protected function loadLayoutSetup(int $pageId)
+    protected function loadLayoutSetup(int $pageId): void
     {
         // Load page TSconfig.
         if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
@@ -399,7 +403,7 @@ class LayoutSetup
      *
      * @param array $typoScriptSetup
      */
-    public function setTypoScriptSetup(array $typoScriptSetup)
+    public function setTypoScriptSetup(array $typoScriptSetup): void
     {
         $this->typoScriptSetup = $typoScriptSetup;
     }
@@ -419,7 +423,7 @@ class LayoutSetup
      *
      * @param string $flexformConfigurationPathAndFileName
      */
-    public function setFlexformConfigurationPathAndFileName(string $flexformConfigurationPathAndFileName)
+    public function setFlexformConfigurationPathAndFileName(string $flexformConfigurationPathAndFileName): void
     {
         $this->flexformConfigurationPathAndFileName = $flexformConfigurationPathAndFileName;
     }
@@ -596,7 +600,7 @@ class LayoutSetup
      *
      * @param array $layoutSetup
      */
-    public function setLayoutSetup(array $layoutSetup)
+    public function setLayoutSetup(array $layoutSetup): void
     {
         $this->layoutSetup = $layoutSetup;
     }
@@ -607,7 +611,7 @@ class LayoutSetup
      * @param string $key
      * @param array $layoutSetup
      */
-    public function setSingleLayoutSetup(string $key, array $layoutSetup)
+    public function setSingleLayoutSetup(string $key, array $layoutSetup): void
     {
         $this->layoutSetup[$key] = $layoutSetup;
     }
@@ -711,7 +715,7 @@ class LayoutSetup
      *
      * @return DefaultRestrictionContainer restrictions
      */
-    public function getRestrictions()
+    public function getRestrictions(): DefaultRestrictionContainer
     {
         return GeneralUtility::makeInstance(DefaultRestrictionContainer::class);
     }
@@ -731,18 +735,31 @@ class LayoutSetup
      *
      * @param LanguageService|null $languageService
      */
-    public function setLanguageService(LanguageService $languageService = null)
+    public function setLanguageService(LanguageService $languageService = null): void
     {
-        $this->languageService = $languageService instanceof LanguageService ? $languageService : GeneralUtility::makeInstance(LanguageService::class);
+        if ($languageService instanceof LanguageService) {
+            $this->languageService = $languageService;
+        } else {
+            $this->languageService = GeneralUtility::makeInstance(LanguageServiceFactory::class)
+                    ->createFromSiteLanguage($this->getRequest()->getAttribute('language'));
+        }
         if ($this->getBackendUser()) {
             $this->languageService->init($this->getBackendUser()->uc['lang'] ?? '');
         }
     }
 
     /**
+     * @return Request|null
+     */
+    private function getRequest(): ?Request
+    {
+        return $GLOBALS['TYPO3_REQUEST'];
+    }
+
+    /**
      * Gets the current backend user.
      *
-     * @return BackendUserAuthentication
+     * @return BackendUserAuthentication|null
      */
     public function getBackendUser(): ?BackendUserAuthentication
     {
