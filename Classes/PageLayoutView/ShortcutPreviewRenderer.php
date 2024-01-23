@@ -36,12 +36,12 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
     /**
      * @param QueryBuilder $ttContentQueryBuilder
      * @param array<string, string> $gridElementsExtensionConfiguration
-     * @param IconFactory $iconFactory
+     * @param IconFactory|null $iconFactory
      */
     public function __construct(
         protected QueryBuilder $ttContentQueryBuilder,
         protected array $gridElementsExtensionConfiguration,
-        protected IconFactory $iconFactory,
+        protected IconFactory|null $iconFactory = null,
     ) {
     }
 
