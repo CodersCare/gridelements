@@ -47,7 +47,7 @@ class ListTypeList implements SingletonInterface
      */
     public function itemsProcFunc(array &$params)
     {
-        $this->layoutSetup->init((int)$params['row']['pid']);
+        $this->init((int)$params['row']['pid']);
 
         if ((int)$params['row']['pid'] > 0) {
             $colPos = is_array($params['row']['colPos']) ? ($params['row']['colPos'][0] ?? 0) : $params['row']['colPos'];
