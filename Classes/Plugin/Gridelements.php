@@ -87,6 +87,15 @@ class Gridelements extends ContentObjectRenderer
     protected FlexFormTools $flexFormTools;
 
     /**
+     * @param ContentObjectRenderer $cObj
+     * @return void
+     */
+    public function setContentObjectRenderer(ContentObjectRenderer $cObj)
+    {
+        $this->cObj = $cObj;
+    }
+
+    /**
      * The main method of the PlugIn
      *
      * @param string $content The PlugIn content
