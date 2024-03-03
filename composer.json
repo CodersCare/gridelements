@@ -21,7 +21,8 @@
 		"typo3/cms-backend": "^11.5 || ^12.4.10 || dev-master",
 		"typo3/cms-core": "^11.5 || ^12.4.10 || dev-master",
 		"typo3/cms-fluid": "^11.5 || ^12.4.10 || dev-master",
-		"typo3/cms-frontend": "^11.5 || ^12.4.10 || dev-master"
+		"typo3/cms-frontend": "^11.5 || ^12.4.10 || dev-master",
+		"typo3/cms-scheduler": "^11.5 || ^12.4.10 || dev-master"
 	},
 	"require-dev": {
 		"composer/package-versions-deprecated": "1.11.99.5",
