@@ -57,7 +57,7 @@ class SysLanguageUidList implements SingletonInterface
             return;
         }
         $parentContainer = BackendUtility::getRecordWSOL('tt_content', $gridContainerId);
-        if (!empty($items) && (int)$parentContainer['uid'] > 0) {
+        if (!empty($parentContainer) && !empty($items) && (int)$parentContainer['uid'] > 0) {
             foreach ($items as $item => $valueArray) {
                 if ((int)$parentContainer['sys_language_uid'] > -1 && (int)$valueArray[1] !== (int)$parentContainer['sys_language_uid']) {
                     unset($items[$item]);

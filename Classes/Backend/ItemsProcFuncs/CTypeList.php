@@ -48,13 +48,17 @@ class CTypeList implements SingletonInterface
     public function itemsProcFunc(array &$params)
     {
         if ((int)$params['row']['pid'] > 0) {
-            $colPos = is_array($params['row']['colPos']) ? ($params['row']['colPos'][0] ?? 0) : $params['row']['colPos'];
+            if (isset($params['row']['colPos'])) {
+                $colPos = is_array($params['row']['colPos']) ? ($params['row']['colPos'][0] ?? 0) : $params['row']['colPos'];
+            } else {
+                $colPos = 0;
+            }
             $this->checkForAllowedCTypes(
                 $params['items'],
-                (int)$params['row']['pid'],
+                (int)($params['row']['pid'] ?? 0),
                 (int)$colPos,
-                (int)$params['row']['tx_gridelements_container'],
-                (int)$params['row']['tx_gridelements_columns']
+                (int)($params['row']['tx_gridelements_container'] ?? 0),
+                (int)($params['row']['tx_gridelements_columns'] ?? 0)
             );
         } else {
             // negative uid_pid values indicate that the element has been inserted after an existing element
@@ -65,10 +69,10 @@ class CTypeList implements SingletonInterface
 
                 $this->checkForAllowedCTypes(
                     $params['items'],
-                    (int)$existingElement['pid'],
-                    (int)$existingElement['colPos'],
-                    (int)$existingElement['tx_gridelements_container'],
-                    (int)$existingElement['tx_gridelements_columns']
+                    (int)($existingElement['pid'] ?? 0),
+                    (int)($existingElement['colPos'] ?? 0),
+                    (int)($existingElement['tx_gridelements_container'] ?? 0),
+                    (int)($existingElement['tx_gridelements_columns'] ?? 0)
                 );
             }
         }
