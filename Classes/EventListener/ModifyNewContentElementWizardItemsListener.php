@@ -24,6 +24,7 @@ namespace GridElementsTeam\Gridelements\EventListener;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 
+use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Utility\DebugUtility;
 use function str_ends_with;
 use function str_starts_with;
@@ -121,18 +122,27 @@ final class ModifyNewContentElementWizardItemsListener
         }
 
         $queryParams = $request->getQueryParams();
+        $colPos = (int)$queryParams['colPos'];
 
-        $allowed = json_decode(base64_decode($queryParams['tx_gridelements_allowed'] ?? ''), true) ?: [];
-        if (!empty($allowed)) {
-            foreach ($allowed as &$item) {
+        if (isset($queryParams['colPos']) && $colPos > -1) {
+            $restrictions = $this->getRestrictionsFromBackendLayout($queryParams, $colPos);
+        } else {
+            $restrictions = [
+                'allowed' => json_decode(base64_decode($queryParams['tx_gridelements_allowed'] ?? ''), true) ?: [],
+                'disallowed' => json_decode(base64_decode($queryParams['tx_gridelements_disallowed'] ?? ''), true) ?: []
+            ];
+        }
+
+        if (!empty($restrictions['allowed'])) {
+            foreach ($restrictions['allowed'] as &$item) {
                 if (!is_array($item)) {
                     $item = array_flip(GeneralUtility::trimExplode(',', $item));
                 }
             }
         }
-        $disallowed = json_decode(base64_decode($queryParams['tx_gridelements_disallowed'] ?? ''), true) ?: [];
-        if (!empty($disallowed)) {
-            foreach ($disallowed as &$item) {
+
+        if (!empty($restrictions['disallowed'])) {
+            foreach ($restrictions['disallowed'] as &$item) {
                 if (!is_array($item)) {
                     $item = array_flip(GeneralUtility::trimExplode(',', $item));
                 }
@@ -142,8 +152,84 @@ final class ModifyNewContentElementWizardItemsListener
         return [
             'container' => $queryParams['tx_gridelements_container'] ?? 0,
             'column' => $queryParams['tx_gridelements_columns'] ?? 0,
+            'allowed' => $restrictions['allowed'],
+            'disallowed' => $restrictions['disallowed'],
+        ];
+    }
+
+    /**
+     * @param $queryParams
+     * @param $colPos
+     * @return array[]
+     */
+    protected function getRestrictionsFromBackendLayout($queryParams, $colPos): array
+    {
+        $backendLayoutView = GeneralUtility::makeInstance(BackendLayoutView::class);
+        $backendLayout = $backendLayoutView->getSelectedBackendLayout((int)$queryParams['id'] ?? 0);
+        if (empty($backendLayout)) {
+            $backendLayout = [
+                    'config' => '',
+            ];
+        }
+        $allowed = [];
+        $disallowed = [];
+        $configuration = [];
+        if (in_array($colPos, array_map('intval', $backendLayout['__colPosList']), true)) {
+            foreach ($backendLayout['__config']['backend_layout.']['rows.'] as $row) {
+                if (empty($row['columns.'])) {
+                    continue;
+                }
+                foreach ($row['columns.'] as $column) {
+                    if (isset($column['colPos']) && $column['colPos'] !== '' && $colPos === (int)$column['colPos']) {
+                        $configuration = $column;
+                        break;
+                    }
+                }
+            }
+            $activateGridelements = true;
+            $deactivateGridelements = true;
+            $activatePlugins = true;
+            $deactivatePlugins = true;
+            if (!empty($configuration['disallowed.'])) {
+                $disallowed = [];
+                foreach($configuration['disallowed.'] as $key => $disallowedString) {
+                    if ($disallowedString === '*' && $key === 'Ctype') {
+                        return [];
+                    }
+                    if ($disallowedString === '*' && !empty($configuration['allowed.'][$key])) {
+                        unset($configuration['allowed.'][$key]);
+                    }
+                    if ($disallowedString === '*' && $key === 'list_type') {
+                        $deactivatePlugins = true;
+                    }
+                    if ($disallowedString === '*' && $key === 'tx_gridelements_backend_layout') {
+                        $deactivateGridelements = true;
+                    }
+                    $disallowed[$key] = array_flip(GeneralUtility::trimExplode(',', $disallowedString));
+                }
+            }
+            if (!empty($configuration['allowed.'])) {
+                $allowed = [];
+                foreach($configuration['allowed.'] as $key => $allowedString) {
+                    $allowed[$key] = array_flip(GeneralUtility::trimExplode(',', $allowedString));
+                    if ($key === 'list_type' && !empty($allowedString) && !$deactivatePlugins) {
+                        $activatePlugins = true;
+                    }
+                    if ($key === 'tx_gridelements_backend_layout' && !empty($allowedString) && !$deactivateGridelements) {
+                        $activateGridelements = true;
+                    }
+                }
+            }
+            if ($activatePlugins) {
+                $allowed['CType']['list'] = 1;
+            }
+            if ($activateGridelements) {
+                $allowed['CType']['gridelements_pi1'] = 1;
+            }
+        }
+        return [
             'allowed' => $allowed,
-            'disallowed' => $disallowed,
+            'disallowed' => $disallowed
         ];
     }
 
