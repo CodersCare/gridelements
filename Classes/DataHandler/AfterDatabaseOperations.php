@@ -451,7 +451,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
             );
             $temp = [];
             foreach ($tcaColumns as $item) {
-                if (trim($item['value']) !== '') {
+                if (trim($item['value'] ?? '') !== '') {
                     $temp[] = (int)$item['value'];
                 }
             }
