@@ -20,6 +20,7 @@ namespace GridElementsTeam\Gridelements\ContextMenu;
 use TYPO3\CMS\Backend\ContextMenu\ItemProviders\ProviderInterface;
 use TYPO3\CMS\Backend\ContextMenu\ItemProviders\RecordProvider;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ItemProvider extends RecordProvider implements ProviderInterface
@@ -110,11 +111,20 @@ class ItemProvider extends RecordProvider implements ProviderInterface
     {
         $canRender = false;
         if ($itemName === 'pastereference') {
-            $canRender = $this->canBePastedAfter() && $this->clipboard->currentMode() === 'copy' && $this->backendUser->checkAuthMode(
-                'tt_content',
-                'CType',
-                'shortcut',
-            );
+            if ((new Typo3Version())->getMajorVersion() >= 12) {
+                $canRender = $this->canBePastedAfter() && $this->clipboard->currentMode() === 'copy' && $this->backendUser->checkAuthMode(
+                    'tt_content',
+                    'CType',
+                    'shortcut',
+                );
+            } else {
+                $canRender = $this->canBePastedAfter() && $this->clipboard->currentMode() === 'copy' && $this->backendUser->checkAuthMode(
+                    'tt_content',
+                    'CType',
+                    'shortcut',
+                    $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode'] ?? ''
+                );
+            }
         }
         return $canRender;
     }
