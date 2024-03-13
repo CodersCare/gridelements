@@ -25,7 +25,6 @@ namespace GridElementsTeam\Gridelements\EventListener;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 
 use TYPO3\CMS\Backend\View\BackendLayoutView;
-use TYPO3\CMS\Core\Utility\DebugUtility;
 use function str_ends_with;
 use function str_starts_with;
 
@@ -168,7 +167,7 @@ final class ModifyNewContentElementWizardItemsListener
         $backendLayout = $backendLayoutView->getSelectedBackendLayout((int)$queryParams['id'] ?? 0);
         if (empty($backendLayout)) {
             $backendLayout = [
-                    'config' => '',
+                'config' => '',
             ];
         }
         $allowed = [];
@@ -186,10 +185,10 @@ final class ModifyNewContentElementWizardItemsListener
                     }
                 }
             }
-            $activateGridelements = true;
-            $deactivateGridelements = true;
-            $activatePlugins = true;
-            $deactivatePlugins = true;
+            $activateGridelements = false;
+            $deactivateGridelements = false;
+            $activatePlugins = false;
+            $deactivatePlugins = false;
             if (!empty($configuration['disallowed.'])) {
                 $disallowed = [];
                 foreach($configuration['disallowed.'] as $key => $disallowedString) {
