@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\Task;
 
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Scheduler\Task\AbstractTask;
@@ -28,7 +29,7 @@ class GridelementsColPosFixer extends AbstractTask
                 'colPos',
                 -1,
                 true,
-                \PDO::PARAM_INT
+                Connection::PARAM_INT
             )
             ->where(
                 $queryBuilder->expr()->gt(

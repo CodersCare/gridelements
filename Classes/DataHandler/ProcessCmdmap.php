@@ -24,8 +24,8 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  ***************************************************************/
 
 use Doctrine\DBAL\Exception;
-use PDO;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Http\ServerRequestFactory;
 
@@ -114,7 +114,7 @@ class ProcessCmdmap extends AbstractDataHandler
                 ->select('tx_gridelements_container', 'sys_language_uid')
                 ->from('tt_content')->where($queryBuilder->expr()->eq(
                     'uid',
-                    $queryBuilder->createNamedParameter($id, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($id, Connection::PARAM_INT)
                 ))->executeQuery()
                 ->fetchAssociative();
 

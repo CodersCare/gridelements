@@ -23,9 +23,9 @@ namespace GridElementsTeam\Gridelements\Helper;
  ***************************************************************/
 
 use Doctrine\DBAL\Exception;
-use PDO;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
@@ -80,10 +80,10 @@ class GridElementsHelper implements SingletonInterface
                 ->select(...$selectFieldArray)
                 ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq(
                     'tx_gridelements_container',
-                    $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT)
                 ), $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)
                 )))->executeQuery()
                 ->fetchAllAssociative();
 
@@ -172,7 +172,7 @@ class GridElementsHelper implements SingletonInterface
             ->select('pid')
             ->from('tt_content')->where($queryBuilder->expr()->eq(
                 'uid',
-                $queryBuilder->createNamedParameter(abs($uid), PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter(abs($uid), Connection::PARAM_INT)
             ))->executeQuery()
             ->fetchAssociative();
         return (int)($triggerElement['pid'] ?? 0);

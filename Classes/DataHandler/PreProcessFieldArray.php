@@ -23,12 +23,12 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  ***************************************************************/
 
 use Doctrine\DBAL\Exception;
-use PDO;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Http\ServerRequestFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -369,7 +369,7 @@ class PreProcessFieldArray extends AbstractDataHandler
                 $queryBuilder->expr()->eq('t1.uid', $queryBuilder->quoteIdentifier('t2.tx_gridelements_container'))
             )->where($queryBuilder->expr()->eq(
                 't2.uid',
-                $queryBuilder->createNamedParameter($contentId, PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter($contentId, Connection::PARAM_INT)
             ))->executeQuery()
             ->fetchAssociative();
         if (!empty($parent)) {

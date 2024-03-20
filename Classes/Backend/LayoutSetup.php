@@ -24,9 +24,9 @@ namespace GridElementsTeam\Gridelements\Backend;
 
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
-use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DefaultRestrictionContainer;
@@ -202,18 +202,18 @@ class LayoutSetup
                     $queryBuilder->expr()->orX(
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter((int)$pageTSconfigId, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter((int)$pageTSconfigId, Connection::PARAM_INT)
                         ),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter($storagePid, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($storagePid, Connection::PARAM_INT)
                         )
                     ),
                     $queryBuilder->expr()->andX(
                         $queryBuilder->expr()->comparison($pageTSconfigId, '=', 0),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($pageId, Connection::PARAM_INT)
                         )
                     )
                 )

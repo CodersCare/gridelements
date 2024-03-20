@@ -25,7 +25,6 @@ namespace GridElementsTeam\Gridelements\Plugin;
 use Doctrine\DBAL\DBALException;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\FlexFormTools;
-use PDO;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Database\Connection;
@@ -265,12 +264,12 @@ class Gridelements extends ContentObjectRenderer
         $where = $queryBuilder->expr()->andX(
             $queryBuilder->expr()->eq(
                 'tx_gridelements_container',
-                $queryBuilder->createNamedParameter($element, PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter($element, Connection::PARAM_INT)
             ),
-            $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)),
+            $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, Connection::PARAM_INT)),
             $queryBuilder->expr()->eq(
                 'pid',
-                $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)
             ),
             $queryBuilder->expr()->in(
                 'tx_gridelements_columns',
@@ -289,12 +288,12 @@ class Gridelements extends ContentObjectRenderer
                     $translationOverlay = $queryBuilder->expr()->andX(
                         $queryBuilder->expr()->eq(
                             'tx_gridelements_container',
-                            $queryBuilder->createNamedParameter($element, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($element, Connection::PARAM_INT)
                         ),
-                        $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)),
+                        $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, Connection::PARAM_INT)),
                         $queryBuilder->expr()->eq(
                             'pid',
-                            $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)
                         ),
                         $queryBuilder->expr()->in(
                             'tx_gridelements_columns',
@@ -309,7 +308,7 @@ class Gridelements extends ContentObjectRenderer
                         ),
                         $queryBuilder->expr()->eq(
                             'l18n_parent',
-                            $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
+                            $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)
                         )
                     );
                 }
@@ -317,12 +316,12 @@ class Gridelements extends ContentObjectRenderer
                 $translationNoOverlay = $queryBuilder->expr()->andX(
                     $queryBuilder->expr()->eq(
                         'tx_gridelements_container',
-                        $queryBuilder->createNamedParameter($element, PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter($element, Connection::PARAM_INT)
                     ),
-                    $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, PDO::PARAM_INT)),
+                    $queryBuilder->expr()->neq('colPos', $queryBuilder->createNamedParameter(-2, Connection::PARAM_INT)),
                     $queryBuilder->expr()->eq(
                         'pid',
-                        $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)
                     ),
                     $queryBuilder->expr()->in(
                         'tx_gridelements_columns',

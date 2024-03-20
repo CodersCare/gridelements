@@ -18,11 +18,11 @@ namespace GridElementsTeam\Gridelements\Updates;
  */
 use Exception;
 use InvalidArgumentException;
-use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Expression\ExpressionBuilder;
 use TYPO3\CMS\Core\Resource\File;
@@ -226,7 +226,7 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
                     $queryBuilder->createNamedParameter($fileSha1)
                 ), $queryBuilder->expr()->eq(
                     'storage',
-                    $queryBuilder->createNamedParameter($storageUid, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($storageUid, Connection::PARAM_INT)
                 ))->executeQuery()->fetch();
 
                 // the file exists, the file does not have to be moved again
@@ -295,7 +295,7 @@ class GridelementsBackendLayoutPiFlexformDsFileUpdateWizard implements UpgradeWi
             $queryBuilder->update($this->table)->where(
                 $queryBuilder->expr()->eq(
                     'uid',
-                    $queryBuilder->createNamedParameter($row['uid'], PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($row['uid'], Connection::PARAM_INT)
                 )
             )->set($this->fieldToMigrate, $i)->executeStatement();
         }

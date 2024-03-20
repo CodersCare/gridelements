@@ -7,6 +7,7 @@ namespace GridElementsTeam\Gridelements\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -36,7 +37,7 @@ class GridelementsColPosFixer extends Command
                 'colPos',
                 -1,
                 true,
-                \PDO::PARAM_INT
+                Connection::PARAM_INT
             )->where(
                 $queryBuilder->expr()->gt(
                     'tx_gridelements_container',

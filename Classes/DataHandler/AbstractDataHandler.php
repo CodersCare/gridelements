@@ -25,7 +25,6 @@ namespace GridElementsTeam\Gridelements\DataHandler;
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
-use PDO;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -164,10 +163,10 @@ abstract class AbstractDataHandler
         $constraints = [
             $queryBuilder->expr()->and($queryBuilder->expr()->eq(
                 'pid',
-                $queryBuilder->createNamedParameter(-1, PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter(-1, Connection::PARAM_INT)
             ), $queryBuilder->expr()->eq(
                 't3ver_wsid',
-                $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)
             )),
         ];
 
@@ -217,7 +216,7 @@ abstract class AbstractDataHandler
             )
             ->from('tt_content')
             ->where(
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT))
             )->setMaxResults(1)->executeQuery()
             ->fetchAssociative();
         if (!empty($currentValues['l18n_parent'])) {
@@ -236,7 +235,7 @@ abstract class AbstractDataHandler
                 ->where(
                     $queryBuilder->expr()->eq(
                         'uid',
-                        $queryBuilder->createNamedParameter((int)$currentValues['l18n_parent'], PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter((int)$currentValues['l18n_parent'], Connection::PARAM_INT)
                     )
                 )->setMaxResults(1)->executeQuery()
                 ->fetchAssociative();
@@ -268,7 +267,7 @@ abstract class AbstractDataHandler
             )
             ->from('tt_content')->where($queryBuilder->expr()->eq(
                 'l18n_parent',
-                $queryBuilder->createNamedParameter((int)$currentValues['uid'], PDO::PARAM_INT)
+                $queryBuilder->createNamedParameter((int)$currentValues['uid'], Connection::PARAM_INT)
             ))->executeQuery();
         $translatedElements = [];
         while ($translatedElement = $translatedElementQuery->fetchAssociative()) {
@@ -286,11 +285,11 @@ abstract class AbstractDataHandler
                     'l18n_parent',
                     $queryBuilder->createNamedParameter(
                         (int)$currentValues['tx_gridelements_container'],
-                        PDO::PARAM_INT
+                        Connection::PARAM_INT
                     )
                 ), $queryBuilder->expr()->eq(
                     't3ver_oid',
-                    $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)
                 ))->executeQuery();
             while ($translatedContainer = $translatedContainerQuery->fetchAssociative()) {
                 $translatedContainers[$translatedContainer['sys_language_uid']] = $translatedContainer;
