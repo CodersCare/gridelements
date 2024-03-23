@@ -17,6 +17,7 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use UnexpectedValueException;
 
@@ -60,7 +61,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         $drawItem = true;
         $hookPreviewContent = '';
         // Hook: Render an own preview of a record
-        if (!empty($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawItem'])) {
+        if ((new Typo3Version())->getMajorVersion() < 12 && !empty($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawItem'])) {
             $pageLayoutView = PageLayoutView::createFromPageLayoutContext($item->getContext());
             foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawItem'] ?? [] as $className) {
                 $hookObject = GeneralUtility::makeInstance($className);
