@@ -228,8 +228,8 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             $theData[$titleCol] = BackendUtility::wrapInHelp($table, '', $tableTitle) . ' (<span class="t3js-table-total-items">' . $totalItems . '</span>)';
         } else {
             $icon = $this->table // @todo separate table header from contract/expand link
-                ? '<span title="' . htmlspecialchars($lang->getLL('contractView')) . '">' . $this->iconFactory->getIcon('actions-view-table-collapse', Icon::SIZE_SMALL)->render() . '</span>'
-                : '<span title="' . htmlspecialchars($lang->getLL('expandView')) . '">' . $this->iconFactory->getIcon('actions-view-table-expand', Icon::SIZE_SMALL)->render() . '</span>';
+                ? '<span title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:contractView')) . '">' . $this->iconFactory->getIcon('actions-view-table-collapse', Icon::SIZE_SMALL)->render() . '</span>'
+                : '<span title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:expandView')) . '">' . $this->iconFactory->getIcon('actions-view-table-expand', Icon::SIZE_SMALL)->render() . '</span>';
             $theData[$titleCol] = $this->linkWrapTable($table, $tableTitle . ' (<span class="t3js-table-total-items">' . $totalItems . '</span>) ' . $icon);
         }
         $tableActions = '';
@@ -241,7 +241,7 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             $tableActions .= $this->createNewRecordButton($table);
             // Render collapse button if in multi table mode
             if (!$this->table) {
-                $title = sprintf(htmlspecialchars($lang->getLL('collapseExpandTable')), $tableTitle);
+                $title = sprintf(htmlspecialchars($lang->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:collapseExpandTable')), $tableTitle);
                 $icon = '<span class="collapseIcon">' . $this->iconFactory->getIcon(($tableCollapsed ? 'actions-view-list-expand' : 'actions-view-list-collapse'), Icon::SIZE_SMALL)->render() . '</span>';
                 $tableActions .= '<button type="button"'
                     . ' class="btn btn-default btn-sm pull-right t3js-toggle-recordlist"'
@@ -514,8 +514,8 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                     if ($this->table && $permsEdit && is_array($currentIdList) && $this->isEditable($table)) {
                         $theData[$fCol] = '<button type="button"'
                                 . ' class="btn btn-default t3js-record-edit-multiple"'
-                                . ' title="' . htmlspecialchars($lang->getLL('editShownColumns')) . '"'
-                                . ' aria-label="' . htmlspecialchars($lang->getLL('editShownColumns')) . '"'
+                                . ' title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:editShownColumns')) . '"'
+                                . ' aria-label="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:editShownColumns')) . '"'
                                 . ' data-return-url="' . htmlspecialchars($this->listURL()) . '"'
                                 . ' data-columns-only="' . htmlspecialchars(implode(',', $this->fieldArray)) . '">'
                                 . $this->iconFactory->getIcon('actions-document-open', Icon::SIZE_SMALL)->render()
@@ -537,7 +537,7 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                 case '_LOCALIZATION_b':
                     // Show translation options
                     if ($this->showLocalizeColumn[$table] ?? false) {
-                        $theData[$fCol] = htmlspecialchars($lang->getLL('Localize'));
+                        $theData[$fCol] = htmlspecialchars($lang->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:Localize'));
                     }
                     break;
                 default:
@@ -580,13 +580,13 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                                 && $this->clipObj->current !== 'normal'
                         ) {
                             $theData[$fCol] .= '<a class="btn btn-default" href="' . htmlspecialchars($this->listURL() . '&duplicateField=' . $fCol)
-                                    . '" title="' . htmlspecialchars($lang->getLL('clip_duplicates')) . '">'
+                                    . '" title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:clip_duplicates')) . '">'
                                     . $this->iconFactory->getIcon('actions-document-duplicates-select', Icon::SIZE_SMALL)->render() . '</a>';
                         }
                         // If the table can be edited, add link for editing THIS field for all
                         // listed records:
                         if ($this->isEditable($table) && $permsEdit && ($GLOBALS['TCA'][$table]['columns'][$fCol] ?? false)) {
-                            $iTitle = sprintf($lang->getLL('editThisColumn'), $sortLabel);
+                            $iTitle = sprintf($lang->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:editThisColumn'), $sortLabel);
                             $theData[$fCol] .= '<button type="button"'
                                     . ' class="btn btn-default t3js-record-edit-multiple"'
                                     . ' title="' . htmlspecialchars($iTitle) . '"'
@@ -1069,7 +1069,7 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             } catch (RouteNotFoundException $e) {
             }
             $editAction = '<a class="btn btn-default" href="' . htmlspecialchars((string)$editLink) . '"'
-                    . ' title="' . htmlspecialchars($this->getLanguageService()->getLL('edit')) . '">' . $this->iconFactory->getIcon($iconIdentifier, Icon::SIZE_SMALL)->render() . '</a>';
+                    . ' title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:edit')) . '">' . $this->iconFactory->getIcon($iconIdentifier, Icon::SIZE_SMALL)->render() . '</a>';
         } else {
             $editAction = $this->spaceIcon;
         }
@@ -1080,8 +1080,8 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             $viewBigAction = '<button type="button" aria-haspopup="dialog"'
                     . ' class="btn btn-default" '
                     . $this->createShowItemTagAttributes($table . ',' . ($row['uid'] ?? 0))
-                    . ' title="' . htmlspecialchars($this->getLanguageService()->getLL('showInfo')) . '"'
-                    . ' aria-label="' . htmlspecialchars($this->getLanguageService()->getLL('showInfo')) . '">'
+                    . ' title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:showInfo')) . '"'
+                    . ' aria-label="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:showInfo')) . '">'
                     . $this->iconFactory->getIcon('actions-document-info', Icon::SIZE_SMALL)->render()
                     . '</button>';
             $this->addActionToCellGroup($cells, $viewBigAction, 'viewBig');
@@ -1094,7 +1094,7 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
             if ($isL10nOverlay || $isDeletePlaceHolder) {
                 $moveAction = $this->spaceIcon;
             } else {
-                $linkTitleLL = htmlspecialchars($this->getLanguageService()->getLL('move_' . ($table === 'tt_content' ? 'record' : 'page')));
+                $linkTitleLL = htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:move_' . ($table === 'tt_content' ? 'record' : 'page')));
                 $icon = ($table === 'pages' ? $this->iconFactory->getIcon('actions-page-move', Icon::SIZE_SMALL) : $this->iconFactory->getIcon('actions-document-move', Icon::SIZE_SMALL));
                 try {
                     $url = (string)$this->uriBuilder->buildUriFromRoute('move_element', [
@@ -1122,7 +1122,7 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                     } catch (RouteNotFoundException $e) {
                     }
                     $historyAction = '<a class="btn btn-default" href="' . htmlspecialchars($moduleUrl) . '" title="'
-                            . htmlspecialchars($this->getLanguageService()->getLL('history')) . '">'
+                            . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:history')) . '">'
                             . $this->iconFactory->getIcon('actions-document-history-open', Icon::SIZE_SMALL)->render() . '</a>';
                     $this->addActionToCellGroup($cells, $historyAction, 'history');
                 } else {
@@ -1145,7 +1145,7 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                     } catch (RouteNotFoundException $e) {
                     }
                     $permsAction = '<a class="btn btn-default" href="' . htmlspecialchars($href) . '" title="'
-                            . htmlspecialchars($this->getLanguageService()->getLL('permissions')) . '">'
+                            . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:permissions')) . '">'
                             . $this->iconFactory->getIcon('actions-lock', Icon::SIZE_SMALL)->render() . '</a>';
                 }
                 $this->addActionToCellGroup($cells, $permsAction, 'perms');
@@ -1176,7 +1176,7 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                             $newLink = $this->uriBuilder->buildUriFromRoute('record_edit', $params);
                         } catch (RouteNotFoundException $e) {
                         }
-                        $newAction = '<a class="btn btn-default" href="' . htmlspecialchars((string)$newLink) . '" title="' . htmlspecialchars($this->getLanguageService()->getLL($titleLabel)) . '">'
+                        $newAction = '<a class="btn btn-default" href="' . htmlspecialchars((string)$newLink) . '" title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:'. $titleLabel)) . '">'
                                 . $icon->render() . '</a>';
                         $this->addActionToCellGroup($cells, $newAction, 'new');
                     }
@@ -1192,8 +1192,8 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                 if (!$permsEdit || $isDeletePlaceHolder || $this->isRecordCurrentBackendUser($table, $row)) {
                     $hideAction = $this->spaceIcon;
                 } else {
-                    $hideTitle = htmlspecialchars($this->getLanguageService()->getLL('hide' . ($table === 'pages' ? 'Page' : '')));
-                    $unhideTitle = htmlspecialchars($this->getLanguageService()->getLL('unHide' . ($table === 'pages' ? 'Page' : '')));
+                    $hideTitle = htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:hide' . ($table === 'pages' ? 'Page' : '')));
+                    $unhideTitle = htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:unHide' . ($table === 'pages' ? 'Page' : '')));
                     if ($row[$hiddenField]) {
                         $params = 'data[' . $table . '][' . $rowUid . '][' . $hiddenField . ']=0';
                         $hideAction = '<button type="button"'
@@ -1230,7 +1230,7 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                         $url = (string)$this->uriBuilder->buildUriFromRoute('tce_db', $params);
                     } catch (RouteNotFoundException $e) {
                     }
-                    $moveUpAction = '<a class="btn btn-default" href="' . htmlspecialchars($url) . '" title="' . htmlspecialchars($this->getLanguageService()->getLL('moveUp')) . '">'
+                    $moveUpAction = '<a class="btn btn-default" href="' . htmlspecialchars($url) . '" title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:moveUp')) . '">'
                             . $this->iconFactory->getIcon('actions-move-up', Icon::SIZE_SMALL)->render() . '</a>';
                 } else {
                     $moveUpAction = $this->spaceIcon;
@@ -1246,7 +1246,7 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                         $url = (string)$this->uriBuilder->buildUriFromRoute('tce_db', $params);
                     } catch (RouteNotFoundException $e) {
                     }
-                    $moveDownAction = '<a class="btn btn-default" href="' . htmlspecialchars($url) . '" title="' . htmlspecialchars($this->getLanguageService()->getLL('moveDown')) . '">'
+                    $moveDownAction = '<a class="btn btn-default" href="' . htmlspecialchars($url) . '" title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:moveDown')) . '">'
                             . $this->iconFactory->getIcon('actions-move-down', Icon::SIZE_SMALL)->render() . '</a>';
                 } else {
                     $moveDownAction = $this->spaceIcon;
@@ -1266,10 +1266,10 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                 $refCountMsg = BackendUtility::referenceCount($table, $row['uid'], ' ' . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.referencesToRecord'), (string)$this->getReferenceCount($table, $row['uid']))
                         . BackendUtility::translationCount($table, $row['uid'], ' ' . $this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.translationsOfRecord'));
                 $title = BackendUtility::getRecordTitle($table, $row);
-                $warningText = $this->getLanguageService()->getLL($actionName . 'Warning') . ' "' . $title . '" [' . $table . ':' . $row['uid'] . ']' . $refCountMsg;
+                $warningText = $this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:' . $actionName . 'Warning') . ' "' . $title . '" [' . $table . ':' . $row['uid'] . ']' . $refCountMsg;
                 $params = 'cmd[' . $table . '][' . $row['uid'] . '][delete]=1';
                 $icon = $this->iconFactory->getIcon('actions-edit-' . $actionName, Icon::SIZE_SMALL)->render();
-                $linkTitle = htmlspecialchars($this->getLanguageService()->getLL($actionName));
+                $linkTitle = htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:' . $actionName));
                 $l10nParentField = $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] ?? '';
                 $deleteAction = '<button type="button" class="btn btn-default t3js-record-delete"'
                         . ' title="' . $linkTitle . '"'
@@ -1300,8 +1300,8 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                         }
                         $moveLeftAction = '<a class="btn btn-default"'
                                 . ' href="' . htmlspecialchars($url) . '"'
-                                . ' title="' . htmlspecialchars($this->getLanguageService()->getLL('prevLevel')) . '"'
-                                . ' aria-label="' . htmlspecialchars($this->getLanguageService()->getLL('prevLevel')) . '">'
+                                . ' title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:prevLevel')) . '"'
+                                . ' aria-label="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:prevLevel')) . '">'
                                 . $this->iconFactory->getIcon('actions-move-left', Icon::SIZE_SMALL)->render()
                                 . '</a>';
                         $this->addActionToCellGroup($cells, $moveLeftAction, 'moveLeft');
@@ -1322,8 +1322,8 @@ class DatabaseRecordList11 extends \TYPO3\CMS\Recordlist\RecordList\DatabaseReco
                         }
                         $moveRightAction = '<a class="btn btn-default"'
                                 . ' href="' . htmlspecialchars($url) . '"'
-                                . ' title="' . htmlspecialchars($this->getLanguageService()->getLL('nextLevel')) . '"'
-                                . ' aria-label="' . htmlspecialchars($this->getLanguageService()->getLL('nextLevel')) . '">'
+                                . ' title="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:nextLevel')) . '"'
+                                . ' aria-label="' . htmlspecialchars($this->getLanguageService()->sL('LLL:EXT:gridelements_EA/Resources/Private/Language/locallang_db.xlf:nextLevel')) . '">'
                                 . $this->iconFactory->getIcon('actions-move-right', Icon::SIZE_SMALL)->render() . '</a>';
                     } else {
                         $moveRightAction = $this->spaceIcon;

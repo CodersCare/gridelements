@@ -101,11 +101,11 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         $html[] = '<td>';
         $html[] = '<div class="btn-group-vertical">';
         $html[] = '<a class="btn btn-default btn-sm t3js-grideditor-addcolumn" href="#"';
-        $html[] = ' title="' . htmlspecialchars($lang->getLL('grid_addColumn')) . '">';
+        $html[] = ' title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf:grid_addColumn')) . '">';
         $html[] = '<i class="fa fa-fw fa-arrow-right"></i>';
         $html[] = '</a>';
         $html[] = '<a class="btn btn-default btn-sm t3js-grideditor-removecolumn" href="#"';
-        $html[] = ' title="' . htmlspecialchars($lang->getLL('grid_removeColumn')) . '">';
+        $html[] = ' title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf:grid_removeColumn')) . '">';
         $html[] = '<i class="fa fa-fw fa-arrow-left"></i>';
         $html[] = '</a>';
         $html[] = '</div>';
@@ -115,11 +115,11 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         $html[] = '<td colspan="2" align="center">';
         $html[] = '<div class="btn-group">';
         $html[] = '<a class="btn btn-default btn-sm t3js-grideditor-addrow" href="#"';
-        $html[] = ' title="' . htmlspecialchars($lang->getLL('grid_addRow')) . '">';
+        $html[] = ' title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf:grid_addRow')) . '">';
         $html[] = '<i class="fa fa-fw fa-arrow-down"></i>';
         $html[] = '</a>';
         $html[] = '<a class="btn btn-default btn-sm t3js-grideditor-removerow" href="#"';
-        $html[] = ' title="' . htmlspecialchars($lang->getLL('grid_removeRow')) . '">';
+        $html[] = ' title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf:grid_removeRow')) . '">';
         $html[] = '<i class="fa fa-fw fa-arrow-up"></i>';
         $html[] = '</a>';
         $html[] = '</div>';
@@ -127,7 +127,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         $html[] = '</tr>';
         $html[] = '<tr>';
         $html[] = '<td colspan="2">';
-        $html[] = '<a href="#" class="btn btn-default btn-sm t3js-grideditor-preview-button">' . htmlspecialchars($lang->getLL('buttons.pageTsConfig')) . '</a>';
+        $html[] = '<a href="#" class="btn btn-default btn-sm t3js-grideditor-preview-button">' . htmlspecialchars($lang->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf:buttons.pageTsConfig')) . '</a>';
         $html[] = '<pre class="t3js-grideditor-preview-config grideditor-preview"><code></code></pre>';
         $html[] = '</td>';
         $html[] = '</tr>';

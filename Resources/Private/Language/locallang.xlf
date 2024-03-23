@@ -1,40 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="messages" date="2013-11-02T17:54:12Z" product-name="gridelements">
-		<header/>
+<xliff version="1.2" xmlns:t3="http://typo3.org/schemas/xliff" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" original="messages" datatype="plaintext" product-name="gridelements" date="2024-03-23T22:53:17+01:00">
+		<header></header>
 		<body>
-			<trans-unit id="additionalStylesheet" xml:space="preserve">
+			<trans-unit id="additionalStylesheet" resname="additionalStylesheet">
 				<source>Path to folder containing additional stylesheets</source>
 			</trans-unit>
-			<trans-unit id="disableAutomaticUnusedColumnCorrection" xml:space="preserve">
+			<trans-unit id="disableAutomaticUnusedColumnCorrection" resname="disableAutomaticUnusedColumnCorrection">
 				<source>Disable the automatic correction of elements in unused columns to colPos -2. So elements will keep their colPos values even though that column is not available anymore.</source>
 			</trans-unit>
-			<trans-unit id="disableCopyFromPageButton" xml:space="preserve">
-				<source>Disable the "Copy from page" button.</source>
+			<trans-unit id="disableCopyFromPageButton" resname="disableCopyFromPageButton">
+				<source>Disable the &#34;Copy from page&#34; button.</source>
 			</trans-unit>
-			<trans-unit id="disableDragInWizard" xml:space="preserve">
+			<trans-unit id="disableDragInWizard" resname="disableDragInWizard">
 				<source>Disable the drag-in wizard.</source>
 			</trans-unit>
-			<trans-unit id="fluidBasedPageModule" xml:space="preserve">
-				<source>Use the rewritten page layout backend module which is based on Fluid if enabled in the global configuration. Default setting is "off" to use the legacy PageLayoutView on installations which require the hooks etc. which are associated with PageLayoutView.</source>
+			<trans-unit id="fluidBasedPageModule" resname="fluidBasedPageModule">
+				<source>Use the rewritten page layout backend module which is based on Fluid if enabled in the global configuration. Default setting is &#34;off&#34; to use the legacy PageLayoutView on installations which require the hooks etc. which are associated with PageLayoutView.</source>
 			</trans-unit>
-			<trans-unit id="nestingInListModule" xml:space="preserve">
+			<trans-unit id="nestingInListModule" resname="nestingInListModule">
 				<source>Enable nesting in list module</source>
 			</trans-unit>
-			<trans-unit id="overlayShortcutTranslation" xml:space="preserve">
+			<trans-unit id="overlayShortcutTranslation" resname="overlayShortcutTranslation">
 				<source>Use language overlay for content and page records referenced in shortcut elements.</source>
 			</trans-unit>
-
-			<trans-unit id="gridelementsColPosFixer.name" xml:space="preserve">
+			<trans-unit id="gridelementsColPosFixer.name" resname="gridelementsColPosFixer.name">
 				<source>Gridelements ColPos Fixer</source>
 			</trans-unit>
-			<trans-unit id="gridelementsColPosFixer.description" xml:space="preserve">
+			<trans-unit id="gridelementsColPosFixer.description" resname="gridelementsColPosFixer.description">
 				<source>Sets colPos value of Gridelements children back to -1 if you accidentally reverted the SQL field definition during a major core upgrade.</source>
 			</trans-unit>
-			<trans-unit id="gridelementsNumberOfChildrenFixer.name" xml:space="preserve">
+			<trans-unit id="gridelementsNumberOfChildrenFixer.name" resname="gridelementsNumberOfChildrenFixer.name">
 				<source>Gridelements Number of Children Fixer</source>
 			</trans-unit>
-			<trans-unit id="gridelementsNumberOfChildrenFixer.description" xml:space="preserve">
+			<trans-unit id="gridelementsNumberOfChildrenFixer.description" resname="gridelementsNumberOfChildrenFixer.description">
 				<source>Recalculates the value of tx_gridelements_children due to buggy container update behaviour of Cut/Copy/Paste and/or Drag/Drop methods.</source>
 			</trans-unit>
 		</body>
