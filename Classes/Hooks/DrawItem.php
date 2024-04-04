@@ -46,6 +46,7 @@ use TYPO3\CMS\Core\Database\QueryGenerator;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
@@ -347,12 +348,22 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 if ($item['t3ver_state'] === 3) {
                     $moveUids[] = (int)$item['t3ver_move_id'];
                     $item = BackendUtility::getRecordWSOL('tt_content', (int)$item['uid']);
-                    $movePlaceholder = BackendUtility::getMovePlaceholder(
-                        'tt_content',
-                        (int)$item['uid'],
-                        '*',
-                        $workspace
-                    );
+                    $versionInformation = GeneralUtility::makeInstance(Typo3Version::class);
+                    if ($versionInformation->getMajorVersion() < 11) {
+                        $movePlaceholder = BackendUtility::getMovePlaceholder(
+                            'tt_content',
+                            (int)$item['uid'],
+                            '*',
+                            $workspace
+                        );
+                    } else {
+                        $movePlaceholder = BackendUtility::getWorkspaceVersionOfRecord(
+                            $workspace,
+                            'tt_content',
+                            (int)$item['uid'],
+                            '*'
+                        );
+                    }
                     if (!empty($movePlaceholder)) {
                         $item['sorting'] = $movePlaceholder['sorting'];
                         $item['tx_gridelements_columns'] = $movePlaceholder['tx_gridelements_columns'];
@@ -361,12 +372,23 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 } else {
                     $item = BackendUtility::getRecordWSOL('tt_content', (int)$item['uid']);
                     if ($item['t3ver_state'] === 4) {
-                        $movePlaceholder = BackendUtility::getMovePlaceholder(
-                            'tt_content',
-                            (int)$item['uid'],
-                            '*',
-                            $workspace
-                        );
+                        $versionInformation = GeneralUtility::makeInstance(Typo3Version::class);
+                        if ($versionInformation->getMajorVersion() < 11) {
+                            $movePlaceholder = BackendUtility::getMovePlaceholder(
+                                'tt_content',
+                                (int)$item['uid'],
+                                '*',
+                                $workspace
+                            );
+                        } else {
+                            $movePlaceholder = BackendUtility::getWorkspaceVersionOfRecord(
+                                $workspace,
+                                'tt_content',
+                                (int)$item['uid'],
+                                '*'
+                            );
+
+                        }
                         if (!empty($movePlaceholder)) {
                             $item['sorting'] = $movePlaceholder['sorting'];
                             $item['tx_gridelements_columns'] = $movePlaceholder['tx_gridelements_columns'];

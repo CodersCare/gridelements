@@ -29,6 +29,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -53,7 +54,12 @@ class AfterDatabaseOperations extends AbstractDataHandler
             $originalRecord = $parentObj->recordInfo('tt_content', $uid, '*');
             if ($originalRecord['t3ver_state'] === 4) {
                 $updateArray = [];
-                $movePlaceholder = BackendUtility::getMovePlaceholder('tt_content', $uid, 'uid', $workspace);
+                $versionInformation = GeneralUtility::makeInstance(Typo3Version::class);
+                if ($versionInformation->getMajorVersion() < 11) {
+                    $movePlaceholder = BackendUtility::getMovePlaceholder('tt_content', $uid, 'uid', $workspace);
+                } else {
+                    $movePlaceholder = BackendUtility::getWorkspaceVersionOfRecord($workspace, 'tt_content', $uid, 'uid');
+                }
                 if (isset($fieldArray['colPos'])) {
                     $updateArray['colPos'] = (int)$fieldArray['colPos'];
                 }
