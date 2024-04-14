@@ -17,8 +17,10 @@ namespace GridElementsTeam\Gridelements\Backend;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Controller\Event\AfterPageColumnsSelectedForLocalizationEvent;
 use TYPO3\CMS\Backend\Domain\Repository\Localization\LocalizationRepository;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
@@ -56,12 +58,18 @@ class LocalizationController
     protected $localizationRepository;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
         $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
         $this->localizationRepository = GeneralUtility::makeInstance(LocalizationRepository::class);
+        $this->eventDispatcher = GeneralUtility::makeInstance(EventDispatcherInterface::class);
     }
 
     /**
@@ -91,6 +99,7 @@ class LocalizationController
             '*'
         );
 
+        $flatRecords = [];
         while ($row = $result->fetchAssociative()) {
             BackendUtility::workspaceOL('tt_content', $row, -99, true);
             if (!$row || VersionState::cast($row['t3ver_state'])->equals(VersionState::DELETE_PLACEHOLDER)) {
@@ -112,6 +121,7 @@ class LocalizationController
                     'uid' => $uid,
                     'container' => $container,
                 ];
+                $flatRecords[] = $row;
             }
         }
 
@@ -129,36 +139,39 @@ class LocalizationController
 
         return (new JsonResponse())->setPayload([
             'records' => $filteredRecords,
-            'columns' => $this->getPageColumns($pageId),
+            'columns' => $this->getPageColumns($pageId, $flatRecords, $params),
             'containers' => $containers,
         ]);
     }
 
     /**
      * @param int $pageId
+     * @param array $flatRecords
+     * @param array $params
      * @return array
      */
-    protected function getPageColumns(int $pageId): array
+    protected function getPageColumns(int $pageId, array $flatRecords, array $params): array
     {
         $columns = [];
         $backendLayoutView = GeneralUtility::makeInstance(BackendLayoutView::class);
-        $backendLayouts = $backendLayoutView->getSelectedBackendLayout($pageId);
+        $backendLayout = $backendLayoutView->getBackendLayoutForPage($pageId);
+        $columns[-1] = 'GFridelements';
 
-        $columns[-1] = 'Gridelements';
+        foreach ($backendLayout->getUsedColumns() as $columnPos => $columnLabel) {
+            $columns[$columnPos] = $GLOBALS['LANG']->sL($columnLabel);
+        }
 
-        if (empty($backendLayouts['__items'])) {
-            return [];
-        }
-        foreach ($backendLayouts['__items'] as $backendLayout) {
-            $columns[(int)$backendLayout[1]] = $backendLayout[0];
-        }
-        if (isset($backendLayouts['__colPosList'])) {
-            $backendLayouts['__colPosList'][] = -1;
+        $event = GeneralUtility::makeInstance(AfterPageColumnsSelectedForLocalizationEvent::class, $columns, array_values($backendLayout->getColumnPositionNumbers()), $backendLayout, $flatRecords, $params);
+        $this->eventDispatcher->dispatch($event);
+
+        $columnsList = $event->getColumnList();
+        if (!empty($columnsList)) {
+            $columnsList[] = -1;
         }
 
         return [
-            'columns' => $columns,
-            'columnList' => $backendLayouts['__colPosList'] ?? [],
+            'columns' => $event->getColumns(),
+            'columnList' => $columnsList,
         ];
     }
 }
