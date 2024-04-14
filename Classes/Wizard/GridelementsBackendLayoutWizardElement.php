@@ -24,8 +24,10 @@ namespace GridElementsTeam\Gridelements\Wizard;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Backend\Form\Element\BackendLayoutWizardElement;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
+use TYPO3\CMS\Core\TypoScript\TypoScriptStringFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -255,9 +257,15 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                 $layoutId = $this->data['databaseRow']['alias'] ?? (int)$this->data['databaseRow']['uid'];
                 $layout = $layoutSetup->getLayoutSetup($layoutId);
             } else {
-                $parser = GeneralUtility::makeInstance(TypoScriptParser::class);
-                $parser->parse($this->data['databaseRow']['config']);
-                $layout = ['config' => $parser->setup['backend_layout.']];
+                /* @var TypoScriptStringFactory $parser */
+                $parser = GeneralUtility::makeInstance(TypoScriptStringFactory::class);
+                $typoScriptSetup = $parser->parseFromStringWithIncludes(
+                    'gridelements-typoscript-config-' . (int)$this->data['databaseRow']['uid'],
+                    $this->data['databaseRow']['config']
+                )->toArray();
+
+                $layout = ['config' => $typoScriptSetup['backend_layout.']];
+
                 if (!empty($layout['config']['rows.'])) {
                     $columns = $layoutSetup->checkAvailableColumns($layout);
                     if (!empty($columns['allowed']) || !empty($columns['disallowed']) || !empty($columns['maxitems'])) {

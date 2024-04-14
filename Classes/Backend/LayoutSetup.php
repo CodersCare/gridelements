@@ -37,10 +37,12 @@ use TYPO3\CMS\Core\Http\Request;
 use TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider;
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
 use TYPO3\CMS\Core\Imaging\IconRegistry;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
+use TYPO3\CMS\Core\TypoScript\TypoScriptStringFactory;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
@@ -253,10 +255,23 @@ class LayoutSetup
 
             // parse config
             if (!empty($item['config'])) {
-                $parser = GeneralUtility::makeInstance(TypoScriptParser::class);
-                $parser->parse($parser::checkIncludeLines($item['config']));
-                if (isset($parser->setup['backend_layout.'])) {
-                    $item['config'] = $parser->setup['backend_layout.'];
+                if ((new Typo3Version())->getMajorVersion() >= 12) {
+                    /* @var TypoScriptStringFactory $parser */
+                    $parser = GeneralUtility::makeInstance(TypoScriptStringFactory::class);
+                    $typoScriptSetup = $parser->parseFromStringWithIncludes(
+                        'gridelements-typoscript-config-' . $layoutId,
+                        $item['config']
+                    )->toArray();
+                    if (isset($typoScriptSetup['backend_layout.'])) {
+                        $item['config'] = $typoScriptSetup['backend_layout.'];
+                    }
+                } else {
+                    /** @var TypoScriptParser $parser */
+                    $parser = GeneralUtility::makeInstance(TypoScriptParser::class);
+                    $parser->parse($parser::checkIncludeLines($item['config']));
+                    if (isset($parser->setup['backend_layout.'])) {
+                        $item['config'] = $parser->setup['backend_layout.'];
+                    }
                 }
             }
 
