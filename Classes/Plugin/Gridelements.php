@@ -429,7 +429,6 @@ class Gridelements extends ContentObjectRenderer
     public function renderChildrenIntoParentColumns(array $typoScriptSetup = [], array $sortColumns = [])
     {
         // first we have to make a backup copy of the original data array
-        // and we have to modify the depth counter to avoid stopping too early
 
         $currentParentGrid = $this->copyCurrentParentGrid();
         $columns = $this->getUsedColumns($sortColumns);
@@ -438,7 +437,6 @@ class Gridelements extends ContentObjectRenderer
 
         $counter = count($this->cObj->data['tx_gridelements_view_children'] ?? []);
         $parentRecordNumbers = [];
-        $this->getTSFE()->cObjectDepthCounter += $counter;
 
         // each of the children will now be rendered separately and the output will be added to it's particular column
         $rawColumns = [];
@@ -459,11 +457,10 @@ class Gridelements extends ContentObjectRenderer
             $currentParentGrid['data']['tx_gridelements_view_raw_columns'] = $rawColumns;
         }
 
-        // now we can reset the depth counter and the data array so that the element will behave just as usual
+        // now we can reset the data array so that the element will behave just as usual
         // it will just contain the additional tx_gridelements_view section with the prerendered elements
         // it is important to do this before any stdWrap functions are applied to the grid container
         // since they will depend on the original data
-        $this->getTSFE()->cObjectDepthCounter -= $counter;
 
         $this->cObj->currentRecord = $currentParentGrid['record'] ?? [];
         $this->cObj->data = $currentParentGrid['data'] ?? [];
