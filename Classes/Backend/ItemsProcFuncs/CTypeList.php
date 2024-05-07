@@ -64,7 +64,7 @@ class CTypeList implements SingletonInterface
             // negative uid_pid values indicate that the element has been inserted after an existing element
             // so there is no pid to get the backendLayout for and we have to get that first
             $existingElement = BackendUtility::getRecordWSOL('tt_content', abs((int)$params['row']['pid']), 'pid,CType,colPos,tx_gridelements_container,tx_gridelements_columns');
-            if ((int)$existingElement['pid'] > 0) {
+            if ($existingElement && (int)$existingElement['pid'] > 0) {
                 $this->init((int)$existingElement['pid']);
 
                 $this->checkForAllowedCTypes(
