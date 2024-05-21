@@ -191,11 +191,13 @@ class GridChildrenProcessor implements DataProcessorInterface
         }
         $this->processedRecordVariables = [];
 
-        foreach ($this->options as $key => $value) {
-            unset($this->options[$key . '.']);
+        if (!empty($this->options)) {
+            foreach ($this->options as $key => $value) {
+                unset($this->options[$key . '.']);
+            }
         }
         $this->processedData['options'] = $this->options;
-        unset($this->options);
+        $this->options = [];
 
         return $this->processedData;
     }
