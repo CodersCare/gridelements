@@ -444,7 +444,6 @@ final class ModifyNewContentElementWizardItemsListener
 
             if (!empty($item['tt_content_defValues'])) {
                 foreach ($item['tt_content_defValues'] as $field => $value) {
-                    $value = LocalizationUtility::translate($value);
                     $defVals .= '&defVals[tt_content][' . $field . ']=' . $value;
                 }
             }

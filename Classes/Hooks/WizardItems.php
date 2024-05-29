@@ -289,7 +289,6 @@ class WizardItems implements NewContentElementWizardHookInterface
 
             if (!empty($item['tt_content_defValues'])) {
                 foreach ($item['tt_content_defValues'] as $field => $value) {
-                    $value = $this->getLanguageService()->sL($value);
                     $defVals .= '&defVals[tt_content][' . $field . ']=' . $value;
                 }
             }
