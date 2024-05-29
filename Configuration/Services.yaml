@@ -68,7 +68,8 @@ services:
       - name: console.command
         identifier: 'gridelements-number-of-children-fixer'
         description: 'Fixes Gridelements parent records with broken tx_gridelements_children value'
-
+  GridElementsTeam\Gridelements\DataProcessing\GridChildrenProcessor:
+    shared: false
 
   querybuilder.tt_content:
     class: 'TYPO3\CMS\Core\Database\Query\QueryBuilder'
