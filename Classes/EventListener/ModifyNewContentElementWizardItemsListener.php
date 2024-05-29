@@ -455,10 +455,13 @@ final class ModifyNewContentElementWizardItemsListener
                 'params' => ($largeIcon ? '&largeIconImage=' . $largeIcon : '')
                     . '&defVals[tt_content][CType]=gridelements_pi1' . $defVals . '&defVals[tt_content][tx_gridelements_backend_layout]=' . $item['uid']
                     . ($item['tll'] ? '&isTopLevelLayout' : ''),
-                'tt_content_defValues' => [
-                    'CType' => 'gridelements_pi1',
-                    'tx_gridelements_backend_layout' => $item['uid'],
-                ],
+                'tt_content_defValues' => array_replace(
+                    is_array($item['tt_content_defValues']) ? $item['tt_content_defValues'] : [],
+                    [
+                        'CType' => 'gridelements_pi1',
+                        'tx_gridelements_backend_layout' => $item['uid'],
+                    ]
+                ),
             ];
             $icon = '';
             if (!empty($item['iconIdentifier'])) {
