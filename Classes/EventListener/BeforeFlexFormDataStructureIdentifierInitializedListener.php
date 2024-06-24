@@ -58,7 +58,7 @@ final class BeforeFlexFormDataStructureIdentifierInitializedListener
                         // Our data structure is in a record. Re-use core internal syntax to resolve that.
                         // Get path of referenced file
                         $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-                        $fileReferences = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'pi_flexform_ds_file', $layoutSetup['uid']);
+                        $fileReferences = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'pi_flexform_ds_file', $layoutSetup['uid'] ?? $layoutId);
                         if (!empty($fileReferences[0])) {
                             $file = $fileReferences[0]->getOriginalFile();
                             $storageBasePath = rtrim($file->getStorage()->getConfiguration()['basePath'], '/');
@@ -66,7 +66,7 @@ final class BeforeFlexFormDataStructureIdentifierInitializedListener
                             $identifier = [
                                 'type' => 'record',
                                 'tableName' => 'tx_gridelements_backend_layout',
-                                'uid' => $layoutId,
+                                'uid' => $layoutSetup['uid'] ?? $layoutId,
                                 'fieldName' => 'pi_flexform_ds_file',
                                 'flexformDS' => 'FILE:' . $filePath,
                             ];
@@ -82,7 +82,7 @@ final class BeforeFlexFormDataStructureIdentifierInitializedListener
                         $identifier = [
                             'type' => 'record',
                             'tableName' => 'tx_gridelements_backend_layout',
-                            'uid' => $layoutSetup['uid'],
+                            'uid' => $layoutSetup['uid'] ?? $layoutId,
                             'fieldName' => 'pi_flexform_ds_file',
                             'flexformDS' => 'FILE:' . $layoutSetup['pi_flexform_ds_file'],
                         ];
@@ -91,7 +91,7 @@ final class BeforeFlexFormDataStructureIdentifierInitializedListener
                     $identifier = [
                         'type' => 'record',
                         'tableName' => 'tx_gridelements_backend_layout',
-                        'uid' => $layoutSetup['uid'],
+                        'uid' => $layoutSetup['uid'] ?? $layoutId,
                         'fieldName' => 'pi_flexform_ds',
                         'flexformDS' => $layoutSetup['pi_flexform_ds'],
                     ];
