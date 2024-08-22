@@ -66,7 +66,7 @@ class ListTypeList implements SingletonInterface
             // negative uid_pid values indicate that the element has been inserted after an existing element
             // so there is no pid to get the backendLayout for and we have to get that first
             $existingElement = BackendUtility::getRecordWSOL('tt_content', -((int)$params['row']['pid']), 'pid,list_type,colPos,tx_gridelements_container,tx_gridelements_columns');
-            if ((int)$existingElement['pid'] > 0) {
+            if ($existingElement && (int)$existingElement['pid'] > 0) {
                 $this->checkForAllowedListTypes(
                     $params['items'],
                     (int)($existingElement['pid'] ?? 0),
