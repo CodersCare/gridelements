@@ -67,7 +67,7 @@ class ColPosList implements SingletonInterface
                 -((int)$params['row']['pid']),
                 'pid,CType,list_type,tx_gridelements_backend_layout,tx_gridelements_container'
             );
-            if ($existingElement['pid'] > 0) {
+            if ($existingElement && $existingElement['pid'] > 0) {
                 $params['items'] = $this->addColPosListLayoutItems(
                     $existingElement['pid'],
                     $params['items'],
