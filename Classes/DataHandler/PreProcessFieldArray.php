@@ -102,6 +102,9 @@ class PreProcessFieldArray extends AbstractDataHandler
      */
     public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false, $action = '')
     {
+        if (!($this->request instanceof ServerRequestInterface)) {
+            return;
+        }
         $pid = (int)($this->request->getQueryParams()['DDinsertNew'] ?? 0);
 
         if (abs($pid) > 0) {
@@ -120,6 +123,9 @@ class PreProcessFieldArray extends AbstractDataHandler
      */
     public function setDefaultFieldValues(array &$fieldArray, int $uidPid = 0)
     {
+        if (!($this->request instanceof ServerRequestInterface)) {
+            return;
+        }
         // Default values:
         $newRow = []; // Used to store default values as found here:
 
