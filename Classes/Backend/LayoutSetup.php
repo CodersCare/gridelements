@@ -44,6 +44,7 @@ use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
 use TYPO3\CMS\Core\TypoScript\TypoScriptStringFactory;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
@@ -757,9 +758,6 @@ class LayoutSetup
         } else {
             $this->languageService = GeneralUtility::makeInstance(LanguageServiceFactory::class)
                     ->createFromSiteLanguage($this->getRequest()->getAttribute('language'));
-        }
-        if ($this->getBackendUser()) {
-            $this->languageService->init($this->getBackendUser()->uc['lang'] ?? '');
         }
     }
 
