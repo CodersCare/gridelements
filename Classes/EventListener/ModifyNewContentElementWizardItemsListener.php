@@ -121,10 +121,9 @@ final class ModifyNewContentElementWizardItemsListener
         }
 
         $queryParams = $request->getQueryParams();
-        $colPos = (int)$queryParams['colPos'];
 
-        if (isset($queryParams['colPos']) && $colPos > -1) {
-            $restrictions = $this->getRestrictionsFromBackendLayout($queryParams, $colPos);
+        if (isset($queryParams['colPos']) && (int)$queryParams['colPos'] > -1) {
+            $restrictions = $this->getRestrictionsFromBackendLayout($queryParams, (int)$queryParams['colPos']);
         } else {
             $restrictions = [
                 'allowed' => json_decode(base64_decode($queryParams['tx_gridelements_allowed'] ?? ''), true) ?: [],
