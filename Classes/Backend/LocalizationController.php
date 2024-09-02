@@ -108,7 +108,7 @@ class LocalizationController
             if ($row['CType'] === 'gridelements_pi1') {
                 $containers[$row['uid']] = true;
             }
-            $colPos = $row['colPos'];
+            $colPos = $row['colPos'] ?? 0;
             $container = $row['tx_gridelements_container'];
             $uid = $row['uid'];
             if (!isset($records[$colPos]) && !isset($containers[$container])) {

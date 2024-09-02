@@ -318,8 +318,13 @@ class TtContent
     public function layoutItemsProcFunc(array &$params)
     {
         $this->init((int)$params['row']['pid']);
+        if (isset($params['row']['colPos'])) {
+            $colPos = is_array($params['row']['colPos']) ? ($params['row']['colPos'][0] ?? 0) : $params['row']['colPos'];
+        } else {
+            $colPos = 0;
+        }
         $layoutSelectItems = $this->layoutSetup->getLayoutSelectItems(
-            isset($params['row']['colPos'][0]) ? (int)$params['row']['colPos'][0] : (int)$params['row']['colPos'],
+            $colPos,
             (int)$params['row']['tx_gridelements_columns'],
             (int)$params['row']['tx_gridelements_container'],
             $this->layoutSetup->getRealPid()
