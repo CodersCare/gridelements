@@ -29,7 +29,6 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
-use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -318,7 +317,6 @@ class TtContent
     public function layoutItemsProcFunc(array &$params)
     {
         $this->init((int)$params['row']['pid']);
-        DebugUtility::debug($params['row']['tx_gridelements_container']);
         if (!empty($params['row']['colPos'])) {
             $colPos = is_array($params['row']['colPos']) ? ($params['row']['colPos'][0] ?? 0) : (int)$params['row']['colPos'];
         } else {
