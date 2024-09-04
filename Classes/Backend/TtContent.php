@@ -318,7 +318,7 @@ class TtContent
     {
         $this->init((int)$params['row']['pid']);
         if (!empty($params['row']['colPos'])) {
-            $colPos = is_array($params['row']['colPos']) ? ($params['row']['colPos'][0] ?? 0) : (int)$params['row']['colPos'];
+            $colPos = is_array($params['row']['colPos']) ? ((int)$params['row']['colPos'][0] ?? 0) : (int)$params['row']['colPos'];
         } else {
             $colPos = 0;
         }
