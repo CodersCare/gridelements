@@ -13,6 +13,10 @@
 	overflow-y: initial;
 }
 
+.t3-page-ce[data-ctype="gridelements_pi1"] .t3-page-ce {
+	margin: 10px !important;
+}
+
 .t3js-module-body .t3-grid-container-title-0,
 .t3js-module-body .t3-grid-container-title--1 {
 	font-size: 12px;
