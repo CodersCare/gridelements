@@ -271,8 +271,7 @@
 .t3-grid-cell-number-of-items {
 	display: block;
 	float: right;
-	margin-top: 11px;
-	right: 11px;
+	right: 3rem;
 	height: 25px;
 	border: 1px solid #ccc;
 	border-radius: 2px;
