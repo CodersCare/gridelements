@@ -196,12 +196,12 @@ class LayoutSetup
             ->select('*')
             ->from('tx_gridelements_backend_layout')
             ->where(
-                $queryBuilder->expr()->orX(
-                    $queryBuilder->expr()->andX(
+                $queryBuilder->expr()->or(
+                    $queryBuilder->expr()->and(
                         $queryBuilder->expr()->comparison($pageTSconfigId, '=', 0),
                         $queryBuilder->expr()->comparison($storagePid, '=', 0)
                     ),
-                    $queryBuilder->expr()->orX(
+                    $queryBuilder->expr()->or(
                         $queryBuilder->expr()->eq(
                             'pid',
                             $queryBuilder->createNamedParameter((int)$pageTSconfigId, Connection::PARAM_INT)
@@ -211,7 +211,7 @@ class LayoutSetup
                             $queryBuilder->createNamedParameter($storagePid, Connection::PARAM_INT)
                         )
                     ),
-                    $queryBuilder->expr()->andX(
+                    $queryBuilder->expr()->and(
                         $queryBuilder->expr()->comparison($pageTSconfigId, '=', 0),
                         $queryBuilder->expr()->eq(
                             'pid',
@@ -222,7 +222,7 @@ class LayoutSetup
             )
             ->orderBy('sorting', 'ASC');
 
-        $layoutItems = $layoutQuery->execute()->fetchAll();
+        $layoutItems = $layoutQuery->executeQuery()->fetchAllAssociative();
 
         $gridLayoutRecords = [];
 

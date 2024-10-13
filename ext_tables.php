@@ -33,8 +33,6 @@ if ((new Typo3Version())->getMajorVersion() >= 12) {
     }
 }
 
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::allowTableOnStandardPages('tx_gridelements_backend_layout');
-
 $GLOBALS['TYPO3_CONF_VARS']['BE']['ContextMenu']['ItemProviders'][1487270751] = \GridElementsTeam\Gridelements\ContextMenu\ItemProvider::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['record_is_used']['gridelements'] = \GridElementsTeam\Gridelements\Hooks\PageLayoutView::class . '->contentIsUsed';

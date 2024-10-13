@@ -261,7 +261,7 @@ class Gridelements extends ContentObjectRenderer
         }
         $csvColumns = GeneralUtility::intExplode(',', $csvColumns);
         $queryBuilder = $this->getQueryBuilder();
-        $where = $queryBuilder->expr()->andX(
+        $where = $queryBuilder->expr()->and(
             $queryBuilder->expr()->eq(
                 'tx_gridelements_container',
                 $queryBuilder->createNamedParameter($element, Connection::PARAM_INT)
@@ -285,7 +285,7 @@ class Gridelements extends ContentObjectRenderer
                     $element = (int)$this->cObj->data['_LOCALIZED_UID'];
                 }
                 if ($element) {
-                    $translationOverlay = $queryBuilder->expr()->andX(
+                    $translationOverlay = $queryBuilder->expr()->and(
                         $queryBuilder->expr()->eq(
                             'tx_gridelements_container',
                             $queryBuilder->createNamedParameter($element, Connection::PARAM_INT)
@@ -313,7 +313,7 @@ class Gridelements extends ContentObjectRenderer
                     );
                 }
             } else {
-                $translationNoOverlay = $queryBuilder->expr()->andX(
+                $translationNoOverlay = $queryBuilder->expr()->and(
                     $queryBuilder->expr()->eq(
                         'tx_gridelements_container',
                         $queryBuilder->createNamedParameter($element, Connection::PARAM_INT)
@@ -342,14 +342,14 @@ class Gridelements extends ContentObjectRenderer
             ->select('*')
             ->from('tt_content')
             ->where(
-                $queryBuilder->expr()->orX(
+                $queryBuilder->expr()->or(
                     $where,
                     $translationOverlay,
                     $translationNoOverlay
                 )
             )
             ->orderBy('sorting', 'ASC')
-            ->execute();
+            ->executeQuery();
 
         $this->cObj->data['tx_gridelements_view_children'] = [];
         while ($child = $children->fetch()) {

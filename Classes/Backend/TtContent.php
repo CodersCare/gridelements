@@ -182,7 +182,6 @@ class TtContent
         }
         $containerIds = GeneralUtility::intExplode(',', $containerIds);
         $queryBuilder = $this->getQueryBuilder();
-        $queryBuilder->resetQueryParts();
         $queryBuilder->resetRestrictions();
         $childrenOnNextLevel = $queryBuilder
             ->select('uid', 'tx_gridelements_container')
