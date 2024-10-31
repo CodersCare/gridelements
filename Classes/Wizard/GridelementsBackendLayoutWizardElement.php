@@ -24,10 +24,11 @@ namespace GridElementsTeam\Gridelements\Wizard;
 
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Backend\Form\Element\BackendLayoutWizardElement;
-use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
-use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\TypoScript\TypoScriptStringFactory;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -71,98 +72,111 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         $fieldInformationHtml = $fieldInformationResult['html'];
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldInformationResult, false);
 
-        $fieldWizardResult = $this->renderFieldWizard();
-        $fieldWizardHtml = $fieldWizardResult['html'];
-        $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
+        // Use CodeMirror if available
+        if (ExtensionManagementUtility::isLoaded('t3editor')) {
+            $codeMirrorConfig = [
+                    'label' => $lang->sL('LLL:EXT:backend/Resources/Private/Language/locallang_alt_doc.xlf:buttons.pageTsConfig'),
+                    'panel' => 'top',
+                    'mode' => GeneralUtility::jsonEncodeForHtmlAttribute(JavaScriptModuleInstruction::create('@typo3/t3editor/language/typoscript.js', 'typoscript')->invoke(), false),
+                    'nolazyload' => 'true',
+                    'readonly' => 'true',
+            ];
+            $editor = '
+                <typo3-t3editor-codemirror class="t3js-grideditor-preview-config grideditor-preview" ' . GeneralUtility::implodeAttributes($codeMirrorConfig, true) . '>
+                    <textarea class="t3js-tsconfig-preview-area form-control"></textarea>
+                </typo3-t3editor-codemirror>';
 
-        $json = json_encode($this->rows, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+            $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create('@typo3/t3editor/element/code-mirror-element.js');
+        } else {
+            $editor = '
+                <label>' . htmlspecialchars($lang->sL('LLL:EXT:backend/Resources/Private/Language/locallang_alt_doc.xlf:buttons.pageTsConfig')) . '</label>
+                <div class="t3js-grideditor-preview-config grideditor-preview">
+                    <textarea class="t3js-tsconfig-preview-area form-control" rows="25" readonly></textarea>
+                </div>';
+        }
+
+        $json = (string)json_encode($this->rows, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
         $html = [];
         $html[] = '<div class="formengine-field-item t3js-formengine-field-item">';
-        $html[] = $fieldInformationHtml;
-        $html[] = '<div class="form-control-wrap">';
-        $html[] = '<div class="form-wizards-wrap">';
-        $html[] = '<div class="form-wizards-element">';
-        $html[] = '<input';
-        $html[] = ' type="hidden"';
-        $html[] = ' name="' . htmlspecialchars($this->data['parameterArray']['itemFormElName']) . '"';
-        $html[] = ' value="' . htmlspecialchars($this->data['parameterArray']['itemFormElValue']) . '"';
-        $html[] = '/>';
-        $html[] = '<table class="grideditor table table-bordered">';
-        $html[] = '<tr>';
-        $html[] = '<td class="editor_cell">';
-        $html[] = '<div';
-        $html[] = ' id="editor"';
-        $html[] = ' class="t3js-grideditor"';
-        $html[] = ' data-data="' . htmlspecialchars($json) . '"';
-        $html[] = ' data-rowcount="' . $this->rowCount . '"';
-        $html[] = ' data-colcount="' . $this->colCount . '"';
-        $html[] = ' data-field="' . htmlspecialchars($this->data['parameterArray']['itemFormElName']) . '"';
-        $html[] = '>';
-        $html[] = '</div>';
-        $html[] = '</td>';
-        $html[] = '<td>';
-        $html[] = '<div class="btn-group-vertical">';
-        $html[] = '<a class="btn btn-default btn-sm t3js-grideditor-addcolumn" href="#"';
-        $html[] = ' title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf:grid_addColumn')) . '">';
-        $html[] = '<i class="fa fa-fw fa-arrow-right"></i>';
-        $html[] = '</a>';
-        $html[] = '<a class="btn btn-default btn-sm t3js-grideditor-removecolumn" href="#"';
-        $html[] = ' title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf:grid_removeColumn')) . '">';
-        $html[] = '<i class="fa fa-fw fa-arrow-left"></i>';
-        $html[] = '</a>';
-        $html[] = '</div>';
-        $html[] = '</td>';
-        $html[] = '</tr>';
-        $html[] = '<tr>';
-        $html[] = '<td colspan="2" align="center">';
-        $html[] = '<div class="btn-group">';
-        $html[] = '<a class="btn btn-default btn-sm t3js-grideditor-addrow" href="#"';
-        $html[] = ' title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf:grid_addRow')) . '">';
-        $html[] = '<i class="fa fa-fw fa-arrow-down"></i>';
-        $html[] = '</a>';
-        $html[] = '<a class="btn btn-default btn-sm t3js-grideditor-removerow" href="#"';
-        $html[] = ' title="' . htmlspecialchars($lang->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf:grid_removeRow')) . '">';
-        $html[] = '<i class="fa fa-fw fa-arrow-up"></i>';
-        $html[] = '</a>';
-        $html[] = '</div>';
-        $html[] = '</td>';
-        $html[] = '</tr>';
-        $html[] = '<tr>';
-        $html[] = '<td colspan="2">';
-        $html[] = '<a href="#" class="btn btn-default btn-sm t3js-grideditor-preview-button">' . htmlspecialchars($lang->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf:buttons.pageTsConfig')) . '</a>';
-        $html[] = '<pre class="t3js-grideditor-preview-config grideditor-preview"><code></code></pre>';
-        $html[] = '</td>';
-        $html[] = '</tr>';
-        $html[] = '</table>';
-        $html[] = '</div>';
-        $html[] = '<div class="form-wizards-items-bottom">';
-        $html[] = $fieldWizardHtml;
-        $html[] = '</div>';
-        $html[] = '</div>';
-        $html[] = '</div>';
+        $html[] =   $fieldInformationHtml;
+        $html[] =   '<div class="form-control-wrap">';
+        $html[] =       '<div class="form-wizards-wrap">';
+        $html[] =           '<div class="form-wizards-element">';
+        $html[] =               '<input';
+        $html[] =                   ' type="hidden"';
+        $html[] =                   ' name="' . htmlspecialchars($this->data['parameterArray']['itemFormElName']) . '"';
+        $html[] =                   ' value="' . htmlspecialchars($this->data['parameterArray']['itemFormElValue']) . '"';
+        $html[] =                   '/>';
+        $html[] =               '<div class="grideditor' . ($readOnly ? ' grideditor-readonly' : '') . '">';
+        if (!$readOnly) {
+            $html[] =               '<div class="grideditor-control grideditor-control-top">';
+            $html[] =                   '<div class="btn-group">';
+            $html[] =                       '<a class="btn btn-default btn-sm t3js-grideditor-addrow-top" href="#"';
+            $html[] =                           ' title="' . htmlspecialchars($lang->sL('LLL:EXT:core/Resources/Private/Language/locallang_wizards.xlf:grid_addRow')) . '">';
+            $html[] =                           $this->iconFactory->getIcon('actions-plus', Icon::SIZE_SMALL)->render();
+            $html[] =                       '</a>';
+            $html[] =                       '<a class="btn btn-default btn-sm t3js-grideditor-removerow-top" href="#"';
+            $html[] =                           ' title="' . htmlspecialchars($lang->sL('LLL:EXT:core/Resources/Private/Language/locallang_wizards.xlf:grid_removeRow')) . '">';
+            $html[] =                           $this->iconFactory->getIcon('actions-minus', Icon::SIZE_SMALL)->render();
+            $html[] =                       '</a>';
+            $html[] =                   '</div>';
+            $html[] =               '</div>';
+        }
+        $html[] =                   '<div class="grideditor-editor">';
+        $html[] =                       '<div';
+        $html[] =                           ' id="editor"';
+        $html[] =                           ' class="t3js-grideditor"';
+        $html[] =                           ' data-data="' . htmlspecialchars($json) . '"';
+        $html[] =                           ' data-rowcount="' . (int)$this->rowCount . '"';
+        $html[] =                           ' data-colcount="' . (int)$this->colCount . '"';
+        $html[] =                           ' data-readonly="' . ($readOnly ? '1' : '0') . '"';
+        $html[] =                           ' data-field="' . htmlspecialchars($this->data['parameterArray']['itemFormElName']) . '"';
+        $html[] =                       '></div>';
+        $html[] =                   '</div>';
+        if (!$readOnly) {
+            $html[] =               '<div class="grideditor-control grideditor-control-right">';
+            $html[] =                   '<div class="btn-group-vertical">';
+            $html[] =                       '<a class="btn btn-default btn-sm t3js-grideditor-addcolumn" href="#"';
+            $html[] =                           ' title="' . htmlspecialchars($lang->sL('LLL:EXT:core/Resources/Private/Language/locallang_wizards.xlf:grid_addColumn')) . '">';
+            $html[] =                           $this->iconFactory->getIcon('actions-plus', Icon::SIZE_SMALL)->render();
+            $html[] =                       '</a>';
+            $html[] =                       '<a class="btn btn-default btn-sm t3js-grideditor-removecolumn" href="#"';
+            $html[] =                           ' title="' . htmlspecialchars($lang->sL('LLL:EXT:core/Resources/Private/Language/locallang_wizards.xlf:grid_removeColumn')) . '">';
+            $html[] =                           $this->iconFactory->getIcon('actions-minus', Icon::SIZE_SMALL)->render();
+            $html[] =                       '</a>';
+            $html[] =                   '</div>';
+            $html[] =               '</div>';
+            $html[] =               '<div class="grideditor-control grideditor-control-bottom">';
+            $html[] =                   '<div class="btn-group">';
+            $html[] =                       '<a class="btn btn-default btn-sm t3js-grideditor-addrow-bottom" href="#"';
+            $html[] =                           ' title="' . htmlspecialchars($lang->sL('LLL:EXT:core/Resources/Private/Language/locallang_wizards.xlf:grid_addRow')) . '">';
+            $html[] =                           $this->iconFactory->getIcon('actions-plus', Icon::SIZE_SMALL)->render();
+            $html[] =                       '</a>';
+            $html[] =                       '<a class="btn btn-default btn-sm t3js-grideditor-removerow-bottom" href="#"';
+            $html[] =                           ' title="' . htmlspecialchars($lang->sL('LLL:EXT:core/Resources/Private/Language/locallang_wizards.xlf:grid_removeRow')) . '">';
+            $html[] =                           $this->iconFactory->getIcon('actions-minus', Icon::SIZE_SMALL)->render();
+            $html[] =                       '</a>';
+            $html[] =                   '</div>';
+            $html[] =               '</div>';
+        }
+        $html[] =                   '<div class="grideditor-preview">' . $editor . '</div>';
+        $html[] =                '</div>';
+        if (!$readOnly && !empty($fieldWizardHtml)) {
+            $html[] =           '<div class="form-wizards-items-bottom">' . $fieldWizardHtml . '</div>';
+        }
+        $html[] =           '</div>';
+        $html[] =       '</div>';
+        $html[] =   '</div>';
         $html[] = '</div>';
 
         $contentTypes = [];
         if (is_array($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'])) {
             foreach ($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] as $item) {
                 $contentType = [];
-                if (!empty($item[1])) {
-                    $contentType['key'] = $item[1];
+                if (!empty($item['value'])) {
+                    $contentType['key'] = $item['value'];
                     if (substr((string)$contentType['key'], 0, 2) !== '--') {
-                        $contentType['label'] = $lang->sL($item[0]);
-                        if (!empty($item[2])) {
-                            if (strpos($item[2], 'EXT:') === 0) {
-                                $contentType['icon'] = GeneralUtility::getFileAbsFileName($item[2]);
-                            } elseif (strpos($item[2], '/typo3') === 0) {
-                                $contentType['icon'] = '../../../' . $item[2];
-                            } else {
-                                $contentType['icon'] = '../../../' . '../typo3/sysext/core/Resources/Public/Icons/T3Icons/content/' . $item[2];
-                            }
-                        }
-                        // Check if file ending exists, therefore compare pos of last slash to pos of last dot
-                        if (!empty($contentType['icon']) && strrpos($contentType['icon'], '/') > strrpos($contentType['icon'], '.')) {
-                            $contentType['icon'] .= '.svg';
-                        }
+                        $contentType['label'] = $lang->sL($item['label']);
                         $contentTypes[] = $contentType;
                     }
                 }
@@ -172,24 +186,10 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         if (is_array($GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'])) {
             foreach ($GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] as $item) {
                 $listType = [];
-                if (!empty($item[1])) {
-                    $listType['key'] = $item[1];
+                if (!empty($item['value'])) {
+                    $listType['key'] = $item['value'];
                     if (substr((string)$listType['key'], 0, 2) !== '--') {
-                        $listType['label'] = $lang->sL($item[0]);
-                        if (strpos($item[2], 'EXT:') === 0) {
-                            $listType['icon'] = GeneralUtility::getFileAbsFileName($item[2]);
-                        } elseif (strpos($item[2], '/typo3') === 0) {
-                            $listType['icon'] = '../../../' . $item[2];
-                        } else {
-                            $listType['icon'] = '../../../' . '../typo3/sysext/core/Resources/Public/Icons/T3Icons/content/' . $item[2];
-                        }
-                        // Check if file ending exists, therefore compare pos of last slash to pos of last dot
-                        if (!empty($listType['icon']) && strrpos($listType['icon'], '/') > strrpos(
-                            $listType['icon'],
-                            '.'
-                        )) {
-                            $listType['icon'] .= '.svg';
-                        }
+                        $listType['label'] = $lang->sL($item['label']);
                         $listTypes[] = $listType;
                     }
                 }
@@ -204,39 +204,29 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                     $gridType['key'] = $key;
                     if (substr((string)$gridType['key'], 0, 2) !== '--') {
                         $gridType['label'] = $lang->sL($item['title']);
-                        if (!empty($item['icon']) && is_array($item['icon']) && !empty($item['icon'][0])) {
-                            if (strpos($item['icon'][0], 'EXT:') === 0) {
-                                $gridType['icon'] = GeneralUtility::getFileAbsFileName($item['icon'][0]);
-                            } elseif (strpos($item['icon'][0], '/typo3') === 0) {
-                                $gridType['icon'] = '../../../' . $item['icon'][0];
-                            } else {
-                                $gridType['icon'] = '../../../' . '../typo3/sysext/core/Resources/Public/Icons/T3Icons/content/' . $item['icon'][0];
-                            }
-                            // Check if file ending exists, therefore compare pos of last slash to pos of last dot
-                            if (!empty($gridType['icon']) && strrpos($gridType['icon'], '/') > strrpos(
-                                $gridType['icon'],
-                                '.'
-                            )) {
-                                $gridType['icon'] .= '.svg';
-                            }
-                        }
                         $gridTypes[] = $gridType;
                     }
                 }
             }
         }
-        $html[] = '<script type="text/javascript">/*<![CDATA[*/ ' .
-            ($contentTypes ? ' TYPO3.settings.availableCTypes = ' . json_encode($contentTypes) . '; ' : '') .
-            ($listTypes ? ' TYPO3.settings.availableListTypes = ' . json_encode($listTypes) . '; ' : '') .
-            ($gridTypes ? ' TYPO3.settings.availableGridTypes = ' . json_encode($gridTypes) . '; ' : '') .
-            '/*]]>*/</script>';
-
+        $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
+        $pageRenderer->addJsInlineCode(
+                'GridelementsBackendLayout',
+                'var Gridelements = Gridelements || {}; Gridelements.BackendLayout = Gridelements.BackendLayout || {}; ' .
+                ($contentTypes ? ' Gridelements.BackendLayout.availableCTypes = ' . json_encode($contentTypes) . '; ' : '') .
+                ($listTypes ? '  Gridelements.BackendLayout.availableListTypes = ' . json_encode($listTypes) . '; ' : '') .
+                ($gridTypes ? '  Gridelements.BackendLayout.availableGridTypes = ' . json_encode($gridTypes) . '; ' : ''),
+                true,false,true
+        );
         $html = implode(LF, $html);
-        $resultArray['html'] = $html;
-        $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf';
+        $resultArray['html'] = $this->wrapWithFieldsetAndLegend($html);
+        $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create(
+            '@typo3/backend/gridelements/grid-editor.js',
+            'GridEditor'
+        )->instance();
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:core/Resources/Private/Language/locallang_wizards.xlf';
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:backend/Resources/Private/Language/locallang.xlf';
-        $resultArray['requireJsModules'][] = JavaScriptModuleInstruction::forRequireJS('TYPO3/CMS/Gridelements/GridEditor')->instance();
+        $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:gridelements/Resources/Private/Language/locallang_wizard.xlf';
 
         return $resultArray;
     }
@@ -285,6 +275,9 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
             for ($i = 1; $i <= $rowCount; $i++) {
                 $cells = [];
                 $row = array_shift($dataRows);
+                if (empty($row['columns.'])) {
+                    continue;
+                }
                 $columns = $row['columns.'];
                 for ($j = 1; $j <= $colCount; $j++) {
                     $cellData = [];
