@@ -32,7 +32,7 @@ use Psr\EventDispatcher\StoppableEventInterface;
  *
  * See the note on FlexFormTools regarding the schema of $dataStructure.
  */
-final class ModifyRecordListElementDataEvent implements StoppableEventInterface
+class ModifyRecordListElementDataEvent implements StoppableEventInterface
 {
     private array|null $returnData = null;
 

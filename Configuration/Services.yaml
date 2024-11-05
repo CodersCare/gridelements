@@ -37,17 +37,26 @@ services:
     tags:
       - name: event.listener
         identifier: 'gridelements-ttcontent-recordlist-enhance'
-        event: TYPO3\CMS\Core\Configuration\Event\ModifyDatabaseQueryForRecordListingEvent
+        event: TYPO3\CMS\Backend\View\Event\ModifyDatabaseQueryForRecordListingEvent
+    public: true
+    arguments:
+      [ '@extensionconfiguration.gridelements' ]
   GridElementsTeam\Gridelements\EventListener\ModifyRecordListElementDataListener:
     tags:
       - name: event.listener
         identifier: 'gridelements-ttcontent-recordlist-add-child-attr'
         event: GridElementsTeam\Gridelements\Event\ModifyRecordListElementDataEvent
+    public: true
+    arguments:
+      [ '@extensionconfiguration.gridelements' ]
   GridElementsTeam\Gridelements\EventListener\ModifyNewContentElementWizardItemsListener:
     tags:
       - name: event.listener
         identifier: 'gridelements-ttcontent-new-content-wizard'
         event: TYPO3\CMS\Backend\Controller\Event\ModifyNewContentElementWizardItemsEvent
+    public: true
+    arguments:
+      [ '@extensionconfiguration.gridelements' ]
   GridElementsTeam\Gridelements\EventListener\IsContentUsedOnPageLayoutListener:
     tags:
       - name: event.listener

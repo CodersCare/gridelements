@@ -6,7 +6,7 @@ namespace GridElementsTeam\Gridelements\EventListener;
 
 use TYPO3\CMS\Backend\View\Event\IsContentUsedOnPageLayoutEvent;
 
-final class IsContentUsedOnPageLayoutListener
+class IsContentUsedOnPageLayoutListener
 {
     /**
      * Tell TYPO3 that gridelements are actually used

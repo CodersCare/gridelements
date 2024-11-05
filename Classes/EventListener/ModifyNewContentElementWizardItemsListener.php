@@ -39,7 +39,7 @@ use TYPO3\CMS\Core\Imaging\IconRegistry;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
-final class ModifyNewContentElementWizardItemsListener
+class ModifyNewContentElementWizardItemsListener
 {
     /**
      * @param array $gridElementsExtensionConfiguration

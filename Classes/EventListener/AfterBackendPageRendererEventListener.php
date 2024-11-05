@@ -20,7 +20,7 @@ namespace GridElementsTeam\Gridelements\EventListener;
 use TYPO3\CMS\Backend\Controller\Event\AfterBackendPageRenderEvent;
 use TYPO3\CMS\Core\Page\PageRenderer;
 
-final class AfterBackendPageRendererEventListener
+class AfterBackendPageRendererEventListener
 {
     /**
      * @param PageRenderer|null $pageRenderer

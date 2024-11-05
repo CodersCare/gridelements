@@ -7,7 +7,7 @@ namespace GridElementsTeam\Gridelements\EventListener;
 use TYPO3\CMS\Core\Configuration\Event\BeforeFlexFormDataStructureParsedEvent;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
-final class BeforeFlexFormDataStructureParsedListener
+class BeforeFlexFormDataStructureParsedListener
 {
     /**
      * @param BeforeFlexFormDataStructureParsedEvent $event

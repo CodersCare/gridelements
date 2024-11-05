@@ -35,7 +35,7 @@ use TYPO3\CMS\Core\Utility\MathUtility;
  * @author Dirk Hoffmann <hoffmann@vmd-jena.de>
  * @author Stephan Schuler <stephan.schuler@netlogix.de>
  */
-final class BeforeFlexFormDataStructureIdentifierInitializedListener
+class BeforeFlexFormDataStructureIdentifierInitializedListener
 {
     /**
      * @param BeforeFlexFormDataStructureIdentifierInitializedEvent $event

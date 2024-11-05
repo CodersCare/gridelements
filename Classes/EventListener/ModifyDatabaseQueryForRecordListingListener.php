@@ -6,7 +6,7 @@ namespace GridElementsTeam\Gridelements\EventListener;
 
 use TYPO3\CMS\Backend\View\Event\ModifyDatabaseQueryForRecordListingEvent;
 
-final class ModifyDatabaseQueryForRecordListingListener
+class ModifyDatabaseQueryForRecordListingListener
 {
     /**
      * @param array $gridElementsExtensionConfiguration

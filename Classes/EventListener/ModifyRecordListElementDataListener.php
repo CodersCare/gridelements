@@ -5,7 +5,7 @@ namespace GridElementsTeam\Gridelements\EventListener;
 use GridElementsTeam\Gridelements\Event\ModifyRecordListElementDataEvent;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 
-final class ModifyRecordListElementDataListener
+class ModifyRecordListElementDataListener
 {
     /**
      * @param array $gridElementsExtensionConfiguration
