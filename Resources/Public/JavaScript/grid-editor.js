@@ -264,7 +264,7 @@ export class GridEditor {
 
     setAllowed(t, e, o) {
         const n = this.getCell(e, o);
-        return !!n && (n.allowed.CType = GridEditor.stripMarkup(t))
+        return !!n && (n.allowed.CType = GridEditor.stripMarkup(t ? t : '*'))
     }
 
     setAllowedListTypes(t, e, o) {
@@ -471,7 +471,7 @@ export class GridEditor {
                     i.disallowed && i.disallowed.list_type && (t += "\t\t\t\t\t\tlist_type = " + i.disallowed.list_type + "\n"),
                     i.disallowed &&i.disallowed.tx_gridelements_backend_layout && (t += "\t\t\t\t\t\ttx_gridelements_backend_layout = " + i.disallowed.tx_gridelements_backend_layout + "\n"),
                     i.disallowed && (i.disallowed.CType || i.disallowed.list_type || i.disallowed.tx_gridelements_backend_layout) && (t += "\t\t\t\t\t}\n"),
-                    "number" == typeof i.maxitems && (t += "\t\t\t\t\tmaxitems = " + i.maxitems + "\n"),
+                    "number" == typeof i.maxitems && i.maxitems > 0 && (t += "\t\t\t\t\tmaxitems = " + i.maxitems + "\n"),
                     t += "\t\t\t\t}\n"
                 }
             }
