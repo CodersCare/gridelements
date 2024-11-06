@@ -39,9 +39,9 @@ class ModifyRecordListElementDataListener
         $theData = $event->getInputData();
 
         if (
+            $event->getTable() === 'tt_content' &&
             $row['CType'] === 'gridelements_pi1' &&
-            !empty($row['tx_gridelements_backend_layout']) &&
-            $event->getTable() === 'tt_content'
+            !empty($row['tx_gridelements_backend_layout'])
         ) {
             $elementChildren = GridElementsHelper::getChildren(
                 $event->getTable(),
@@ -60,8 +60,8 @@ class ModifyRecordListElementDataListener
                 $theData['_EXPAND_TABLE_'] = $event->getTable();
                 $theData['_LEVEL_'] = $event->getLevel();
                 $theData['_CHILDREN_'] = $elementChildren;
-                $event->setReturnData($theData);
             }
         }
+        $event->setReturnData($theData);
     }
 }

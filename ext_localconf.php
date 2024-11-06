@@ -10,6 +10,9 @@ if ((new(Typo3Version::class))->getMajorVersion() >= 12) {
         'priority' => 50,
         'class'    => \GridElementsTeam\Gridelements\Wizard\GridelementsBackendLayoutWizardElement::class,
     ];
+    if (!empty($GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['gridelements']['nestingInListModule'])) {
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Backend\RecordList\DatabaseRecordList::class] = ['className' => \GridElementsTeam\Gridelements\Xclass\DatabaseRecordList::class];
+    }
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTypoScript(
         'gridelements',
         'setup',
