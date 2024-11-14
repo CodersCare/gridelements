@@ -1,9 +1,9 @@
 {
 	"name": "gridelementsteam/gridelements",
-	"description": "This TYPO3 extension extends the grid-based concept known from the backend layout of pages to regular content elements - the grid elements. It offers a lot of new features like advanced drag & drop or real references, that improve the usability of the page and list module to speed up the daily work with the backend.",
+	"description": "Be part of the future of TYPO3! Support Gridelements now and unlock exclusive early access to Version 13! The well-established Gridelements Version 12 elevates TYPO3 by bringing grid-based layouts to content elements, with powerful features like advanced drag & drop and real references. Supercharge your backend workflow and make daily tasks easier. Join us in creating the next exciting version: https://coders.care/for/crowdfunding/gridelements",
 	"license": "GPL-2.0-or-later",
 	"type": "typo3-cms-extension",
-	"version": "12.0.0-dev",
+	"version": "12.0.0",
 	"keywords": [
 		"TYPO3 CMS",
 		"Grids",
@@ -11,18 +11,18 @@
 	],
 	"homepage": "https://extensions.typo3.org/extension/gridelements",
 	"support": {
-		"issues": "https://gitlab.com/coderscare/gridelements/-/issues",
+		"issues": "https://github.com/CodersCare/gridelements/issues",
 		"chat": "https://typo3.slack.com/archives/C037AHC38",
-		"source": "https://gitlab.com/coderscare/gridelements",
+		"source": "https://github.com/CodersCare/gridelements",
 		"docs": "https://docs.typo3.org/p/gridelementsteam/gridelements/main/en-us/"
 	},
 	"require": {
 		"php": "~8.1.0 || ~8.2.0 || ~8.3.0",
-		"typo3/cms-backend": "^11.5 || ^12.4.10 || dev-master",
-		"typo3/cms-core": "^11.5 || ^12.4.10 || dev-master",
-		"typo3/cms-fluid": "^11.5 || ^12.4.10 || dev-master",
-		"typo3/cms-frontend": "^11.5 || ^12.4.10 || dev-master",
-		"typo3/cms-scheduler": "^11.5 || ^12.4.10 || dev-master"
+		"typo3/cms-backend": "^11.5 || ^12.4.10",
+		"typo3/cms-core": "^11.5 || ^12.4.10",
+		"typo3/cms-fluid": "^11.5 || ^12.4.10",
+		"typo3/cms-frontend": "^11.5 || ^12.4.10",
+		"typo3/cms-scheduler": "^11.5 || ^12.4.10"
 	},
 	"require-dev": {
 		"composer/package-versions-deprecated": "1.11.99.5",

@@ -10,20 +10,14 @@
 
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Grid Elements',
-    'description' => 'This extension extends the grid-based concept known from the backend layout of pages to regular content elements - the grid elements.
-It offers a lot of new features like advanced drag & drop or real references, that improve the usability of the page and list module to speed up the daily work with the backend.',
+    'description' => 'Be part of the future of TYPO3! Support Gridelements now and unlock exclusive early access to Version 13! The well-established Gridelements Version 12 elevates TYPO3 by bringing grid-based layouts to content elements, with powerful features like advanced drag & drop and real references. Supercharge your backend workflow and make daily tasks easier. Join us in creating the next exciting version: https://coders.care/for/crowdfunding/gridelements',
     'category' => 'be',
     'version' => '12.0.0',
-    'priority' => 'bottom',
-    'module' => '',
     'state' => 'stable',
-    'uploadfolder' => true,
     'createDirs' => '',
     'modify_tables' => 'tt_content',
-    'clearcacheonload' => true,
     'author' => 'Grid Elements Team',
     'author_email' => 'info@cybercraft.de',
-    'author_company' => '',
     'constraints' => [
         'depends' => [
             'typo3' => '11.5.99-12.4.99',

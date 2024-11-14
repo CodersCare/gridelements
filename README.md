@@ -30,7 +30,7 @@ across all components.
 | **TER:**         | https://extensions.typo3.org/extension/gridelements                |
 
 <!-- Markdown link & img dfn's -->
-[coders.care-url]: https://coders.care
+[coders.care-url]: https://coders.care/for/crowdfunding/gridelements
 [patreon-url]: https://www.patreon.com/cybercraft
 [flattr-url]: https://www.flattr.com/@Cybercraft
 [paypal-url]: https://www.paypal.me/cybercraftsponsoring/50
@@ -50,7 +50,7 @@ Thanks in advance for your support.
 
 |                      |                       |
 |:---------------------------|:--------------------------------|
-| [![CodersCareLogo](Documentation/Images/Sponsoring/CodersCareLogo.png)][coders.care-url]              | Get yourself one of the Service Level Agreements we offer together with our fellow coders. This way you make sure Gridelements and other extensions live long and prosper and you will get a hotline with a defined response time in case of emergency.              |
+| [![CodersCareLogo](Documentation/Images/Sponsoring/CodersCareLogo.png)][coders.care-url]              | Support the development of Gridelements and other extensions by becoming a sponsor! As a sponsor, you'll gain exclusive early access to the latest features and updates, making your workflow even more efficient.              |
 | [![PatreonLogo](Documentation/Images/Sponsoring/PatreonLogo.png)][patreon-url]                  | A Service which allows you to become one of our Patrons on a monthly basis. You might even get a shout-out on twitter, get mentioned personally in the next release or even make a feature request depending on the amount you pick.                                  |
 | [![FlattrLogo](Documentation/Images/Sponsoring/FlattrLogo.png)][flattr-url]                         | Pay any amount monthly on this service and it gets spread even around the people you want to support! We would be Flattr'ed to have you.                    |
 | [![PaypalLogo](Documentation/Images/Sponsoring/PaypalLogo.png)][paypal-url]                       | You don't want to sponsor monthly? Don't worry you can also support us via Paypal with any desired amount you find reasonable.                        |
