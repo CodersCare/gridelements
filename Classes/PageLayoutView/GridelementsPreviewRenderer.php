@@ -186,7 +186,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
 
         $view->assignMultiple([
             'context' => $context,
-            'typo3Version', GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion(),
+            'typo3Version' => GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion(),
             'hideRestrictedColumns' => (bool)(BackendUtility::getPagesTSconfig($context->getPageId())['mod.']['web_layout.']['hideRestrictedCols'] ?? false),
             'newContentTitle' => $this->getLanguageService()->sL('LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:newContentElement'),
             'newContentTitleShort' => $this->getLanguageService()->sL('LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:content'),
