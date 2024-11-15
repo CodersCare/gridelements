@@ -20,7 +20,6 @@ use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Configuration\BackendConfigurationManager;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class GridelementsPreviewRenderer extends StandardContentPreviewRenderer implements PreviewRendererInterface
@@ -177,12 +176,10 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         }
 
         $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $configurationManager = GeneralUtility::makeInstance(BackendConfigurationManager::class);
-        $configuration = $configurationManager->getConfiguration('gridelements');
-        $view->setTemplate($configuration['backendContainer']['view']['defaultTemplate'] ?? 'BackendContainer');
-        $view->setLayoutRootPaths($configuration['backendContainer']['view']['layoutRootPaths'] ?? []);
-        $view->setTemplateRootPaths($configuration['backendContainer']['view']['templateRootPaths'] ?? []);
-        $view->setPartialRootPaths($configuration['backendContainer']['view']['partialRootPaths'] ?? []);
+        $view->setTemplate('BackendContainer');
+        $view->setLayoutRootPaths([0 => 'EXT:backend/Resources/Private/Layouts/', 100 => 'EXT:gridelements/Resources/Private/Backend/Gridelements/Layouts/']);
+        $view->setTemplateRootPaths([0 => 'EXT:backend/Resources/Private/Templates/', 100 => 'EXT:gridelements/Resources/Private/Backend/Gridelements/Templates/']);
+        $view->setPartialRootPaths([0 => 'EXT:backend/Resources/Private/Partials/', 100 => 'EXT:gridelements/Resources/Private/Backend/Gridelements/Partials/']);
 
         $view->assignMultiple([
             'context' => $context,
