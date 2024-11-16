@@ -1,0 +1,5 @@
+<col style="width: {100 / colCount}%" />
+<f:if condition="{iteration} < {colCount}">
+    <f:variable name="updated_iteration">{iteration + 1}</f:variable>
+    <f:render partial="PageLayout/Grid/ColgroupCol" arguments="{colCount: colCount, iteration: updated_iteration}" />
+</f:if>
