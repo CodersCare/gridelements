@@ -52,3 +52,10 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks'][\GridElementsTea
     'description'      => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:gridelementsNumberOfChildrenFixer.description'
 ];
 
+// Add orphaned children fixer task
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks'][\GridElementsTeam\Gridelements\Task\GridelementsOrphanedChildFixer::class] = [
+    'extension'        => 'gridelements',
+    'title'            => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:gridelementsOrphanedChildFixer.name',
+    'description'      => 'LLL:EXT:gridelements/Resources/Private/Language/locallang.xlf:gridelementsOrphanedChildFixer.description'
+];
+
