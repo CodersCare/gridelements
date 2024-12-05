@@ -8,7 +8,6 @@ return [
                 'label' => 'title',
                 'tstamp' => 'tstamp',
                 'crdate' => 'crdate',
-                'cruser_id' => 'cruser_id',
                 'versioningWS' => true,
                 'origUid' => 't3_origuid',
                 'sortby' => 'sorting',
@@ -41,7 +40,7 @@ return [
                                 'type' => 'check',
                                 'items' => [
                                         '1' => [
-                                                '0' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:hidden.I.0',
+                                                'label' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:hidden.I.0',
                                         ],
                                 ],
                         ],
@@ -53,7 +52,7 @@ return [
                                 'type' => 'input',
                                 'size' => '25',
                                 'max' => '256',
-                                'eval' => 'required',
+                                'required' => true,
                         ],
                 ],
                 'alias' => [
@@ -81,7 +80,7 @@ return [
                                 'type' => 'check',
                                 'items' => [
                                         '1' => [
-                                                '0' => $l10n . ':tx_gridelements_backend_layout.horizontal.I.0',
+                                                'label' => $l10n . ':tx_gridelements_backend_layout.horizontal.I.0',
                                         ],
                                 ],
                         ],
@@ -102,24 +101,24 @@ return [
                                 'renderType' => 'selectSingle',
                                 'items' => [
                                         [
-                                                $l10n . ':tx_gridelements_backend_layout.frame.I.0',
-                                                '0',
+                                                'label' => $l10n . ':tx_gridelements_backend_layout.frame.I.0',
+                                                'value' => '0',
                                         ],
                                         [
-                                                $l10n . ':tx_gridelements_backend_layout.frame.I.-1',
-                                                '-1',
+                                                'label' => $l10n . ':tx_gridelements_backend_layout.frame.I.-1',
+                                                'value' => '-1',
                                         ],
                                         [
-                                                $l10n . ':tx_gridelements_backend_layout.frame.I.1',
-                                                '1',
+                                                'label' => $l10n . ':tx_gridelements_backend_layout.frame.I.1',
+                                                'value' => '1',
                                         ],
                                         [
-                                                $l10n . ':tx_gridelements_backend_layout.frame.I.2',
-                                                '2',
+                                                'label' => $l10n . ':tx_gridelements_backend_layout.frame.I.2',
+                                                'value' => '2',
                                         ],
                                         [
-                                                $l10n . ':tx_gridelements_backend_layout.frame.I.3',
-                                                '3',
+                                                'label' => $l10n . ':tx_gridelements_backend_layout.frame.I.3',
+                                                'value' => '3',
                                         ],
                                 ],
                                 'size' => 1,
@@ -133,7 +132,7 @@ return [
                                 'type' => 'check',
                                 'items' => [
                                         '1' => [
-                                                '0' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
+                                                'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
                                         ],
                                 ],
                         ],
