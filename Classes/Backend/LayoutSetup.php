@@ -96,7 +96,7 @@ class LayoutSetup
     public function init(int $pageId, array $typoScriptSetup = []): LayoutSetup
     {
         $this->setLanguageService($GLOBALS['LANG'] ?? null);
-        $pageId = (strpos((string)$pageId, 'NEW') === 0) ? 0 : $pageId;
+        $pageId = (str_starts_with((string)$pageId, 'NEW')) ? 0 : $pageId;
         if ($pageId < 0) {
             $pageId = GridElementsHelper::getInstance()->getPidFromUid($pageId);
         }
@@ -126,7 +126,7 @@ class LayoutSetup
     {
         // Load page TSconfig.
         if (($GLOBALS['TYPO3_REQUEST'] ?? null) && ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
-            $pageTSconfig = $GLOBALS['TSFE']->getPagesTSconfig();
+            $pageTSconfig = GridElementsHelper::getPageTSconfig($GLOBALS['TYPO3_REQUEST']);
         } else {
             $pageTSconfig = BackendUtility::getPagesTSconfig($pageId);
         }
@@ -602,12 +602,7 @@ class LayoutSetup
      */
     public function getLayoutSetup(string $layoutId = ''): array
     {
-        // Continue only if setup for given layout ID found.
-        if (isset($this->layoutSetup[$layoutId])) {
-            return $this->layoutSetup[$layoutId];
-        }
-
-        return $this->layoutSetup;
+        return $this->layoutSetup[$layoutId] ?? $this->layoutSetup;
     }
 
     /**

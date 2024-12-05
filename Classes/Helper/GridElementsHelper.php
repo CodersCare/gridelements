@@ -23,8 +23,10 @@ namespace GridElementsTeam\Gridelements\Helper;
  ***************************************************************/
 
 use Doctrine\DBAL\Exception;
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -33,6 +35,9 @@ use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\WorkspaceRestriction;
 use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Site\Entity\NullSite;
+use TYPO3\CMS\Core\TypoScript\PageTsConfig;
+use TYPO3\CMS\Core\TypoScript\PageTsConfigFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -116,7 +121,7 @@ class GridElementsHelper implements SingletonInterface
      * @param bool $csvValues
      * @return array
      */
-    public static function mergeAllowedDisallowedSettings(array $backendLayout, bool $csvValues = false)
+    public static function mergeAllowedDisallowedSettings(array $backendLayout, bool $csvValues = false): array
     {
         if (!empty($backendLayout['allowed'])) {
             foreach ($backendLayout['allowed'] as &$allowedFields) {
@@ -196,7 +201,7 @@ class GridElementsHelper implements SingletonInterface
 
         $workspaceRestriction = GeneralUtility::makeInstance(
             WorkspaceRestriction::class,
-            (int)self::getBackendUser()->workspace
+            self::getBackendUser()->workspace
         );
         $restrictions = $queryBuilder->getRestrictions();
         $restrictions->add($workspaceRestriction);
@@ -232,7 +237,7 @@ class GridElementsHelper implements SingletonInterface
      * @param int $pageId
      * @return mixed
      */
-    public static function getSelectedBackendLayout(int $pageId)
+    public static function getSelectedBackendLayout(int $pageId): mixed
     {
         if (empty($GLOBALS['tx_gridelements']['pageBackendLayoutData'][$pageId])) {
             $backendLayoutData = GeneralUtility::makeInstance(BackendLayoutView::class)?->getSelectedBackendLayout($pageId);
@@ -289,6 +294,27 @@ class GridElementsHelper implements SingletonInterface
             $GLOBALS['tx_gridelements']['pageBackendLayoutData'][$pageId] = $backendLayoutData;
         }
         return $GLOBALS['tx_gridelements']['pageBackendLayoutData'][$pageId] ?? [];
+    }
+
+    /**
+     * Helper method to calculate pageTsConfig in frontend scope, we can't use BackendUtility::getPagesTSconfig() here.
+     */
+    public static function getPageTsConfig(ServerRequestInterface $request): array
+    {
+        $pageInformation = $request->getAttribute('frontend.page.information');
+        $id = $pageInformation->getId();
+        $runtimeCache = GeneralUtility::makeInstance(CacheManager::class)->getCache('runtime');
+        $pageTsConfig = $runtimeCache->get('pageTsConfig-' . $id);
+        if ($pageTsConfig instanceof PageTsConfig) {
+            return $pageTsConfig->getPageTsConfigArray();
+        }
+        $fullRootLine = $pageInformation->getRootLine();
+        ksort($fullRootLine);
+        $site = $request->getAttribute('site') ?? new NullSite();
+        $pageTsConfigFactory = GeneralUtility::makeInstance(PageTsConfigFactory::class);
+        $pageTsConfig = $pageTsConfigFactory->create($fullRootLine, $site);
+        $runtimeCache->set('pageTsConfig-' . $id, $pageTsConfig);
+        return $pageTsConfig->getPageTsConfigArray();
     }
 
     /**
