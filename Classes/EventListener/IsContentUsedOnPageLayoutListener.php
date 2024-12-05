@@ -13,7 +13,7 @@ class IsContentUsedOnPageLayoutListener
      *
      * @param IsContentUsedOnPageLayoutEvent $event
      */
-    public function __invoke(IsContentUsedOnPageLayoutEvent $event)
+    public function __invoke(IsContentUsedOnPageLayoutEvent $event): void
     {
         $record = $event->getRecord();
         if ($event->isRecordUsed()) {

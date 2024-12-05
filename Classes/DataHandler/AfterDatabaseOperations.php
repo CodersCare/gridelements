@@ -51,7 +51,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param DataHandler $parentObj The parent object that triggered this hook
      * @throws AspectNotFoundException
      */
-    public function adjustValuesAfterWorkspaceOperations(array $fieldArray, int $uid, DataHandler $parentObj)
+    public function adjustValuesAfterWorkspaceOperations(array $fieldArray, int $uid, DataHandler $parentObj): void
     {
         if (class_exists(Context::class)) {
             /** @var Context $context */
@@ -107,7 +107,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function execute_afterDatabaseOperations(array &$fieldArray, string $table, int $uid, DataHandler $parentObj)
+    public function execute_afterDatabaseOperations(array &$fieldArray, string $table, int $uid, DataHandler $parentObj): void
     {
         if ($table === 'tt_content' || $table === 'pages') {
             $this->init($table, (string)$uid, $parentObj);
@@ -129,7 +129,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param array $changedFieldArray
      * @throws Exception
      */
-    public function saveCleanedUpFieldArray(array $changedFieldArray)
+    public function saveCleanedUpFieldArray(array $changedFieldArray): void
     {
         unset($changedFieldArray['pi_flexform']);
         if (isset($changedFieldArray['tx_gridelements_backend_layout']) && $this->getTable() === 'tt_content'
@@ -146,7 +146,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param array $fieldArray The array of fields and values that have been saved to the datamap
      * @throws Exception
      */
-    public function setUnusedElements(array &$fieldArray)
+    public function setUnusedElements(array &$fieldArray): void
     {
         $changedGridElements = [];
         $changedElements = [];
@@ -169,7 +169,6 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         'tx_gridelements_columns',
                         $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
                     )))->executeQuery();
-                $childElementsInUnavailableColumns = [];
                 while ($childElementInUnavailableColumns = $childElementsInUnavailableColumnsQuery->fetchAssociative()) {
                     $childElementsInUnavailableColumns[] = $childElementInUnavailableColumns['uid'];
                 }
@@ -199,7 +198,6 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         'tx_gridelements_columns',
                         $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
                     )))->executeQuery();
-                $childElementsInAvailableColumns = [];
                 while ($childElementInAvailableColumns = $childElementsInAvailableColumnsQuery->fetchAssociative()) {
                     $childElementsInAvailableColumns[] = $childElementInAvailableColumns['uid'];
                 }
@@ -228,7 +226,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
             $selectedBackendLayoutNextLevel = '';
             $rootline = BackendUtility::BEgetRootLine($this->getPageUid());
             for ($i = count($rootline); $i > 0; $i--) {
-                $uid = isset($rootline[$i]) && isset($rootline[$i]['uid']) ? (int)$rootline[$i]['uid'] : 0;
+                $uid = isset($rootline[$i]['uid']) ? (int)$rootline[$i]['uid'] : 0;
                 if ($uid > 0) {
                     $page = BackendUtility::getRecord(
                         'pages',
@@ -335,7 +333,6 @@ class AfterDatabaseOperations extends AbstractDataHandler
                 $subPages = [];
                 $this->getSubPagesRecursively($this->getPageUid(), $subPages);
                 if (!empty($subPages)) {
-                    $changedSubPageElements = [];
                     foreach ($subPages as $page) {
                         $availableColumns = $this->getAvailableColumns((string)$backendLayoutId, 'pages', $page['uid']);
                         $availableColumns = GeneralUtility::intExplode(',', $availableColumns);
@@ -468,7 +465,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param array $subPages
      * @throws Exception
      */
-    public function getSubPagesRecursively(int $pageUid, array &$subPages)
+    public function getSubPagesRecursively(int $pageUid, array &$subPages): void
     {
         $queryBuilder = $this->getQueryBuilder('pages');
         $childPages = $queryBuilder

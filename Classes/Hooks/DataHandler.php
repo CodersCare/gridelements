@@ -27,6 +27,10 @@ use GridElementsTeam\Gridelements\DataHandler\AfterDatabaseOperations;
 use GridElementsTeam\Gridelements\DataHandler\PreProcessFieldArray;
 use GridElementsTeam\Gridelements\DataHandler\ProcessCmdmap;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\SingletonInterface;
@@ -64,7 +68,7 @@ class DataHandler implements SingletonInterface
         string $table,
         string $id,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
-    ) {
+    ): void {
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
             /** @var PreProcessFieldArray $hook */
             $hook = GeneralUtility::makeInstance(PreProcessFieldArray::class);
@@ -78,6 +82,10 @@ class DataHandler implements SingletonInterface
      * @param string $id : The uid of the page we are currently working on
      * @param array $fieldArray : The array of fields and values that have been saved to the datamap
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj : The parent object that triggered this hook
+     * @throws AspectNotFoundException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function processDatamap_afterDatabaseOperations(
         string &$status,
@@ -85,7 +93,7 @@ class DataHandler implements SingletonInterface
         string &$id,
         array &$fieldArray,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
-    ) {
+    ): void {
         // create a copy of $id which is passed by reference
         $recordUid = $id;
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
@@ -111,17 +119,18 @@ class DataHandler implements SingletonInterface
      * @param mixed $value The value that has been sent with the copy command
      * @param bool $commandIsProcessed A switch to tell the parent object, if the record has been copied
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj The parent object that triggered this hook
-     * @param array|bool $pasteUpdate Values to be updated after the record is pasted
+     * @param bool|array $pasteUpdate Values to be updated after the record is pasted
+     * @throws \Doctrine\DBAL\Exception
      */
     public function processCmdmap(
         string $command,
         string $table,
         int $id,
-        $value,
+        mixed $value,
         bool &$commandIsProcessed,
         \TYPO3\CMS\Core\DataHandling\DataHandler &$parentObj,
-        $pasteUpdate
-    ) {
+        bool|array $pasteUpdate
+    ): void {
         if (!$parentObj->isImporting) {
             /** @var ProcessCmdmap $hook */
             $hook = GeneralUtility::makeInstance(ProcessCmdmap::class);
@@ -129,7 +138,7 @@ class DataHandler implements SingletonInterface
         }
     }
 
-    public function processCmdmap_beforeStart(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler)
+    public function processCmdmap_beforeStart(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler): void
     {
         $cmdmap = $dataHandler->cmdmap;
         if (empty($cmdmap['tt_content']) || $dataHandler->bypassAccessCheckForRecords) {
@@ -157,14 +166,13 @@ class DataHandler implements SingletonInterface
                     $colPos = (int)$value['update']['colPos'];
                     $gridContainer = (int)$value['update']['tx_gridelements_container'];
                     $gridColumn = (int)$value['update']['tx_gridelements_columns'];
-                    $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
                 } else {
                     $pageId = (int)$value;
                     $colPos = (int)$currentRecord['colPos'];
                     $gridContainer = (int)$currentRecord['tx_gridelements_container'];
                     $gridColumn = (int)$currentRecord['tx_gridelements_columns'];
-                    $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
                 }
+                $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
 
                 if ($pageId < 0) {
                     $targetRecord = BackendUtility::getRecordWSOL('tt_content', abs($pageId), 'pid,colPos,tx_gridelements_container,tx_gridelements_columns');
@@ -233,7 +241,7 @@ class DataHandler implements SingletonInterface
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
      * @param int|string $id
      * @param string $command
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws Exception
      */
     public function flashNotAllowedError(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler, int|string $id, string $command): void
     {

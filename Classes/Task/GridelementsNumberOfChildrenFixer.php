@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\Task;
 
+use Doctrine\DBAL\Exception;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
@@ -12,12 +13,12 @@ use TYPO3\CMS\Scheduler\Task\AbstractTask;
 
 class GridelementsNumberOfChildrenFixer extends AbstractTask
 {
-
     /**
      * Fixes Gridelements parent records with broken tx_gridelements_children value
      * due to buggy behaviour of Cut/Copy/Paste or Drag/Drop methods.
      *
      * @return bool TRUE if task run was successful
+     * @throws Exception
      */
     public function execute(): bool
     {
@@ -85,5 +86,4 @@ class GridelementsNumberOfChildrenFixer extends AbstractTask
         }
         return true;
     }
-
 }

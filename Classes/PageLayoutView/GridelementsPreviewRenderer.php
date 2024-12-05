@@ -27,7 +27,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
     /**
      * @var array
      */
-    protected $extentensionConfiguration;
+    protected mixed $extentensionConfiguration;
 
     /**
      * @var GridelementsHelper
@@ -37,7 +37,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
     /**
      * @var IconFactory
      */
-    protected $iconFactory;
+    protected mixed $iconFactory;
 
     /**
      * @var LanguageService
@@ -96,6 +96,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
      *
      * @param GridColumnItem $item
      * @return string
+     * @throws Exception
      */
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {

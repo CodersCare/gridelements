@@ -37,7 +37,7 @@ class SysLanguageUidList implements SingletonInterface
      *
      * @param array $params The array of parameters that is used to render the item list
      */
-    public function itemsProcFunc(array &$params)
+    public function itemsProcFunc(array &$params): void
     {
         $container = (int)($params['row']['tx_gridelements_container'] ?? 0);
         if (!empty($params['row']['pid']) && $params['row']['pid'] > 0 && $container > 0 && isset($params['items'])) {
@@ -51,7 +51,7 @@ class SysLanguageUidList implements SingletonInterface
      * @param array $items The items of the current language list
      * @param int $gridContainerId The ID of the current container
      */
-    public function checkForAllowedLanguages(array &$items, int $gridContainerId)
+    public function checkForAllowedLanguages(array &$items, int $gridContainerId): void
     {
         if (!$gridContainerId) {
             return;

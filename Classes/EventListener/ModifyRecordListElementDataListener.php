@@ -2,16 +2,17 @@
 
 namespace GridElementsTeam\Gridelements\EventListener;
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Event\ModifyRecordListElementDataEvent;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 
-class ModifyRecordListElementDataListener
+readonly class ModifyRecordListElementDataListener
 {
     /**
      * @param array $gridElementsExtensionConfiguration
      */
     public function __construct(
-        private readonly array $gridElementsExtensionConfiguration,
+        private array $gridElementsExtensionConfiguration,
     ) {
     }
 
@@ -26,8 +27,9 @@ class ModifyRecordListElementDataListener
     }
 
     /**
-    /**
+     * /**
      * @param ModifyRecordListElementDataEvent $event
+     * @throws Exception
      */
     public function __invoke(ModifyRecordListElementDataEvent $event): void
     {

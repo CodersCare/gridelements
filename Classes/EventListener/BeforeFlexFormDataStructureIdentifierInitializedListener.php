@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\EventListener;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Core\Configuration\Event\BeforeFlexFormDataStructureIdentifierInitializedEvent;
 use TYPO3\CMS\Core\Resource\FileRepository;
@@ -39,8 +40,9 @@ class BeforeFlexFormDataStructureIdentifierInitializedListener
 {
     /**
      * @param BeforeFlexFormDataStructureIdentifierInitializedEvent $event
+     * @throws Exception
      */
-    public function __invoke(BeforeFlexFormDataStructureIdentifierInitializedEvent $event)
+    public function __invoke(BeforeFlexFormDataStructureIdentifierInitializedEvent $event): void
     {
         $row = $event->getRow();
         $tableName = $event->getTableName();

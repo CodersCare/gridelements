@@ -67,7 +67,7 @@ class DatabaseRecordList implements SingletonInterface
      *
      * @return array the modified clip-icons
      */
-    public function makeClip($table, $row, $cells, &$parentObject): array
+    public function makeClip(string $table, array $row, array $cells, DatabaseRecordList &$parentObject): array
     {
         return $cells;
     }
@@ -82,7 +82,7 @@ class DatabaseRecordList implements SingletonInterface
      *
      * @return array the modified control-icons
      */
-    public function makeControl($table, $row, $cells, &$parentObject): array
+    public function makeControl(string $table, array $row, array $cells, DatabaseRecordList &$parentObject): array
     {
         return $cells;
     }
@@ -97,7 +97,7 @@ class DatabaseRecordList implements SingletonInterface
      *
      * @return array Array of modified cells/columns
      */
-    public function renderListHeader($table, $currentIdList, $headerColumns, &$parentObject): array
+    public function renderListHeader(string $table, array $currentIdList, array $headerColumns, DatabaseRecordList &$parentObject): array
     {
         return $headerColumns;
     }
@@ -112,7 +112,7 @@ class DatabaseRecordList implements SingletonInterface
      *
      * @return array Array of modified clipboard/action icons
      */
-    public function renderListHeaderActions($table, $currentIdList, $cells, &$parentObject): array
+    public function renderListHeaderActions(string $table, array $currentIdList, array $cells, DatabaseRecordList &$parentObject): array
     {
         return $cells;
     }
@@ -132,7 +132,7 @@ class DatabaseRecordList implements SingletonInterface
         int $level,
         string &$contentCollapseIcon,
         DatabaseRecordListXclass $parentObj
-    ) {
+    ): void {
         if (!empty($data['_EXPAND_TABLE_']) && $data['_EXPAND_TABLE_'] === 'tt_content') {
             $expandTitle = htmlspecialchars(LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.expandElement'));
             $collapseTitle = htmlspecialchars(LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.collapseElement'));
@@ -178,7 +178,7 @@ class DatabaseRecordList implements SingletonInterface
      *
      * @param LanguageService $languageService
      */
-    public function setLanguageService(LanguageService $languageService)
+    public function setLanguageService(LanguageService $languageService): void
     {
         $this->languageService = $languageService;
     }

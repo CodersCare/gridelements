@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -45,7 +46,7 @@ class ListTypeList implements SingletonInterface
      *
      * @param array $params The array of parameters that is used to render the item list
      */
-    public function itemsProcFunc(array &$params)
+    public function itemsProcFunc(array &$params): void
     {
         $this->init((int)$params['row']['pid']);
 
@@ -87,7 +88,7 @@ class ListTypeList implements SingletonInterface
      * @param int $gridContainerId The ID of the current container
      * @param int $gridColumn The grid column the element is a child of
      */
-    public function checkForAllowedListTypes(array &$items, int $pageId, int $pageColumn, int $gridContainerId, int $gridColumn)
+    public function checkForAllowedListTypes(array &$items, int $pageId, int $pageColumn, int $gridContainerId, int $gridColumn): void
     {
         if ($pageColumn >= 0 || $pageColumn === -2) {
             $column = $pageColumn ?: 0;
@@ -126,8 +127,9 @@ class ListTypeList implements SingletonInterface
      * initializes this class
      *
      * @param int $pageId
+     * @throws Exception
      */
-    public function init(int $pageId = 0)
+    public function init(int $pageId = 0): void
     {
         $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
     }
@@ -137,9 +139,8 @@ class ListTypeList implements SingletonInterface
      *
      * @param LayoutSetup $layoutSetup
      */
-    public function injectLayoutSetup(LayoutSetup $layoutSetup)
+    public function injectLayoutSetup(LayoutSetup $layoutSetup): void
     {
         $this->layoutSetup = $layoutSetup;
     }
 }
-

@@ -70,7 +70,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param string $id The parent uid of either the page or the container we are currently working on
      * @param DataHandler $parentObj The parent object that triggered this hook
      */
-    public function execute_preProcessFieldArray(array &$fieldArray, string $table, string $id, DataHandler $parentObj)
+    public function execute_preProcessFieldArray(array &$fieldArray, string $table, string $id, DataHandler $parentObj): void
     {
         if ($table === 'tt_content') {
             $action = '';
@@ -99,8 +99,10 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param array $fieldArray
      * @param string $id
      * @param bool $new
+     * @param string $action
+     * @throws Exception
      */
-    public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false, $action = '')
+    public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false, $action = ''): void
     {
         if (!($this->request instanceof ServerRequestInterface)) {
             return;
@@ -121,7 +123,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param array $fieldArray
      * @param int $uidPid
      */
-    public function setDefaultFieldValues(array &$fieldArray, int $uidPid = 0)
+    public function setDefaultFieldValues(array &$fieldArray, int $uidPid = 0): void
     {
         if (!($this->request instanceof ServerRequestInterface)) {
             return;
@@ -203,7 +205,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      *
      * @param array $fieldArray
      */
-    public function getDefaultFlexformValues(array &$fieldArray)
+    public function getDefaultFlexformValues(array &$fieldArray): void
     {
         if (!empty($GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds'])) {
             foreach ($GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds'] as $key => $dataStructure) {
@@ -233,7 +235,7 @@ class PreProcessFieldArray extends AbstractDataHandler
                 $structureArray['sheets']['sDEF']['ROOT'] = $structureArray['ROOT'];
                 unset($structureArray['ROOT']);
             }
-            if (isset($structureArray['sheets']) && !empty($structureArray['sheets'])) {
+            if (!empty($structureArray['sheets'])) {
                 foreach ($structureArray['sheets'] as $sheetName => $sheet) {
                     if (is_array($sheet['ROOT']['el']) && !empty($sheet['ROOT']['el'])) {
                         $elArray = [];
@@ -250,7 +252,7 @@ class PreProcessFieldArray extends AbstractDataHandler
             }
             if (!empty($sheetArray)) {
                 $flexformTools = GeneralUtility::makeInstance(FlexFormTools::class);
-                $returnXML = $flexformTools->flexArray2Xml($sheetArray, true);
+                $returnXML = $flexformTools->flexArray2Xml($sheetArray);
             }
         }
 
@@ -263,9 +265,10 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param array $fieldArray
      * @param string $contentId
      * @param bool $new
+     * @param string $action
      * @throws Exception
      */
-    public function setFieldEntries(array &$fieldArray, string $contentId = '0', bool $new = false, $action = '')
+    public function setFieldEntries(array &$fieldArray, string $contentId = '0', bool $new = false, $action = ''): void
     {
         $containerUpdateArray = [];
         if (isset($fieldArray['tx_gridelements_container'])) {
@@ -301,6 +304,8 @@ class PreProcessFieldArray extends AbstractDataHandler
      * set/override entries to gridelements container
      *
      * @param array $fieldArray
+     * @param $action
+     * @throws Exception
      */
     public function setFieldEntriesForGridContainers(array &$fieldArray, $action): void
     {

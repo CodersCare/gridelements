@@ -27,21 +27,15 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class GridelementsGridColumnItem extends GridColumnItem
 {
     /**
-     * @var array
-     */
-    protected array $layoutColumns;
-
-    /**
      * @param PageLayoutContext $context
      * @param GridelementsGridColumn $column
      * @param array $record
      * @param string $table
      * @param array $layoutColumns
      */
-    public function __construct(PageLayoutContext $context, GridelementsGridColumn $column, array $record, string $table = 'tt_content', array $layoutColumns = [])
+    public function __construct(PageLayoutContext $context, GridelementsGridColumn $column, array $record, string $table = 'tt_content', protected array $layoutColumns = [])
     {
         parent::__construct($context, $column, $record, $table);
-        $this->layoutColumns = $layoutColumns;
     }
 
     /**

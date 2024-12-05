@@ -22,6 +22,8 @@ namespace GridElementsTeam\Gridelements\EventListener;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use GridElementsTeam\Gridelements\PageLayoutView\GridelementsPreviewRenderer;
+use GridElementsTeam\Gridelements\PageLayoutView\ShortcutPreviewRenderer;
 use TYPO3\CMS\Core\Configuration\Event\AfterTcaCompilationEvent;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
@@ -47,8 +49,8 @@ class ExtTablesInclusionPostProcessing
             '--div--;LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:gridElements,tx_gridelements_container,tx_gridelements_columns'
         );
 
-        $GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['previewRenderer'] = \GridElementsTeam\Gridelements\PageLayoutView\GridelementsPreviewRenderer::class;
-        $GLOBALS['TCA']['tt_content']['types']['shortcut']['previewRenderer'] = \GridElementsTeam\Gridelements\PageLayoutView\ShortcutPreviewRenderer::class;
+        $GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['previewRenderer'] = GridelementsPreviewRenderer::class;
+        $GLOBALS['TCA']['tt_content']['types']['shortcut']['previewRenderer'] = ShortcutPreviewRenderer::class;
 
         $event->setTca($GLOBALS['TCA']);
         $GLOBALS['TCA'] = $tcaBackup;

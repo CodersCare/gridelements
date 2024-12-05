@@ -107,6 +107,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
     /**
      * @param GridColumnItem $gridColumnItem
      * @return array
+     * @throws Exception
      */
     protected function addShortcutRenderItems(GridColumnItem $gridColumnItem): array
     {
@@ -147,7 +148,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         return $renderItems;
     }
 
-    public function getTreeList($id, $depth, $begin = 0, $dontCheckEnableFields = false, $addSelectFields = '', $moreWhereClauses = '', array $prevId_array = [], $recursionLevel = 0)
+    public function getTreeList($id, $depth, $begin = 0, $dontCheckEnableFields = false, $addSelectFields = '', $moreWhereClauses = '', array $prevId_array = [], $recursionLevel = 0): string
     {
         $addCurrentPageId = false;
         $id = (int)$id;
@@ -189,7 +190,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         int $recursive = 0,
         int $parentUid = 0,
         int $language = 0
-    ) {
+    ): void {
         $itemList = str_replace('pages_', '', $shortcutItem);
         if ($recursive) {
             $itemList = $this->getTreeList($itemList, $recursive, 0, 1);
@@ -271,7 +272,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
      * @param int $language : sys_language_uid of the referencing tt_content record
      * @throws Exception
      */
-    protected function collectContentData(string $shortcutItem, array &$collectedItems, int $parentUid, int $language)
+    protected function collectContentData(string $shortcutItem, array &$collectedItems, int $parentUid, int $language): void
     {
         $shortcutItem = str_replace('tt_content_', '', $shortcutItem);
         if ((int)$shortcutItem !== $parentUid) {

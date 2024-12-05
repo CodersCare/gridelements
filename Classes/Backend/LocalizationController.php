@@ -17,6 +17,7 @@ namespace GridElementsTeam\Gridelements\Backend;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Doctrine\DBAL\Exception;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -50,17 +51,17 @@ class LocalizationController
     /**
      * @var IconFactory
      */
-    protected $iconFactory;
+    protected mixed $iconFactory;
 
     /**
      * @var LocalizationRepository
      */
-    protected $localizationRepository;
+    protected mixed $localizationRepository;
 
     /**
      * @var EventDispatcherInterface
      */
-    protected $eventDispatcher;
+    protected mixed $eventDispatcher;
 
     /**
      * Constructor
@@ -77,6 +78,7 @@ class LocalizationController
      *
      * @param ServerRequestInterface $request
      * @return ResponseInterface
+     * @throws Exception
      */
     public function getRecordLocalizeSummary(ServerRequestInterface $request): ResponseInterface
     {
@@ -95,8 +97,7 @@ class LocalizationController
         $result = $this->localizationRepository->getRecordsToCopyDatabaseResult(
             $pageId,
             $destLanguageId,
-            $languageId,
-            '*'
+            $languageId
         );
 
         $flatRecords = [];

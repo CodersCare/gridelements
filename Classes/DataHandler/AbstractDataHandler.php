@@ -77,8 +77,9 @@ abstract class AbstractDataHandler
      * @param string $table : The name of the table the data should be saved to
      * @param string $uidPid : The uid of the record or page we are currently working on
      * @param DataHandler $dataHandler
+     * @throws Exception
      */
-    public function init(string $table, string $uidPid, DataHandler $dataHandler)
+    public function init(string $table, string $uidPid, DataHandler $dataHandler): void
     {
         $this->setTable($table);
         if ($table === 'tt_content' && (int)$uidPid < 0) {
@@ -107,7 +108,7 @@ abstract class AbstractDataHandler
      *
      * @param int $contentUid
      */
-    public function setContentUid(int $contentUid)
+    public function setContentUid(int $contentUid): void
     {
         $this->contentUid = $contentUid;
     }
@@ -117,7 +118,7 @@ abstract class AbstractDataHandler
      *
      * @param DataHandler $dataHandler
      */
-    public function setTceMain(DataHandler $dataHandler)
+    public function setTceMain(DataHandler $dataHandler): void
     {
         $this->dataHandler = $dataHandler;
     }
@@ -127,7 +128,7 @@ abstract class AbstractDataHandler
      *
      * @param LayoutSetup $layoutSetup
      */
-    public function injectLayoutSetup(LayoutSetup $layoutSetup)
+    public function injectLayoutSetup(LayoutSetup $layoutSetup): void
     {
         $this->layoutSetup = $layoutSetup;
     }
@@ -147,7 +148,7 @@ abstract class AbstractDataHandler
      *
      * @param int $pageUid
      */
-    public function setPageUid(int $pageUid)
+    public function setPageUid(int $pageUid): void
     {
         $this->pageUid = $pageUid;
     }
@@ -156,7 +157,7 @@ abstract class AbstractDataHandler
      * Function to remove any remains of versioned records after finalizing a workspace action
      * via 'Discard' or 'Publish' commands
      */
-    public function cleanupWorkspacesAfterFinalizing()
+    public function cleanupWorkspacesAfterFinalizing(): void
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -199,7 +200,7 @@ abstract class AbstractDataHandler
      * @param int $uid
      * @throws Exception
      */
-    public function checkAndUpdateTranslatedElements(int $uid)
+    public function checkAndUpdateTranslatedElements(int $uid): void
     {
         if ($uid <= 0) {
             return;
@@ -363,6 +364,7 @@ abstract class AbstractDataHandler
      * Function to handle record actions between different grid containers
      *
      * @param array $containerUpdateArray
+     * @param string $action
      * @throws Exception
      */
     public function doGridContainerUpdate(array $containerUpdateArray = [], $action = ''): void
@@ -413,7 +415,7 @@ abstract class AbstractDataHandler
      *
      * @param string $table
      */
-    public function setTable(string $table)
+    public function setTable(string $table): void
     {
         $this->table = $table;
     }

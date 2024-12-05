@@ -22,12 +22,11 @@ namespace GridElementsTeam\Gridelements\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 
 /**
  * Manipulate and find flex forms for gridelements tt_content plugin
@@ -47,14 +46,12 @@ class TtContentFlexForm
      * @param string $fieldName
      * @param array $row
      * @return array
+     * @throws Exception
      */
     public function getDataStructureIdentifierPreProcess(array $tca, string $tableName, string $fieldName, array $row): array
     {
         if ($tableName === 'tt_content' && $fieldName === 'pi_flexform' && $row['CType'] === 'gridelements_pi1') {
             if (!empty($row['tx_gridelements_backend_layout']) && !empty($row['uid']) && !empty($row['pid'])) {
-                if (VersionNumberUtility::convertVersionNumberToInteger(TYPO3_version) < 11000000) {
-                    BackendUtility::fixVersioningPid($tableName, $row);
-                }
                 $pageUid = $row['pid'];
                 $layoutId = $row['tx_gridelements_backend_layout'];
                 /** @var LayoutSetup $layoutSetupInstance */

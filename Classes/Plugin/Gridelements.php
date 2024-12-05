@@ -23,9 +23,11 @@ namespace GridElementsTeam\Gridelements\Plugin;
  ***************************************************************/
 
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\FlexFormTools;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -87,9 +89,8 @@ class Gridelements extends ContentObjectRenderer
 
     /**
      * @param ContentObjectRenderer $cObj
-     * @return void
      */
-    public function setContentObjectRenderer(ContentObjectRenderer $cObj)
+    public function setContentObjectRenderer(ContentObjectRenderer $cObj): void
     {
         $this->cObj = $cObj;
     }
@@ -100,6 +101,8 @@ class Gridelements extends ContentObjectRenderer
      * @param string $content The PlugIn content
      * @param array $conf The PlugIn configuration
      * @return string The content that is displayed on the website
+     * @throws AspectNotFoundException
+     * @throws Exception
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v12.0
      */
     public function main(string $content = '', array $conf = []): string
@@ -174,7 +177,7 @@ class Gridelements extends ContentObjectRenderer
      * @param array|null $child
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v11.0
      */
-    public function initPluginFlexForm(string $field = 'pi_flexform', array &$child = null)
+    public function initPluginFlexForm(string $field = 'pi_flexform', array &$child = null): void
     {
         $this->flexFormTools = GeneralUtility::makeInstance(FlexFormTools::class);
         // Converting flexform data into array:
@@ -206,7 +209,7 @@ class Gridelements extends ContentObjectRenderer
      * @param array $child
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v12.0
      */
-    public function getPluginFlexFormData(array &$child = [])
+    public function getPluginFlexFormData(array &$child = []): void
     {
         if (!empty($child)) {
             $cObjData = $child;
@@ -251,10 +254,10 @@ class Gridelements extends ContentObjectRenderer
      * @param int $element The uid of the grid container
      * @param int $pid
      * @param string $csvColumns A list of available column IDs
-     * @throws DBALException
+     * @throws Exception
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v12.0
      */
-    public function getChildren(int $element = 0, int $pid = 0, string $csvColumns = '')
+    public function getChildren(int $element = 0, int $pid = 0, string $csvColumns = ''): void
     {
         if (!$element || $csvColumns === '') {
             return;
@@ -352,7 +355,7 @@ class Gridelements extends ContentObjectRenderer
             ->executeQuery();
 
         $this->cObj->data['tx_gridelements_view_children'] = [];
-        while ($child = $children->fetch()) {
+        while ($child = $children->fetchAssociative()) {
             // Versioning preview:
             $sorting = $child['sorting'] ?? '';
             $this->getTSFE()->sys_page->versionOL('tt_content', $child, true);
@@ -364,8 +367,7 @@ class Gridelements extends ContentObjectRenderer
                     $child = $this->getTSFE()->sys_page->getRecordOverlay(
                         'tt_content',
                         $child,
-                        $this->languageAspect->getContentId(),
-                        $this->languageAspect->getLegacyOverlayType()
+                        $this->languageAspect->getContentId()
                     );
                 }
                 if (!empty($child)) {
@@ -426,7 +428,7 @@ class Gridelements extends ContentObjectRenderer
      * @param array $sortColumns An Array of column positions within the grid container in the order they got in the grid setup
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v12.0
      */
-    public function renderChildrenIntoParentColumns(array $typoScriptSetup = [], array $sortColumns = [])
+    public function renderChildrenIntoParentColumns(array $typoScriptSetup = [], array $sortColumns = []): void
     {
         // first we have to make a backup copy of the original data array
 
@@ -579,7 +581,7 @@ class Gridelements extends ContentObjectRenderer
         array &$parentGridData,
         array &$parentRecordNumbers,
         array $typoScriptSetup = []
-    ) {
+    ): void {
         $column_number = (int)($child['tx_gridelements_columns'] ?? 0);
         $columnKey = $column_number . '.';
         $columnSetupKey = isset($typoScriptSetup['columns.'][$columnKey]) ? $columnKey : 'default.';
@@ -657,7 +659,7 @@ class Gridelements extends ContentObjectRenderer
      * renders a recursive pidList to reference content from a list of pages
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v12.0
      */
-    public function user_getTreeList()
+    public function user_getTreeList(): void
     {
         $pidList = !empty($this->getTSFE()->register['tt_content_shortcut_recursive'])
             ? $this->cObj->getTreeList(

@@ -50,7 +50,7 @@ abstract class AbstractItemsProcFunc implements SingletonInterface
     /**
      * initializes this class
      */
-    public function init()
+    public function init(): void
     {
         $this->setLanguageService($GLOBALS['LANG']);
     }
@@ -94,7 +94,7 @@ abstract class AbstractItemsProcFunc implements SingletonInterface
      *
      * @param LanguageService $languageService
      */
-    public function setLanguageService(LanguageService $languageService)
+    public function setLanguageService(LanguageService $languageService): void
     {
         $this->languageService = $languageService;
     }

@@ -51,18 +51,18 @@ class ProcessCmdmap extends AbstractDataHandler
      * @param mixed $value The value that has been sent with the copy command
      * @param bool $commandIsProcessed A switch to tell the parent object, if the record has been copied
      * @param DataHandler|null $parentObj The parent object that triggered this hook
-     * @param array|bool $pasteUpdate Values to be updated after the record is pasted
+     * @param bool|array $pasteUpdate Values to be updated after the record is pasted
      * @throws Exception
      */
     public function execute_processCmdmap(
         string $command,
         string $table,
         int $id,
-        $value,
+        mixed $value,
         bool &$commandIsProcessed,
         DataHandler $parentObj = null,
-        $pasteUpdate = false
-    ) {
+        bool|array $pasteUpdate = false
+    ): void {
         $this->init($table, (string)$id, $parentObj);
 
         $reference = (int)($this->request->getQueryParams()['reference'] ?? 0);
@@ -95,10 +95,9 @@ class ProcessCmdmap extends AbstractDataHandler
                 $this->getTceMain()->start($data, []);
                 $this->getTceMain()->process_datamap();
 
-                $parentObj->registerDBList = null;
-                $parentObj->remapStack = null;
+                $parentObj->registerDBList = [];
+                $parentObj->remapStack = [];
                 $commandIsProcessed = true;
-
             }
             $containerUpdateArray = [];
             if (!empty($pasteUpdate) && !empty($pasteUpdate['tx_gridelements_container'])) {

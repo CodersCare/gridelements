@@ -22,14 +22,15 @@ namespace GridElementsTeam\Gridelements\EventListener;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 
-use TYPO3\CMS\Backend\View\BackendLayoutView;
 use function str_ends_with;
 use function str_starts_with;
-
 use TYPO3\CMS\Backend\Controller\Event\ModifyNewContentElementWizardItemsEvent;
+
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider;
@@ -66,6 +67,7 @@ class ModifyNewContentElementWizardItemsListener
 
     /**
      * @param ModifyNewContentElementWizardItemsEvent $event
+     * @throws Exception
      */
     public function __invoke(ModifyNewContentElementWizardItemsEvent $event): void
     {
@@ -164,11 +166,6 @@ class ModifyNewContentElementWizardItemsListener
     {
         $backendLayoutView = GeneralUtility::makeInstance(BackendLayoutView::class);
         $backendLayout = $backendLayoutView->getSelectedBackendLayout((int)$queryParams['id'] ?? 0);
-        if (empty($backendLayout)) {
-            $backendLayout = [
-                'config' => '',
-            ];
-        }
         $allowed = [];
         $disallowed = [];
         $configuration = [];
@@ -189,8 +186,7 @@ class ModifyNewContentElementWizardItemsListener
             $activatePlugins = false;
             $deactivatePlugins = false;
             if (!empty($configuration['disallowed.'])) {
-                $disallowed = [];
-                foreach($configuration['disallowed.'] as $key => $disallowedString) {
+                foreach ($configuration['disallowed.'] as $key => $disallowedString) {
                     if ($disallowedString === '*' && $key === 'Ctype') {
                         return [];
                     }
@@ -207,8 +203,7 @@ class ModifyNewContentElementWizardItemsListener
                 }
             }
             if (!empty($configuration['allowed.'])) {
-                $allowed = [];
-                foreach($configuration['allowed.'] as $key => $allowedString) {
+                foreach ($configuration['allowed.'] as $key => $allowedString) {
                     $allowed[$key] = array_flip(GeneralUtility::trimExplode(',', $allowedString));
                     if ($key === 'list_type' && !empty($allowedString) && !$deactivatePlugins) {
                         $activatePlugins = true;
@@ -259,7 +254,7 @@ class ModifyNewContentElementWizardItemsListener
      *
      * @return string
      */
-    public function getExcludeLayouts(int $container, int $pageId)
+    public function getExcludeLayouts(int $container, int $pageId): string
     {
         $excludeLayouts = 0;
         $excludeArray = [];
@@ -296,7 +291,7 @@ class ModifyNewContentElementWizardItemsListener
      * @param array $disallowed
      * @param array $wizardItems
      */
-    public function removeDisallowedWizardItems(array $allowed, array $disallowed, array &$wizardItems)
+    public function removeDisallowedWizardItems(array $allowed, array $disallowed, array &$wizardItems): void
     {
         foreach ($wizardItems as $key => $wizardItem) {
             if (empty($wizardItem['header'])) {
@@ -346,7 +341,7 @@ class ModifyNewContentElementWizardItemsListener
      * @param int $container
      * @param int $column
      */
-    public function addGridValuesToWizardItems(array &$wizardItems, int $container, int $column)
+    public function addGridValuesToWizardItems(array &$wizardItems, int $container, int $column): void
     {
         foreach ($wizardItems as $key => $wizardItem) {
             if (!isset($wizardItem['params'])) {
@@ -379,7 +374,7 @@ class ModifyNewContentElementWizardItemsListener
      * @param array $gridItems
      * @param array $wizardItems
      */
-    public function addGridItemsToWizard(array &$gridItems, array &$wizardItems)
+    public function addGridItemsToWizard(array &$gridItems, array &$wizardItems): void
     {
         if (empty($gridItems)) {
             return;

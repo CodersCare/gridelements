@@ -22,9 +22,9 @@ namespace GridElementsTeam\Gridelements\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
-use GridElementsTeam\Gridelements\Helper\Helper;
 use TYPO3\CMS\Backend\Clipboard\Clipboard;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -49,7 +49,7 @@ class PageLayoutController
     /**
      * @var array
      */
-    protected $extensionConfiguration;
+    protected mixed $extensionConfiguration;
 
     /**
      * @var GridElementsHelper
@@ -59,7 +59,7 @@ class PageLayoutController
     /**
      * @var PageRenderer
      */
-    protected $pageRenderer;
+    protected mixed $pageRenderer;
 
     public function __construct()
     {
@@ -73,8 +73,9 @@ class PageLayoutController
      *
      * @param array $parameters An array of available parameters
      * @param \TYPO3\CMS\Backend\Controller\PageLayoutController $pageLayoutController The parent object that triggered this hook
+     * @throws Exception
      */
-    public function drawHeaderHook(array $parameters, \TYPO3\CMS\Backend\Controller\PageLayoutController $pageLayoutController)
+    public function drawHeaderHook(array $parameters, \TYPO3\CMS\Backend\Controller\PageLayoutController $pageLayoutController): void
     {
         $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsOnReady');
@@ -88,8 +89,6 @@ class PageLayoutController
             $typo3Version = new Typo3Version();
             if ($typo3Version->getMajorVersion() >= 11) {
                 $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard');
-            } else {
-                $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard10');
             }
         }
 
@@ -116,7 +115,7 @@ class PageLayoutController
                 }
             ';
 
-        $id = (int)GeneralUtility::_GP('id');
+        $id = (int)($GLOBALS['TYPO3_REQUEST']->getParsedBody()['id'] ?? $GLOBALS['TYPO3_REQUEST']->getQueryParams()['id'] ?? null);
         $layout = GeneralUtility::callUserFunction(
             BackendLayoutView::class . '->getSelectedBackendLayout',
             $id,
@@ -151,8 +150,7 @@ class PageLayoutController
                 top.pasteReferenceAllowed = ' . ($this->getBackendUser()->checkAuthMode(
                 'tt_content',
                 'CType',
-                'shortcut',
-                $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode'] ?? ''
+                'shortcut'
             ) ? 'true' : 'false') . ';
                 top.skipDraggableDetails = ' . (
                 isset($this->getBackendUser()->uc['dragAndDropHideNewElementWizardInfoOverlay'])
@@ -160,7 +158,7 @@ class PageLayoutController
                     ? 'true' : 'false'
             ) . ';
                 top.browserUrl = ' . json_encode((string)$uriBuilder->buildUriFromRoute('wizard_element_browser')) . ';';
-        } catch (RouteNotFoundException $e) {
+        } catch (RouteNotFoundException) {
         }
 
         if (!empty($clipBoard) && !empty($clipBoard['el'])) {

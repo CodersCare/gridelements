@@ -48,7 +48,7 @@ class TtContent
      *
      * @param array $params An array containing the items and parameters for the list of items
      */
-    public function columnsItemsProcFunc(array &$params)
+    public function columnsItemsProcFunc(array &$params): void
     {
         $this->init((int)$params['row']['pid']);
         $gridContainerId = 0;
@@ -88,8 +88,9 @@ class TtContent
      * initializes this class
      *
      * @param int $pageId
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function init(int $pageId)
+    public function init(int $pageId): void
     {
         $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
     }
@@ -99,7 +100,7 @@ class TtContent
      *
      * @param LayoutSetup $layoutSetup
      */
-    public function injectLayoutSetup(LayoutSetup $layoutSetup)
+    public function injectLayoutSetup(LayoutSetup $layoutSetup): void
     {
         $this->layoutSetup = $layoutSetup;
     }
@@ -110,8 +111,9 @@ class TtContent
      * if the element itself already is a container
      *
      * @param array $params An array containing the items and parameters for the list of items
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function containerItemsProcFunc(array &$params)
+    public function containerItemsProcFunc(array &$params): void
     {
         $this->init((int)$params['row']['pid']);
         $possibleContainers = [];
@@ -131,7 +133,7 @@ class TtContent
             foreach ($params['items'] as $container) {
                 if (!empty($container['value'])) {
                     $itemUidList .= $itemUidList ? ',' . $container['value'] : $container['value'];
-                } else if (!empty($container[1])) {
+                } elseif (!empty($container[1])) {
                     $itemUidList .= $itemUidList ? ',' . $container[1] : $container[1];
                 }
             }
@@ -147,8 +149,9 @@ class TtContent
      *
      * @param array $params
      * @param array $possibleContainers
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function removeItemsFromListOfSelectableContainers(array &$params, array &$possibleContainers)
+    public function removeItemsFromListOfSelectableContainers(array &$params, array &$possibleContainers): void
     {
         if (!empty($params['row']['CType'])) {
             $contentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
@@ -173,9 +176,9 @@ class TtContent
      *
      * @param string $containerIds : A list determining containers that should be checked
      * @param array $possibleContainers : The result list containing the remaining containers after the check
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function lookForChildContainersRecursively(string $containerIds, array &$possibleContainers)
+    public function lookForChildContainersRecursively(string $containerIds, array &$possibleContainers): void
     {
         if (!$containerIds) {
             return;
@@ -229,9 +232,9 @@ class TtContent
      *
      * @param array $params
      * @param string $itemUidList comma separated list of uids
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function deleteDisallowedContainers(array &$params, string $itemUidList = '')
+    public function deleteDisallowedContainers(array &$params, string $itemUidList = ''): void
     {
         $contentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
         $listType = '';
@@ -255,9 +258,11 @@ class TtContent
             foreach ($params['items'] as $key => $container) {
                 if (!empty($container['value'])) {
                     $backendLayout = $containers[$container['value']]['tx_gridelements_backend_layout'] ?? [];
-                } else if (!empty($container[1]))  {
+                } elseif (!empty($container[1])) {
                     $backendLayout = $containers[$container[1]]['tx_gridelements_backend_layout'] ?? [];
-                } else $backendLayout = false;
+                } else {
+                    $backendLayout = false;
+                }
 
                 $gridColumn = (string)$params['row']['tx_gridelements_columns'];
                 if ($backendLayout && $gridColumn) {
@@ -313,7 +318,7 @@ class TtContent
      *
      * @param array $params An array containing the items and parameters for the list of items
      */
-    public function layoutItemsProcFunc(array &$params)
+    public function layoutItemsProcFunc(array &$params): void
     {
         $this->init((int)$params['row']['pid']);
         if (!empty($params['row']['colPos'])) {
