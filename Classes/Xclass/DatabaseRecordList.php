@@ -134,8 +134,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordLis
         }
         // Finding the total amount of records on the page
         $queryBuilderTotalItems = $this->getQueryBuilder($table, ['*'], false, 0, 1);
-        // @todo Switch to `resetOrderBy()` as soon as the QueryBuilder facade has that method on board.
-        $queryBuilderTotalItems->resetQueryPart('orderBy');
+        $queryBuilderTotalItems->resetOrderBy();
         $totalItems = (int)$queryBuilderTotalItems
                 ->count('*')
                 ->executeQuery()
@@ -1772,9 +1771,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordLis
     }
 
     /**
-     * @return object|BackendLayoutView
+     * @return BackendLayoutView
      */
-    protected function getBackendLayoutView(): BackendLayoutView|object
+    protected function getBackendLayoutView(): BackendLayoutView
     {
         return GeneralUtility::makeInstance(BackendLayoutView::class);
     }
