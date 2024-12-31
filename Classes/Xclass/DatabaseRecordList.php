@@ -650,7 +650,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordLis
                         )
                     ) . '</i>';
                     // In single table view, add button to edit displayed fields of marked / listed records
-                    if ($this->table && $permsEdit && is_array($currentIdList) && $this->isEditable($table)) {
+                    if ($this->table && $permsEdit && $this->isEditable($table)) {
                         $label = htmlspecialchars(
                             $lang->sL(
                                 'LLL:EXT:core/Resources/Private/Language/locallang_mod_web_list.xlf:editShownColumns'
@@ -728,7 +728,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordLis
                         $sortLabel = '<i>[' . rtrim(trim($sortLabel), ':') . ']</i>';
                     }
 
-                    if ($this->table && is_array($currentIdList)) {
+                    if ($this->table) {
                         // If the numeric clipboard pads are selected, show duplicate sorting link:
                         if ($this->noControlPanels===false
                                 && $this->isClipboardFunctionalityEnabled($table)
@@ -852,6 +852,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordLis
      * @param int $triggerContainer
      * @param string $expanded
      * @return string Table row for the element
+     * @throws RouteNotFoundException
+     * @throws RouteNotFoundException
+     * @throws RouteNotFoundException
      * @internal
      * @see getTable()
      */
@@ -1148,7 +1151,7 @@ class DatabaseRecordList extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordLis
                 if (!empty($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['actions'])) {
                     foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/class.db_list_extra.inc']['actions'] ?? [] as $className) {
                         $hookObject = GeneralUtility::makeInstance($className);
-                        if (is_object($hookObject) && method_exists($hookObject, 'contentCollapseIcon')) {
+                        if (method_exists($hookObject, 'contentCollapseIcon')) {
                             $hookObject->contentCollapseIcon($data, $sortField, $level, $contentCollapseIcon, $this);
                         }
                     }
@@ -1178,9 +1181,9 @@ class DatabaseRecordList extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordLis
                     $collapseCell = '';
                     if ($table==='tt_content' && $lastKey==='_SELECTOR_') {
                         if ($contentCollapseIcon) {
-                            $collapseCell = '<' . $colType . ' colspan="' . ((int)$level + 1) . '" nowrap="nowrap" class="col-icon col-content-collapse-icon">' . $contentCollapseIcon . '</' . $colType . '>';
+                            $collapseCell = '<' . $colType . ' colspan="' . ($level + 1) . '" nowrap="nowrap" class="col-icon col-content-collapse-icon">' . $contentCollapseIcon . '</' . $colType . '>';
                         } elseif ($colType!=='th') {
-                            $collapseCell = '<' . $colType . ' colspan="' . ((int)$level + 1) . '" nowrap="nowrap"></' . $colType . '>';
+                            $collapseCell = '<' . $colType . ' colspan="' . ($level + 1) . '" nowrap="nowrap"></' . $colType . '>';
                         }
                         if ($colType==='th') {
                             $colsp = ' colspan="2"';
@@ -1211,12 +1214,12 @@ class DatabaseRecordList extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordLis
             } elseif ($c > 1) {
                 $colsp = ' colspan="2"';
             } elseif ($ccount===3 && $colType==='td') {
-                $colsp = ' colspan="' . ($this->maxDepth - (int)$level - 3) . '"';
+                $colsp = ' colspan="' . ($this->maxDepth - $level - 3) . '"';
             } elseif ($ccount===2 && $colType==='th') {
                 if ($table==='tt_content') {
-                    $colsp = ' colspan="' . ($this->maxDepth - (int)$level - 2) . '"';
+                    $colsp = ' colspan="' . ($this->maxDepth - $level - 2) . '"';
                 } else {
-                    $colsp = ' colspan="' . ($this->maxDepth - (int)$level - 3) . '"';
+                    $colsp = ' colspan="' . ($this->maxDepth - $level - 3) . '"';
                 }
             } else {
                 $colsp = '';

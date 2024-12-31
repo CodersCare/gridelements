@@ -23,7 +23,7 @@ class WizardItemmsTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetLanguageService()
+    public function testGetLanguageService(): void
     {
         $wizardItems = GeneralUtility::makeInstance(WizardItems::class);
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);

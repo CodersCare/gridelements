@@ -15,7 +15,7 @@ class CTypeListTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetLanguageService()
+    public function testGetLanguageService(): void
     {
         $itemsProcFunc = GeneralUtility::makeInstance(CTypeList::class);
         $languageService = GeneralUtility::makeInstance(LanguageService::class);
@@ -29,7 +29,7 @@ class CTypeListTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetBackendUser()
+    public function testGetBackendUser(): void
     {
         $itemsProcFunc = GeneralUtility::makeInstance(CTypeList::class);
         $backendUserAuthentication = GeneralUtility::makeInstance(BackendUserAuthentication::class);

@@ -15,7 +15,7 @@ class DatabaseRecordListTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetLanguageService()
+    public function testGetLanguageService(): void
     {
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);
         $databaseRecordList = GeneralUtility::makeInstance(DatabaseRecordList::class);
@@ -28,7 +28,7 @@ class DatabaseRecordListTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetIconFactory()
+    public function testGetIconFactory(): void
     {
         $databaseRecordList = GeneralUtility::makeInstance(DatabaseRecordList::class);
         $iconFactory = GeneralUtility::makeInstance(IconFactory::class);

@@ -22,8 +22,7 @@ namespace GridElementsTeam\Gridelements\Backend;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use Exception;
-use TYPO3\CMS\Core\Database\Connection;
+use Doctrine\DBAL\ArrayParameterType;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
@@ -47,6 +46,9 @@ class TtContent
      * ItemProcFunc for columns items
      *
      * @param array $params An array containing the items and parameters for the list of items
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function columnsItemsProcFunc(array &$params): void
     {
@@ -190,7 +192,7 @@ class TtContent
             ->select('uid', 'tx_gridelements_container')
             ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq('CType', $queryBuilder->createNamedParameter('gridelements_pi1')), $queryBuilder->expr()->in(
                 'tx_gridelements_container',
-                $queryBuilder->createNamedParameter($containerIds, Connection::PARAM_INT_ARRAY)
+                $queryBuilder->createNamedParameter($containerIds, ArrayParameterType::INTEGER)
             )))->executeQuery()
             ->fetchAllAssociative();
 
@@ -249,7 +251,7 @@ class TtContent
                 ->select('uid', 'tx_gridelements_backend_layout')
                 ->from('tt_content')->where($queryBuilder->expr()->in(
                     'uid',
-                    $queryBuilder->createNamedParameter($itemUidList, Connection::PARAM_INT_ARRAY)
+                    $queryBuilder->createNamedParameter($itemUidList, ArrayParameterType::INTEGER)
                 ))->executeQuery();
             $containers = [];
             while ($container = $containerQuery->fetchAssociative()) {
@@ -317,6 +319,9 @@ class TtContent
      * and items that are excluded for a certain branch or user
      *
      * @param array $params An array containing the items and parameters for the list of items
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function layoutItemsProcFunc(array &$params): void
     {

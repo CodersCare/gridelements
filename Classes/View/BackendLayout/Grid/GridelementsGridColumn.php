@@ -383,7 +383,6 @@ class GridelementsGridColumn extends GridColumn
             return;
         }
 
-        $disallowedContentTypes = [];
         $disallowedListTypes = [];
         $disallowedGridTypes = [];
         $allowedContentTypes = [];

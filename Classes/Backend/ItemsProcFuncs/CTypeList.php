@@ -45,6 +45,9 @@ class CTypeList implements SingletonInterface
      * ItemProcFunc for CType items
      *
      * @param array $params The array of parameters that is used to render the item list
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function itemsProcFunc(array &$params): void
     {
@@ -87,6 +90,9 @@ class CTypeList implements SingletonInterface
      * @param int $pageColumn The page column the element is a child of
      * @param int $gridContainerId The ID of the current container
      * @param int $gridColumn The grid column the element is a child of
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function checkForAllowedCTypes(array &$items, int $pageId, int $pageColumn, int $gridContainerId, int $gridColumn): void
     {

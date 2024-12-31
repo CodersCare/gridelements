@@ -31,7 +31,7 @@ class HelperTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetSpecificIdsWithoutWorkspaceAndOriginalId()
+    public function testGetSpecificIdsWithoutWorkspaceAndOriginalId(): void
     {
         $record = [
             'uid' => '1',
@@ -51,7 +51,7 @@ class HelperTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetSpecificIdsWithoutWorkspaceButWithOriginalId()
+    public function testGetSpecificIdsWithoutWorkspaceButWithOriginalId(): void
     {
         $record = [
            'uid' => '1',
@@ -71,7 +71,7 @@ class HelperTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetSpecificIdsWithWorkspaceAndWithOriginalId()
+    public function testGetSpecificIdsWithWorkspaceAndWithOriginalId(): void
     {
         $GLOBALS['BE_USER'] = $this->getMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->workspace = 1;
@@ -93,7 +93,7 @@ class HelperTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetSpecificIdsWithWorkspaceButWithoutOriginalId()
+    public function testGetSpecificIdsWithWorkspaceButWithoutOriginalId(): void
     {
         $GLOBALS['BE_USER'] = $this->getMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->workspace = 1;

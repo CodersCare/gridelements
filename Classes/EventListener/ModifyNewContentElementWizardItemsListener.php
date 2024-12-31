@@ -374,7 +374,7 @@ class ModifyNewContentElementWizardItemsListener
      * @param array $gridItems
      * @param array $wizardItems
      */
-    public function addGridItemsToWizard(array &$gridItems, array &$wizardItems): void
+    public function addGridItemsToWizard(array $gridItems, array &$wizardItems): void
     {
         if (empty($gridItems)) {
             return;

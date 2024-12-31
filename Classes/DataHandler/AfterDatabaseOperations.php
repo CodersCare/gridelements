@@ -22,6 +22,8 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection as ConnectionAlias;
 use Doctrine\DBAL\Exception;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
@@ -107,7 +109,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function execute_afterDatabaseOperations(array &$fieldArray, string $table, int $uid, DataHandler $parentObj): void
+    public function execute_afterDatabaseOperations(array $fieldArray, string $table, int $uid, DataHandler $parentObj): void
     {
         if ($table === 'tt_content' || $table === 'pages') {
             $this->init($table, (string)$uid, $parentObj);
@@ -146,7 +148,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param array $fieldArray The array of fields and values that have been saved to the datamap
      * @throws Exception
      */
-    public function setUnusedElements(array &$fieldArray): void
+    public function setUnusedElements(array $fieldArray): void
     {
         $changedGridElements = [];
         $changedElements = [];
@@ -167,7 +169,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder->createNamedParameter($this->getContentUid(), Connection::PARAM_INT)
                     ), $queryBuilder->expr()->notIn(
                         'tx_gridelements_columns',
-                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
                     )))->executeQuery();
                 while ($childElementInUnavailableColumns = $childElementsInUnavailableColumnsQuery->fetchAssociative()) {
                     $childElementsInUnavailableColumns[] = $childElementInUnavailableColumns['uid'];
@@ -196,7 +198,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder->createNamedParameter($this->getContentUid(), Connection::PARAM_INT)
                     ), $queryBuilder->expr()->in(
                         'tx_gridelements_columns',
-                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
                     )))->executeQuery();
                 while ($childElementInAvailableColumns = $childElementsInAvailableColumnsQuery->fetchAssociative()) {
                     $childElementsInAvailableColumns[] = $childElementInAvailableColumns['uid'];
@@ -271,7 +273,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder->createNamedParameter($this->getPageUid(), Connection::PARAM_INT)
                     ), $queryBuilder->expr()->notIn(
                         'colPos',
-                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
                     )))->executeQuery();
                 $elementsInUnavailableColumns = [];
                 while ($elementInUnavailableColumns = $elementsInUnavailableColumnsQuery->fetchAssociative()) {
@@ -304,7 +306,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder->createNamedParameter(-2, Connection::PARAM_INT)
                     ), $queryBuilder->expr()->in(
                         'backupColPos',
-                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
                     )))->executeQuery();
                 $elementsInAvailableColumns = [];
                 while ($elementInAvailableColumns = $elementsInAvailableColumnsQuery->fetchAssociative()) {
@@ -345,8 +347,8 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             ), $queryBuilder->expr()->notIn(
                                 'colPos',
                                 $queryBuilder->createNamedParameter(
-                                    $availableColumns,
-                                    Connection::PARAM_INT_ARRAY
+                                        $availableColumns,
+                                        ArrayParameterType::INTEGER
                                 )
                             )))->executeQuery();
                         $subPageElementsInUnavailableColumns = [];
@@ -381,8 +383,8 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             ), $queryBuilder->expr()->in(
                                 'backupColPos',
                                 $queryBuilder->createNamedParameter(
-                                    $availableColumns,
-                                    Connection::PARAM_INT_ARRAY
+                                        $availableColumns,
+                                        ArrayParameterType::INTEGER
                                 )
                             )))->executeQuery();
                         $subPageElementsInAvailableColumns = [];

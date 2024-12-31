@@ -38,6 +38,9 @@ class ItemProvider extends RecordProvider implements ProviderInterface
     /**
      * @param array $items
      * @return array
+     * @throws RouteNotFoundException
+     * @throws RouteNotFoundException
+     * @throws RouteNotFoundException
      */
     public function addItems(array $items): array
     {

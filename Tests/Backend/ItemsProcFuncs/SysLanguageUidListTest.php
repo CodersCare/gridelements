@@ -15,7 +15,7 @@ class SysLanguageUidListTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetLanguageService()
+    public function testGetLanguageService(): void
     {
         $itemsProcFunc = GeneralUtility::makeInstance(SysLanguageUidList::class);
         $languageService = GeneralUtility::makeInstance(LanguageService::class);
@@ -29,7 +29,7 @@ class SysLanguageUidListTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetBackendUser()
+    public function testGetBackendUser(): void
     {
         $itemsProcFunc = GeneralUtility::makeInstance(SysLanguageUidList::class);
         $backendUserAuthentication = GeneralUtility::makeInstance(BackendUserAuthentication::class);

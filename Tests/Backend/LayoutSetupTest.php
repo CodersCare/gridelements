@@ -15,7 +15,7 @@ class LayoutSetupTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetLanguageService()
+    public function testGetLanguageService(): void
     {
         $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class);
         $languageService = GeneralUtility::makeInstance(LanguageService::class);
@@ -29,7 +29,7 @@ class LayoutSetupTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetBackendUser()
+    public function testGetBackendUser(): void
     {
         $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class);
         $backendUserAuthentication = GeneralUtility::makeInstance(BackendUserAuthentication::class);

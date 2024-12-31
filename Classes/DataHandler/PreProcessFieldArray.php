@@ -69,6 +69,10 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param string $table The name of the table the data should be saved to
      * @param string $id The parent uid of either the page or the container we are currently working on
      * @param DataHandler $parentObj The parent object that triggered this hook
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function execute_preProcessFieldArray(array &$fieldArray, string $table, string $id, DataHandler $parentObj): void
     {
@@ -102,7 +106,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param string $action
      * @throws Exception
      */
-    public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false, $action = ''): void
+    public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false, string $action = ''): void
     {
         if (!($this->request instanceof ServerRequestInterface)) {
             return;
@@ -268,7 +272,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param string $action
      * @throws Exception
      */
-    public function setFieldEntries(array &$fieldArray, string $contentId = '0', bool $new = false, $action = ''): void
+    public function setFieldEntries(array &$fieldArray, string $contentId = '0', bool $new = false, string $action = ''): void
     {
         $containerUpdateArray = [];
         if (isset($fieldArray['tx_gridelements_container'])) {

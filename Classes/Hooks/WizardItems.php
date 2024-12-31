@@ -65,8 +65,11 @@ class WizardItems implements NewContentElementWizardHookInterface
      *
      * @param array $wizardItems The array containing the current status of the wizard item list before rendering
      * @param NewContentElementController $parentObject The parent object that triggered this hook
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
-    public function manipulateWizardItems(array &$wizardItems, NewContentElementController &$parentObject): void
+    public function manipulateWizardItems(&$wizardItems, &$parentObject): void
     {
         if (!$this->getBackendUser()->checkAuthMode('tt_content', 'CType', 'gridelements_pi1')) {
             return;
@@ -229,7 +232,7 @@ class WizardItems implements NewContentElementWizardHookInterface
      * @param array $gridItems
      * @param array $wizardItems
      */
-    public function addGridItemsToWizard(array &$gridItems, array &$wizardItems): void
+    public function addGridItemsToWizard(array $gridItems, array &$wizardItems): void
     {
         if (empty($gridItems)) {
             return;

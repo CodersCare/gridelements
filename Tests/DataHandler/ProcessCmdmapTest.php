@@ -32,7 +32,7 @@ class ProcessCmdmapTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetTable()
+    public function testGetTable(): void
     {
         $hook = GeneralUtility::makeInstance(ProcessCmdmap::class);
         $table = 'tt_content';
@@ -46,7 +46,7 @@ class ProcessCmdmapTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetPageUid()
+    public function testGetPageUid(): void
     {
         $hook = GeneralUtility::makeInstance(ProcessCmdmap::class);
         $pageUid = 123;
@@ -60,7 +60,7 @@ class ProcessCmdmapTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetTceMain()
+    public function testGetTceMain(): void
     {
         $hook = GeneralUtility::makeInstance(ProcessCmdmap::class);
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);

@@ -45,6 +45,9 @@ class ListTypeList implements SingletonInterface
      * ItemProcFunc for CType items
      *
      * @param array $params The array of parameters that is used to render the item list
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function itemsProcFunc(array &$params): void
     {

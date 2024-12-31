@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\PageLayoutView;
 
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection as ConnectionAlias;
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Preview\PreviewRendererInterface;
@@ -53,6 +55,9 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
      *
      * @param GridColumnItem $item
      * @return string
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
@@ -71,7 +76,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
                         1582574553
                     );
                 }
-                $hookObject->preProcess($pageLayoutView, $drawItem, $previewHeader, $hookPreviewContent, $record);
+                $hookObject->preProcess($pageLayoutView, $drawItem, '', $hookPreviewContent, $record);
             }
             $item->setRecord($record);
         }
@@ -223,7 +228,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
                 $queryBuilder->expr()->gte('colPos', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
                 $queryBuilder->expr()->in(
                     'sys_language_uid',
-                    $queryBuilder->createNamedParameter([0, -1], Connection::PARAM_INT_ARRAY)
+                    $queryBuilder->createNamedParameter([0, -1], ArrayParameterType::INTEGER)
                 )
             )
             ->orderBy('inSet')

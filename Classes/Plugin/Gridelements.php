@@ -22,6 +22,8 @@ namespace GridElementsTeam\Gridelements\Plugin;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection as ConnectionAlias;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
@@ -276,7 +278,7 @@ class Gridelements extends ContentObjectRenderer
             ),
             $queryBuilder->expr()->in(
                 'tx_gridelements_columns',
-                $queryBuilder->createNamedParameter($csvColumns, Connection::PARAM_INT_ARRAY)
+                $queryBuilder->createNamedParameter($csvColumns, ArrayParameterType::INTEGER)
             )
         );
         $translationOverlay = [];
@@ -300,13 +302,13 @@ class Gridelements extends ContentObjectRenderer
                         ),
                         $queryBuilder->expr()->in(
                             'tx_gridelements_columns',
-                            $queryBuilder->createNamedParameter($csvColumns, Connection::PARAM_INT_ARRAY)
+                            $queryBuilder->createNamedParameter($csvColumns, ArrayParameterType::INTEGER)
                         ),
                         $queryBuilder->expr()->in(
                             'sys_language_uid',
                             $queryBuilder->createNamedParameter(
-                                [-1, $this->languageAspect->getContentId()],
-                                Connection::PARAM_INT_ARRAY
+                                    [-1, $this->languageAspect->getContentId()],
+                                    ArrayParameterType::INTEGER
                             )
                         ),
                         $queryBuilder->expr()->eq(
@@ -328,13 +330,13 @@ class Gridelements extends ContentObjectRenderer
                     ),
                     $queryBuilder->expr()->in(
                         'tx_gridelements_columns',
-                        $queryBuilder->createNamedParameter($csvColumns, Connection::PARAM_INT_ARRAY)
+                        $queryBuilder->createNamedParameter($csvColumns, ArrayParameterType::INTEGER)
                     ),
                     $queryBuilder->expr()->in(
                         'sys_language_uid',
                         $queryBuilder->createNamedParameter(
-                            [-1, $this->languageAspect->getContentId()],
-                            Connection::PARAM_INT_ARRAY
+                                [-1, $this->languageAspect->getContentId()],
+                                ArrayParameterType::INTEGER
                         )
                     )
                 );
@@ -649,9 +651,6 @@ class Gridelements extends ContentObjectRenderer
      */
     public function getPageRenderer(): PageRenderer
     {
-        if ($this->pageRenderer === null) {
-            $this->pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
-        }
         return $this->pageRenderer;
     }
 

@@ -15,7 +15,7 @@ class PageRendererTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetBackendUser()
+    public function testGetBackendUser(): void
     {
         $pageRenderer = GeneralUtility::makeInstance(PageLayoutController::class);
         $GLOBALS['BE_USER'] = GeneralUtility::makeInstance(BackendUserAuthentication::class);
@@ -28,7 +28,7 @@ class PageRendererTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetLanguageService()
+    public function testGetLanguageService(): void
     {
         $pageRenderer = GeneralUtility::makeInstance(PageLayoutController::class);
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);

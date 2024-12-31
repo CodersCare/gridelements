@@ -88,9 +88,9 @@ class DataHandler implements SingletonInterface
      * @throws \Doctrine\DBAL\Exception
      */
     public function processDatamap_afterDatabaseOperations(
-        string &$status,
-        string &$table,
-        string &$id,
+        string $status,
+        string $table,
+        string $id,
         array &$fieldArray,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
     ): void {
@@ -128,7 +128,7 @@ class DataHandler implements SingletonInterface
         int $id,
         mixed $value,
         bool &$commandIsProcessed,
-        \TYPO3\CMS\Core\DataHandling\DataHandler &$parentObj,
+        \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj,
         bool|array $pasteUpdate
     ): void {
         if (!$parentObj->isImporting) {
@@ -138,6 +138,10 @@ class DataHandler implements SingletonInterface
         }
     }
 
+    /**
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function processCmdmap_beforeStart(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler): void
     {
         $cmdmap = $dataHandler->cmdmap;

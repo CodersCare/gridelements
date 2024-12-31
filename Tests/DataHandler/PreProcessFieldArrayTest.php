@@ -33,7 +33,7 @@ class PreProcessFieldArrayTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetTable()
+    public function testGetTable(): void
     {
         $hook = GeneralUtility::makeInstance(PreProcessFieldArray::class);
         $table = 'tt_content';
@@ -47,7 +47,7 @@ class PreProcessFieldArrayTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetPageUid()
+    public function testGetPageUid(): void
     {
         $hook = GeneralUtility::makeInstance(PreProcessFieldArray::class);
         $pageUid = 123;
@@ -61,7 +61,7 @@ class PreProcessFieldArrayTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetTceMain()
+    public function testGetTceMain(): void
     {
         $hook = GeneralUtility::makeInstance(PreProcessFieldArray::class);
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
@@ -138,7 +138,7 @@ class PreProcessFieldArrayTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetBackendUser()
+    public function testGetBackendUser(): void
     {
         $hook = GeneralUtility::makeInstance(PreProcessFieldArray::class);
         $backendUserAuthentication = GeneralUtility::makeInstance(BackendUserAuthentication::class);

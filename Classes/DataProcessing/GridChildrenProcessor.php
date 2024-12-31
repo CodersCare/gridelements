@@ -117,6 +117,9 @@ class GridChildrenProcessor implements DataProcessorInterface
      * @param array $processedData Key/value store of processed data (e.g. to be passed to a Fluid View)
      *
      * @return array the processed data as key/value store
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function process(
         ContentObjectRenderer $cObj,
@@ -294,6 +297,9 @@ class GridChildrenProcessor implements DataProcessorInterface
      * Processes child records recursively to get other children into the same array
      *
      * @param array $record
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
     protected function processChildRecord(array $record): void
     {

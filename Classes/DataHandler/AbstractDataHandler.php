@@ -367,7 +367,7 @@ abstract class AbstractDataHandler
      * @param string $action
      * @throws Exception
      */
-    public function doGridContainerUpdate(array $containerUpdateArray = [], $action = ''): void
+    public function doGridContainerUpdate(array $containerUpdateArray = [], string $action = ''): void
     {
         if (is_array($containerUpdateArray) && !empty($containerUpdateArray)) {
             $queryBuilder = $this->getQueryBuilder();

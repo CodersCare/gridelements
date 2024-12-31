@@ -27,6 +27,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -298,6 +299,8 @@ class GridElementsHelper implements SingletonInterface
 
     /**
      * Helper method to calculate pageTsConfig in frontend scope, we can't use BackendUtility::getPagesTSconfig() here.
+     * @throws \JsonException
+     * @throws NoSuchCacheException
      */
     public static function getPageTsConfig(ServerRequestInterface $request): array
     {

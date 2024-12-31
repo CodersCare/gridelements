@@ -38,7 +38,7 @@ class FlexFormTools
      * @param string $sheet Sheet pointer, eg. "sDEF"
      * @param string $language Language pointer, eg. "lDEF"
      * @param string $value Value pointer, eg. "vDEF"
-     * @return string The content.
+     * @return array|string The content.
      */
     public function getFlexFormValue(
         array $T3FlexForm_array,
@@ -66,7 +66,7 @@ class FlexFormTools
     public function getFlexFormValueFromSheetArray(array $sheetArray, array $fieldNameArr, string $value): mixed
     {
         $tempArr = $sheetArray;
-        foreach ($fieldNameArr as $k => $v) {
+        foreach ($fieldNameArr as $v) {
             $checkedValue = MathUtility::canBeInterpretedAsInteger($v);
             if ($checkedValue) {
                 if (is_array($tempArr)) {

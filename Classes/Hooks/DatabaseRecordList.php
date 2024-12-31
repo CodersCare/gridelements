@@ -127,7 +127,7 @@ class DatabaseRecordList implements SingletonInterface
      * @param DatabaseRecordListXclass $parentObj
      */
     public function contentCollapseIcon(
-        array &$data,
+        array $data,
         string $sortField,
         int $level,
         string &$contentCollapseIcon,

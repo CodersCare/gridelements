@@ -86,7 +86,6 @@ class GridelementsGridColumnItem extends GridColumnItem
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $pageId = $this->context->getPageId();
 
-        $specificIds = GridElementsHelper::getSpecificIds($this->record);
         $allowed = base64_encode(json_encode($this->column->getAllowed()));
         $disallowed = base64_encode(json_encode($this->column->getDisallowed()));
 

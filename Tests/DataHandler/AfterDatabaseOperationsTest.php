@@ -32,7 +32,7 @@ class AfterDatabaseOperationsTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetTable()
+    public function testGetTable(): void
     {
         $hook = GeneralUtility::makeInstance(AfterDatabaseOperations::class);
         $table = 'tt_content';
@@ -46,7 +46,7 @@ class AfterDatabaseOperationsTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetPageUid()
+    public function testGetPageUid(): void
     {
         $hook = GeneralUtility::makeInstance(AfterDatabaseOperations::class);
         $pageUid = 123;
@@ -60,7 +60,7 @@ class AfterDatabaseOperationsTest extends UnitTestCase
      *
      * @test
      */
-    public function testGetTceMain()
+    public function testGetTceMain(): void
     {
         $hook = GeneralUtility::makeInstance(AfterDatabaseOperations::class);
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
