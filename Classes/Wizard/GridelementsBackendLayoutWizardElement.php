@@ -28,6 +28,7 @@ use phpDocumentor\Reflection\Types\Parent_;
 use TYPO3\CMS\Backend\Form\Element\BackendLayoutWizardElement;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\TypoScript\TypoScriptStringFactory;
@@ -39,6 +40,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
 {
+    /**
+     * @var IconFactory
+     */
+    private IconFactory $iconFactory;
+
     /**
      * @var array
      */
@@ -58,6 +64,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
     ) {
         parent::__construct(GeneralUtility::makeInstance(TypoScriptStringFactory::class));
         $this->injectNodeFactory(GeneralUtility::makeInstance(NodeFactory::class));
+        $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
     }
 
     /**
@@ -180,7 +187,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         $html[] = '</div>';
 
         $contentTypes = [];
-        if (is_array($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'])) {
+        if (!empty($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'])) {
             foreach ($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] as $item) {
                 $contentType = [];
                 if (!empty($item['value'])) {
@@ -193,7 +200,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
             }
         }
         $listTypes = [];
-        if (is_array($GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'])) {
+        if (!empty($GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'])) {
             foreach ($GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] as $item) {
                 $listType = [];
                 if (!empty($item['value'])) {
