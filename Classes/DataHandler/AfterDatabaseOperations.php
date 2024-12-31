@@ -23,9 +23,9 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  ***************************************************************/
 
 use Doctrine\DBAL\ArrayParameterType;
-use Doctrine\DBAL\Connection as ConnectionAlias;
 use Doctrine\DBAL\Exception;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Backend\View\BackendLayout\BackendLayout;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
@@ -443,11 +443,9 @@ class AfterDatabaseOperations extends AbstractDataHandler
             }
             $tcaColumns = '-2,-1,' . $CSV;
         } elseif ($table === 'pages') {
-            $tcaColumns = GeneralUtility::callUserFunction(
-                BackendLayoutView::class . '->getColPosListItemsParsed',
-                $id,
-                $this
-            );
+            $backendLayoutView = GeneralUtility::makeInstance(BackendLayoutView::class);
+            $backendLayout = $backendLayoutView->getBackendLayoutForPage($id);
+            $tcaColumns = $backendLayout->getStructure()['__items'] ?? [];
             $temp = [];
             foreach ($tcaColumns as $item) {
                 if (trim($item['value'] ?? '') !== '') {
