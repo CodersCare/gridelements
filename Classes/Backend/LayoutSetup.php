@@ -126,7 +126,11 @@ class LayoutSetup
     {
         // Load page TSconfig.
         if (($GLOBALS['TYPO3_REQUEST'] ?? null) && ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
-            $pageTSconfig = GridElementsHelper::getPageTSconfig($GLOBALS['TYPO3_REQUEST']);
+            if ((new Typo3Version())->getMajorVersion() <= 12) {
+                $pageTSconfig = $GLOBALS['TSFE']->getPagesTSconfig();
+            } else {
+                $pageTSconfig = GridElementsHelper::getPageTSconfig($GLOBALS['TYPO3_REQUEST']);
+            }
         } else {
             $pageTSconfig = BackendUtility::getPagesTSconfig($pageId);
         }
