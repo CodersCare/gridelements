@@ -24,9 +24,7 @@ namespace GridElementsTeam\Gridelements\Wizard;
 
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
-use phpDocumentor\Reflection\Types\Parent_;
 use TYPO3\CMS\Backend\Form\Element\BackendLayoutWizardElement;
-use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Page\PageRenderer;
@@ -37,7 +35,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 /**
  * Script Class for grid wizard
  */
-class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
+class GridelementsBackendLayoutWizardElement12 extends BackendLayoutWizardElement
 {
     /**
      * @var array
@@ -53,12 +51,6 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
      * @var int
      */
     protected int $rowCount = 0;
-
-    public function __construct(
-    ) {
-        parent::__construct(GeneralUtility::makeInstance(TypoScriptStringFactory::class));
-        $this->injectNodeFactory(GeneralUtility::makeInstance(NodeFactory::class));
-    }
 
     /**
      * @return array
