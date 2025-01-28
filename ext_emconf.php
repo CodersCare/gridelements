@@ -18,7 +18,7 @@ $EM_CONF[$_EXTKEY] = [
     'author_email' => 'info@cybercraft.de',
     'constraints' => [
         'depends' => [
-            'typo3' => '12.4.99-13.2.99',
+            'typo3' => '12.4.1-13.4.99',
         ],
         'conflicts' => [
             'templavoila' => '',
