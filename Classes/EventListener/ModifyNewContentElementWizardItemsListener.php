@@ -446,6 +446,11 @@ class ModifyNewContentElementWizardItemsListener
             $wizardItems['gridelements_' . $itemIdentifier] = [
                 'title' => $item['title'] ?? '',
                 'description' => $item['description'] ?? '',
+                'defaultValues' => [
+                    'CType' => 'gridelements_pi1',
+                    'tx_gridelements_backend_layout' => $item['uid'],
+                    'isTopLevelLayout' => $item['tll'] ?? ''
+                ],
                 'params' => ($largeIcon ? '&largeIconImage=' . $largeIcon : '')
                     . '&defVals[tt_content][CType]=gridelements_pi1' . $defVals . '&defVals[tt_content][tx_gridelements_backend_layout]=' . $item['uid']
                     . ($item['tll'] ? '&isTopLevelLayout' : ''),
