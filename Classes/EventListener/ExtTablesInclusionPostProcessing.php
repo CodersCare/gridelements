@@ -49,8 +49,12 @@ class ExtTablesInclusionPostProcessing
             '--div--;LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:gridElements,tx_gridelements_container,tx_gridelements_columns'
         );
 
-        $GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['previewRenderer'] = GridelementsPreviewRenderer::class;
-        $GLOBALS['TCA']['tt_content']['types']['shortcut']['previewRenderer'] = ShortcutPreviewRenderer::class;
+        if (!isset($GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['previewRenderer'])) {
+            $GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['previewRenderer'] = GridelementsPreviewRenderer::class;
+        }
+        if (!isset($GLOBALS['TCA']['tt_content']['types']['shortcut']['previewRenderer'])) {
+            $GLOBALS['TCA']['tt_content']['types']['shortcut']['previewRenderer'] = ShortcutPreviewRenderer::class;
+        }
 
         $event->setTca($GLOBALS['TCA']);
         $GLOBALS['TCA'] = $tcaBackup;
