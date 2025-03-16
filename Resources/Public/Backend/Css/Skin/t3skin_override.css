@@ -339,3 +339,10 @@ border-color:#79a548;
 .t3-page-ce-disable-new-ce > .t3-page-ce-wrapper > .t3-page-ce > .t3-page-ce > .t3-page-ce-wrapper-new-ce {
     visibility: hidden;
 }
+
+.t3js-page-ce-dropzone-available {
+	display: none;
+}
+.t3js-page-ce-dropzone-available.active {
+	display: block;
+}

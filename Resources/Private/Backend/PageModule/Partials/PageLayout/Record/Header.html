@@ -1,5 +1,5 @@
 <div class="t3-ctype-identifier" data-ctype="{item.record.CType}" data-list_type="{item.record.list_type}" data-tx_gridelements_backend_layout="{item.record.tx_gridelements_backend_layout}">
-    <div class="t3-page-ce-header {f:if(condition: '{allowEditContent} && {item.dragAndDropAllowed}', then: 't3-page-ce-header-draggable t3js-page-ce-draghandle')}">
+    <div class="t3-page-ce-header t3js-page-ce-header" {f:if(condition: '{allowEditContent} && {item.dragAndDropAllowed}', then: 'draggable="true"')}">
         <div class="col t3-page-ce-header-icons-left">
             {item.icons -> f:format.raw()}
             <f:if condition="{item.siteLanguage.flagIdentifier}">

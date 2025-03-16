@@ -73,28 +73,16 @@ class DragDrop {
     onDrop(e, t) {
         let a;
         if (t.classList.remove(Classes.dropPossibleHoverClass), !e.dataTransfer.types.includes(DataTransferTypes.content)) return;
-        let n = this.getColumnPositionForElement(t),
-            u = this.getGridColumnPositionForElement(t);
-        const o = JSON.parse(e.dataTransfer.getData(DataTransferTypes.content));
-
+        const n = this.getColumnPositionForElement(t),
+            o = JSON.parse(e.dataTransfer.getData(DataTransferTypes.content));
         if (a = document.querySelector(`${Identifiers.content}[data-uid="${o.uid}"]`), a || (a = document.createRange().createContextualFragment(o.content).firstElementChild), "number" == typeof o.uid && o.uid > 0) {
             const r = {}, s = t.closest(Identifiers.content).dataset.uid;
-            if (u !== false && u !== '') {
-                n = -1;
-            } else {
-                u = 0;
-            }
             let i;
             i = void 0 === s ? parseInt(t.closest("[data-page]").dataset.page, 10) : 0 - parseInt(s, 10);
             let d = o.language;
             -1 !== d && (d = parseInt(t.closest("[data-language-uid]").dataset.languageUid, 10));
-            const v = parseInt(t?.closest('.t3-grid-element-container')?.closest(Identifiers.content).dataset.uid) || 0;
             let l = 0;
-            if (v > 0 && u !== false && u !== '') {
-                l = -1;
-            } else if (i !== 0) {
-                l = n;
-            }
+            0 !== i && (l = n);
             const c = DragDropUtility.isCopyModifierFromEvent(e) || t.classList.contains("t3js-paste-copy"),
                 p = c ? "copy" : "move";
             r.cmd = {
@@ -103,7 +91,7 @@ class DragDrop {
                         [p]: {
                             action: "paste",
                             target: i,
-                            update: {colPos: l, sys_language_uid: d, tx_gridelements_container: v, tx_gridelements_columns: u}
+                            update: {colPos: l, sys_language_uid: d}
                         }
                     }
                 }
@@ -142,12 +130,6 @@ class DragDrop {
     getColumnPositionForElement(e) {
         const t = e.closest("[data-colpos]");
         return null !== t && void 0 !== t.dataset.colpos && parseInt(t.dataset.colpos, 10)
-    }
-
-    getGridColumnPositionForElement(e) {
-        const gc =  e.closest(".t3-grid-element-container");
-        const t = e.closest("[data-colpos]");
-        return gc !== null && null !== t && void 0 !== t.dataset.colpos && parseInt(t.dataset.colpos, 10)
     }
 
     getDragTooltipMetadataFromContentElement(e) {
@@ -191,12 +173,6 @@ class DragDrop {
             const t = e.parentElement.querySelector(Identifiers.addContent);
             null !== t && (t.hidden = !1), e.classList.remove(Classes.validDropZoneClass)
         }))
-    }
-
-    getGridColumnPositionForElement(e) {
-        const gc =  e.closest(".t3-grid-element-container");
-        const t = e.closest("[data-colpos]");
-        return gc !== null && null !== t && void 0 !== t.dataset.colpos && parseInt(t.dataset.colpos, 10)
     }
 }
 
