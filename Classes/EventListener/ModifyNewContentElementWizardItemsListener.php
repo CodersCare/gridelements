@@ -298,22 +298,22 @@ class ModifyNewContentElementWizardItemsListener
                 if (
                     (
                         !empty($allowed['CType'])
-                        && !isset($allowed['CType'][$wizardItem['tt_content_defValues']['CType']])
+                        && !isset($allowed['CType'][$wizardItem['defaultValues']['CType']])
                         && !isset($allowed['CType']['*'])
                     ) || (
                         !empty($disallowed) && (
-                            isset($disallowed['CType'][$wizardItem['tt_content_defValues']['CType']])
+                            isset($disallowed['CType'][$wizardItem['defaultValues']['CType']])
                             || isset($disallowed['CType']['*'])
                         )
                     ) || (
-                        isset($wizardItem['tt_content_defValues']['list_type'])
+                        isset($wizardItem['defaultValues']['list_type'])
                         && !empty($allowed['list_type'])
-                        && !isset($allowed['list_type'][$wizardItem['tt_content_defValues']['list_type']])
+                        && !isset($allowed['list_type'][$wizardItem['defaultValues']['list_type']])
                         && !isset($allowed['list_type']['*'])
                     ) || (
-                        isset($wizardItem['tt_content_defValues']['list_type'])
+                        isset($wizardItem['defaultValues']['list_type'])
                         && !empty($disallowed) && (
-                            isset($disallowed['list_type'][$wizardItem['tt_content_defValues']['list_type']])
+                            isset($disallowed['list_type'][$wizardItem['defaultValues']['list_type']])
                             || isset($disallowed['list_type']['*'])
                         )
                     )
@@ -344,26 +344,17 @@ class ModifyNewContentElementWizardItemsListener
     public function addGridValuesToWizardItems(array &$wizardItems, int $container, int $column): void
     {
         foreach ($wizardItems as $key => $wizardItem) {
-            if (!isset($wizardItem['params'])) {
-                $wizardItems[$key]['params'] = '';
-            }
             if (empty($wizardItem['header'])) {
                 if ($container !== 0) {
-                    if (!isset($wizardItem['tt_content_defValues'])) {
-                        $wizardItems[$key]['tt_content_defValues'] = [];
+                    if (!isset($wizardItem['defaultValues'])) {
+                        $wizardItems[$key]['defaultValues'] = [];
                     }
-                    $wizardItems[$key]['tt_content_defValues']['tx_gridelements_container'] = $container;
-                    $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_container]=' . $container;
+                    $wizardItems[$key]['defaultValues']['tx_gridelements_container'] = $container;
                 }
-                $wizardItems[$key]['tt_content_defValues']['tx_gridelements_columns'] = $column;
-                $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_columns]=' . $column;
+                $wizardItems[$key]['defaultValues']['tx_gridelements_columns'] = $column;
             }
-            if (isset($wizardItem['tt_content_defValues']['CType']) && $wizardItem['tt_content_defValues']['CType'] === 'table') {
-                $wizardItems[$key]['tt_content_defValues']['bodytext'] = '';
-                $wizardItems[$key]['params'] .= '&defVals[tt_content][bodytext]=';
-            }
-            if (empty($wizardItems[$key]['params'])) {
-                unset($wizardItems[$key]['params']);
+            if (isset($wizardItem['defaultValues']['CType']) && $wizardItem['defaultValues']['CType'] === 'table') {
+                $wizardItems[$key]['defaultValues']['bodytext'] = '';
             }
         }
     }
@@ -433,34 +424,21 @@ class ModifyNewContentElementWizardItemsListener
                 }
             }
 
-            // Traverse defVals
-            $defVals = '';
-
-            if (!empty($item['tt_content_defValues'])) {
-                foreach ($item['tt_content_defValues'] as $field => $value) {
-                    $defVals .= '&defVals[tt_content][' . $field . ']=' . $value;
-                }
+            // Traverse default values
+            $defaultValues = [
+                'CType' => 'gridelements_pi1',
+                'tx_gridelements_backend_layout' => $item['uid'],
+                'isTopLevelLayout' => $item['tll'] ?? '',
+                'largeIconImage' => $largeIcon ?? ''
+            ];
+            if (!empty($item['defaultValues'])) {
+                $defaultValues = array_merge($defaultValues, $item['defaultValues']);
             }
-
             $itemIdentifier = $item['alias'] ?? $item['uid'];
             $wizardItems['gridelements_' . $itemIdentifier] = [
                 'title' => $item['title'] ?? '',
                 'description' => $item['description'] ?? '',
-                'defaultValues' => [
-                    'CType' => 'gridelements_pi1',
-                    'tx_gridelements_backend_layout' => $item['uid'],
-                    'isTopLevelLayout' => $item['tll'] ?? ''
-                ],
-                'params' => ($largeIcon ? '&largeIconImage=' . $largeIcon : '')
-                    . '&defVals[tt_content][CType]=gridelements_pi1' . $defVals . '&defVals[tt_content][tx_gridelements_backend_layout]=' . $item['uid']
-                    . ($item['tll'] ? '&isTopLevelLayout' : ''),
-                'tt_content_defValues' => array_replace(
-                    is_array($item['tt_content_defValues']) ? $item['tt_content_defValues'] : [],
-                    [
-                        'CType' => 'gridelements_pi1',
-                        'tx_gridelements_backend_layout' => $item['uid'],
-                    ]
-                ),
+                'defaultValues' => $defaultValues,
             ];
             $icon = '';
             if (!empty($item['iconIdentifier'])) {
