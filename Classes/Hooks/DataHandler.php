@@ -80,9 +80,9 @@ class DataHandler implements SingletonInterface
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj : The parent object that triggered this hook
      */
     public function processDatamap_afterDatabaseOperations(
-        string &$status,
-        string &$table,
-        string &$id,
+        string $status,
+        string $table,
+        string $id,
         array &$fieldArray,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
     ) {
