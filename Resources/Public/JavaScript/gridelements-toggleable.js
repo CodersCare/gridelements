@@ -39,52 +39,60 @@ class GridelementsToggleable {
   static activateAllCollapseIcons () {
     GridelementsToggleable.activateCollapseIcons();
 
-    const lastIcon = document.querySelector('.module-docheader-bar-column-left .btn-group .icon:last-child').parentNode;
-    const addNewIcon = document.querySelector('.t3js-toggle-gridelements-column');
+    const lastIconElement = document.querySelector('.module-docheader-bar-column-left .btn-group .icon:last-child');
 
-    let newIcon = addNewIcon.cloneNode(true);
-    newIcon.className = 'btn btn-default btn-sm t3js-gridcolumn-toggle t3js-gridcolumn-expand';
-    lastIcon.insertAdjacentElement('afterend', newIcon);
+    if (lastIconElement && lastIconElement.parentNode) {
 
-    [...newIcon.childNodes].filter(node => node.nodeType === 3).forEach(node => node.remove());
-    newIcon.querySelector('.icon-actions-view-list-collapse').remove();
-    newIcon.removeAttribute('onclick');
-    newIcon.setAttribute('title', 'Expand all grid columns');
+      const lastIcon = lastIconElement.parentNode;
+      const addNewIcon = document.querySelector('.t3js-toggle-gridelements-column');
 
-    newIcon = addNewIcon.cloneNode(true);
-    newIcon.className = 'btn btn-default btn-sm t3js-gridcolumn-toggle';
-    lastIcon.insertAdjacentElement('afterend', newIcon);
+      if (addNewIcon) {
 
-    [...newIcon.childNodes].filter(node => node.nodeType === 3).forEach(node => node.remove());
-    newIcon.querySelector('.icon-actions-view-list-expand').remove();
-    newIcon.removeAttribute('onclick');
-    newIcon.setAttribute('title', 'Collapse all grid columns');
+        let newIcon = addNewIcon.cloneNode(true);
+        newIcon.className = 'btn btn-default btn-sm t3js-gridcolumn-toggle t3js-gridcolumn-expand';
+        lastIcon.insertAdjacentElement('afterend', newIcon);
 
-    document.addEventListener('click', function(evt) {
-      if (evt.target.closest('.t3js-gridcolumn-toggle')) {
-        evt.preventDefault();
+        [...newIcon.childNodes].filter(node => node.nodeType === 3).forEach(node => node.remove());
+        newIcon.querySelector('.icon-actions-view-list-collapse').remove();
+        newIcon.removeAttribute('onclick');
+        newIcon.setAttribute('title', 'Expand all grid columns');
 
-        const me = evt.target;
-        const collapsed = me.classList.contains('t3js-gridcolumn-expand') ? 0 : 1;
+        newIcon = addNewIcon.cloneNode(true);
+        newIcon.className = 'btn btn-default btn-sm t3js-gridcolumn-toggle';
+        lastIcon.insertAdjacentElement('afterend', newIcon);
 
-        let storedModuleDataPage = {};
+        [...newIcon.childNodes].filter(node => node.nodeType === 3).forEach(node => node.remove());
+        newIcon.querySelector('.icon-actions-view-list-expand').remove();
+        newIcon.removeAttribute('onclick');
+        newIcon.setAttribute('title', 'Collapse all grid columns');
 
-        if (PersistentStorage.isset('moduleData.page.gridelementsCollapsedColumns')) {
-          storedModuleDataPage = PersistentStorage.get('moduleData.list.gridelementsExpanded');
-        }
+        document.addEventListener('click', function (evt) {
+          if (evt.target.closest('.t3js-gridcolumn-toggle')) {
+            evt.preventDefault();
 
-        const collapseConfig = {};
-        document.querySelectorAll('[data-columnkey]').forEach(elem => {
-          const columnKey = elem.getAttribute('data-columnkey');
-          collapseConfig[columnKey] = collapsed;
-          elem.classList.remove('collapsed', 'expanded');
-          elem.classList.add(collapsed ? 'collapsed' : 'expanded');
+            const me = evt.target.closest('.t3js-gridcolumn-toggle');
+            const collapse = me.classList.contains('t3js-gridcolumn-expand') ? 0 : 1;
+
+            let storedModuleDataPage = {};
+
+            if (PersistentStorage.isset('moduleData.page.gridelementsCollapsedColumns')) {
+              storedModuleDataPage = PersistentStorage.get('moduleData.page.gridelementsCollapsedColumns');
+            }
+
+            const collapseConfig = {};
+            document.querySelectorAll('[data-columnkey]').forEach(elem => {
+              const columnKey = elem.getAttribute('data-columnkey');
+              collapseConfig[columnKey] = collapse;
+              elem.classList.remove('collapsed', 'expanded');
+              elem.classList.add(collapse ? 'collapsed' : 'expanded');
+            });
+
+            storedModuleDataPage = {...storedModuleDataPage, ...collapseConfig};
+            PersistentStorage.set('moduleData.page.gridelementsCollapsedColumns', storedModuleDataPage);
+          }
         });
-
-        storedModuleDataPage = {...storedModuleDataPage, ...collapseConfig};
-        PersistentStorage.set('moduleData.page.gridelementsCollapsedColumns', storedModuleDataPage);
       }
-    });
+    }
   };
 
   static activateCollapseIcons() {
