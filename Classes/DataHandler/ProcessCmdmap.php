@@ -25,6 +25,7 @@ namespace GridElementsTeam\Gridelements\DataHandler;
 
 use Doctrine\DBAL\Exception;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Http\ServerRequestFactory;
@@ -39,7 +40,9 @@ class ProcessCmdmap extends AbstractDataHandler
     public function __construct(
         protected ServerRequestInterface|null $request = null
     ) {
-        $this->request = $GLOBALS['TYPO3_REQUEST'] ?? ServerRequestFactory::fromGlobals();
+        if (!Environment::isCli()) {
+            $this->request = $GLOBALS['TYPO3_REQUEST'] ?? ServerRequestFactory::fromGlobals();
+        }
     }
 
     /**
@@ -58,11 +61,16 @@ class ProcessCmdmap extends AbstractDataHandler
         string $command,
         string $table,
         int $id,
-        $value,
+        mixed $value,
         bool &$commandIsProcessed,
         DataHandler $parentObj = null,
-        $pasteUpdate = false
-    ) {
+        bool|array $pasteUpdate = false
+    ): void {
+
+        if (!($this->request instanceof ServerRequestInterface)) {
+            return;
+        }
+
         $this->init($table, (string)$id, $parentObj);
 
         $reference = (int)($this->request->getQueryParams()['reference'] ?? 0);
