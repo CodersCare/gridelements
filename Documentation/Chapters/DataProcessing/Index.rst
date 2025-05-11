@@ -106,5 +106,6 @@ The two setups for the shortcut cObject are the same as for the well known defau
    :titlesonly:
    :glob:
 
+   HowTo/Index
    Reference/Index
 
