@@ -750,7 +750,7 @@ class LayoutSetup
      *
      * @param LanguageService|null $languageService
      */
-    public function setLanguageService(LanguageService $languageService = null): void
+    public function setLanguageService(?LanguageService $languageService = null): void
     {
         if ($languageService instanceof LanguageService) {
             $this->languageService = $languageService;
