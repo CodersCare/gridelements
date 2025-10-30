@@ -126,7 +126,7 @@ class LayoutSetup
     {
         // Load page TSconfig.
         if (($GLOBALS['TYPO3_REQUEST'] ?? null) && ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
-            $pageTSconfig = $GLOBALS['TSFE']->getPagesTSconfig();
+            $pageTSconfig = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.controller')->getPagesTSconfig();
         } else {
             $pageTSconfig = BackendUtility::getPagesTSconfig($pageId);
         }
