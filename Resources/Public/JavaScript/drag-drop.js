@@ -40,6 +40,11 @@ class DragDrop {
     }
 
     initialize() {
+        const dropUid = sessionStorage.getItem('gridelements-drop-uid');
+        if (dropUid !== null) {
+            sessionStorage.removeItem('gridelements-drop-uid');
+            document.getElementById(`element-tt_content-${dropUid}`)?.scrollIntoView({ block: 'center' });
+        }
         new RegularEvent("mousedown", ((e, t) => {
             const a = e.target.closest("a,img");
             null === a || t.contains(a)
@@ -167,7 +172,10 @@ class DragDrop {
             r = document.querySelector(".t3-grid-container");
         return DataHandler.process(e, o).then((e => {
             if (e.hasErrors) throw e.messages;
-            (t || "1" === r?.dataset.defaultLanguageBinding) && self.location.reload()
+            if (t || "1" === r?.dataset.defaultLanguageBinding) {
+                sessionStorage.setItem('gridelements-drop-uid', String(n));
+                self.location.reload()
+            }
         }))
     }
 
