@@ -251,7 +251,7 @@ class DataHandler implements SingletonInterface
     {
         unset($dataHandler->cmdmap['tt_content'][$id]);
 
-        $message = LocalizationUtility::translate(sprintf('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_cannot_%s_into_container', $command));
+        $message = LocalizationUtility::translate(sprintf('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_cannot_%s_into_container', $command));
 
         $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', ContextualFeedbackSeverity::ERROR, true);
         $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
