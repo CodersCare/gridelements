@@ -34,10 +34,10 @@ use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\FrontendRestrictionContainer;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Service\FlexFormService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
@@ -190,7 +190,7 @@ class Gridelements extends ContentObjectRenderer implements LoggerAwareInterface
      * @param array|null $child
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v14.0
      */
-    public function initPluginFlexForm(string $field = 'pi_flexform', ?array &$child = null): void
+    public function initPluginFlexForm(string $field = 'pi_flexform', array &$child = null): void
     {
         $this->flexFormTools = GeneralUtility::makeInstance(FlexFormTools::class);
         // Converting flexform data into array:
@@ -676,7 +676,7 @@ class Gridelements extends ContentObjectRenderer implements LoggerAwareInterface
      */
     public function user_getTreeList(): void
     {
-        if (GeneralUtility::makeInstance(VersionNumberUtility::class)->getMajorVersionNumber() <= 12) {
+        if ((new Typo3Version())->getMajorVersion() <= 12) {
             $pidList = !empty($this->getTSFE()->register['tt_content_shortcut_recursive'])
                 ? $this->cObj->getTreeList(
                     $this->cObj->data['uid'],
