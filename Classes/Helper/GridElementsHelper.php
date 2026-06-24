@@ -226,11 +226,6 @@ class GridElementsHelper implements SingletonInterface
         $specificIds['uid'] = (int)$record['uid'];
         $specificIds['pid'] = (int)$record['pid'];
 
-        if (self::getBackendUser()->workspace > 0 && !empty($record['t3ver_oid'])) {
-            $specificIds['uid'] = (int)$record['t3ver_oid'];
-            $specificIds['pid'] = -1;
-        }
-
         return $specificIds;
     }
 
