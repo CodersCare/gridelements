@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
@@ -352,7 +353,13 @@ abstract class AbstractDataHandler
             $queryBuilder = $this->getQueryBuilder();
             $currentContainers = $queryBuilder
                 ->select('uid', 'tx_gridelements_children')
-                ->from('tt_content')->where($queryBuilder->expr()->in('uid', implode(',', array_keys($containerUpdateArray))))->executeQuery()
+                ->from('tt_content')->where(
+                    $queryBuilder->expr()->in(
+                        'uid',
+                        $queryBuilder->createNamedParameter(array_keys($containerUpdateArray), ArrayParameterType::INTEGER)
+                    )
+                )
+                ->executeQuery()
                 ->fetchAllAssociative();
             if (!empty($currentContainers)) {
                 foreach ($currentContainers as $fieldArray) {
