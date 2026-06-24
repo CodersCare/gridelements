@@ -50,7 +50,7 @@ class ModifyNewContentElementWizardItemsListener
         private readonly array $gridElementsExtensionConfiguration,
         private LayoutSetup|null $layoutSetup = null
     ) {
-        if (empty($layouSetup)) {
+        if (empty($layoutSetup)) {
             $this->layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class);
         }
     }
