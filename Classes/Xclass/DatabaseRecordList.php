@@ -32,6 +32,7 @@ use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Http\PropagateResponseException;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -1844,6 +1845,18 @@ class DatabaseRecordList extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordLis
             <span class="table-sorting-label">' . $label . '</span>
             <span class="table-sorting-icon">' . $icon . '</span>
             </a>';
+    }
+
+    protected function getNoViewWithDokTypes(array $tsConfig): array
+    {
+        if (isset($tsConfig['noViewWithDokTypes'])) {
+            return GeneralUtility::intExplode(',', (string)$tsConfig['noViewWithDokTypes'], true);
+        }
+        return [
+            PageRepository::DOKTYPE_SPACER,
+            PageRepository::DOKTYPE_SYSFOLDER,
+            255, // recycler doktype, constant removed in TYPO3 13
+        ];
     }
 
 }
