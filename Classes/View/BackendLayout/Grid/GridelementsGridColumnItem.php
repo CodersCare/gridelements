@@ -43,7 +43,9 @@ class GridelementsGridColumnItem extends GridColumnItem
      */
     public function getGridelementsColumn(): GridelementsGridColumn
     {
-        return $this->column;
+        /** @var GridelementsGridColumn $column */
+        $column = $this->column;
+        return $column;
     }
 
     /**
@@ -86,16 +88,16 @@ class GridelementsGridColumnItem extends GridColumnItem
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $pageId = $this->context->getPageId();
 
-        $allowed = base64_encode(json_encode($this->column->getAllowed()));
-        $disallowed = base64_encode(json_encode($this->column->getDisallowed()));
+        $allowed = base64_encode(json_encode($this->getGridelementsColumn()->getAllowed()));
+        $disallowed = base64_encode(json_encode($this->getGridelementsColumn()->getDisallowed()));
 
         $urlParameters = [
             'id' => $pageId,
             'sys_language_uid' => $this->context->getSiteLanguage()->getLanguageId(),
             'tx_gridelements_allowed' => $allowed,
             'tx_gridelements_disallowed' => $disallowed,
-            'tx_gridelements_container' => $this->column->getGridContainerId(),
-            'tx_gridelements_columns' => $this->column->getColumnNumber(),
+            'tx_gridelements_container' => $this->getGridelementsColumn()->getGridContainerId(),
+            'tx_gridelements_columns' => $this->getGridelementsColumn()->getColumnNumber(),
             'colPos' => -1,
             'uid_pid' => -$this->record['uid'],
             'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
