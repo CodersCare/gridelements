@@ -31,8 +31,6 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -44,44 +42,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class AfterDatabaseOperations extends AbstractDataHandler
 {
-    /**
-     * Function to adjust colPos, container and grid column of an element
-     * after it has been moved out of or into a container during a workspace operation
-     *
-     * @param array $fieldArray The array of fields and values that have been saved to the datamap
-     * @param int $uid the ID of the record
-     * @param DataHandler $parentObj The parent object that triggered this hook
-     * @throws AspectNotFoundException
-     */
-    public function adjustValuesAfterWorkspaceOperations(array $fieldArray, int $uid, DataHandler $parentObj): void
-    {
-        if (class_exists(Context::class)) {
-            /** @var Context $context */
-            $context = GeneralUtility::makeInstance(Context::class);
-            $workspaceId = $context->getPropertyFromAspect('workspace', 'id');
-        } else {
-            $workspaceId = $GLOBALS['BE_USER']->workspace;
-        }
-
-        if ($workspaceId && (isset($fieldArray['colPos']) || isset($fieldArray['tx_gridelements_container']) || isset($fieldArray['tx_gridelements_columns']))) {
-            $originalRecord = $parentObj->recordInfo('tt_content', $uid);
-            if ($originalRecord['t3ver_state'] === 4) {
-                $updateArray = [];
-                $movePlaceholder = BackendUtility::getWorkspaceVersionOfRecord($workspaceId, 'tt_content', $uid, 'uid');
-                if (isset($fieldArray['colPos'])) {
-                    $updateArray['colPos'] = (int)$fieldArray['colPos'];
-                }
-                if (isset($fieldArray['tx_gridelements_container'])) {
-                    $updateArray['tx_gridelements_container'] = (int)$fieldArray['tx_gridelements_container'];
-                }
-                if (isset($fieldArray['tx_gridelements_columns'])) {
-                    $updateArray['tx_gridelements_columns'] = (int)$fieldArray['tx_gridelements_columns'];
-                }
-                $parentObj->updateDB('tt_content', (int)$movePlaceholder['uid'], $updateArray);
-            }
-        }
-    }
-
     /**
      * Gets the current backend user.
      *

@@ -29,7 +29,6 @@ use GridElementsTeam\Gridelements\DataHandler\ProcessCmdmap;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
-use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
@@ -82,7 +81,6 @@ class DataHandler implements SingletonInterface
      * @param string $id : The uid of the page we are currently working on
      * @param array $fieldArray : The array of fields and values that have been saved to the datamap
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj : The parent object that triggered this hook
-     * @throws AspectNotFoundException
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws \Doctrine\DBAL\Exception
@@ -101,10 +99,6 @@ class DataHandler implements SingletonInterface
             $hook = GeneralUtility::makeInstance(AfterDatabaseOperations::class);
             if (str_contains($recordUid, 'NEW')) {
                 $recordUid = $parentObj->substNEWwithIDs[$recordUid];
-            } else {
-                if ($table === 'tt_content' && $status === 'update') {
-                    $hook->adjustValuesAfterWorkspaceOperations($fieldArray, (int)$recordUid, $parentObj);
-                }
             }
             $hook->execute_afterDatabaseOperations($fieldArray, $table, (int)$recordUid, $parentObj);
         }
