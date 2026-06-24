@@ -30,6 +30,8 @@ class DragDrop {
     draggedCType = '';
     draggedListType = '';
     draggedGridType = '';
+    ownDropZone = null;
+    prevDropZone = null;
 
     constructor() {
         DocumentService.ready().then((() => {
@@ -70,13 +72,29 @@ class DragDrop {
             moveElementUrl: a.dataset.moveElementUrl
         }));
         const n = this.getDragTooltipMetadataFromContentElement(a);
-        e.dataTransfer.setData(DataTransferTypes.dragTooltip, JSON.stringify(n)), e.dataTransfer.effectAllowed = "copyMove", DragDropUtility.updateEventAndTooltipToReflectCopyMoveIntention(e), a.querySelector(Identifiers.dropZone).hidden = !0
+        e.dataTransfer.setData(DataTransferTypes.dragTooltip, JSON.stringify(n)), e.dataTransfer.effectAllowed = "copyMove", DragDropUtility.updateEventAndTooltipToReflectCopyMoveIntention(e);
+        this.ownDropZone = a.querySelector(Identifiers.dropZone);
+        if (this.ownDropZone) this.ownDropZone.hidden = true;
+        const prevSibling = a.previousElementSibling;
+        if (prevSibling !== null) {
+            this.prevDropZone = prevSibling.querySelector(Identifiers.dropZone);
+        } else {
+            let node = a.parentElement?.previousElementSibling;
+            while (node) {
+                const dz = node.querySelector(Identifiers.dropZone);
+                if (dz) { this.prevDropZone = dz; break; }
+                node = node.previousElementSibling;
+            }
+        }
+        if (this.prevDropZone) this.prevDropZone.hidden = true;
     }
 
     onDragEnd() {
         this.draggedCType = '';
         this.draggedListType = '';
         this.draggedGridType = '';
+        this.ownDropZone = null;
+        this.prevDropZone = null;
         this.hideDropZones()
     }
 
@@ -171,6 +189,7 @@ class DragDrop {
 
     showDropZones() {
         document.querySelectorAll(Identifiers.dropZone).forEach((e => {
+            if (e === this.ownDropZone || e === this.prevDropZone) return;
             if (!this.isAllowedDropZone(e)) return;
             e.hidden = !1;
             const t = e.parentElement.querySelector(Identifiers.addContent);
