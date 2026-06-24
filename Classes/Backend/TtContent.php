@@ -61,13 +61,8 @@ class TtContent
                 : (int)$params['row']['tx_gridelements_container'];
         }
 
-        if ((new(Typo3Version::class))->getMajorVersion() >= 12) {
-            $params['items'][0]['label'] = '/';
-            $params['items'][0]['value'] = 0;
-        } else {
-            $params['items'][0][0] = '/';
-            $params['items'][0][1] = 0;
-        }
+        $params['items'][0]['label'] = '/';
+        $params['items'][0]['value'] = 0;
 
         if ($gridContainerId > 0) {
             $gridElement = $this->layoutSetup->cacheCurrentParent($gridContainerId, true);
@@ -121,11 +116,7 @@ class TtContent
         $possibleContainers = [];
         $this->removeItemsFromListOfSelectableContainers($params, $possibleContainers);
 
-        if ((new(Typo3Version::class))->getMajorVersion() >= 12) {
-            array_unshift($params['items'], ['label' => '/', 'value' => 0]);
-        } else {
-            array_unshift($params['items'], [0 => '/', 1 => 0]);
-        }
+        array_unshift($params['items'], ['label' => '/', 'value' => 0]);
 
         if (!empty($possibleContainers)) {
             $params['items'] = array_merge($params['items'], $possibleContainers);
