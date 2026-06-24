@@ -36,7 +36,6 @@ use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-
 use TYPO3\CMS\Core\Utility\MathUtility;
 
 /**
@@ -1081,11 +1080,8 @@ class DatabaseRecordList extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordLis
                 }
                 $this->showMoveDown = !isset($child['tx_gridelements_columns']) || !isset($theData['_CHILDREN_'][$key + 1])
                         || (int)$child['tx_gridelements_columns']===(int)$theData['_CHILDREN_'][$key + 1]['tx_gridelements_columns'];
-                // TODO
-                /** @phpstan-ignore-next-line * */
                 $this->currentIdList[] = $child['uid'];
                 if ($row['CType']==='gridelements_pi1') {
-                    /** @phpstan-ignore-next-line * */
                     $this->currentContainerIdList[] = $row['uid'];
                 }
                 $child['_CSSCLASS'] = 't3-gridelements-child' . $expanded;
