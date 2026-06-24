@@ -27,6 +27,10 @@ var Identifiers, Classes;
 }(Classes || (Classes = {}));
 
 class DragDrop {
+    draggedCType = '';
+    draggedListType = '';
+    draggedGridType = '';
+
     constructor() {
         DocumentService.ready().then((() => {
             this.initialize()
@@ -55,6 +59,9 @@ class DragDrop {
 
     onDragStart(e, t) {
         const a = t.closest(Identifiers.content);
+        this.draggedCType = a.dataset.ctype || '';
+        this.draggedListType = a.dataset.list_type || '';
+        this.draggedGridType = a.dataset.tx_gridelements_backend_layout || '';
         e.dataTransfer.setData(DataTransferTypes.content, JSON.stringify({
             pid: this.getCurrentPageId(),
             uid: parseInt(a.dataset.uid, 10),
@@ -67,6 +74,9 @@ class DragDrop {
     }
 
     onDragEnd() {
+        this.draggedCType = '';
+        this.draggedListType = '';
+        this.draggedGridType = '';
         this.hideDropZones()
     }
 
@@ -179,10 +189,39 @@ class DragDrop {
 
     showDropZones() {
         document.querySelectorAll(Identifiers.dropZone).forEach((e => {
+            if (!this.isAllowedDropZone(e)) return;
             e.hidden = !1;
             const t = e.parentElement.querySelector(Identifiers.addContent);
             null !== t && (t.hidden = !0, e.classList.add(Classes.validDropZoneClass))
         }))
+    }
+
+    isAllowedDropZone(dropZone) {
+        const column = dropZone.closest('.t3js-page-column');
+        if (!column) return true;
+        const ctype = this.draggedCType || '';
+        const allowedCtype = column.getAttribute('data-allowed-ctype') || '';
+        const disallowedCtype = column.getAttribute('data-disallowed-ctype') || '';
+        if (disallowedCtype === '*') return false;
+        if (disallowedCtype && disallowedCtype.split(',').includes(ctype)) return false;
+        if (allowedCtype && allowedCtype !== '*' && !allowedCtype.split(',').includes(ctype)) return false;
+        if (ctype === 'list') {
+            const listType = this.draggedListType || '';
+            const allowedListType = column.getAttribute('data-allowed-list_type') || '';
+            const disallowedListType = column.getAttribute('data-disallowed-list_type') || '';
+            if (disallowedListType === '*') return false;
+            if (disallowedListType && disallowedListType.split(',').includes(listType)) return false;
+            if (allowedListType && allowedListType !== '*' && !allowedListType.split(',').includes(listType)) return false;
+        }
+        if (ctype === 'gridelements_pi1') {
+            const gridType = this.draggedGridType || '';
+            const allowedGridType = column.getAttribute('data-allowed-tx_gridelements_backend_layout') || '';
+            const disallowedGridType = column.getAttribute('data-disallowed-tx_gridelements_backend_layout') || '';
+            if (disallowedGridType === '*') return false;
+            if (disallowedGridType && disallowedGridType.split(',').includes(gridType)) return false;
+            if (allowedGridType && allowedGridType !== '*' && !allowedGridType.split(',').includes(gridType)) return false;
+        }
+        return true;
     }
 
     hideDropZones() {
@@ -193,11 +232,6 @@ class DragDrop {
         }))
     }
 
-    getGridColumnPositionForElement(e) {
-        const gc =  e.closest(".t3-grid-element-container");
-        const t = e.closest("[data-colpos]");
-        return gc !== null && null !== t && void 0 !== t.dataset.colpos && parseInt(t.dataset.colpos, 10)
-    }
 }
 
 export default new DragDrop;

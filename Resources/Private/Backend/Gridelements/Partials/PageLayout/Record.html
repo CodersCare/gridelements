@@ -1,7 +1,7 @@
 {f:if(condition: '{item.disabled} && {item.context.drawingConfiguration.showHidden} == 0', then: 'display: none;') -> f:variable(name: 'style')}
 <div class="t3-page-ce {item.wrapperClassName} t3js-page-ce t3js-page-ce-sortable"
      id="element-tt_content-{item.record.uid}"
-     data-table="tt_content" data-uid="{item.record.uid}" data-ctype="{item.record.CType}" data-language-uid="{item.record.sys_language_uid}"
+     data-table="tt_content" data-uid="{item.record.uid}" data-ctype="{item.record.CType}" data-list_type="{item.record.list_type}" data-language-uid="{item.record.sys_language_uid}"
      data-container="{item.record.tx_gridelements_container}" data-tx_gridelements_backend_layout="{item.record.tx_gridelements_backend_layout}"
      style="{style}">
     <div class="t3-page-ce-element t3-page-ce-dragitem" id="{item.uniqueId}">
