@@ -187,7 +187,6 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             )
                         )
                         ->set('colPos', -2)->set('backupColPos', -1)->executeStatement();
-                    array_flip($childElementsInUnavailableColumns);
                 }
 
                 $queryBuilder = $this->getQueryBuilder();
@@ -216,7 +215,6 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             )
                         )
                         ->set('colPos', -1)->set('backupColPos', -2)->executeStatement();
-                    array_flip($childElementsInAvailableColumns);
                 }
             }
             $changedGridElements = $changedGridElements + $childElementsInUnavailableColumns + $childElementsInAvailableColumns;
@@ -292,7 +290,6 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             )
                         )
                         ->set('backupColPos', $queryBuilder->quoteIdentifier('colPos'), false)->set('colPos', -2)->executeStatement();
-                    array_flip($elementsInUnavailableColumns);
                 }
 
                 $queryBuilder = $this->getQueryBuilder();
@@ -325,7 +322,6 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             )
                         )
                         ->set('colPos', $queryBuilder->quoteIdentifier('backupColPos'), false)->set('backupColPos', -2)->executeStatement();
-                    array_flip($elementsInAvailableColumns);
                 }
                 $changedElements = $elementsInUnavailableColumns + $elementsInAvailableColumns;
             }
@@ -368,7 +364,6 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                     )
                                 )
                                 ->set('backupColPos', $queryBuilder->quoteIdentifier('colPos'), false)->set('colPos', -2)->executeStatement();
-                            array_flip($subPageElementsInUnavailableColumns);
                         }
 
                         $queryBuilder = $this->getQueryBuilder();
@@ -404,7 +399,6 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                     )
                                 )
                                 ->set('colPos', $queryBuilder->quoteIdentifier('backupColPos'), false)->set('backupColPos', -2)->executeStatement();
-                            array_flip($subPageElementsInAvailableColumns);
                         }
 
                         $changedPageElements = $subPageElementsInUnavailableColumns + $subPageElementsInAvailableColumns;

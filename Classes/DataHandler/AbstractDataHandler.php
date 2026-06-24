@@ -154,27 +154,6 @@ abstract class AbstractDataHandler
     }
 
     /**
-     * Function to remove any remains of versioned records after finalizing a workspace action
-     * via 'Discard' or 'Publish' commands
-     */
-    public function cleanupWorkspacesAfterFinalizing(): void
-    {
-        $queryBuilder = $this->getQueryBuilder();
-
-        $constraints = [
-            $queryBuilder->expr()->and($queryBuilder->expr()->eq(
-                'pid',
-                $queryBuilder->createNamedParameter(-1, Connection::PARAM_INT)
-            ), $queryBuilder->expr()->eq(
-                't3ver_wsid',
-                $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)
-            )),
-        ];
-
-        $queryBuilder->delete('tt_content')->where(...$constraints)->executeStatement();
-    }
-
-    /**
      * getter for queryBuilder
      *
      * @param string $table

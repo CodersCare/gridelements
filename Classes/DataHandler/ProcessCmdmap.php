@@ -131,8 +131,5 @@ class ProcessCmdmap extends AbstractDataHandler
             }
         }
 
-        if ($table === 'tt_content') {
-            $this->cleanupWorkspacesAfterFinalizing();
-        }
     }
 }
