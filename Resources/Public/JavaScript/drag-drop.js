@@ -44,9 +44,13 @@ class DragDrop {
             const a = e.target.closest("a,img");
             null === a || t.contains(a)
         })).delegateTo(document, Identifiers.draggableContentHandle), new RegularEvent("dragstart", this.onDragStart.bind(this)).delegateTo(document, Identifiers.draggableContentHandle), new RegularEvent("dragenter", this.onDragEnter.bind(this)).delegateTo(document, Identifiers.draggableContentHandle), new RegularEvent("dragend", this.onDragEnd.bind(this)).delegateTo(document, Identifiers.draggableContentHandle), new RegularEvent("dragenter", ((e, t) => {
-            t.classList.add(Classes.dropPossibleHoverClass), DragDropUtility.updateEventAndTooltipToReflectCopyMoveIntention(e)
+            t.classList.add(Classes.dropPossibleHoverClass);
+            e.dataTransfer.dropEffect = (navigator.userAgent.includes("Mac") ? e.altKey : e.ctrlKey) ? "copy" : "move";
+            DragDropUtility.updateEventAndTooltipToReflectCopyMoveIntention(e)
         })).delegateTo(document, Identifiers.dropZone), new RegularEvent("dragover", (e => {
-            e.preventDefault(), DragDropUtility.updateEventAndTooltipToReflectCopyMoveIntention(e)
+            e.preventDefault();
+            e.dataTransfer.dropEffect = (navigator.userAgent.includes("Mac") ? e.altKey : e.ctrlKey) ? "copy" : "move";
+            DragDropUtility.updateEventAndTooltipToReflectCopyMoveIntention(e)
         })).delegateTo(document, Identifiers.dropZone), new RegularEvent("dragleave", ((e, t) => {
             e.preventDefault(), t.classList.remove(Classes.dropPossibleHoverClass)
         })).delegateTo(document, Identifiers.dropZone), new RegularEvent("drop", this.onDrop.bind(this), {
