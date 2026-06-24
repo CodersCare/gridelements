@@ -190,7 +190,7 @@ class Gridelements extends ContentObjectRenderer implements LoggerAwareInterface
      * @param array|null $child
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v14.0
      */
-    public function initPluginFlexForm(string $field = 'pi_flexform', array &$child = null): void
+    public function initPluginFlexForm(string $field = 'pi_flexform', ?array &$child = null): void
     {
         $this->flexFormTools = GeneralUtility::makeInstance(FlexFormTools::class);
         // Converting flexform data into array:
