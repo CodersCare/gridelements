@@ -21,7 +21,6 @@ $typo3Version = (new Typo3Version())->getMajorVersion();
 
 if ($typo3Version < 13) {
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['record_is_used']['gridelements'] = \GridElementsTeam\Gridelements\Hooks\PageLayoutView::class . '->contentIsUsed';
-    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms']['db_new_content_el']['wizardItemsHook'][] = \GridElementsTeam\Gridelements\Hooks\WizardItems::class;
 }
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] = \GridElementsTeam\Gridelements\Hooks\DataHandler::class;
