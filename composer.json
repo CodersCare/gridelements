@@ -3,7 +3,7 @@
 	"description": "Be part of the future of TYPO3! Support Gridelements now and unlock exclusive early access to Version 13! The well-established Gridelements Version 12 elevates TYPO3 by bringing grid-based layouts to content elements, with powerful features like advanced drag & drop and real references. Supercharge your backend workflow and make daily tasks easier. Join us in creating the next exciting version: https://coders.care/for/crowdfunding/gridelements",
 	"license": "GPL-2.0-or-later",
 	"type": "typo3-cms-extension",
-	"version": "13.0.0-dev",
+	"version": "13.0.0",
 	"keywords": [
 		"TYPO3 CMS",
 		"Grids",
