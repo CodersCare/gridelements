@@ -32,6 +32,8 @@ class DragDrop {
     draggedGridType = '';
     ownDropZone = null;
     prevDropZone = null;
+    dragging = false;
+    copyMode = false;
 
     constructor() {
         DocumentService.ready().then((() => {
@@ -61,7 +63,12 @@ class DragDrop {
         })).delegateTo(document, Identifiers.dropZone), new RegularEvent("drop", this.onDrop.bind(this), {
             capture: !0,
             passive: !0
-        }).delegateTo(document, Identifiers.dropZone), new RegularEvent("typo3:page-layout-drag-drop:elementChanged", this.onBroadcastElementChanged.bind(this)).bindTo(top.document)
+        }).delegateTo(document, Identifiers.dropZone), new RegularEvent("typo3:page-layout-drag-drop:elementChanged", this.onBroadcastElementChanged.bind(this)).bindTo(top.document);
+        new RegularEvent("dragover", (e => {
+            if (!this.dragging) return;
+            const newCopyMode = navigator.userAgent.includes("Mac") ? e.altKey : e.ctrlKey;
+            if (newCopyMode !== this.copyMode) { this.copyMode = newCopyMode; this.hideDropZones(); this.showDropZones() }
+        })).bindTo(document)
     }
 
     onDragEnter(e) {
@@ -69,6 +76,8 @@ class DragDrop {
     }
 
     onDragStart(e, t) {
+        this.dragging = true;
+        this.copyMode = navigator.userAgent.includes("Mac") ? e.altKey : e.ctrlKey;
         const a = t.closest(Identifiers.content);
         this.draggedCType = a.dataset.ctype || '';
         this.draggedListType = a.dataset.list_type || '';
@@ -99,6 +108,8 @@ class DragDrop {
     }
 
     onDragEnd() {
+        this.dragging = false;
+        this.copyMode = false;
         this.draggedCType = '';
         this.draggedListType = '';
         this.draggedGridType = '';
@@ -219,7 +230,7 @@ class DragDrop {
 
     showDropZones() {
         document.querySelectorAll(Identifiers.dropZone).forEach((e => {
-            if (e === this.ownDropZone || e === this.prevDropZone) return;
+            if (!this.copyMode && (e === this.ownDropZone || e === this.prevDropZone)) return;
             if (!this.isAllowedDropZone(e)) return;
             e.hidden = !1;
             const t = e.parentElement.querySelector(Identifiers.addContent);
