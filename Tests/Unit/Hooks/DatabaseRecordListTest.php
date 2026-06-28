@@ -6,6 +6,7 @@ namespace GridElementsTeam\Gridelements\Tests\Unit\Hooks;
 
 use GridElementsTeam\Gridelements\Hooks\DatabaseRecordList;
 use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList as DatabaseRecordListXclass;
+use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList12;
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
@@ -62,6 +63,22 @@ class DatabaseRecordListTest extends UnitTestCase
         $icon = 'original-icon';
         $hook->contentCollapseIcon(
             ['uid' => 1],
+            'title',
+            0,
+            $icon,
+            $parentObj
+        );
+        self::assertSame('original-icon', $icon);
+    }
+
+    #[Test]
+    public function contentCollapseIconAcceptsDatabaseRecordList12AsCms12ParentObj(): void
+    {
+        $hook = $this->makeHook();
+        $parentObj = $this->createMock(DatabaseRecordList12::class);
+        $icon = 'original-icon';
+        $hook->contentCollapseIcon(
+            ['_EXPAND_TABLE_' => 'pages', 'uid' => 1],
             'title',
             0,
             $icon,

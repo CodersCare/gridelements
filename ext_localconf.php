@@ -19,7 +19,10 @@ if ((new(Typo3Version::class))->getMajorVersion() >= 13) {
 }
 
 if (!empty($GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['gridelements']['nestingInListModule'])) {
-    $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Backend\RecordList\DatabaseRecordList::class] = ['className' => \GridElementsTeam\Gridelements\Xclass\DatabaseRecordList::class];
+    $xclassName = (new \TYPO3\CMS\Core\Information\Typo3Version())->getMajorVersion() >= 13
+        ? \GridElementsTeam\Gridelements\Xclass\DatabaseRecordList::class
+        : \GridElementsTeam\Gridelements\Xclass\DatabaseRecordList12::class;
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Backend\RecordList\DatabaseRecordList::class] = ['className' => $xclassName];
 }
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTypoScript(
     'gridelements',

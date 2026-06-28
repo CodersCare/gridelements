@@ -17,21 +17,8 @@ declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\Event;
 
-use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList as DatabaseRecordListXclass;
 use Psr\EventDispatcher\StoppableEventInterface;
 
-/**
- * Listeners to this event are able to specify a flex form data structure that
- * corresponds to a given identifier.
- *
- * Listeners should call ->setDataStructure() to set the data structure (this
- * can either be a resolved data structure string, a "FILE:" reference or a
- * fully parsed data structure as array) or ignore the event to allow other
- * listeners to set it. Do not set an empty array or string as this will
- * immediately stop event propagation!
- *
- * See the note on FlexFormTools regarding the schema of $dataStructure.
- */
 class ModifyRecordListElementDataEvent implements StoppableEventInterface
 {
     private array|null $returnData = null;
@@ -41,46 +28,34 @@ class ModifyRecordListElementDataEvent implements StoppableEventInterface
         private readonly array $row,
         private readonly int $level,
         private readonly array $inputData,
-        private readonly DatabaseRecordListXclass $parentObject,
+        private readonly \TYPO3\CMS\Backend\RecordList\DatabaseRecordList $parentObject,
     ) {
     }
 
-    /**
-     * @return string
-     */
     public function getTable(): string
     {
         return $this->table;
     }
 
-    /**
-     * @return array
-     */
     public function getRow(): array
     {
         return $this->row;
     }
 
-    /**
-     * @return int
-     */
     public function getLevel(): int
     {
         return $this->level;
     }
 
-    /**
-     * @return array
-     */
     public function getInputData(): array
     {
         return $this->inputData;
     }
 
     /**
-     * @return DatabaseRecordListXclass
+     * @return \TYPO3\CMS\Backend\RecordList\DatabaseRecordList
      */
-    public function getParentObject(): DatabaseRecordListXclass
+    public function getParentObject(): \TYPO3\CMS\Backend\RecordList\DatabaseRecordList
     {
         return $this->parentObject;
     }

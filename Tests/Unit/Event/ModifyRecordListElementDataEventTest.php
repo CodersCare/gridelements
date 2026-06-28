@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace GridElementsTeam\Gridelements\Tests\Unit\Event;
 
 use GridElementsTeam\Gridelements\Event\ModifyRecordListElementDataEvent;
-use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList as DatabaseRecordListXclass;
+use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList;
+use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList12;
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
@@ -13,7 +14,7 @@ class ModifyRecordListElementDataEventTest extends UnitTestCase
 {
     private function makeEvent(): ModifyRecordListElementDataEvent
     {
-        $parentObject = $this->createMock(DatabaseRecordListXclass::class);
+        $parentObject = $this->createMock(DatabaseRecordList::class);
         return new ModifyRecordListElementDataEvent(
             'tt_content',
             ['uid' => 1, 'pid' => 10],
@@ -50,8 +51,16 @@ class ModifyRecordListElementDataEventTest extends UnitTestCase
     #[Test]
     public function getParentObjectReturnsConstructorValue(): void
     {
-        $parentObject = $this->createMock(DatabaseRecordListXclass::class);
+        $parentObject = $this->createMock(DatabaseRecordList::class);
         $event = new ModifyRecordListElementDataEvent('pages', [], 0, [], $parentObject);
+        self::assertSame($parentObject, $event->getParentObject());
+    }
+
+    #[Test]
+    public function eventAcceptsDatabaseRecordList12AsCms12ParentObject(): void
+    {
+        $parentObject = $this->createMock(DatabaseRecordList12::class);
+        $event = new ModifyRecordListElementDataEvent('tt_content', [], 0, [], $parentObject);
         self::assertSame($parentObject, $event->getParentObject());
     }
 

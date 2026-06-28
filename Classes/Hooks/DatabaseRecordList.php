@@ -22,7 +22,6 @@ namespace GridElementsTeam\Gridelements\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList as DatabaseRecordListXclass;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -64,14 +63,14 @@ class DatabaseRecordList implements SingletonInterface
      * @param string $sortField
      * @param int $level
      * @param string $contentCollapseIcon
-     * @param DatabaseRecordListXclass $parentObj
+     * @param \TYPO3\CMS\Backend\RecordList\DatabaseRecordList $parentObj
      */
     public function contentCollapseIcon(
         array $data,
         string $sortField,
         int $level,
         string &$contentCollapseIcon,
-        DatabaseRecordListXclass $parentObj
+        \TYPO3\CMS\Backend\RecordList\DatabaseRecordList $parentObj
     ): void {
         if (!empty($data['_EXPAND_TABLE_']) && $data['_EXPAND_TABLE_'] === 'tt_content') {
             $expandTitle = htmlspecialchars(LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.expandElement'));
