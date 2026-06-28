@@ -34,15 +34,22 @@
 		"phpstan/phpstan": "*",
 		"phpstan/phpstan-deprecation-rules": "*",
 		"phpstan/phpstan-symfony": "*",
+		"phpunit/phpunit": "^10 || ^11",
 		"saschaegerer/phpstan-typo3": "*",
 		"symfony/finder": "*",
 		"symfony/process": "*",
-		"typo3/coding-standards": "*"
+		"typo3/coding-standards": "*",
+		"typo3/testing-framework": "^7 || ^8"
 	},
 	"minimum-stability": "dev",
 	"autoload": {
 		"psr-4": {
 			"GridElementsTeam\\Gridelements\\": "Classes/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"GridElementsTeam\\Gridelements\\Tests\\": "Tests/"
 		}
 	},
 	"config": {
@@ -86,7 +93,8 @@
 		"ci:php:cs": "@php php-cs-fixer fix -v --dry-run --using-cache no --diff",
 		"ci:php:lint": "@php phplint --no-progress",
 		"ci:php:stan": "@php phpstan analyse --no-progress",
-		"ci:php:unit": "phpunit",
+		"ci:php:functional": "@php .Build/vendor/bin/phpunit -c phpunit.functional.xml.dist",
+		"ci:php:unit": "@php .Build/vendor/bin/phpunit -c phpunit.xml.dist",
 		"fix": [
 			"@fix:composer",
 			"@fix:php"
