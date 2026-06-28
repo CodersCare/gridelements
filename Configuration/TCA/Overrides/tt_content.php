@@ -118,11 +118,9 @@ $GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds']['*,gride
 <ROOT type="array">
 	<el type="array">
 		<field_content type="array">
-			<TCEforms type="array">
-				<config type="array">
-					<type>none</type>
-				</config>
-			</TCEforms>
+			<config type="array">
+				<type>none</type>
+			</config>
 		</field_content>
 	</el>
 </ROOT>
