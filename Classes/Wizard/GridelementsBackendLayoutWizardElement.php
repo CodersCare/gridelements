@@ -43,7 +43,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
     /**
      * @var IconFactory
      */
-    private IconFactory $iconFactory;
+    protected $iconFactory;
 
     /**
      * @var array
