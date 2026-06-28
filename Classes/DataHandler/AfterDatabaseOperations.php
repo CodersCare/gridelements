@@ -142,7 +142,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $childElementsInUnavailableColumns,
-                                    Connection::PARAM_INT
+                                    Connection::PARAM_INT_ARRAY
                                 )
                             )
                         )
@@ -170,7 +170,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $childElementsInAvailableColumns,
-                                    Connection::PARAM_INT
+                                    Connection::PARAM_INT_ARRAY
                                 )
                             )
                         )
@@ -245,7 +245,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $elementsInUnavailableColumns,
-                                    Connection::PARAM_INT
+                                    Connection::PARAM_INT_ARRAY
                                 )
                             )
                         )
@@ -277,7 +277,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $elementsInAvailableColumns,
-                                    Connection::PARAM_INT
+                                    Connection::PARAM_INT_ARRAY
                                 )
                             )
                         )
@@ -319,7 +319,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                         'uid',
                                         $queryBuilder->createNamedParameter(
                                             $subPageElementsInUnavailableColumns,
-                                            Connection::PARAM_INT
+                                            Connection::PARAM_INT_ARRAY
                                         )
                                     )
                                 )
@@ -354,7 +354,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                         'uid',
                                         $queryBuilder->createNamedParameter(
                                             $subPageElementsInAvailableColumns,
-                                            Connection::PARAM_INT
+                                            Connection::PARAM_INT_ARRAY
                                         )
                                     )
                                 )
