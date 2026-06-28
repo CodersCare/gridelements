@@ -14,9 +14,9 @@ import DocumentService from "@typo3/core/document-service.js";
 import DataHandler from "@typo3/backend/ajax-data-handler.js";
 import Icons from "@typo3/backend/icons.js";
 import RegularEvent from "@typo3/core/event/regular-event.js";
-import {DataTransferTypes} from "@typo3/backend/enum/data-transfer-types.js";
 import BroadcastService from "@typo3/backend/broadcast-service.js";
 import {BroadcastMessage} from "@typo3/backend/broadcast-message.js";
+import {DataTransferTypes} from "@typo3/backend/enum/data-transfer-types.js";
 import DragDropUtility from "@typo3/backend/utility/drag-drop-utility.js";
 
 var Identifiers, Classes;
