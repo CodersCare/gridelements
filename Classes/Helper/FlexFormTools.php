@@ -49,7 +49,7 @@ class FlexFormTools
     ): array|string {
         $sheetArray = !empty($T3FlexForm_array) ? $T3FlexForm_array['data'][$sheet][$language] : '';
         if (is_array($sheetArray)) {
-            return $this->getFlexFormValueFromSheetArray($sheetArray, explode('/', $fieldName), $value);
+            return $this->getFlexFormValueFromSheetArray($sheetArray, explode('/', $fieldName), $value) ?? '';
         }
         return '';
     }
@@ -80,7 +80,7 @@ class FlexFormTools
                     }
                 }
             } else {
-                $tempArr = $tempArr[$v];
+                $tempArr = $tempArr[$v] ?? null;
             }
         }
         if (is_array($tempArr)) {
