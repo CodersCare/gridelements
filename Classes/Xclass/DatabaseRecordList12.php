@@ -1068,7 +1068,7 @@ class DatabaseRecordList12 extends \TYPO3\CMS\Backend\RecordList\DatabaseRecordL
                                     <strong>' . $this->getLanguageService()->sL(
                                     'LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.containerColumnName'
                             )
-                            . ' ' . $theData['_CONTAINER_COLUMNS_']['columns'][$child['tx_gridelements_columns']] . '</strong>
+                            . ' ' . htmlspecialchars($theData['_CONTAINER_COLUMNS_']['columns'][$child['tx_gridelements_columns']] ?? '') . '</strong>
                                 </td>
                             </tr>';
                 } else {

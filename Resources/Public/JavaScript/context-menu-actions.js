@@ -46,7 +46,6 @@ class ContextMenuActions {
      * @param {DOMStringMap} dataset The data attributes of the invoked menu item
      */
     static pasteInto(table, uid, dataset) {
-        console.log(dataset);
         const performPaste = () => {
             const url = dataset.actionUrl + '&redirect=' + ContextMenuActions.getReturnUrl();
 

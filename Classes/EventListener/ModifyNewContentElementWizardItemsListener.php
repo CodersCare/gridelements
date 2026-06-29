@@ -126,11 +126,13 @@ class ModifyNewContentElementWizardItemsListener
 
         if (isset($queryParams['colPos']) && (int)$queryParams['colPos'] > -1) {
             $restrictions = $this->getRestrictionsFromBackendLayout($queryParams, (int)$queryParams['colPos']);
+        } elseif (!empty($queryParams['tx_gridelements_container'])) {
+            $restrictions = $this->getRestrictionsFromGridContainer(
+                (int)$queryParams['tx_gridelements_container'],
+                (int)($queryParams['tx_gridelements_columns'] ?? 0)
+            );
         } else {
-            $restrictions = [
-                'allowed' => json_decode(base64_decode($queryParams['tx_gridelements_allowed'] ?? ''), true) ?: [],
-                'disallowed' => json_decode(base64_decode($queryParams['tx_gridelements_disallowed'] ?? ''), true) ?: []
-            ];
+            $restrictions = ['allowed' => [], 'disallowed' => []];
         }
 
         if (!empty($restrictions['allowed'])) {
@@ -223,6 +225,23 @@ class ModifyNewContentElementWizardItemsListener
         return [
             'allowed' => $allowed,
             'disallowed' => $disallowed
+        ];
+    }
+
+    /**
+     * Derive allowed/disallowed restrictions from the grid container record and its layout config.
+     */
+    protected function getRestrictionsFromGridContainer(int $containerId, int $columnNumber): array
+    {
+        $container = BackendUtility::getRecord('tt_content', $containerId, 'tx_gridelements_backend_layout,pid');
+        if (empty($container)) {
+            return ['allowed' => [], 'disallowed' => []];
+        }
+        $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init((int)$container['pid']);
+        $layoutColumns = $layoutSetup->getLayoutColumns((string)$container['tx_gridelements_backend_layout']);
+        return [
+            'allowed' => $layoutColumns['allowed'][$columnNumber] ?? [],
+            'disallowed' => $layoutColumns['disallowed'][$columnNumber] ?? [],
         ];
     }
 
