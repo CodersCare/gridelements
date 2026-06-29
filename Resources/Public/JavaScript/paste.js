@@ -113,8 +113,6 @@ class Paste {
             colPos = -1;
         }
         const closestElement = $element.closest(this.elementIdentifier);
-        console.log(colPos, gridContainer, gridColPos);
-
         const targetFound = closestElement.data('uid');
         let targetPid;
         if (typeof targetFound === 'undefined') {

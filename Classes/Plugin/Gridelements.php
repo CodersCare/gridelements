@@ -22,7 +22,7 @@ namespace GridElementsTeam\Gridelements\Plugin;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\FlexFormTools;
 use TYPO3\CMS\Core\Context\Context;
@@ -251,7 +251,7 @@ class Gridelements extends ContentObjectRenderer
      * @param int $element The uid of the grid container
      * @param int $pid
      * @param string $csvColumns A list of available column IDs
-     * @throws DBALException
+     * @throws Exception
      * @deprecated use the recommended static file based on DataProcessing instead of a USER cObject, will be removed in Gridelements v12.0
      */
     public function getChildren(int $element = 0, int $pid = 0, string $csvColumns = '')
