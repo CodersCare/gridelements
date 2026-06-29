@@ -223,7 +223,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
                 ),
                 $queryBuilder->expr()->in(
                     'pid',
-                    $queryBuilder->createNamedParameter($itemList, Connection::PARAM_INT)
+                    $queryBuilder->createNamedParameter($itemList, ArrayParameterType::INTEGER)
                 ),
                 $queryBuilder->expr()->gte('colPos', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
                 $queryBuilder->expr()->in(
@@ -233,7 +233,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
             )
             ->orderBy('inSet')
             ->addOrderBy('colPos')->addOrderBy('sorting')
-            ->setParameter('itemList', $itemList, Connection::PARAM_INT)
+            ->setParameter('itemList', implode(',', $itemList))
             ->executeQuery()->fetchAllAssociative();
 
         $sortedItemList = array_flip($itemList);

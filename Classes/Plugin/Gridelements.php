@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\Plugin;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\FlexFormTools;
@@ -292,7 +293,7 @@ class Gridelements extends ContentObjectRenderer implements LoggerAwareInterface
         if (!empty($csvColumns)) {
             $columnConstraint = $queryBuilder->expr()->in(
                 'tx_gridelements_columns',
-                $queryBuilder->createNamedParameter($csvColumns, Connection::PARAM_INT_ARRAY)
+                $queryBuilder->createNamedParameter($csvColumns, ArrayParameterType::INTEGER)
             );
             $where = $queryBuilder->expr()->and($where, $columnConstraint);
         }
@@ -318,13 +319,13 @@ class Gridelements extends ContentObjectRenderer implements LoggerAwareInterface
                         ),
                         $queryBuilder->expr()->in(
                             'tx_gridelements_columns',
-                            $queryBuilder->createNamedParameter($csvColumns, Connection::PARAM_INT_ARRAY)
+                            $queryBuilder->createNamedParameter($csvColumns, ArrayParameterType::INTEGER)
                         ),
                         $queryBuilder->expr()->in(
                             'sys_language_uid',
                             $queryBuilder->createNamedParameter(
                                 [-1, $this->languageAspect->getContentId()],
-                                Connection::PARAM_INT_ARRAY
+                                ArrayParameterType::INTEGER
                             )
                         ),
                         $queryBuilder->expr()->eq(
@@ -346,13 +347,13 @@ class Gridelements extends ContentObjectRenderer implements LoggerAwareInterface
                     ),
                     $queryBuilder->expr()->in(
                         'tx_gridelements_columns',
-                        $queryBuilder->createNamedParameter($csvColumns, Connection::PARAM_INT_ARRAY)
+                        $queryBuilder->createNamedParameter($csvColumns, ArrayParameterType::INTEGER)
                     ),
                     $queryBuilder->expr()->in(
                         'sys_language_uid',
                         $queryBuilder->createNamedParameter(
                             [-1, $this->languageAspect->getContentId()],
-                            Connection::PARAM_INT_ARRAY
+                            ArrayParameterType::INTEGER
                         )
                     )
                 );
