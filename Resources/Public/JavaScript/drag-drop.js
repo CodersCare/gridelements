@@ -30,6 +30,7 @@ class DragDrop {
     draggedCType = '';
     draggedListType = '';
     draggedGridType = '';
+    draggedElement = null;
     ownDropZone = null;
     prevDropZone = null;
     dragging = false;
@@ -79,9 +80,12 @@ class DragDrop {
         this.dragging = true;
         this.copyMode = navigator.userAgent.includes("Mac") ? e.altKey : e.ctrlKey;
         const a = t.closest(Identifiers.content);
-        this.draggedCType = a.dataset.ctype || '';
-        this.draggedListType = a.dataset.list_type || '';
-        this.draggedGridType = a.dataset.tx_gridelements_backend_layout || '';
+        // Core Record.html (used for page column elements) does not put data-ctype on .t3js-page-ce;
+        // fall back to .t3-ctype-identifier which gridelements' header partial always renders.
+        const ctypeIdentifier = a.querySelector('.t3-ctype-identifier');
+        this.draggedCType = a.dataset.ctype || ctypeIdentifier?.dataset.ctype || '';
+        this.draggedListType = a.dataset.list_type || ctypeIdentifier?.dataset.list_type || '';
+        this.draggedGridType = a.dataset.tx_gridelements_backend_layout || ctypeIdentifier?.dataset.tx_gridelements_backend_layout || '';
         e.dataTransfer.setData(DataTransferTypes.content, JSON.stringify({
             pid: this.getCurrentPageId(),
             uid: parseInt(a.dataset.uid, 10),
@@ -91,15 +95,17 @@ class DragDrop {
         }));
         const n = this.getDragTooltipMetadataFromContentElement(a);
         e.dataTransfer.setData(DataTransferTypes.dragTooltip, JSON.stringify(n)), e.dataTransfer.effectAllowed = "copyMove", DragDropUtility.updateEventAndTooltipToReflectCopyMoveIntention(e);
-        this.ownDropZone = a.querySelector(Identifiers.dropZone);
+        this.draggedElement = a;
+        // Use :scope > to find only the direct-child drop zone, not ones nested inside sub-columns.
+        this.ownDropZone = a.querySelector(':scope > ' + Identifiers.dropZone);
         if (this.ownDropZone) this.ownDropZone.hidden = true;
         const prevSibling = a.previousElementSibling;
         if (prevSibling !== null) {
-            this.prevDropZone = prevSibling.querySelector(Identifiers.dropZone);
+            this.prevDropZone = prevSibling.querySelector(':scope > ' + Identifiers.dropZone);
         } else {
             let node = a.parentElement?.previousElementSibling;
             while (node) {
-                const dz = node.querySelector(Identifiers.dropZone);
+                const dz = node.querySelector(':scope > ' + Identifiers.dropZone);
                 if (dz) { this.prevDropZone = dz; break; }
                 node = node.previousElementSibling;
             }
@@ -117,6 +123,7 @@ class DragDrop {
         this.draggedCType = '';
         this.draggedListType = '';
         this.draggedGridType = '';
+        this.draggedElement = null;
         this.ownDropZone = null;
         this.prevDropZone = null;
         this.hideDropZones();
@@ -239,10 +246,13 @@ class DragDrop {
     showDropZones() {
         document.querySelectorAll(Identifiers.dropZone).forEach((e => {
             if (!this.copyMode && (e === this.ownDropZone || e === this.prevDropZone)) return;
+            // In move mode, hide all drop zones inside the dragged element (e.g. sub-columns of a grid container).
+            // In copy mode they remain visible so the container can be copied into its own sub-columns.
+            if (!this.copyMode && this.draggedElement?.contains(e)) return;
             if (!this.isAllowedDropZone(e)) return;
             e.hidden = false;
             e.classList.add(Classes.validDropZoneClass);
-            const btn = e.parentElement.querySelector(Identifiers.addContent);
+            const btn = e.parentElement.querySelector(':scope > ' + Identifiers.addContent);
             if (btn !== null) {
                 btn.hidden = true;
                 btn.style.visibility = '';
@@ -256,9 +266,15 @@ class DragDrop {
         const ctype = this.draggedCType || '';
         const allowedCtype = column.getAttribute('data-allowed-ctype') || '';
         const disallowedCtype = column.getAttribute('data-disallowed-ctype') || '';
+        const allowedGridType = column.getAttribute('data-allowed-tx_gridelements_backend_layout') || '';
         if (disallowedCtype === '*') return false;
         if (disallowedCtype && disallowedCtype.split(',').includes(ctype)) return false;
-        if (allowedCtype && allowedCtype !== '*' && !allowedCtype.split(',').includes(ctype)) return false;
+        if (allowedCtype && allowedCtype !== '*' && !allowedCtype.split(',').includes(ctype)) {
+            // Mirror PHP GridelementsGridColumn::setRestrictions(): when specific grid layouts are
+            // allowed on a column, gridelements_pi1 is implicitly permitted even without explicit
+            // CType listing (page column backend layouts don't auto-add it like gridelements does).
+            if (!(ctype === 'gridelements_pi1' && allowedGridType)) return false;
+        }
         if (ctype === 'list') {
             const listType = this.draggedListType || '';
             const allowedListType = column.getAttribute('data-allowed-list_type') || '';
@@ -269,7 +285,6 @@ class DragDrop {
         }
         if (ctype === 'gridelements_pi1') {
             const gridType = this.draggedGridType || '';
-            const allowedGridType = column.getAttribute('data-allowed-tx_gridelements_backend_layout') || '';
             const disallowedGridType = column.getAttribute('data-disallowed-tx_gridelements_backend_layout') || '';
             if (disallowedGridType === '*') return false;
             if (disallowedGridType && disallowedGridType.split(',').includes(gridType)) return false;
@@ -282,7 +297,7 @@ class DragDrop {
         document.querySelectorAll(Identifiers.dropZone).forEach((e => {
             e.hidden = true;
             e.classList.remove(Classes.validDropZoneClass);
-            const btn = e.parentElement.querySelector(Identifiers.addContent);
+            const btn = e.parentElement.querySelector(':scope > ' + Identifiers.addContent);
             if (btn !== null) {
                 btn.hidden = false;
                 btn.style.visibility = this.dragging ? 'hidden' : '';
