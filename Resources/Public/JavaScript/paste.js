@@ -65,42 +65,115 @@ class Paste {
             + '</button>';
     }
 
+    /**
+     * Returns true when value is permitted by the given allowed/disallowed attribute strings.
+     * An absent attribute (null/undefined) means no restriction applies.
+     */
+    isTypeAllowed(allowedAttr, disallowedAttr, value) {
+        if (!value) {
+            return true;
+        }
+        if (allowedAttr != null) {
+            const a = allowedAttr.toString().split(',');
+            if (!a.includes(value) && !a.includes('*')) {
+                return false;
+            }
+        }
+        if (disallowedAttr != null) {
+            const d = disallowedAttr.toString().split(',');
+            if (d.includes(value) || d.includes('*')) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     activatePasteIcons() {
-        this.pasteAfterLinkTemplate && this.pasteIntoLinkTemplate && document.querySelectorAll(".t3js-page-new-ce").forEach((t => {
-            const e = t.parentElement.dataset.page ? this.pasteIntoLinkTemplate : this.pasteAfterLinkTemplate;
-            t.append(document.createRange().createContextualFragment(e))
-        }))
+        if (!this.pasteAfterLinkTemplate || !this.pasteIntoLinkTemplate) {
+            return;
+        }
+
+        const clipBoardCType = TYPO3.settings?.gridelements?.clipBoardElementCType || '';
+        const clipBoardListType = TYPO3.settings?.gridelements?.clipBoardElementListType || '';
+        const clipBoardGridType = TYPO3.settings?.gridelements?.clipBoardElementTxGridelementsBackendLayout || '';
+        const pasteReferenceAllowed = TYPO3.settings?.gridelements?.pasteReferenceAllowed !== false;
+
+        document.querySelectorAll(".t3js-page-new-ce").forEach((el) => {
+            const gridCell = el.closest('.t3-grid-cell') || el.closest('td');
+            const allowedCtype = gridCell ? gridCell.getAttribute('data-allowed-ctype') : null;
+            const disallowedCtype = gridCell ? gridCell.getAttribute('data-disallowed-ctype') : null;
+            const allowedListType = gridCell ? gridCell.getAttribute('data-allowed-list_type') : null;
+            const disallowedListType = gridCell ? gridCell.getAttribute('data-disallowed-list_type') : null;
+            const allowedGridType = gridCell ? gridCell.getAttribute('data-allowed-tx_gridelements_backend_layout') : null;
+            const disallowedGridType = gridCell ? gridCell.getAttribute('data-disallowed-tx_gridelements_backend_layout') : null;
+
+            const canPaste = this.isTypeAllowed(allowedCtype, disallowedCtype, clipBoardCType)
+                && this.isTypeAllowed(allowedListType, disallowedListType, clipBoardListType)
+                && this.isTypeAllowed(allowedGridType, disallowedGridType, clipBoardGridType);
+            const canPasteReference = pasteReferenceAllowed
+                && this.isTypeAllowed(allowedCtype, disallowedCtype, 'shortcut');
+
+            if (!canPaste && !canPasteReference) {
+                return;
+            }
+
+            const template = el.parentElement.dataset.page ? this.pasteIntoLinkTemplate : this.pasteAfterLinkTemplate;
+            el.append(document.createRange().createContextualFragment(template));
+        });
     }
 
     activatePasteModal($element) {
         const title = (TYPO3.lang['paste.modal.title.paste'] || 'Paste record') + ': "' + this.itemOnClipboardTitle + '"';
         const content = TYPO3.lang['paste.modal.paste'] || 'Do you want to paste the record to this position?';
 
+        const gridCell = $element[0].closest('.t3-grid-cell') || $element[0].closest('td');
+        const allowedCtype = gridCell ? gridCell.getAttribute('data-allowed-ctype') : null;
+        const disallowedCtype = gridCell ? gridCell.getAttribute('data-disallowed-ctype') : null;
+        const allowedListType = gridCell ? gridCell.getAttribute('data-allowed-list_type') : null;
+        const disallowedListType = gridCell ? gridCell.getAttribute('data-disallowed-list_type') : null;
+        const allowedGridType = gridCell ? gridCell.getAttribute('data-allowed-tx_gridelements_backend_layout') : null;
+        const disallowedGridType = gridCell ? gridCell.getAttribute('data-disallowed-tx_gridelements_backend_layout') : null;
+
+        const clipBoardCType = TYPO3.settings?.gridelements?.clipBoardElementCType || '';
+        const clipBoardListType = TYPO3.settings?.gridelements?.clipBoardElementListType || '';
+        const clipBoardGridType = TYPO3.settings?.gridelements?.clipBoardElementTxGridelementsBackendLayout || '';
+        const pasteReferenceAllowed = TYPO3.settings?.gridelements?.pasteReferenceAllowed !== false;
+
+        const canPaste = this.isTypeAllowed(allowedCtype, disallowedCtype, clipBoardCType)
+            && this.isTypeAllowed(allowedListType, disallowedListType, clipBoardListType)
+            && this.isTypeAllowed(allowedGridType, disallowedGridType, clipBoardGridType);
+        const canPasteReference = pasteReferenceAllowed
+            && this.isTypeAllowed(allowedCtype, disallowedCtype, 'shortcut');
+
         let buttons = [];
-        buttons = [
-            {
-                text: TYPO3.lang['paste.modal.button.cancel'] || 'Cancel',
-                active: true,
-                btnClass: 'btn-default',
-                trigger: (e, modal) => modal.hideModal(),
-            },
-            {
+        buttons.push({
+            text: TYPO3.lang['paste.modal.button.cancel'] || 'Cancel',
+            active: true,
+            btnClass: 'btn-default',
+            trigger: (e, modal) => modal.hideModal(),
+        });
+
+        if (canPaste) {
+            buttons.push({
                 text: TYPO3.lang['paste.modal.button.paste'] || 'Paste',
                 btnClass: 'btn-' + Severity.getCssClass(SeverityEnum.warning),
                 trigger: (e, modal) => {
                     modal.hideModal();
                     this.execute($element);
                 },
-            },
-            {
+            });
+        }
+
+        if (canPasteReference) {
+            buttons.push({
                 text: TYPO3.lang['paste.modal.button.paste_reference'] || 'Paste Reference',
                 btnClass: 'btn-' + Severity.getCssClass(SeverityEnum.warning),
                 trigger: (e, modal) => {
                     modal.hideModal();
                     this.execute($element, true);
                 },
-            },
-        ];
+            });
+        }
 
         Modal.show(title, content, SeverityEnum.warning, buttons);
     }

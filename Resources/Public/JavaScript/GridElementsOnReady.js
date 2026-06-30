@@ -135,7 +135,37 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
                 } else {
                     gridCell.data('allowedListType', true);
                 }
-                gridCell.data('allowed', (gridCell.data('allowedCType') && gridCell.data('allowedTxGridelementsBackendLayout') && gridCell.data('allowedListType')));
+
+                // Check if shortcut (reference) CType is allowed for this column independently
+                var canPasteReference = false;
+                if (top.pasteReferenceAllowed === true) {
+                    canPasteReference = true;
+                    if (typeof(gridCell.data('allowed-ctype')) !== 'undefined') {
+                        var refAllowedCTypes = gridCell.data('allowed-ctype').toString().split(',');
+                        if (
+                            refAllowedCTypes.indexOf('shortcut') === -1
+                            && refAllowedCTypes.indexOf('*') === -1
+                            && gridCell.data('allowed-ctype') !== '*'
+                        ) {
+                            canPasteReference = false;
+                        }
+                    }
+                    if (canPasteReference && typeof(gridCell.data('disallowed-ctype')) !== 'undefined') {
+                        var refDisallowedCTypes = gridCell.data('disallowed-ctype').toString().split(',');
+                        if (
+                            refDisallowedCTypes.indexOf('shortcut') > -1
+                            || refDisallowedCTypes.indexOf('*') > -1
+                            || gridCell.data('disallowed-ctype') === '*'
+                        ) {
+                            canPasteReference = false;
+                        }
+                    }
+                }
+
+                var canPaste = gridCell.data('allowedCType') && gridCell.data('allowedTxGridelementsBackendLayout') && gridCell.data('allowedListType');
+                gridCell.data('canPaste', canPaste);
+                gridCell.data('canPasteReference', canPasteReference);
+                gridCell.data('allowed', canPaste || canPasteReference);
             }
             if (top.pasteAfterLinkTemplate && top.pasteIntoLinkTemplate && gridCell.data('allowed')) {
                 var parent = $(this).parent();
@@ -171,6 +201,9 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
     Paste.activatePasteModal = function (element) {
         var $element = $(element);
         var url = $element.data('url') || null;
+        var gridCell = $element.closest('.t3-grid-cell');
+        var canPaste = gridCell.data('canPaste') !== false;
+        var canPasteReference = gridCell.data('canPasteReference') === true;
         if (Paste.itemOnClipboardTitle) {
             var title = (TYPO3.lang['paste.modal.title.paste'] || 'Paste record') + ': "' + Paste.itemOnClipboardTitle + '"';
             var severity = (typeof top.TYPO3.Severity[$element.data('severity')] !== 'undefined') ? top.TYPO3.Severity[$element.data('severity')] : top.TYPO3.Severity.warning;
@@ -188,26 +221,27 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
                     trigger: function () {
                         Modal.currentModal.trigger('modal-dismiss');
                     }
-                },
-                {
+                }
+            ];
+            if (canPaste) {
+                buttons.push({
                     text: TYPO3.lang['tx_gridelements_js.modal.button.pastecopy'] || 'Paste as copy',
                     btnClass: 'btn-' + top.TYPO3.Severity.getCssClass(severity),
                     trigger: function (ev) {
                         Modal.currentModal.trigger('modal-dismiss');
                         DragDrop.default.onDrop($element.data('content'), $element, ev);
                     }
-                },
-                {
+                });
+            }
+            if (canPasteReference) {
+                buttons.push({
                     text: TYPO3.lang['tx_gridelements_js.modal.button.pastereference'] || 'Paste as reference',
                     btnClass: 'btn-' + top.TYPO3.Severity.getCssClass(severity),
                     trigger: function (ev) {
                         Modal.currentModal.trigger('modal-dismiss');
                         DragDrop.default.onDrop($element.data('content'), $element, ev, 'reference');
                     }
-                }
-            ];
-            if (top.pasteReferenceAllowed !== true) {
-                buttons.pop();
+                });
             }
         } else {
             var content = TYPO3.lang['paste.modal.paste'] || 'Do you want to move the record to this position?';
@@ -219,16 +253,28 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
                     trigger: function () {
                         Modal.currentModal.trigger('modal-dismiss');
                     }
-                },
-                {
+                }
+            ];
+            if (canPaste) {
+                buttons.push({
                     text: TYPO3.lang['paste.modal.button.paste'] || 'Move',
                     btnClass: 'btn-' + Severity.getCssClass(severity),
                     trigger: function () {
                         Modal.currentModal.trigger('modal-dismiss');
                         DragDrop.default.onDrop($element.data('content'), $element, null);
                     }
-                }
-            ];
+                });
+            }
+            if (canPasteReference) {
+                buttons.push({
+                    text: TYPO3.lang['tx_gridelements_js.modal.button.pastereference'] || 'Paste as reference',
+                    btnClass: 'btn-' + Severity.getCssClass(severity),
+                    trigger: function (ev) {
+                        Modal.currentModal.trigger('modal-dismiss');
+                        DragDrop.default.onDrop($element.data('content'), $element, ev, 'reference');
+                    }
+                });
+            }
         }
         if (url !== null) {
             var separator = (url.indexOf('?') > -1) ? '&' : '?';
