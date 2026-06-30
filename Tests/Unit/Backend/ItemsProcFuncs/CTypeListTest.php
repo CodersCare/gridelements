@@ -101,4 +101,66 @@ class CTypeListTest extends UnitTestCase
         self::assertCount(1, $items);
         self::assertSame('image', $items[0][1]);
     }
+
+    // --- current CType preservation ---
+
+    #[Test]
+    public function checkForAllowedCTypesKeepsCurrentCTypeEvenWhenNotInAllowedList(): void
+    {
+        // allowed = text only; current element is already 'image' — must stay to keep the record saveable
+        $this->seedLayout(16, [
+            'allowed' => [0 => ['CType' => ['text' => 0]]],
+            'disallowed' => [],
+        ]);
+        $items = [['Text', 'text', null, null], ['Image', 'image', null, null]];
+        $this->makeList()->checkForAllowedCTypes($items, 16, 0, 0, 0, 'image');
+        $items = array_values($items);
+        self::assertCount(2, $items);
+        self::assertSame('text', $items[0][1]);
+        self::assertSame('image', $items[1][1]);
+    }
+
+    #[Test]
+    public function checkForAllowedCTypesKeepsCurrentCTypeEvenWhenExplicitlyDisallowed(): void
+    {
+        $this->seedLayout(17, [
+            'allowed' => [],
+            'disallowed' => [0 => ['CType' => ['image' => 0]]],
+        ]);
+        $items = [['Text', 'text', null, null], ['Image', 'image', null, null]];
+        $this->makeList()->checkForAllowedCTypes($items, 17, 0, 0, 0, 'image');
+        $items = array_values($items);
+        self::assertCount(2, $items);
+        self::assertSame('image', $items[1][1]);
+    }
+
+    #[Test]
+    public function checkForAllowedCTypesKeepsCurrentCTypeEvenWhenDisallowedByWildcard(): void
+    {
+        $this->seedLayout(18, [
+            'allowed' => [],
+            'disallowed' => [0 => ['CType' => ['*' => 0]]],
+        ]);
+        $items = [['Text', 'text', null, null], ['Image', 'image', null, null]];
+        $this->makeList()->checkForAllowedCTypes($items, 18, 0, 0, 0, 'image');
+        $items = array_values($items);
+        self::assertCount(1, $items);
+        self::assertSame('image', $items[0][1]);
+    }
+
+    #[Test]
+    public function checkForAllowedCTypesStillFiltersOtherItemsWhenCurrentCTypeIsSet(): void
+    {
+        // current CType is 'image'; allowed is 'text' only — 'image' kept, everything else still filtered
+        $this->seedLayout(19, [
+            'allowed' => [0 => ['CType' => ['text' => 0]]],
+            'disallowed' => [],
+        ]);
+        $items = [['Text', 'text', null, null], ['Image', 'image', null, null], ['Video', 'media', null, null]];
+        $this->makeList()->checkForAllowedCTypes($items, 19, 0, 0, 0, 'image');
+        $items = array_values($items);
+        self::assertCount(2, $items);
+        self::assertSame('text', $items[0][1]);
+        self::assertSame('image', $items[1][1]);
+    }
 }

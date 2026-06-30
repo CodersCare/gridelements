@@ -225,10 +225,10 @@ class TtContent
      */
     public function deleteDisallowedContainers(array &$params, string $itemUidList = ''): void
     {
-        $contentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
+        $contentType = is_array($params['row']['CType']) ? ($params['row']['CType'][0] ?? '') : $params['row']['CType'];
         $listType = '';
         if ($contentType === 'list') {
-            $listType = is_array($params['row']['list_type']) ? $params['row']['list_type'][0] : $params['row']['list_type'];
+            $listType = is_array($params['row']['list_type']) ? ($params['row']['list_type'][0] ?? '') : $params['row']['list_type'];
         }
         $layoutSetups = $this->layoutSetup->getLayoutSetup();
         if ($itemUidList) {
