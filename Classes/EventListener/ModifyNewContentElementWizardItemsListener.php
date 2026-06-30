@@ -78,6 +78,9 @@ class ModifyNewContentElementWizardItemsListener
         $this->layoutSetup->init($event->getUidPid());
 
         $requestArguments = $this->getRequestArguments();
+        if ($requestArguments === null) {
+            return;
+        }
 
         $wizardItems = $event->getWizardItems();
 

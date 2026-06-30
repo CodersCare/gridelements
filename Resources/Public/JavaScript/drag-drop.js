@@ -135,8 +135,8 @@ class DragDrop {
             let i;
             i = void 0 === s ? parseInt(t.closest("[data-page]").dataset.page, 10) : 0 - parseInt(s, 10);
             let d = o.language;
-            -1 !== d && (d = parseInt(t.closest("[data-language-uid]").dataset.languageUid, 10));
-            const v = parseInt(t?.closest('.t3-grid-element-container')?.closest(Identifiers.content).dataset.uid) || 0;
+            -1 !== d && (d = parseInt(t.closest("[data-language-uid]")?.dataset.languageUid ?? '-1', 10));
+            const v = parseInt(t?.closest('.t3-grid-element-container')?.closest(Identifiers.content)?.dataset?.uid) || 0;
             let l = 0;
             if (v > 0 && u !== false && u !== '') {
                 l = -1;

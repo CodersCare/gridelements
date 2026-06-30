@@ -156,7 +156,7 @@ class LocalizationController
         $columns = [];
         $backendLayoutView = GeneralUtility::makeInstance(BackendLayoutView::class);
         $backendLayout = $backendLayoutView->getBackendLayoutForPage($pageId);
-        $columns[-1] = 'GFridelements';
+        $columns[-1] = 'Gridelements';
 
         foreach ($backendLayout->getUsedColumns() as $columnPos => $columnLabel) {
             $columns[$columnPos] = $GLOBALS['LANG']->sL($columnLabel);

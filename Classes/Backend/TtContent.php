@@ -66,6 +66,9 @@ class TtContent
 
         if ($gridContainerId > 0) {
             $gridElement = $this->layoutSetup->cacheCurrentParent($gridContainerId, true);
+            if ($gridElement === null) {
+                return;
+            }
             $params['items'] = $this->layoutSetup->getLayoutColumnsSelectItems($gridElement['tx_gridelements_backend_layout']);
 
             $ContentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
