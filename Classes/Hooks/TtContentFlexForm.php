@@ -65,6 +65,7 @@ class TtContentFlexForm
                         // Our data structure is in a record. Re-use core internal syntax to resolve that.
                         // Get path of referenced file
                         $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
+                        $fileReferences = [];
                         if (MathUtility::canBeInterpretedAsInteger($layoutId)) {
                             $fileReferences = $fileRepository->findByRelation('tx_gridelements_backend_layout', 'pi_flexform_ds_file', $layoutId);
                         }

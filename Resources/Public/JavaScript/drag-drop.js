@@ -187,10 +187,10 @@ class DragDrop {
             let language = parseInt(draggedElement.dataset.languageUid, 10);
             if (language !== -1) {
                 // new elements language must be the same as the column the element is dropped in if element is not -1
-                language = parseInt((dropContainer.closest('[data-language-uid]')).dataset.languageUid, 10);
+                language = parseInt((dropContainer.closest('[data-language-uid]'))?.dataset.languageUid ?? '-1', 10);
             }
 
-            const container = parseInt(dropContainer?.closest('.t3-grid-element-container')?.closest(DragDrop.contentIdentifier).dataset.uid) || 0;
+            const container = parseInt(dropContainer?.closest('.t3-grid-element-container')?.closest(DragDrop.contentIdentifier)?.dataset?.uid) || 0;
 
             let colPos = 0;
             if (container > 0 && gridColumn !== false && gridColumn !== '') {

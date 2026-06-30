@@ -380,7 +380,7 @@ define(['jquery', 'TYPO3/CMS/Backend/AjaxDataHandler', 'TYPO3/CMS/Backend/Storag
             var storedModuleDataPage = {};
 
             if (PersistentStorage.isset('moduleData.page.gridelementsCollapsedColumns')) {
-                storedModuleDataPage = PersistentStorage.get('moduleData.list.gridelementsExpanded');
+                storedModuleDataPage = PersistentStorage.get('moduleData.page.gridelementsCollapsedColumns');
             }
 
             var collapseConfig = {};
