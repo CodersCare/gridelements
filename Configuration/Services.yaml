@@ -67,6 +67,11 @@ services:
       - name: event.listener
         identifier: 'gridelements-inject-js-labels'
         event: TYPO3\CMS\Backend\Controller\Event\AfterBackendPageRenderEvent
+  GridElementsTeam\Gridelements\EventListener\ModifyPageLayoutContentEventListener:
+    tags:
+      - name: event.listener
+        identifier: 'gridelements-paste-clipboard-settings'
+        event: TYPO3\CMS\Backend\Controller\Event\ModifyPageLayoutContentEvent
   GridElementsTeam\Gridelements\Command\GridelementsColPosFixer:
     tags:
       - name: console.command
