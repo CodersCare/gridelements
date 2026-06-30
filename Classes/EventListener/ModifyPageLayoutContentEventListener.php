@@ -26,7 +26,21 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ModifyPageLayoutContentEventListener
 {
+    /**
+     * @param array<string, mixed> $gridElementsExtensionConfiguration
+     */
+    public function __construct(
+        private readonly array $gridElementsExtensionConfiguration
+    ) {
+    }
+
     public function __invoke(ModifyPageLayoutContentEvent $event): void
+    {
+        $this->exposeClipboardPasteSettings($event);
+        $this->loadDragInWizardModule();
+    }
+
+    private function exposeClipboardPasteSettings(ModifyPageLayoutContentEvent $event): void
     {
         $request = $event->getRequest();
 
@@ -69,5 +83,20 @@ class ModifyPageLayoutContentEventListener
             'clipBoardElementTxGridelementsBackendLayout' => $clipBoardElementGridType,
             'pasteReferenceAllowed' => $pasteReferenceAllowed,
         ]);
+    }
+
+    private function loadDragInWizardModule(): void
+    {
+        if (!empty($this->gridElementsExtensionConfiguration['disableDragInWizard'])) {
+            return;
+        }
+
+        $backendUser = $GLOBALS['BE_USER'] ?? null;
+        if (!empty($backendUser->uc['disableDragInWizard'] ?? null)) {
+            return;
+        }
+
+        GeneralUtility::makeInstance(PageRenderer::class)
+            ->loadJavaScriptModule('@gridelementsteam/gridelements/drag-in-wizard.js');
     }
 }

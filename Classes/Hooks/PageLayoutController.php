@@ -85,12 +85,7 @@ class PageLayoutController
             || isset($this->helper->getBackendUser()->uc['disableDragInWizard'])
                 && (boolean)$this->helper->getBackendUser()->uc['disableDragInWizard'] === true)
         ) {
-            $typo3Version = new Typo3Version();
-            if ($typo3Version->getMajorVersion() >= 11) {
-                $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard');
-            } else {
-                $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard10');
-            }
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Gridelements/GridElementsDragInWizard11');
         }
 
         /** @var Clipboard $clipObj */
