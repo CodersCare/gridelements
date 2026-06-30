@@ -105,6 +105,10 @@ class DragDrop {
             }
         }
         if (this.prevDropZone) this.prevDropZone.hidden = true;
+        document.querySelectorAll(Identifiers.addContent).forEach(btn => {
+            btn.style.visibility = 'hidden';
+        });
+        this.showDropZones();
     }
 
     onDragEnd() {
@@ -115,7 +119,11 @@ class DragDrop {
         this.draggedGridType = '';
         this.ownDropZone = null;
         this.prevDropZone = null;
-        this.hideDropZones()
+        this.hideDropZones();
+        document.querySelectorAll(Identifiers.addContent).forEach(btn => {
+            btn.hidden = false;
+            btn.style.visibility = '';
+        });
     }
 
     onDrop(e, t) {
@@ -232,9 +240,13 @@ class DragDrop {
         document.querySelectorAll(Identifiers.dropZone).forEach((e => {
             if (!this.copyMode && (e === this.ownDropZone || e === this.prevDropZone)) return;
             if (!this.isAllowedDropZone(e)) return;
-            e.hidden = !1;
-            const t = e.parentElement.querySelector(Identifiers.addContent);
-            null !== t && (t.hidden = !0, e.classList.add(Classes.validDropZoneClass))
+            e.hidden = false;
+            e.classList.add(Classes.validDropZoneClass);
+            const btn = e.parentElement.querySelector(Identifiers.addContent);
+            if (btn !== null) {
+                btn.hidden = true;
+                btn.style.visibility = '';
+            }
         }))
     }
 
@@ -268,9 +280,13 @@ class DragDrop {
 
     hideDropZones() {
         document.querySelectorAll(Identifiers.dropZone).forEach((e => {
-            e.hidden = !0;
-            const t = e.parentElement.querySelector(Identifiers.addContent);
-            null !== t && (t.hidden = !1), e.classList.remove(Classes.validDropZoneClass)
+            e.hidden = true;
+            e.classList.remove(Classes.validDropZoneClass);
+            const btn = e.parentElement.querySelector(Identifiers.addContent);
+            if (btn !== null) {
+                btn.hidden = false;
+                btn.style.visibility = this.dragging ? 'hidden' : '';
+            }
         }))
     }
 
