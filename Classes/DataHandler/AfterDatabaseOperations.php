@@ -171,7 +171,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     )))->executeQuery();
                 $childElementsInUnavailableColumns = [];
                 while ($childElementInUnavailableColumns = $childElementsInUnavailableColumnsQuery->fetchAssociative()) {
-                    $childElementsInUnavailableColumns[] = $childElementInUnavailableColumns['uid'];
+                    $childElementsInUnavailableColumns[$childElementInUnavailableColumns['uid']] = $childElementInUnavailableColumns['uid'];
                 }
                 if (!empty($childElementsInUnavailableColumns)) {
                     $queryBuilder
@@ -201,7 +201,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     )))->executeQuery();
                 $childElementsInAvailableColumns = [];
                 while ($childElementInAvailableColumns = $childElementsInAvailableColumnsQuery->fetchAssociative()) {
-                    $childElementsInAvailableColumns[] = $childElementInAvailableColumns['uid'];
+                    $childElementsInAvailableColumns[$childElementInAvailableColumns['uid']] = $childElementInAvailableColumns['uid'];
                 }
                 if (!empty($childElementsInAvailableColumns)) {
                     $queryBuilder
@@ -277,7 +277,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     )))->executeQuery();
                 $elementsInUnavailableColumns = [];
                 while ($elementInUnavailableColumns = $elementsInUnavailableColumnsQuery->fetchAssociative()) {
-                    $elementsInUnavailableColumns[] = $elementInUnavailableColumns['uid'];
+                    $elementsInUnavailableColumns[$elementInUnavailableColumns['uid']] = $elementInUnavailableColumns['uid'];
                 }
                 if (!empty($elementsInUnavailableColumns)) {
                     $queryBuilder
@@ -310,7 +310,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                     )))->executeQuery();
                 $elementsInAvailableColumns = [];
                 while ($elementInAvailableColumns = $elementsInAvailableColumnsQuery->fetchAssociative()) {
-                    $elementsInAvailableColumns[] = $elementInAvailableColumns['uid'];
+                    $elementsInAvailableColumns[$elementInAvailableColumns['uid']] = $elementInAvailableColumns['uid'];
                 }
                 if (!empty($elementsInAvailableColumns)) {
                     $queryBuilder
@@ -354,7 +354,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             )))->executeQuery();
                         $subPageElementsInUnavailableColumns = [];
                         while ($subPageElementInUnavailableColumns = $subPageElementsInUnavailableColumnsQuery->fetchAssociative()) {
-                            $subPageElementsInUnavailableColumns[] = $subPageElementInUnavailableColumns['uid'];
+                            $subPageElementsInUnavailableColumns[$subPageElementInUnavailableColumns['uid']] = $subPageElementInUnavailableColumns['uid'];
                         }
                         if (!empty($subPageElementsInUnavailableColumns)) {
                             $queryBuilder
@@ -390,7 +390,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             )))->executeQuery();
                         $subPageElementsInAvailableColumns = [];
                         while ($subPageElementInAvailableColumns = $subPageElementsInAvailableColumnsQuery->fetchAssociative()) {
-                            $subPageElementsInAvailableColumns[] = $subPageElementInAvailableColumns['uid'];
+                            $subPageElementsInAvailableColumns[$subPageElementInAvailableColumns['uid']] = $subPageElementInAvailableColumns['uid'];
                         }
                         if (!empty($subPageElementsInAvailableColumns)) {
                             $queryBuilder

@@ -39,7 +39,7 @@ class GridelementsNumberOfChildrenFixer extends AbstractTask
             )
             ->orderBy('pid')
             ->addOrderBy('uid')
-            ->execute();
+            ->executeQuery();
 
         if (!empty($containers)) {
             while ($container = $containers->fetchAssociative()) {
@@ -59,7 +59,7 @@ class GridelementsNumberOfChildrenFixer extends AbstractTask
                             $queryBuilder->createNamedParameter($container['uid'])
                         )
                     )
-                    ->execute()
+                    ->executeQuery()
                     ->fetchAllAssociative();
 
                 if (empty($children)) {
@@ -80,7 +80,7 @@ class GridelementsNumberOfChildrenFixer extends AbstractTask
                             $container['uid']
                         )
                     )
-                    ->execute();
+                    ->executeStatement();
             }
         }
         return true;

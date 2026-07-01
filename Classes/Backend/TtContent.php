@@ -204,10 +204,10 @@ class TtContent
                 }
 
                 $containerIds .= $containerIds ? ',' . (int)$childOnNextLevel['uid'] : (int)$childOnNextLevel['uid'];
+            }
 
-                if ($containerIds !== '') {
-                    $this->lookForChildContainersRecursively($containerIds, $possibleContainers);
-                }
+            if ($containerIds !== '') {
+                $this->lookForChildContainersRecursively($containerIds, $possibleContainers);
             }
         }
     }
