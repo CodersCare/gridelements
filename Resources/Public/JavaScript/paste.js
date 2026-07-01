@@ -88,30 +88,66 @@ class Paste {
         return true;
     }
 
-    activatePasteIcons() {
-        if (!this.pasteAfterLinkTemplate || !this.pasteIntoLinkTemplate) {
-            return;
+    /**
+     * The plain page column template exposes the raw, unmerged backend layout "allowed.CType"
+     * definition. It does not carry over the auto-permission gridelements grants for its own
+     * CType whenever a column restricts allowed/disallowed grid layouts (mirrors the merge done
+     * in GridElementsHelper::mergeAllowedDisallowedSettings() / GridelementsGridColumn.php, which
+     * columns nested inside a grid container already benefit from). Without this, a column that
+     * only configures "allowed.tx_gridelements_backend_layout" (the common case, since admins
+     * aren't required to also list "gridelements_pi1" in "allowed.CType") would never offer a
+     * real "Paste" for such containers - only "Paste Reference", since the CType check alone
+     * already rejects it before the grid type check is ever consulted.
+     */
+    static resolveEffectiveAllowedCtype(allowedCtype, allowedListType, allowedGridType) {
+        if (!allowedCtype) {
+            return allowedCtype;
         }
+        const list = allowedCtype.toString().split(',');
+        if (list.includes('*')) {
+            return allowedCtype;
+        }
+        if (allowedListType && !list.includes('list')) {
+            list.push('list');
+        }
+        if (allowedGridType && !list.includes('gridelements_pi1')) {
+            list.push('gridelements_pi1');
+        }
+        return list.join(',');
+    }
+
+    getPasteState(gridCell) {
+        const allowedCtype = gridCell ? gridCell.getAttribute('data-allowed-ctype') : null;
+        const disallowedCtype = gridCell ? gridCell.getAttribute('data-disallowed-ctype') : null;
+        const allowedListType = gridCell ? gridCell.getAttribute('data-allowed-list_type') : null;
+        const disallowedListType = gridCell ? gridCell.getAttribute('data-disallowed-list_type') : null;
+        const allowedGridType = gridCell ? gridCell.getAttribute('data-allowed-tx_gridelements_backend_layout') : null;
+        const disallowedGridType = gridCell ? gridCell.getAttribute('data-disallowed-tx_gridelements_backend_layout') : null;
+
+        const effectiveAllowedCtype = Paste.resolveEffectiveAllowedCtype(allowedCtype, allowedListType, allowedGridType);
 
         const clipBoardCType = TYPO3.settings?.gridelements?.clipBoardElementCType || '';
         const clipBoardListType = TYPO3.settings?.gridelements?.clipBoardElementListType || '';
         const clipBoardGridType = TYPO3.settings?.gridelements?.clipBoardElementTxGridelementsBackendLayout || '';
         const pasteReferenceAllowed = TYPO3.settings?.gridelements?.pasteReferenceAllowed !== false;
 
+        const canPaste = this.isTypeAllowed(effectiveAllowedCtype, disallowedCtype, clipBoardCType)
+            && this.isTypeAllowed(allowedListType, disallowedListType, clipBoardListType)
+            && this.isTypeAllowed(allowedGridType, disallowedGridType, clipBoardGridType);
+        const canPasteReference = pasteReferenceAllowed
+            && this.isTypeAllowed(effectiveAllowedCtype, disallowedCtype, 'shortcut');
+
+        return {canPaste, canPasteReference};
+    }
+
+    activatePasteIcons() {
+        if (!this.pasteAfterLinkTemplate || !this.pasteIntoLinkTemplate) {
+            return;
+        }
+
         document.querySelectorAll(".t3js-page-new-ce").forEach((el) => {
             const gridCell = el.closest('.t3-grid-cell') || el.closest('td');
-            const allowedCtype = gridCell ? gridCell.getAttribute('data-allowed-ctype') : null;
-            const disallowedCtype = gridCell ? gridCell.getAttribute('data-disallowed-ctype') : null;
-            const allowedListType = gridCell ? gridCell.getAttribute('data-allowed-list_type') : null;
-            const disallowedListType = gridCell ? gridCell.getAttribute('data-disallowed-list_type') : null;
-            const allowedGridType = gridCell ? gridCell.getAttribute('data-allowed-tx_gridelements_backend_layout') : null;
-            const disallowedGridType = gridCell ? gridCell.getAttribute('data-disallowed-tx_gridelements_backend_layout') : null;
-
-            const canPaste = this.isTypeAllowed(allowedCtype, disallowedCtype, clipBoardCType)
-                && this.isTypeAllowed(allowedListType, disallowedListType, clipBoardListType)
-                && this.isTypeAllowed(allowedGridType, disallowedGridType, clipBoardGridType);
-            const canPasteReference = pasteReferenceAllowed
-                && this.isTypeAllowed(allowedCtype, disallowedCtype, 'shortcut');
+            const {canPaste, canPasteReference} = this.getPasteState(gridCell);
 
             if (!canPaste && !canPasteReference) {
                 return;
@@ -127,23 +163,7 @@ class Paste {
         const content = TYPO3.lang['paste.modal.paste'] || 'Do you want to paste the record to this position?';
 
         const gridCell = $element[0].closest('.t3-grid-cell') || $element[0].closest('td');
-        const allowedCtype = gridCell ? gridCell.getAttribute('data-allowed-ctype') : null;
-        const disallowedCtype = gridCell ? gridCell.getAttribute('data-disallowed-ctype') : null;
-        const allowedListType = gridCell ? gridCell.getAttribute('data-allowed-list_type') : null;
-        const disallowedListType = gridCell ? gridCell.getAttribute('data-disallowed-list_type') : null;
-        const allowedGridType = gridCell ? gridCell.getAttribute('data-allowed-tx_gridelements_backend_layout') : null;
-        const disallowedGridType = gridCell ? gridCell.getAttribute('data-disallowed-tx_gridelements_backend_layout') : null;
-
-        const clipBoardCType = TYPO3.settings?.gridelements?.clipBoardElementCType || '';
-        const clipBoardListType = TYPO3.settings?.gridelements?.clipBoardElementListType || '';
-        const clipBoardGridType = TYPO3.settings?.gridelements?.clipBoardElementTxGridelementsBackendLayout || '';
-        const pasteReferenceAllowed = TYPO3.settings?.gridelements?.pasteReferenceAllowed !== false;
-
-        const canPaste = this.isTypeAllowed(allowedCtype, disallowedCtype, clipBoardCType)
-            && this.isTypeAllowed(allowedListType, disallowedListType, clipBoardListType)
-            && this.isTypeAllowed(allowedGridType, disallowedGridType, clipBoardGridType);
-        const canPasteReference = pasteReferenceAllowed
-            && this.isTypeAllowed(allowedCtype, disallowedCtype, 'shortcut');
+        const {canPaste, canPasteReference} = this.getPasteState(gridCell);
 
         let buttons = [];
         buttons.push({
