@@ -151,6 +151,10 @@ class DataHandler implements SingletonInterface
 
                 $currentRecord = BackendUtility::getRecord('tt_content', $id);
 
+                if (empty($currentRecord)) {
+                    continue;
+                }
+
                 if (is_array($value)
                     && !empty($value['action'])
                     && $value['action'] === 'paste'
@@ -174,6 +178,9 @@ class DataHandler implements SingletonInterface
 
                 if ($pageId < 0) {
                     $targetRecord = BackendUtility::getRecordWSOL('tt_content', abs($pageId), 'pid,colPos,tx_gridelements_container,tx_gridelements_columns');
+                    if (empty($targetRecord)) {
+                        continue;
+                    }
                     $pageId = (int)$targetRecord['pid'];
                     $colPos = (int)$targetRecord['colPos'];
                     $gridContainer = (int)$targetRecord['tx_gridelements_container'];
@@ -181,7 +188,7 @@ class DataHandler implements SingletonInterface
                     $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
                 }
 
-                if ($colPos !== -1) {
+                if ($colPos !== -1 || empty($containerRecord)) {
                     continue;
                 }
 

@@ -81,7 +81,7 @@ class GridelementsNumberOfChildrenFixer extends AbstractTask
                             $container['uid']
                         )
                     )
-                    ->executeQuery();
+                    ->executeStatement();
             }
         }
         return true;

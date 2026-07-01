@@ -405,12 +405,12 @@ function ($, Modal, Severity) {
                         .html(
                             '<tr><th>' + TYPO3.lang['grid_name'] + ': </th><td>' + (cell.name ? GridEditor.stripMarkup(cell.name) : TYPO3.lang['grid_notSet']) + '</td></tr>'
                             + '<tr><th>' + TYPO3.lang['grid_column'] + ': </th><td>' + (cell.column === undefined || typeof(cell.column) !== 'number' ? TYPO3.lang['grid_notSet'] : parseInt(cell.column, 10)) + '</td></tr>'
-                            + (cell.allowed && cell.allowed.CType ? ('<tr><th>' + TYPO3.lang['grid_allowed'] + ': </th><td>' + cell.allowed.CType + '</td></tr>') : '')
-                            + (cell.allowed && cell.allowed.list_type ? ('<tr><th>' + TYPO3.lang['grid_allowedListTypes'] + ': </th><td>' + cell.allowed.list_type + '</td></tr>') : '')
-                            + (cell.allowed && cell.allowed.tx_gridelements_backend_layout ? ('<tr><th>' + TYPO3.lang['grid_allowedGridTypes'] + ': </th><td>' + cell.allowed.tx_gridelements_backend_layout + '</td></tr>') : '')
-                            + (cell.disallowed && cell.disallowed.CType ? ('<tr><th>' + TYPO3.lang['grid_disallowed'] + ': </th><td>' + cell.disallowed.CType + '</td></tr>') : '')
-                            + (cell.disallowed && cell.disallowed.list_type ? ('<tr><th>' + TYPO3.lang['grid_disallowedListTypes'] + ': </th><td>' + cell.disallowed.list_type + '</td></tr>') : '')
-                            + (cell.disallowed && cell.disallowed.tx_gridelements_backend_layout ? ('<tr><th>' + TYPO3.lang['grid_disallowedGridTypes'] + ': </th><td>' + cell.disallowed.tx_gridelements_backend_layout + '</td></tr>') : '')
+                            + (cell.allowed && cell.allowed.CType ? ('<tr><th>' + TYPO3.lang['grid_allowed'] + ': </th><td>' + GridEditor.stripMarkup(cell.allowed.CType) + '</td></tr>') : '')
+                            + (cell.allowed && cell.allowed.list_type ? ('<tr><th>' + TYPO3.lang['grid_allowedListTypes'] + ': </th><td>' + GridEditor.stripMarkup(cell.allowed.list_type) + '</td></tr>') : '')
+                            + (cell.allowed && cell.allowed.tx_gridelements_backend_layout ? ('<tr><th>' + TYPO3.lang['grid_allowedGridTypes'] + ': </th><td>' + GridEditor.stripMarkup(cell.allowed.tx_gridelements_backend_layout) + '</td></tr>') : '')
+                            + (cell.disallowed && cell.disallowed.CType ? ('<tr><th>' + TYPO3.lang['grid_disallowed'] + ': </th><td>' + GridEditor.stripMarkup(cell.disallowed.CType) + '</td></tr>') : '')
+                            + (cell.disallowed && cell.disallowed.list_type ? ('<tr><th>' + TYPO3.lang['grid_disallowedListTypes'] + ': </th><td>' + GridEditor.stripMarkup(cell.disallowed.list_type) + '</td></tr>') : '')
+                            + (cell.disallowed && cell.disallowed.tx_gridelements_backend_layout ? ('<tr><th>' + TYPO3.lang['grid_disallowedGridTypes'] + ': </th><td>' + GridEditor.stripMarkup(cell.disallowed.tx_gridelements_backend_layout) + '</td></tr>') : '')
                             + (cell.maxitems ? ('<tr><th>' + TYPO3.lang['grid_maxitems'] + ': </th><td>' + parseInt(cell.maxitems, 10) + '</td></tr>') : '')
                             + '</table>'
                         )

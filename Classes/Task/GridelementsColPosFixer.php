@@ -36,7 +36,7 @@ class GridelementsColPosFixer extends AbstractTask
                     0
                 )
             )
-            ->executeQuery();
+            ->executeStatement();
         return true;
     }
 }
