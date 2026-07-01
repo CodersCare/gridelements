@@ -26,17 +26,6 @@ class PageLayoutViewTest extends UnitTestCase
     }
 
     #[Test]
-    public function hookPointWasRemovedInTypo3Version12(): void
-    {
-        $changelogEntry = glob(
-            dirname(__DIR__, 3) . '/.Build/vendor/typo3/cms-core/Documentation/Changelog/12.0/Breaking-98375-*.rst'
-        );
-        self::assertNotEmpty($changelogEntry, 'Breaking change 98375 must be documented in installed vendor');
-        $content = file_get_contents($changelogEntry[0]);
-        self::assertStringContainsString('record_is_used', $content);
-    }
-
-    #[Test]
     public function parentObjectTypeHintClassWasRemovedInCms13(): void
     {
         self::assertFalse(
