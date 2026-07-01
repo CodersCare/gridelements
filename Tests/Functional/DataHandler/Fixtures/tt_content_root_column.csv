@@ -1,0 +1,5 @@
+tt_content,,,,,,,,,,,
+,uid,pid,CType,header,tx_gridelements_container,tx_gridelements_columns,colPos,sys_language_uid,deleted,hidden,tx_gridelements_children
+,3,1,gridelements_pi1,Page Column Container,0,0,3,0,0,0,1
+,30,1,text,Leaf In Page Column,3,0,-1,0,0,0,0
+,31,1,text,No Parent,0,0,0,0,0,0,0
