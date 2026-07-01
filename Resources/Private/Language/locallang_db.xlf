@@ -193,6 +193,12 @@
 			<trans-unit id="tx_gridelements_cannot_move_into_container" resname="tx_gridelements_cannot_move_into_container">
 				<source>Moving the current element into the target container is not allowed.</source>
 			</trans-unit>
+			<trans-unit id="tx_gridelements_cannot_create_container_cycle" resname="tx_gridelements_cannot_create_container_cycle">
+				<source>This action would make the container its own (direct or indirect) container and is not allowed.</source>
+			</trans-unit>
+			<trans-unit id="tx_gridelements_cannot_reference_ancestor_container" resname="tx_gridelements_cannot_reference_ancestor_container">
+				<source>A shortcut cannot reference one of its own ancestor containers, since this would create an infinite rendering loop.</source>
+			</trans-unit>
 			<trans-unit id="editShownColumns" resname="editShownColumns">
 				<source>Edit shown columns</source>
 			</trans-unit>

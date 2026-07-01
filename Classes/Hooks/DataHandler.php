@@ -26,6 +26,7 @@ use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\DataHandler\AfterDatabaseOperations;
 use GridElementsTeam\Gridelements\DataHandler\PreProcessFieldArray;
 use GridElementsTeam\Gridelements\DataHandler\ProcessCmdmap;
+use GridElementsTeam\Gridelements\Helper\ContainerCycleGuard;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
@@ -186,6 +187,32 @@ class DataHandler implements SingletonInterface
                     continue;
                 }
 
+                if ($currentRecord['CType'] === 'gridelements_pi1') {
+                    if (ContainerCycleGuard::wouldCreateContainerCycle((int)$currentRecord['uid'], $gridContainer)) {
+                        $this->flashContainerError($dataHandler, $id, 'tx_gridelements_cannot_create_container_cycle');
+                        continue;
+                    }
+
+                    $forbiddenAncestorUids = ContainerCycleGuard::getContainerAncestorChain($gridContainer);
+                    if (ContainerCycleGuard::subtreeReferencesForbiddenContainer((int)$currentRecord['uid'], $forbiddenAncestorUids)) {
+                        $this->flashContainerError($dataHandler, $id, 'tx_gridelements_cannot_reference_ancestor_container');
+                        continue;
+                    }
+                } elseif (
+                    $currentRecord['CType'] === 'shortcut'
+                    && !empty($currentRecord['records'])
+                    && ContainerCycleGuard::shortcutReferencesForbiddenContainer(
+                        (string)$currentRecord['records'],
+                        ContainerCycleGuard::getContainerAncestorChain($gridContainer)
+                    )
+                ) {
+                    // the shortcut itself (not a container) is being moved/copied into a
+                    // column whose container is (or descends from) something it already
+                    // references -- would create an infinite rendering loop
+                    $this->flashContainerError($dataHandler, $id, 'tx_gridelements_cannot_reference_ancestor_container');
+                    continue;
+                }
+
                 $currentLayoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($currentRecord['pid']);
                 $currentLayout = $currentLayoutSetup->getLayoutSetup($currentRecord['tx_gridelements_backend_layout']);
 
@@ -247,6 +274,28 @@ class DataHandler implements SingletonInterface
         unset($dataHandler->cmdmap['tt_content'][$id]);
 
         $message = LocalizationUtility::translate(sprintf('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_cannot_%s_into_container', $command));
+
+        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', ContextualFeedbackSeverity::ERROR, true);
+        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+        $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
+        $defaultFlashMessageQueue->enqueue($flashMessage);
+    }
+
+    /**
+     * Aborts the current command and shows a flash message for the given language label,
+     * used for the container-recursion guards (self/ancestor cycles, shortcut elements
+     * referencing one of their own ancestor containers).
+     *
+     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+     * @param int|string $id
+     * @param string $labelKey
+     * @throws \TYPO3\CMS\Core\Exception
+     */
+    public function flashContainerError(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler, int|string $id, string $labelKey): void
+    {
+        unset($dataHandler->cmdmap['tt_content'][$id]);
+
+        $message = LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:' . $labelKey);
 
         $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', ContextualFeedbackSeverity::ERROR, true);
         $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
