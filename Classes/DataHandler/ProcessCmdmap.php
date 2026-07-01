@@ -63,7 +63,7 @@ class ProcessCmdmap extends AbstractDataHandler
         int $id,
         mixed $value,
         bool &$commandIsProcessed,
-        DataHandler $parentObj = null,
+        ?DataHandler $parentObj = null,
         bool|array $pasteUpdate = false
     ): void {
 
