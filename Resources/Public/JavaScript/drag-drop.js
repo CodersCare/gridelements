@@ -50,6 +50,11 @@ class DragDrop {
                     const clone = currentTarget.cloneNode(true);
                     clone.setAttribute('data-dragdrop-clone', 'true');
                     currentTarget.parentNode.insertBefore(clone, currentTarget.nextSibling);
+                    // This placeholder stays behind in the item's original grid slot while
+                    // currentTarget itself is turned into the floating, cursor-following ghost.
+                    // Its own (cloned) drop zone is what represents "copy right here" - see
+                    // showDropZones()/hideDropZones(), which keep the ghost's copy hidden always.
+                    DragDrop.placeholderClone = clone;
                     interaction.start({ name: 'drag' }, event.interactable, currentTarget);
                 }
             });
@@ -66,8 +71,38 @@ class DragDrop {
             ) => {
                 const dropzoneRect = dropElement.getBoundingClientRect();
 
-                return (event.pageX >= dropzoneRect.left && event.pageX <= dropzoneRect.left + dropzoneRect.width) // is cursor in boundaries of x-axis
+                const withinBounds = (event.pageX >= dropzoneRect.left && event.pageX <= dropzoneRect.left + dropzoneRect.width) // is cursor in boundaries of x-axis
                     && (event.pageY >= dropzoneRect.top && event.pageY <= dropzoneRect.top + dropzoneRect.height); // is cursor in boundaries of y-axis;
+
+                if (!withinBounds) {
+                    return false;
+                }
+
+                if (!DragDrop.isAllowedDropZone(dropElement)) {
+                    return false;
+                }
+
+                // The floating ghost following the cursor is a visual preview only - its own
+                // (nested) drop zones are never valid targets.
+                if (DragDrop.draggedElement && DragDrop.draggedElement.contains(dropElement)) {
+                    return false;
+                }
+
+                // The placeholder left behind in the item's original slot represents "copy right
+                // here" and only accepts drops while copying; moving into your own column (nesting
+                // a container inside itself) stays blocked. Read the modifier key live off this
+                // check's own event so a key pressed/released mid-drag is honored immediately.
+                if (DragDrop.placeholderClone && DragDrop.placeholderClone.contains(dropElement) && !DragDrop.isCopyModifier(dragEvent)) {
+                    return false;
+                }
+
+                // Same reasoning for the zone immediately preceding the item's current position -
+                // it's the same no-op position, just approached from the other side.
+                if (dropElement === DragDrop.prevDropZone && !DragDrop.isCopyModifier(dragEvent)) {
+                    return false;
+                }
+
+                return true;
             }
         }).on('dragenter', (e) => {
             e.target.classList.add(DragDrop.dropPossibleHoverClass);
@@ -91,15 +126,25 @@ class DragDrop {
         e.target.append(copyMessage);
 
         e.target.closest(DragDrop.columnIdentifier).classList.remove('active');
-        (e.target.querySelector(DragDrop.dropZoneIdentifier)).hidden = true;
 
-        document.querySelectorAll(DragDrop.dropZoneIdentifier).forEach((element) => {
-            const addContentButton = element.parentElement.querySelector(DragDrop.addContentIdentifier);
-            if (addContentButton !== null) {
-                addContentButton.hidden = true;
-                element.classList.add(DragDrop.validDropZoneClass);
-            }
-        });
+        DragDrop.draggedElement = e.target;
+        // The drop zone immediately preceding the item's own position - either the previous
+        // sibling's own zone, or (if it's the first item) the column's own top-of-column zone -
+        // represents the exact same position the item is already in and is a no-op for a plain
+        // move; only offer it while copying, same as the item's own trailing zone.
+        DragDrop.prevDropZone = DragDrop.findPrevDropZone(e.target);
+        // Core Record.html (used for page column elements) does not put data-ctype on .t3js-page-ce;
+        // fall back to .t3-ctype-identifier which gridelements' header partial always renders.
+        const ctypeIdentifier = e.target.querySelector('.t3-ctype-identifier');
+        DragDrop.draggedCType = e.target.dataset.ctype || ctypeIdentifier?.dataset.ctype || '';
+        DragDrop.draggedListType = e.target.dataset.list_type || ctypeIdentifier?.dataset.list_type || '';
+        DragDrop.draggedGridType = e.target.dataset.tx_gridelements_backend_layout || ctypeIdentifier?.dataset.tx_gridelements_backend_layout || '';
+        DragDrop.copyMode = DragDrop.isCopyModifier(e);
+
+        document.addEventListener('keydown', DragDrop.onModifierKeyChange);
+        document.addEventListener('keyup', DragDrop.onModifierKeyChange);
+
+        DragDrop.showDropZones();
     }
 
     static onDragMove(e) {
@@ -141,16 +186,20 @@ class DragDrop {
 
         // Show create new element button
         e.target.closest(DragDrop.columnIdentifier).classList.add('active');
-        (e.target.querySelector(DragDrop.dropZoneIdentifier)).hidden = false;
         e.target.querySelector('.draggable-copy-message').remove();
 
-        document.querySelectorAll(DragDrop.dropZoneIdentifier + '.' + DragDrop.validDropZoneClass).forEach((element) => {
-            const addContentButton = element.parentElement.querySelector(DragDrop.addContentIdentifier);
-            if (addContentButton !== null) {
-                addContentButton.hidden = false;
-            }
-            element.classList.remove(DragDrop.validDropZoneClass);
-        });
+        document.removeEventListener('keydown', DragDrop.onModifierKeyChange);
+        document.removeEventListener('keyup', DragDrop.onModifierKeyChange);
+
+        DragDrop.hideDropZones();
+
+        DragDrop.draggedElement = null;
+        DragDrop.placeholderClone = null;
+        DragDrop.prevDropZone = null;
+        DragDrop.draggedCType = '';
+        DragDrop.draggedListType = '';
+        DragDrop.draggedGridType = '';
+        DragDrop.copyMode = false;
 
         // Remove clones
         document.querySelectorAll(DragDrop.draggableContentCloneIdentifier).forEach((element) => {
@@ -158,9 +207,186 @@ class DragDrop {
         });
     }
 
+    /**
+     * Windows uses CTRL, macOS conventionally uses ALT/Option as the "copy while dragging" modifier.
+     * Both are treated the same: whichever one matches the current platform triggers copy mode.
+     */
+    static isCopyModifier(e) {
+        return (navigator.userAgent.includes('Mac') ? e.altKey : e.ctrlKey) || false;
+    }
+
+    static onModifierKeyChange(e) {
+        if (e.key !== 'Control' && e.key !== 'Alt') {
+            return;
+        }
+        const newCopyMode = DragDrop.isCopyModifier(e);
+        if (newCopyMode === DragDrop.copyMode) {
+            return;
+        }
+        DragDrop.copyMode = newCopyMode;
+        // Re-evaluate which drop zones are valid now that move/copy intent changed
+        // (this is what unlocks/locks a container's own sub-columns as drop targets).
+        DragDrop.hideDropZones();
+        DragDrop.showDropZones();
+    }
+
+    /**
+     * Finds the drop zone that sits immediately before the given (dragged) element: the previous
+     * sibling item's own trailing zone, or - if there's no preceding item in this column - the
+     * column's own top-of-column zone (rendered by ColumnHeader.html for both grid container and
+     * page columns). Dropping there would place the item exactly where it already sits.
+     */
+    static findPrevDropZone(element) {
+        const prevSibling = element.previousElementSibling;
+        if (prevSibling) {
+            const dz = prevSibling.querySelector(':scope > ' + DragDrop.dropZoneIdentifier);
+            if (dz) {
+                return dz;
+            }
+        }
+        let node = element.parentElement?.previousElementSibling;
+        while (node) {
+            const dz = node.querySelector(':scope > ' + DragDrop.dropZoneIdentifier);
+            if (dz) {
+                return dz;
+            }
+            node = node.previousElementSibling;
+        }
+        return null;
+    }
+
+    /**
+     * Checks whether the currently dragged element's CType/list_type/grid layout type is
+     * permitted in the column the given drop zone belongs to, mirroring the allowed/disallowed
+     * restrictions configured for that grid column (the data-allowed-... / data-disallowed-... attributes).
+     */
+    static isAllowedDropZone(dropZone) {
+        const column = dropZone.closest(DragDrop.columnIdentifier);
+        if (!column) {
+            return true;
+        }
+        const ctype = DragDrop.draggedCType || '';
+        const allowedCtype = column.getAttribute('data-allowed-ctype') || '';
+        const disallowedCtype = column.getAttribute('data-disallowed-ctype') || '';
+        const allowedGridType = column.getAttribute('data-allowed-tx_gridelements_backend_layout') || '';
+        if (disallowedCtype === '*') {
+            return false;
+        }
+        if (disallowedCtype && disallowedCtype.split(',').includes(ctype)) {
+            return false;
+        }
+        if (allowedCtype && allowedCtype !== '*' && !allowedCtype.split(',').includes(ctype)) {
+            // Mirror PHP GridelementsGridColumn::setRestrictions(): when specific grid layouts are
+            // allowed on a column, gridelements_pi1 is implicitly permitted even without explicit
+            // CType listing (page column backend layouts don't auto-add it like gridelements does).
+            if (!(ctype === 'gridelements_pi1' && allowedGridType)) {
+                return false;
+            }
+        }
+        if (ctype === 'list') {
+            const listType = DragDrop.draggedListType || '';
+            const allowedListType = column.getAttribute('data-allowed-list_type') || '';
+            const disallowedListType = column.getAttribute('data-disallowed-list_type') || '';
+            if (disallowedListType === '*') {
+                return false;
+            }
+            if (disallowedListType && disallowedListType.split(',').includes(listType)) {
+                return false;
+            }
+            if (allowedListType && allowedListType !== '*' && !allowedListType.split(',').includes(listType)) {
+                return false;
+            }
+        }
+        if (ctype === 'gridelements_pi1') {
+            const gridType = DragDrop.draggedGridType || '';
+            const disallowedGridType = column.getAttribute('data-disallowed-tx_gridelements_backend_layout') || '';
+            if (disallowedGridType === '*') {
+                return false;
+            }
+            if (disallowedGridType && disallowedGridType.split(',').includes(gridType)) {
+                return false;
+            }
+            if (allowedGridType && allowedGridType !== '*' && !allowedGridType.split(',').includes(gridType)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Reveals drop zones that are valid targets for the drag currently in progress (allowed/
+     * disallowed CType/list_type/grid type, and - unless copying - not nested inside the dragged
+     * element itself, which would nest a container inside its own column).
+     *
+     * Every "create new content" button is hidden unconditionally while dragging - no button
+     * should stay visible mid-drag - but every button/drop-zone pair occupies the same space
+     * (see Record.html/ColumnHeader.html), so hiding a button without something taking its place
+     * collapses that column's whitespace. Zones that become real drop targets swap in for their
+     * button 1:1 (hidden via the `hidden` attribute, i.e. removed from flow, same as before);
+     * zones that stay invalid instead hide their button via `visibility: hidden`, which keeps its
+     * box (and the column's height) reserved without showing it or a misleadingly "available"
+     * drop zone.
+     */
+    static showDropZones() {
+        document.querySelectorAll(DragDrop.addContentIdentifier).forEach((button) => {
+            button.style.visibility = 'hidden';
+        });
+        document.querySelectorAll(DragDrop.dropZoneIdentifier).forEach((element) => {
+            const isGhostZone = DragDrop.draggedElement && DragDrop.draggedElement.contains(element);
+            if (isGhostZone) {
+                // The floating ghost is position:fixed and no longer part of the page layout -
+                // nothing needs its space reserved, so its own zone/button are simply left alone.
+                return;
+            }
+            const isOwnPlaceholderZone = DragDrop.placeholderClone && DragDrop.placeholderClone.contains(element);
+            const isPrevDropZone = element === DragDrop.prevDropZone;
+            if ((isOwnPlaceholderZone || isPrevDropZone) && !DragDrop.copyMode) {
+                return;
+            }
+            if (!DragDrop.isAllowedDropZone(element)) {
+                return;
+            }
+            element.hidden = false;
+            element.classList.add(DragDrop.validDropZoneClass);
+            // :scope > restricts this to the zone's own sibling button. A plain querySelector()
+            // would also match buttons nested deep inside a grid container's own sub-columns,
+            // hiding the wrong one and leaving the container's real button visibly stuck in
+            // front of its now-active zone.
+            const addContentButton = element.parentElement.querySelector(':scope > ' + DragDrop.addContentIdentifier);
+            if (addContentButton !== null) {
+                addContentButton.hidden = true;
+            }
+        });
+    }
+
+    static hideDropZones() {
+        document.querySelectorAll(DragDrop.dropZoneIdentifier + '.' + DragDrop.validDropZoneClass).forEach((element) => {
+            element.classList.remove(DragDrop.validDropZoneClass);
+            element.hidden = true;
+        });
+        document.querySelectorAll(DragDrop.addContentIdentifier).forEach((button) => {
+            button.hidden = false;
+            button.style.visibility = '';
+        });
+    }
+
     static onDrop(e) {
         const dropContainer = e.target, draggedElement = e.relatedTarget,
             contentElementUid = parseInt(draggedElement.dataset.uid, 10);
+
+        const isCopyAction = (DragDrop.isCopyModifier(e.dragEvent) || dropContainer.classList.contains('t3js-paste-copy'));
+
+        // Defense in depth: the drop zone should already be hidden/rejected by showDropZones()
+        // and the dropzone checker, but never let a container be moved into one of its own
+        // (nested) columns - that orphans/self-nests the record. Copying into itself is fine.
+        if (!isCopyAction && (draggedElement.contains(dropContainer) || (DragDrop.placeholderClone && DragDrop.placeholderClone.contains(dropContainer)) || dropContainer === DragDrop.prevDropZone)) {
+            return;
+        }
+
+        if (!DragDrop.isAllowedDropZone(dropContainer)) {
+            return;
+        }
+
         let newColumn = DragDrop.getColumnPositionForElement(dropContainer),
             gridColumn = DragDrop.getGridColumnPositionForElement(dropContainer);
         if ("number" == typeof contentElementUid && contentElementUid > 0) {
@@ -199,7 +425,6 @@ class DragDrop {
                 colPos = newColumn;
             }
 
-            const isCopyAction = (e.dragEvent.ctrlKey || dropContainer.classList.contains('t3js-paste-copy'));
             const datahandlerCommand = isCopyAction ? 'copy' : 'move';
             parameters.cmd = {
                 tt_content: {
@@ -258,4 +483,11 @@ class DragDrop {
 }
 
 DragDrop.contentIdentifier = ".t3js-page-ce", DragDrop.draggableContentIdentifier = ".t3js-page-ce-sortable", DragDrop.draggableContentHandleIdentifier = ".t3js-page-ce-draghandle", DragDrop.draggableContentCloneIdentifier = "[data-dragdrop-clone]", DragDrop.dropZoneIdentifier = ".t3js-page-ce-dropzone-available", DragDrop.columnIdentifier = ".t3js-page-column", DragDrop.validDropZoneClass = "active", DragDrop.dropPossibleHoverClass = "t3-page-ce-dropzone-possible", DragDrop.addContentIdentifier = ".t3js-page-new-ce";
+DragDrop.draggedElement = null;
+DragDrop.placeholderClone = null;
+DragDrop.prevDropZone = null;
+DragDrop.draggedCType = '';
+DragDrop.draggedListType = '';
+DragDrop.draggedGridType = '';
+DragDrop.copyMode = false;
 export default new DragDrop;
