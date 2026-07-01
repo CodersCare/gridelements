@@ -13,6 +13,16 @@ class PreProcessFieldArrayTest extends FunctionalTestCase
 {
     protected array $testExtensionsToLoad = ['gridelementsteam/gridelements'];
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // ContainerCycleGuard uses GridElementsHelper::getQueryBuilder(), which applies
+        // a WorkspaceRestriction based on $GLOBALS['BE_USER']->workspace; the recursion-guard
+        // flash messages also need a real backend-user session to enqueue into
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/be_users.csv');
+        $this->setUpBackendUser(1);
+    }
+
     #[Test]
     public function setFieldEntriesForGridContainersSetsColPosMinus1WhenContainerSet(): void
     {
@@ -99,5 +109,52 @@ class PreProcessFieldArrayTest extends FunctionalTestCase
 
         $hook = new PreProcessFieldArray();
         self::assertSame(0, $hook->checkForRootColumn(31));
+    }
+
+    // --- setFieldEntries: container-recursion guard ---
+
+    #[Test]
+    public function setFieldEntriesRejectsAssigningOwnDescendantAsContainer(): void
+    {
+        // uid=2's tx_gridelements_container chain is 2 -> 1, so assigning
+        // container 2 to uid=1 would make uid=1 its own (indirect) container
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/tt_content_container_cycle_edit.csv');
+
+        $hook = new PreProcessFieldArray();
+        $fieldArray = ['tx_gridelements_container' => 2, 'colPos' => 0, 'tx_gridelements_columns' => 0];
+        $hook->setFieldEntries($fieldArray, '1', false, '');
+
+        self::assertArrayNotHasKey('tx_gridelements_container', $fieldArray);
+        self::assertArrayNotHasKey('colPos', $fieldArray);
+        self::assertArrayNotHasKey('tx_gridelements_columns', $fieldArray);
+    }
+
+    #[Test]
+    public function setFieldEntriesRejectsShortcutRecordsReferencingAncestorContainer(): void
+    {
+        // uid=11 sits in container 2, whose ancestor chain is [2, 1];
+        // pointing its 'records' at uid=1 would create a rendering loop
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/tt_content_container_cycle_edit.csv');
+
+        $hook = new PreProcessFieldArray();
+        $fieldArray = ['records' => 'tt_content_1'];
+        $hook->setFieldEntries($fieldArray, '11', false, '');
+
+        self::assertArrayNotHasKey('records', $fieldArray);
+    }
+
+    #[Test]
+    public function setFieldEntriesRejectsContainerReassignmentWhenExistingRecordsAlreadyDangerous(): void
+    {
+        // uid=10 is an existing shortcut whose stored 'records' already reference uid=1;
+        // only 'tx_gridelements_container' is part of this save, but the guard must still
+        // fall back to the DB-stored CType/records to catch the now-dangerous combination
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/tt_content_container_cycle_edit.csv');
+
+        $hook = new PreProcessFieldArray();
+        $fieldArray = ['tx_gridelements_container' => 2];
+        $hook->setFieldEntries($fieldArray, '10', false, '');
+
+        self::assertArrayNotHasKey('tx_gridelements_container', $fieldArray);
     }
 }

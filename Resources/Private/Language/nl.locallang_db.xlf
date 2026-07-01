@@ -179,6 +179,14 @@
 				<source>Moving the current element into the target container is not allowed.</source>
 				<target>Het verplaatsen van het huidige element naar de doelcontainer is niet toegestaan.</target>
 			</trans-unit>
+			<trans-unit id="tx_gridelements_cannot_create_container_cycle" resname="tx_gridelements_cannot_create_container_cycle">
+				<source>This action would make the container its own (direct or indirect) container and is not allowed.</source>
+				<target>Deze actie zou de container tot zijn eigen (directe of indirecte) container maken en is niet toegestaan.</target>
+			</trans-unit>
+			<trans-unit id="tx_gridelements_cannot_reference_ancestor_container" resname="tx_gridelements_cannot_reference_ancestor_container">
+				<source>A shortcut cannot reference one of its own ancestor containers, since this would create an infinite rendering loop.</source>
+				<target>Een shortcut mag niet verwijzen naar een van zijn eigen bovenliggende containers, omdat dit een oneindige renderlus zou veroorzaken.</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
