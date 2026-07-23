@@ -6,6 +6,10 @@ namespace GridElementsTeam\Gridelements\Tests\Functional\Hooks;
 
 use GridElementsTeam\Gridelements\Hooks\DataHandler;
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Core\SystemEnvironmentBuilder;
+use TYPO3\CMS\Core\Http\ServerRequest;
+use TYPO3\CMS\Core\Http\Uri;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 class DataHandlerTest extends FunctionalTestCase
@@ -25,13 +29,13 @@ class DataHandlerTest extends FunctionalTestCase
         $this->hook = new DataHandler();
     }
 
-    private function makeCmdmapForPasteIntoContainer(int $id, int $gridContainer): \TYPO3\CMS\Core\DataHandling\DataHandler
+    private function makeCmdmapForPasteIntoContainer(int $id, int $gridContainer, string $command = 'move'): \TYPO3\CMS\Core\DataHandling\DataHandler
     {
         $dataHandler = $this->createStub(\TYPO3\CMS\Core\DataHandling\DataHandler::class);
         $dataHandler->cmdmap = [
             'tt_content' => [
                 $id => [
-                    'move' => [
+                    $command => [
                         'action' => 'paste',
                         'target' => 1,
                         'update' => [
@@ -59,6 +63,26 @@ class DataHandlerTest extends FunctionalTestCase
         $this->hook->processCmdmap_beforeStart($dataHandler);
 
         self::assertArrayNotHasKey(1, $dataHandler->cmdmap['tt_content']);
+    }
+
+    #[Test]
+    public function processCmdmapBeforeStartAllowsContainerCopiedIntoItsOwnDescendant(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages.csv');
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/tt_content_container_cycle_cmdmap.csv');
+
+        // LayoutSetup, reached once the cycle guard lets a copy through, needs
+        // a backend request to resolve the current language
+        $GLOBALS['TYPO3_REQUEST'] = (new ServerRequest())
+            ->withAttribute('applicationType', SystemEnvironmentBuilder::REQUESTTYPE_BE)
+            ->withAttribute('language', new SiteLanguage(0, 'en_US', new Uri('https://example.com/'), []));
+
+        // a copy creates a brand-new uid, which can never already be its own
+        // ancestor -- unlike move, this must not be rejected
+        $dataHandler = $this->makeCmdmapForPasteIntoContainer(1, 2, 'copy');
+        $this->hook->processCmdmap_beforeStart($dataHandler);
+
+        self::assertArrayHasKey(1, $dataHandler->cmdmap['tt_content']);
     }
 
     #[Test]

@@ -194,7 +194,10 @@ class DataHandler implements SingletonInterface
                 }
 
                 if ($currentRecord['CType'] === 'gridelements_pi1') {
-                    if (ContainerCycleGuard::wouldCreateContainerCycle((int)$currentRecord['uid'], $gridContainer)) {
+                    if (
+                        $command === 'move'
+                        && ContainerCycleGuard::wouldCreateContainerCycle((int)$currentRecord['uid'], $gridContainer)
+                    ) {
                         $this->flashContainerError($dataHandler, $id, 'tx_gridelements_cannot_create_container_cycle');
                         continue;
                     }
