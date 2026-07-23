@@ -354,6 +354,10 @@ border-color:#79a548;
 	display: block;
 }
 
+body.gridelements-dragdrop-cms12 .t3js-page-ce-dropzone-available {
+	display: block;
+}
+
 .t3-page-ce-disable-new-ce > .t3-page-ce > .t3-page-ce-actions,
 .t3-page-ce-disable-new-ce > .t3-page-ce-wrapper > .t3-page-ce > .t3-page-ce-actions {
     display: none;

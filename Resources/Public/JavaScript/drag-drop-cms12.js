@@ -27,11 +27,17 @@ class DragDrop {
     static initialize() {
         const moduleBody = document.querySelector('.module');
 
+        document.body.classList.add('gridelements-dragdrop-cms12');
+
         // Pipe scroll attempt to parent element
         new RegularEvent('wheel', (e) => {
             moduleBody.scrollLeft += e.deltaX;
             moduleBody.scrollTop += e.deltaY;
         }).delegateTo(document, '.draggable-dragging');
+
+        new RegularEvent('dragstart', (e) => {
+            e.preventDefault();
+        }).delegateTo(document, DragDrop.draggableContentHandleIdentifier);
 
         interact(DragDrop.draggableContentIdentifier)
             .draggable({
