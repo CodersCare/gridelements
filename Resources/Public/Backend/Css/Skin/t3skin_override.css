@@ -92,6 +92,13 @@
 	opacity: 0.15;
 }
 
+/* A reference/shortcut preview renders a nested container's real grid markup
+   read-only - its "new content" buttons and drop zones must not be interactive. */
+.reference .t3js-page-new-ce,
+.reference .t3js-page-ce-dropzone-available {
+	display: none !important;
+}
+
 .t3-page-ce-dragitem {
 	user-select: none;
 	touch-action: none;

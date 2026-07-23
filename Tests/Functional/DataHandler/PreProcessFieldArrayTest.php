@@ -157,4 +157,36 @@ class PreProcessFieldArrayTest extends FunctionalTestCase
 
         self::assertArrayNotHasKey('tx_gridelements_container', $fieldArray);
     }
+
+    // --- extractDefaultDataFromDataStructure ---
+
+    #[Test]
+    public function extractDefaultDataFromDataStructureDoesNotFailOnFieldWithoutTypeKey(): void
+    {
+        // A TCEforms.config without an explicit 'type' key (e.g. a passthrough field) must not
+        // trigger an "Undefined array key" warning - under this environment's error handler
+        // (warnings escalated to exceptions) that crashed real-world gridelements container
+        // creation outright, since config['type'] was accessed unconditionally.
+        $dataStructure = '<T3DataStructure>
+            <sheets>
+                <sDEF>
+                    <ROOT>
+                        <type>array</type>
+                        <el>
+                            <settings.myfield>
+                                <TCEforms>
+                                    <config>
+                                        <default>0</default>
+                                    </config>
+                                </TCEforms>
+                            </settings.myfield>
+                        </el>
+                    </ROOT>
+                </sDEF>
+            </sheets>
+        </T3DataStructure>';
+
+        $hook = new PreProcessFieldArray();
+        self::assertIsString($hook->extractDefaultDataFromDataStructure($dataStructure));
+    }
 }

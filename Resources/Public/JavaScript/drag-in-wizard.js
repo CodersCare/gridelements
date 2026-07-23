@@ -269,6 +269,9 @@ class DragInWizard {
         const gridType = defaultValues.tx_gridelements_backend_layout || '';
 
         document.querySelectorAll('.t3js-page-ce-dropzone-available').forEach(zone => {
+            if (zone.closest('.reference')) {
+                return;
+            }
             const addBtn = zone.parentElement?.querySelector('.t3js-page-new-ce');
             if (addBtn) {
                 addBtn.hidden = true;
@@ -336,6 +339,8 @@ class DragInWizard {
     }
 
     static isDropAllowed(zone, ctype, listType, gridType) {
+        if (zone.closest('.reference')) return false;
+
         const column = zone.closest('.t3js-page-column');
         if (!column) return true;
         if (column.classList.contains('t3-page-ce-disable-new-ce')) return false;

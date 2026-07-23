@@ -245,7 +245,7 @@ class PreProcessFieldArray extends AbstractDataHandler
                         foreach ($sheet['ROOT']['el'] as $elName => $elConf) {
                             $config = $elConf['TCEforms']['config'] ?? [];
                             $elArray[$elName]['vDEF'] = $config['default'] ?? [];
-                            if (!$elArray[$elName]['vDEF'] && $config['type'] === 'select' && !empty($config['items'])) {
+                            if (!$elArray[$elName]['vDEF'] && ($config['type'] ?? null) === 'select' && !empty($config['items'])) {
                                 $elArray[$elName]['vDEF'] = $config['items'][0][1] ?? '';
                             }
                         }
