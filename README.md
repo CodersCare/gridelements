@@ -1,6 +1,6 @@
 [![Latest Stable Version](https://poser.pugx.org/gridelementsteam/gridelements/v/stable)](https://extensions.typo3.org/extension/gridelements/)
+[![TYPO3 12](https://img.shields.io/badge/TYPO3-12-orange.svg?style=flat-square)](https://get.typo3.org/version/12)
 [![TYPO3 11](https://img.shields.io/badge/TYPO3-11-orange.svg?style=flat-square)](https://get.typo3.org/version/11)
-[![TYPO3 10](https://img.shields.io/badge/TYPO3-10-orange.svg?style=flat-square)](https://get.typo3.org/version/10)
 [![Total Downloads](https://poser.pugx.org/gridelementsteam/gridelements/d/total)](https://packagist.org/packages/gridelementsteam/gridelements)
 [![Monthly Downloads](https://poser.pugx.org/gridelementsteam/gridelements/d/monthly)](https://packagist.org/packages/gridelementsteam/gridelements)
 
