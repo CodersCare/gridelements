@@ -15,6 +15,7 @@ import DocumentService from "@typo3/core/document-service.js";
 import DataHandler from "@typo3/backend/ajax-data-handler.js";
 import Icons from "@typo3/backend/icons.js";
 import RegularEvent from "@typo3/core/event/regular-event.js";
+import { getColumnRestriction, typeOk } from "./gridelements-column-restrictions.js";
 
 class DragDrop {
     constructor() {
@@ -351,39 +352,10 @@ class DragDrop {
     }
 
     static isTypeAllowed(column, ctype, listType, gridType) {
-        const getTypes = (attr) => {
-            const val = column.getAttribute(attr);
-            return val ? val.split(',').map(s => s.trim()).filter(Boolean) : null;
-        };
-        const allowedCtype = getTypes('data-allowed-ctype');
-        const disallowedCtype = getTypes('data-disallowed-ctype');
-        const allowedListType = getTypes('data-allowed-list_type');
-        const disallowedListType = getTypes('data-disallowed-list_type');
-        const allowedGridType = getTypes('data-allowed-tx_gridelements_backend_layout');
-        const disallowedGridType = getTypes('data-disallowed-tx_gridelements_backend_layout');
-
-        const ctypeOk = (
-            (!allowedCtype || allowedCtype.includes('*') || allowedCtype.includes(ctype)) &&
-            (!disallowedCtype || (!disallowedCtype.includes('*') && !disallowedCtype.includes(ctype)))
-        );
-        if (!ctypeOk) return false;
-
-        if (listType) {
-            const listTypeOk = (
-                (!allowedListType || allowedListType.includes('*') || allowedListType.includes(listType)) &&
-                (!disallowedListType || (!disallowedListType.includes('*') && !disallowedListType.includes(listType)))
-            );
-            if (!listTypeOk) return false;
-        }
-
-        if (gridType) {
-            const gridTypeOk = (
-                (!allowedGridType || allowedGridType.includes('*') || allowedGridType.includes(gridType)) &&
-                (!disallowedGridType || (!disallowedGridType.includes('*') && !disallowedGridType.includes(gridType)))
-            );
-            if (!gridTypeOk) return false;
-        }
-
+        const restriction = getColumnRestriction(column);
+        if (!typeOk(restriction.allowedCtype, restriction.disallowedCtype, ctype)) return false;
+        if (listType && !typeOk(restriction.allowedListType, restriction.disallowedListType, listType)) return false;
+        if (gridType && !typeOk(restriction.allowedGridType, restriction.disallowedGridType, gridType)) return false;
         return true;
     }
 }

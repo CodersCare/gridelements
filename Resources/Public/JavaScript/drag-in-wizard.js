@@ -14,6 +14,7 @@ import interact from "interactjs";
 import DocumentService from "@typo3/core/document-service.js";
 import DataHandler from "@typo3/backend/ajax-data-handler.js";
 import Icons from "@typo3/backend/icons.js";
+import { getColumnRestriction, typeOk } from "./gridelements-column-restrictions.js";
 
 class DragInWizard {
     constructor() {
@@ -44,7 +45,7 @@ class DragInWizard {
         toggleBtn.className = 'btn btn-default btn-sm';
         toggleBtn.title = TYPO3.lang['gridelements.toggleDragInWizard'] || 'Toggle Drag In Wizard';
 
-        Icons.getIcon('actions-move-to-page', Icons.sizes.small).then(markup => {
+        Icons.getIcon('actions-plus', Icons.sizes.small).then(markup => {
             toggleBtn.innerHTML = markup;
         });
 
@@ -322,57 +323,16 @@ class DragInWizard {
     }
 
     static buildColumnRestrictions() {
-        const getTypes = (col, attr) => {
-            const val = col.getAttribute(attr);
-            return val ? val.split(',').map(s => s.trim()).filter(Boolean) : null;
-        };
         return [...document.querySelectorAll('.t3js-page-column')]
             .filter(col => !col.classList.contains('t3-page-ce-disable-new-ce'))
-            .map(col => ({
-                allowedCtype: getTypes(col, 'data-allowed-ctype'),
-                disallowedCtype: getTypes(col, 'data-disallowed-ctype'),
-                allowedListType: getTypes(col, 'data-allowed-list_type'),
-                disallowedListType: getTypes(col, 'data-disallowed-list_type'),
-                allowedGridType: getTypes(col, 'data-allowed-tx_gridelements_backend_layout'),
-                disallowedGridType: getTypes(col, 'data-disallowed-tx_gridelements_backend_layout'),
-            }));
+            .map(col => getColumnRestriction(col));
     }
 
     static columnAllows(col, ctype, listType, gridType) {
-        const ctypeOk = (
-            (!col.allowedCtype || col.allowedCtype.includes('*') || col.allowedCtype.includes(ctype)) &&
-            (!col.disallowedCtype || (!col.disallowedCtype.includes('*') && !col.disallowedCtype.includes(ctype)))
-        );
-        if (!ctypeOk) return false;
-        if (listType) {
-            const listTypeOk = (
-                (!col.allowedListType || col.allowedListType.includes('*') || col.allowedListType.includes(listType)) &&
-                (!col.disallowedListType || (!col.disallowedListType.includes('*') && !col.disallowedListType.includes(listType)))
-            );
-            if (!listTypeOk) return false;
-        }
-        if (gridType) {
-            const gridTypeOk = (
-                (!col.allowedGridType || col.allowedGridType.includes('*') || col.allowedGridType.includes(gridType)) &&
-                (!col.disallowedGridType || (!col.disallowedGridType.includes('*') && !col.disallowedGridType.includes(gridType)))
-            );
-            if (!gridTypeOk) return false;
-        }
+        if (!typeOk(col.allowedCtype, col.disallowedCtype, ctype)) return false;
+        if (listType && !typeOk(col.allowedListType, col.disallowedListType, listType)) return false;
+        if (gridType && !typeOk(col.allowedGridType, col.disallowedGridType, gridType)) return false;
         return true;
-    }
-
-    static resolveEffectiveAllowedCtype(allowedCtype, allowedListType, allowedGridType) {
-        if (!allowedCtype || allowedCtype.includes('*')) {
-            return allowedCtype;
-        }
-        const list = [...allowedCtype];
-        if (allowedListType && !list.includes('list')) {
-            list.push('list');
-        }
-        if (allowedGridType && !list.includes('gridelements_pi1')) {
-            list.push('gridelements_pi1');
-        }
-        return list;
     }
 
     static isDropAllowed(zone, ctype, listType, gridType) {
@@ -380,20 +340,7 @@ class DragInWizard {
         if (!column) return true;
         if (column.classList.contains('t3-page-ce-disable-new-ce')) return false;
 
-        const getTypes = (attr) => {
-            const val = column.getAttribute(attr);
-            return val ? val.split(',').map(s => s.trim()).filter(Boolean) : null;
-        };
-        const allowedListType = getTypes('data-allowed-list_type');
-        const allowedGridType = getTypes('data-allowed-tx_gridelements_backend_layout');
-        return DragInWizard.columnAllows({
-            allowedCtype: DragInWizard.resolveEffectiveAllowedCtype(getTypes('data-allowed-ctype'), allowedListType, allowedGridType),
-            disallowedCtype: getTypes('data-disallowed-ctype'),
-            allowedListType,
-            disallowedListType: getTypes('data-disallowed-list_type'),
-            allowedGridType,
-            disallowedGridType: getTypes('data-disallowed-tx_gridelements_backend_layout'),
-        }, ctype, listType, gridType);
+        return DragInWizard.columnAllows(getColumnRestriction(column), ctype, listType, gridType);
     }
 
     static handleDrop(draggedItem, dropZone) {
