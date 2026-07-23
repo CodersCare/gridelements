@@ -17,6 +17,7 @@ import {default as Modal} from "@typo3/backend/modal.js";
 import Severity from "@typo3/backend/severity.js";
 import "@typo3/backend/element/icon-element.js";
 import {SeverityEnum} from "@typo3/backend/enum/severity.js";
+import { getColumnRestriction, typeOk } from "./gridelements-column-restrictions.js";
 
 class Paste {
     constructor(t) {
@@ -65,77 +66,26 @@ class Paste {
             + '</button>';
     }
 
-    /**
-     * Returns true when value is permitted by the given allowed/disallowed attribute strings.
-     * An absent attribute (null/undefined) means no restriction applies.
-     */
-    isTypeAllowed(allowedAttr, disallowedAttr, value) {
+    isTypeAllowed(allowedList, disallowedList, value) {
         if (!value) {
             return true;
         }
-        if (allowedAttr != null) {
-            const a = allowedAttr.toString().split(',');
-            if (!a.includes(value) && !a.includes('*')) {
-                return false;
-            }
-        }
-        if (disallowedAttr != null) {
-            const d = disallowedAttr.toString().split(',');
-            if (d.includes(value) || d.includes('*')) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * The plain page column template exposes the raw, unmerged backend layout "allowed.CType"
-     * definition. It does not carry over the auto-permission gridelements grants for its own
-     * CType whenever a column restricts allowed/disallowed grid layouts (mirrors the merge done
-     * in GridElementsHelper::mergeAllowedDisallowedSettings() / GridelementsGridColumn.php, which
-     * columns nested inside a grid container already benefit from). Without this, a column that
-     * only configures "allowed.tx_gridelements_backend_layout" (the common case, since admins
-     * aren't required to also list "gridelements_pi1" in "allowed.CType") would never offer a
-     * real "Paste" for such containers - only "Paste Reference", since the CType check alone
-     * already rejects it before the grid type check is ever consulted.
-     */
-    static resolveEffectiveAllowedCtype(allowedCtype, allowedListType, allowedGridType) {
-        if (!allowedCtype) {
-            return allowedCtype;
-        }
-        const list = allowedCtype.toString().split(',');
-        if (list.includes('*')) {
-            return allowedCtype;
-        }
-        if (allowedListType && !list.includes('list')) {
-            list.push('list');
-        }
-        if (allowedGridType && !list.includes('gridelements_pi1')) {
-            list.push('gridelements_pi1');
-        }
-        return list.join(',');
+        return typeOk(allowedList, disallowedList, value);
     }
 
     getPasteState(gridCell) {
-        const allowedCtype = gridCell ? gridCell.getAttribute('data-allowed-ctype') : null;
-        const disallowedCtype = gridCell ? gridCell.getAttribute('data-disallowed-ctype') : null;
-        const allowedListType = gridCell ? gridCell.getAttribute('data-allowed-list_type') : null;
-        const disallowedListType = gridCell ? gridCell.getAttribute('data-disallowed-list_type') : null;
-        const allowedGridType = gridCell ? gridCell.getAttribute('data-allowed-tx_gridelements_backend_layout') : null;
-        const disallowedGridType = gridCell ? gridCell.getAttribute('data-disallowed-tx_gridelements_backend_layout') : null;
-
-        const effectiveAllowedCtype = Paste.resolveEffectiveAllowedCtype(allowedCtype, allowedListType, allowedGridType);
+        const restriction = getColumnRestriction(gridCell);
 
         const clipBoardCType = TYPO3.settings?.gridelements?.clipBoardElementCType || '';
         const clipBoardListType = TYPO3.settings?.gridelements?.clipBoardElementListType || '';
         const clipBoardGridType = TYPO3.settings?.gridelements?.clipBoardElementTxGridelementsBackendLayout || '';
         const pasteReferenceAllowed = TYPO3.settings?.gridelements?.pasteReferenceAllowed !== false;
 
-        const canPaste = this.isTypeAllowed(effectiveAllowedCtype, disallowedCtype, clipBoardCType)
-            && this.isTypeAllowed(allowedListType, disallowedListType, clipBoardListType)
-            && this.isTypeAllowed(allowedGridType, disallowedGridType, clipBoardGridType);
+        const canPaste = this.isTypeAllowed(restriction.allowedCtype, restriction.disallowedCtype, clipBoardCType)
+            && this.isTypeAllowed(restriction.allowedListType, restriction.disallowedListType, clipBoardListType)
+            && this.isTypeAllowed(restriction.allowedGridType, restriction.disallowedGridType, clipBoardGridType);
         const canPasteReference = pasteReferenceAllowed
-            && this.isTypeAllowed(effectiveAllowedCtype, disallowedCtype, 'shortcut');
+            && this.isTypeAllowed(restriction.allowedCtype, restriction.disallowedCtype, 'shortcut');
 
         return {canPaste, canPasteReference};
     }
