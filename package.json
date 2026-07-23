@@ -1,0 +1,13 @@
+{
+  "name": "gridelementsteam/gridelements-javascript-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "jquery": "^3.7.1",
+    "jsdom": "^24.0.0",
+    "vitest": "^1.6.0"
+  }
+}

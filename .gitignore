@@ -5,3 +5,4 @@
 /.php_cs.cache
 /public
 /Documentation-GENERATED-temp/
+/node_modules
