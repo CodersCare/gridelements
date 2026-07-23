@@ -317,25 +317,26 @@ class ModifyNewContentElementWizardItemsListener
     {
         foreach ($wizardItems as $key => $wizardItem) {
             if (empty($wizardItem['header'])) {
+                $values = $this->getWizardItemDefaultValues($wizardItem);
                 if (
                     (
                         !empty($allowed['CType'])
-                        && !isset($allowed['CType'][$wizardItem['defaultValues']['CType']])
+                        && !isset($allowed['CType'][$values['CType'] ?? null])
                         && !isset($allowed['CType']['*'])
                     ) || (
                         !empty($disallowed) && (
-                            isset($disallowed['CType'][$wizardItem['defaultValues']['CType']])
+                            isset($disallowed['CType'][$values['CType'] ?? null])
                             || isset($disallowed['CType']['*'])
                         )
                     ) || (
-                        isset($wizardItem['defaultValues']['list_type'])
+                        isset($values['list_type'])
                         && !empty($allowed['list_type'])
-                        && !isset($allowed['list_type'][$wizardItem['defaultValues']['list_type']])
+                        && !isset($allowed['list_type'][$values['list_type']])
                         && !isset($allowed['list_type']['*'])
                     ) || (
-                        isset($wizardItem['defaultValues']['list_type'])
+                        isset($values['list_type'])
                         && !empty($disallowed) && (
-                            isset($disallowed['list_type'][$wizardItem['defaultValues']['list_type']])
+                            isset($disallowed['list_type'][$values['list_type']])
                             || isset($disallowed['list_type']['*'])
                         )
                     )
@@ -366,19 +367,41 @@ class ModifyNewContentElementWizardItemsListener
     public function addGridValuesToWizardItems(array &$wizardItems, int $container, int $column): void
     {
         foreach ($wizardItems as $key => $wizardItem) {
+            $values = $this->getWizardItemDefaultValues($wizardItem);
+            $changed = false;
+
             if (empty($wizardItem['header'])) {
                 if ($container !== 0) {
-                    if (!isset($wizardItem['defaultValues'])) {
-                        $wizardItems[$key]['defaultValues'] = [];
-                    }
-                    $wizardItems[$key]['defaultValues']['tx_gridelements_container'] = $container;
+                    $values['tx_gridelements_container'] = $container;
                 }
-                $wizardItems[$key]['defaultValues']['tx_gridelements_columns'] = $column;
+                $values['tx_gridelements_columns'] = $column;
+                $changed = true;
             }
-            if (isset($wizardItem['defaultValues']['CType']) && $wizardItem['defaultValues']['CType'] === 'table') {
-                $wizardItems[$key]['defaultValues']['bodytext'] = '';
+            if (($values['CType'] ?? null) === 'table') {
+                $values['bodytext'] = '';
+                $changed = true;
+            }
+            if ($changed) {
+                $this->setWizardItemDefaultValues($wizardItems, $key, $values);
             }
         }
+    }
+
+    /**
+     * TYPO3 v12's NewContentElementController reads wizard item default values from
+     * 'tt_content_defValues', while TYPO3 v13's reads 'defaultValues'. Wizard items built
+     * by this listener (and by core, depending on which version is running) may carry
+     * either key, so read/write both to stay compatible with both major versions.
+     */
+    private function getWizardItemDefaultValues(array $wizardItem): array
+    {
+        return (array)($wizardItem['defaultValues'] ?? $wizardItem['tt_content_defValues'] ?? []);
+    }
+
+    private function setWizardItemDefaultValues(array &$wizardItems, string|int $key, array $values): void
+    {
+        $wizardItems[$key]['defaultValues'] = $values;
+        $wizardItems[$key]['tt_content_defValues'] = $values;
     }
 
     /**
@@ -461,6 +484,7 @@ class ModifyNewContentElementWizardItemsListener
                 'title' => $item['title'] ?? '',
                 'description' => $item['description'] ?? '',
                 'defaultValues' => $defaultValues,
+                'tt_content_defValues' => $defaultValues,
             ];
             $icon = '';
             if (!empty($item['iconIdentifier'])) {
