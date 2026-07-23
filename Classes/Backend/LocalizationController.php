@@ -103,7 +103,7 @@ class LocalizationController
         $flatRecords = [];
         while ($row = $result->fetchAssociative()) {
             BackendUtility::workspaceOL('tt_content', $row, -99, true);
-            if (!$row || VersionState::tryFrom((int)$row['t3ver_state']) === VersionState::DELETE_PLACEHOLDER) {
+            if (!$row || self::isDeletePlaceholder((int)$row['t3ver_state'])) {
                 continue;
             }
             if ($row['CType'] === 'gridelements_pi1') {
@@ -174,5 +174,19 @@ class LocalizationController
             'columns' => $event->getColumns(),
             'columnList' => $columnsList,
         ];
+    }
+
+    /**
+     * TYPO3 v13's VersionState is a backed enum with ::tryFrom(), while TYPO3 v12's is
+     * still the legacy Enumeration class without it, so this branches to stay compatible
+     * with both without triggering the v13-deprecated Enumeration-style cast()/equals().
+     */
+    public static function isDeletePlaceholder(int $state): bool
+    {
+        if (method_exists(VersionState::class, 'tryFrom')) {
+            return VersionState::tryFrom($state) === VersionState::DELETE_PLACEHOLDER;
+        }
+
+        return VersionState::cast($state)->equals(VersionState::DELETE_PLACEHOLDER);
     }
 }
