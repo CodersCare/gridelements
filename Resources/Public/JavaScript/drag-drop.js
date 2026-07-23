@@ -127,11 +127,6 @@ class DragDrop {
     }
 
     static showDropZones() {
-        // Hide clone zone entirely — it only appears with CTRL via toggleAdjacentZones
-        document.querySelectorAll(`${DragDrop.draggableContentCloneIdentifier} ${DragDrop.dropZoneIdentifier}`).forEach(z => {
-            z.style.setProperty('display', 'none', 'important');
-        });
-
         document.querySelectorAll(DragDrop.dropZoneIdentifier).forEach(element => {
             if (DragDrop.dragTarget?.contains(element)) return;
             if (element.closest(DragDrop.draggableContentCloneIdentifier)) return;
@@ -151,16 +146,11 @@ class DragDrop {
                 DragDrop.dragPrevZone.classList.remove(DragDrop.validDropZoneClass, DragDrop.dropPossibleHoverClass);
             }
         }
-        // Toggle the clone zone (adjacent "after" — hidden without CTRL)
         document.querySelectorAll(`${DragDrop.draggableContentCloneIdentifier} ${DragDrop.dropZoneIdentifier}`).forEach(z => {
-            if (withCtrl) {
-                z.style.removeProperty('display');
-                if (DragDrop.isDropAllowed(z, DragDrop.dragCtype, '', DragDrop.dragGridType, DragDrop.dragSourceColumn)) {
-                    z.classList.add(DragDrop.validDropZoneClass);
-                }
+            if (withCtrl && DragDrop.isDropAllowed(z, DragDrop.dragCtype, '', DragDrop.dragGridType, DragDrop.dragSourceColumn)) {
+                z.classList.add(DragDrop.validDropZoneClass);
             } else {
                 z.classList.remove(DragDrop.validDropZoneClass, DragDrop.dropPossibleHoverClass);
-                z.style.setProperty('display', 'none', 'important');
             }
         });
     }
@@ -168,9 +158,6 @@ class DragDrop {
     static hideDropZones() {
         document.querySelectorAll(DragDrop.dropZoneIdentifier).forEach(element => {
             element.classList.remove(DragDrop.validDropZoneClass, DragDrop.dropPossibleHoverClass);
-        });
-        document.querySelectorAll(`${DragDrop.draggableContentCloneIdentifier} ${DragDrop.dropZoneIdentifier}`).forEach(z => {
-            z.style.setProperty('display', 'none', 'important');
         });
     }
 

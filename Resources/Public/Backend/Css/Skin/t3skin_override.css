@@ -378,3 +378,7 @@ border-color:#79a548;
 .t3-page-ce > .t3-page-ce-dropzone.active {
     visibility: visible;
 }
+
+.t3-page-ce.draggable-dragging > .t3-page-ce-dropzone {
+    display: none;
+}
