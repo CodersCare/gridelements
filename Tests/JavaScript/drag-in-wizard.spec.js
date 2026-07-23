@@ -84,6 +84,48 @@ describe('isDropAllowed', () => {
         document.body.appendChild(zone);
         expect(DragInWizard.isDropAllowed(zone, 'anything', '', '')).toBe(true);
     });
+
+    it('rejects any drop inside a shortcut/reference preview, even on an otherwise-unrestricted nested column', () => {
+        // ShortcutPreviewRenderer nests a referenced gridelements container's real, live
+        // grid markup (drop zones and all) inside a `.reference`-wrapped preview box - that
+        // markup must never be a real drop target, it's a read-only preview of someone else's content.
+        const reference = document.createElement('div');
+        reference.className = 'reference';
+        document.body.appendChild(reference);
+        const zone = makeColumnZone({ 'data-allowed-ctype': '*' });
+        reference.appendChild(zone.closest('.t3js-page-column'));
+
+        expect(DragInWizard.isDropAllowed(zone, 'text', '', '')).toBe(false);
+    });
+});
+
+describe('onDragStart', () => {
+    it('does not activate a drop zone or reveal its add button when nested inside a reference preview', () => {
+        const reference = document.createElement('div');
+        reference.className = 'reference';
+        document.body.appendChild(reference);
+
+        const column = document.createElement('td');
+        column.className = 't3js-page-column';
+        reference.appendChild(column);
+
+        const addBtn = document.createElement('button');
+        addBtn.className = 't3js-page-new-ce';
+        column.appendChild(addBtn);
+
+        const zone = document.createElement('div');
+        zone.className = 't3js-page-ce-dropzone-available';
+        column.appendChild(zone);
+
+        const draggedItem = document.createElement('div');
+        draggedItem.dataset.defaultValues = JSON.stringify({ CType: 'text' });
+        document.body.appendChild(draggedItem);
+
+        DragInWizard.onDragStart({ target: draggedItem });
+
+        expect(zone.classList.contains('active')).toBe(false);
+        expect(addBtn.hidden).toBe(false);
+    });
 });
 
 describe('buildColumnRestrictions', () => {
