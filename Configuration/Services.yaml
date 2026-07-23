@@ -62,16 +62,19 @@ services:
       - name: event.listener
         identifier: 'gridelements-ttcontent-element-used'
         event: TYPO3\CMS\Backend\View\Event\IsContentUsedOnPageLayoutEvent
+  GridElementsTeam\Gridelements\EventListener\ModifyPageLayoutContentEventListener:
+    tags:
+      - name: event.listener
+        identifier: 'gridelements-paste-clipboard-settings-drag-in-wizard'
+        event: TYPO3\CMS\Backend\Controller\Event\ModifyPageLayoutContentEvent
+    public: true
+    arguments:
+      [ '@extensionconfiguration.gridelements' ]
   GridElementsTeam\Gridelements\EventListener\AfterBackendPageRendererEventListener:
     tags:
       - name: event.listener
         identifier: 'gridelements-inject-js-labels'
         event: TYPO3\CMS\Backend\Controller\Event\AfterBackendPageRenderEvent
-  GridElementsTeam\Gridelements\EventListener\ModifyPageLayoutContentEventListener:
-    tags:
-      - name: event.listener
-        identifier: 'gridelements-paste-clipboard-settings'
-        event: TYPO3\CMS\Backend\Controller\Event\ModifyPageLayoutContentEvent
   GridElementsTeam\Gridelements\Command\GridelementsColPosFixer:
     tags:
       - name: console.command
