@@ -65,6 +65,7 @@ class DragInWizard {
             panel.classList.remove('active');
             sessionStorage.setItem('gridelements-drag-in-wizard-active', '0');
         } else {
+            DragInWizard.positionPanel();
             panel.classList.add('active');
             sessionStorage.setItem('gridelements-drag-in-wizard-active', '1');
         }
@@ -73,6 +74,7 @@ class DragInWizard {
     static showWizard() {
         const existing = document.getElementById('gridelements-drag-in-wizard');
         if (existing) {
+            DragInWizard.positionPanel();
             existing.classList.add('active');
             sessionStorage.setItem('gridelements-drag-in-wizard-active', '1');
             return;
@@ -91,7 +93,7 @@ class DragInWizard {
             .then(r => r.text())
             .then(html => {
                 const doc = new DOMParser().parseFromString(html, 'text/html');
-                const wizardEl = doc.querySelector('typo3-backend-new-content-element-wizard');
+                const wizardEl = doc.querySelector('typo3-backend-new-record-wizard, typo3-backend-new-content-element-wizard');
                 if (!wizardEl) {
                     return;
                 }
@@ -217,10 +219,25 @@ class DragInWizard {
         const maxWidth = Math.floor(window.innerWidth * 0.6);
         panel.style.width = Math.min(naturalWidth, maxWidth) + 'px';
 
+        DragInWizard.positionPanel();
+        window.addEventListener('resize', DragInWizard.positionPanel);
+
         // eslint-disable-next-line no-unused-expressions
         panel.offsetHeight;
         panel.classList.add('active');
         sessionStorage.setItem('gridelements-drag-in-wizard-active', '1');
+    }
+
+    static positionPanel() {
+        const panel = document.getElementById('gridelements-drag-in-wizard');
+        const docHeader = document.querySelector('.t3js-module-docheader');
+        const pageTitle = document.querySelector('typo3-backend-editable-page-title');
+        if (!panel || !docHeader || !pageTitle) {
+            return;
+        }
+        const gap = 10;
+        panel.style.right = `${window.innerWidth - pageTitle.getBoundingClientRect().right - gap}px`;
+        panel.style.top = `${docHeader.getBoundingClientRect().bottom + gap}px`;
     }
 
     static switchTab(clickedTab, panelId) {
@@ -248,7 +265,11 @@ class DragInWizard {
     static setupDraggable() {
         interact('.gridelements-drag-in-wizard-item').draggable({
             inertia: false,
-            autoScroll: true,
+            autoScroll: {
+                container: document.querySelector('.t3js-module-body') || undefined,
+                margin: 60,
+                speed: 300,
+            },
             onstart: DragInWizard.onDragStart,
             onmove: DragInWizard.onDragMove,
             onend: DragInWizard.onDragEnd,
@@ -275,9 +296,10 @@ class DragInWizard {
             const addBtn = zone.parentElement?.querySelector('.t3js-page-new-ce');
             if (addBtn) {
                 addBtn.hidden = true;
-                if (DragInWizard.isDropAllowed(zone, ctype, listType, gridType)) {
-                    zone.classList.add('active');
-                }
+            }
+            zone.hidden = false;
+            if (DragInWizard.isDropAllowed(zone, ctype, listType, gridType)) {
+                zone.classList.add('active');
             }
         });
     }
@@ -317,6 +339,7 @@ class DragInWizard {
             if (addBtn) {
                 addBtn.hidden = false;
             }
+            zone.hidden = true;
             zone.classList.remove('active', 't3-page-ce-dropzone-possible');
         });
 

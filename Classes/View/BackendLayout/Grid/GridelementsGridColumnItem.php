@@ -88,14 +88,9 @@ class GridelementsGridColumnItem extends GridColumnItem
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $pageId = $this->context->getPageId();
 
-        $allowed = base64_encode(json_encode($this->getGridelementsColumn()->getAllowed()));
-        $disallowed = base64_encode(json_encode($this->getGridelementsColumn()->getDisallowed()));
-
         $urlParameters = [
             'id' => $pageId,
             'sys_language_uid' => $this->context->getSiteLanguage()->getLanguageId(),
-            'tx_gridelements_allowed' => $allowed,
-            'tx_gridelements_disallowed' => $disallowed,
             'tx_gridelements_container' => $this->getGridelementsColumn()->getGridContainerId(),
             'tx_gridelements_columns' => $this->getGridelementsColumn()->getColumnNumber(),
             'colPos' => -1,

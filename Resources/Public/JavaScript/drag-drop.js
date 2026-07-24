@@ -194,14 +194,11 @@ class DragDrop {
 
     ajaxAction(e, t) {
         const a = Object.keys(e.cmd).shift(), n = parseInt(Object.keys(e.cmd[a]).shift(), 10),
-            o = {component: "dragdrop", action: t ? "copy" : "move", table: a, uid: n},
-            r = document.querySelector(".t3-grid-container");
+            o = {component: "dragdrop", action: t ? "copy" : "move", table: a, uid: n};
         return DataHandler.process(e, o).then((e => {
             if (e.hasErrors) throw e.messages;
-            if (t || "1" === r?.dataset.defaultLanguageBinding) {
-                sessionStorage.setItem('gridelements-drop-uid', String(n));
-                self.location.reload()
-            }
+            sessionStorage.setItem('gridelements-drop-uid', String(n));
+            self.location.reload()
         }))
     }
 

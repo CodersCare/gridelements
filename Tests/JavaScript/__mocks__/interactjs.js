@@ -1,16 +1,22 @@
-function makeChainable() {
+function makeChainable(calls) {
     const handler = {
         get(target, prop) {
             if (prop === 'then' || typeof prop === 'symbol') {
                 return undefined;
             }
-            return (..._args) => proxy;
+            return (...args) => {
+                calls.push({ method: prop, args });
+                return proxy;
+            };
         },
     };
     const proxy = new Proxy({}, handler);
     return proxy;
 }
 
-export default function interact() {
-    return makeChainable();
+function interact() {
+    return makeChainable(interact.calls);
 }
+interact.calls = [];
+
+export default interact;

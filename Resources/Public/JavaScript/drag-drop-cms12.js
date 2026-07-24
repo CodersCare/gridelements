@@ -311,18 +311,14 @@ class DragDrop {
         const o = Object.keys(r.cmd).shift(), n = parseInt(Object.keys(r.cmd[o]).shift(), 10),
             s = {component: "dragdrop", action: a ? "copy" : "move", table: o, uid: n};
         const moduleEl = document.querySelector('.module');
-        const scrollTarget = a
-            ? (moduleEl
-                ? moduleEl.scrollTop + e.getBoundingClientRect().top - moduleEl.getBoundingClientRect().top - 20
-                : e.getBoundingClientRect().top + window.scrollY - 20)
-            : null;
+        const scrollTarget = moduleEl
+            ? moduleEl.scrollTop + e.getBoundingClientRect().top - moduleEl.getBoundingClientRect().top - 20
+            : e.getBoundingClientRect().top + window.scrollY - 20;
         return DataHandler.process(r, s).then((r => {
             if (r.hasErrors) throw r.messages;
             e.parentElement.classList.contains(DragDrop.contentIdentifier.substring(1)) ? e.closest(DragDrop.contentIdentifier).after(t) : e.closest(DragDrop.dropZoneIdentifier).after(t);
-            if (a) {
-                sessionStorage.setItem('gridelements-drag-drop-scroll', Math.round(scrollTarget).toString());
-                self.location.reload();
-            }
+            sessionStorage.setItem('gridelements-drag-drop-scroll', Math.round(scrollTarget).toString());
+            self.location.reload();
         }))
     }
 

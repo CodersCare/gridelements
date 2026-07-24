@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 let DragDrop;
 
@@ -79,5 +79,43 @@ describe('getColumnPositionForElement / getGridColumnPositionForElement', () => 
         document.body.appendChild(container);
 
         expect(DragDrop.getGridColumnPositionForElement(child)).toBe(1);
+    });
+});
+
+describe('ajaxAction', () => {
+    function makeDropContext() {
+        const contentEl = document.createElement('div');
+        contentEl.className = 't3js-page-ce';
+        document.body.appendChild(contentEl);
+
+        const dropZone = document.createElement('div');
+        dropZone.className = 't3js-page-ce-dropzone-available';
+        contentEl.appendChild(dropZone);
+
+        const draggedElement = document.createElement('div');
+        const params = { cmd: { tt_content: { 5: { move: { action: 'paste', target: 10 } } } } };
+        return { dropZone, draggedElement, params };
+    }
+
+    it('reloads the page after a successful move, not just after a copy', async () => {
+        const { dropZone, draggedElement, params } = makeDropContext();
+        const reloadMock = vi.fn();
+        vi.stubGlobal('location', { ...window.location, reload: reloadMock });
+
+        await DragDrop.ajaxAction(dropZone, draggedElement, params, false);
+
+        expect(reloadMock).toHaveBeenCalled();
+        vi.unstubAllGlobals();
+    });
+
+    it('still reloads the page after a successful copy', async () => {
+        const { dropZone, draggedElement, params } = makeDropContext();
+        const reloadMock = vi.fn();
+        vi.stubGlobal('location', { ...window.location, reload: reloadMock });
+
+        await DragDrop.ajaxAction(dropZone, draggedElement, params, true);
+
+        expect(reloadMock).toHaveBeenCalled();
+        vi.unstubAllGlobals();
     });
 });

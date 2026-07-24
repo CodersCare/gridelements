@@ -347,13 +347,6 @@ border-color:#79a548;
     visibility: hidden;
 }
 
-.t3js-page-ce-dropzone-available {
-	display: none;
-}
-.t3js-page-ce-dropzone-available.active {
-	display: block;
-}
-
 body.gridelements-dragdrop-cms12 .t3js-page-ce-dropzone-available {
 	display: block;
 }
