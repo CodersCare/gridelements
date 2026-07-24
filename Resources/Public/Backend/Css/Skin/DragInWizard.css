@@ -60,7 +60,7 @@
     margin: 0;
     padding: 0;
     border-bottom: var(--typo3-component-border-width) solid var(--dragwizard-border-color);
-    background: var(--typo3-surface-container-base, var(--dragwizard-hover-bg));
+    background: var(--typo3-surface-container-base, #ededed);
 }
 
 .drag-in-wizard-tab {
@@ -82,7 +82,7 @@
 }
 
 .drag-in-wizard-tab:hover {
-    background: var(--dragwizard-hover-bg);
+    background: var(--typo3-surface-container-high, #e0e0e0);
     color: var(--dragwizard-hover-color);
 }
 
@@ -140,7 +140,7 @@
     box-sizing: border-box;
     padding: 4px 10px 6px;
     border-top: var(--typo3-component-border-width) solid var(--dragwizard-border-color);
-    background: var(--typo3-surface-container-base, var(--dragwizard-hover-bg));
+    background: var(--typo3-surface-container-base, #ededed);
     border-radius: 0 0 var(--typo3-component-border-radius) var(--typo3-component-border-radius);
     overflow: hidden;
 }

@@ -323,10 +323,14 @@ describe('showWizard response parsing', () => {
 });
 
 describe('setupDraggable', () => {
-    it('points autoScroll at the actual scrollable module body instead of the non-scrolling window', async () => {
+    it('points autoScroll at the scrollable module body on CMS13 (.t3js-module-body has overflow:auto)', async () => {
+        const module = document.createElement('div');
+        module.className = 'module';
+        document.body.appendChild(module);
         const moduleBody = document.createElement('div');
         moduleBody.className = 't3js-module-body';
-        document.body.appendChild(moduleBody);
+        moduleBody.style.overflowY = 'auto';
+        module.appendChild(moduleBody);
 
         const { default: interact } = await import('interactjs');
         interact.calls.length = 0;
@@ -336,6 +340,25 @@ describe('setupDraggable', () => {
         const call = interact.calls.find(c => c.method === 'draggable');
         expect(call).toBeDefined();
         expect(call.args[0].autoScroll.container).toBe(moduleBody);
+    });
+
+    it('points autoScroll at .module on CMS12, where .t3js-module-body has no overflow of its own', async () => {
+        const module = document.createElement('div');
+        module.className = 'module';
+        module.style.overflowY = 'auto';
+        document.body.appendChild(module);
+        const moduleBody = document.createElement('div');
+        moduleBody.className = 't3js-module-body';
+        module.appendChild(moduleBody);
+
+        const { default: interact } = await import('interactjs');
+        interact.calls.length = 0;
+
+        DragInWizard.setupDraggable();
+
+        const call = interact.calls.find(c => c.method === 'draggable');
+        expect(call).toBeDefined();
+        expect(call.args[0].autoScroll.container).toBe(module);
     });
 });
 

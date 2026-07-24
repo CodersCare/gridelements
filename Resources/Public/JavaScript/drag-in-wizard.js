@@ -262,11 +262,19 @@ class DragInWizard {
         }
     }
 
+    static getScrollContainer() {
+        return [...document.querySelectorAll('.module, .t3js-module-body')]
+            .find(el => ['auto', 'scroll'].includes(getComputedStyle(el).overflowY))
+            ?? document.querySelector('.t3js-module-body')
+            ?? document.querySelector('.module')
+            ?? undefined;
+    }
+
     static setupDraggable() {
         interact('.gridelements-drag-in-wizard-item').draggable({
             inertia: false,
             autoScroll: {
-                container: document.querySelector('.t3js-module-body') || undefined,
+                container: DragInWizard.getScrollContainer(),
                 margin: 60,
                 speed: 300,
             },
@@ -400,7 +408,7 @@ class DragInWizard {
             newElementData.header = TYPO3.lang['tx_gridelements_js.newcontentelementheader'] || '';
         }
 
-        const moduleEl = document.querySelector('.module');
+        const moduleEl = DragInWizard.getScrollContainer();
         const scrollTarget = moduleEl
             ? moduleEl.scrollTop + dropZone.getBoundingClientRect().top - moduleEl.getBoundingClientRect().top - 20
             : dropZone.getBoundingClientRect().top + window.scrollY - 20;
@@ -423,7 +431,7 @@ if (_dragInWizardScroll !== null) {
     const _scrollTo = parseInt(_dragInWizardScroll, 10);
     let _scrollAttempts = 20;
     const _applyScroll = () => {
-        document.querySelector('.module')?.scrollTo({ top: _scrollTo, behavior: 'instant' });
+        DragInWizard.getScrollContainer()?.scrollTo({ top: _scrollTo, behavior: 'instant' });
         if (--_scrollAttempts > 0) {
             requestAnimationFrame(_applyScroll);
         }
