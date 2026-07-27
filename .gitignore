@@ -6,3 +6,5 @@
 /public
 /Documentation-GENERATED-temp/
 /node_modules
+composer.lock
+package-lock.json
