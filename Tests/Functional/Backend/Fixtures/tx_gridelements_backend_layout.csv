@@ -1,0 +1,3 @@
+tx_gridelements_backend_layout,,,,,,,
+,uid,pid,title,alias,deleted,hidden,sorting
+,1,0,Two Columns,two_columns,0,0,1

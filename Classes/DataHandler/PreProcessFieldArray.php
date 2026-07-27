@@ -23,6 +23,7 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  ***************************************************************/
 
 use Doctrine\DBAL\Exception;
+use GridElementsTeam\Gridelements\Helper\ContainerCycleGuard;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -31,8 +32,12 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Http\ServerRequestFactory;
+use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 /**
  * Class/Function which offers TCE main hook functions.
@@ -69,8 +74,12 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param string $table The name of the table the data should be saved to
      * @param string $id The parent uid of either the page or the container we are currently working on
      * @param DataHandler $parentObj The parent object that triggered this hook
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
-    public function execute_preProcessFieldArray(array &$fieldArray, string $table, string $id, DataHandler $parentObj)
+    public function execute_preProcessFieldArray(array &$fieldArray, string $table, string $id, DataHandler $parentObj): void
     {
         if ($table === 'tt_content') {
             $action = '';
@@ -99,8 +108,10 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param array $fieldArray
      * @param string $id
      * @param bool $new
+     * @param string $action
+     * @throws Exception
      */
-    public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false, $action = '')
+    public function processFieldArrayForTtContent(array &$fieldArray, string $id = '0', bool $new = false, string $action = ''): void
     {
         if (!($this->request instanceof ServerRequestInterface)) {
             return;
@@ -121,7 +132,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param array $fieldArray
      * @param int $uidPid
      */
-    public function setDefaultFieldValues(array &$fieldArray, int $uidPid = 0)
+    public function setDefaultFieldValues(array &$fieldArray, int $uidPid = 0): void
     {
         if (!($this->request instanceof ServerRequestInterface)) {
             return;
@@ -203,7 +214,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      *
      * @param array $fieldArray
      */
-    public function getDefaultFlexformValues(array &$fieldArray)
+    public function getDefaultFlexformValues(array &$fieldArray): void
     {
         if (!empty($GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds'])) {
             foreach ($GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds'] as $key => $dataStructure) {
@@ -233,14 +244,14 @@ class PreProcessFieldArray extends AbstractDataHandler
                 $structureArray['sheets']['sDEF']['ROOT'] = $structureArray['ROOT'];
                 unset($structureArray['ROOT']);
             }
-            if (isset($structureArray['sheets']) && !empty($structureArray['sheets'])) {
+            if (!empty($structureArray['sheets'])) {
                 foreach ($structureArray['sheets'] as $sheetName => $sheet) {
                     if (is_array($sheet['ROOT']['el']) && !empty($sheet['ROOT']['el'])) {
                         $elArray = [];
                         foreach ($sheet['ROOT']['el'] as $elName => $elConf) {
                             $config = $elConf['TCEforms']['config'] ?? [];
                             $elArray[$elName]['vDEF'] = $config['default'] ?? [];
-                            if (!$elArray[$elName]['vDEF'] && $config['type'] === 'select' && !empty($config['items'])) {
+                            if (!$elArray[$elName]['vDEF'] && ($config['type'] ?? null) === 'select' && !empty($config['items'])) {
                                 $elArray[$elName]['vDEF'] = $config['items'][0][1] ?? '';
                             }
                         }
@@ -250,7 +261,7 @@ class PreProcessFieldArray extends AbstractDataHandler
             }
             if (!empty($sheetArray)) {
                 $flexformTools = GeneralUtility::makeInstance(FlexFormTools::class);
-                $returnXML = $flexformTools->flexArray2Xml($sheetArray, true);
+                $returnXML = $flexformTools->flexArray2Xml($sheetArray);
             }
         }
 
@@ -263,10 +274,25 @@ class PreProcessFieldArray extends AbstractDataHandler
      * @param array $fieldArray
      * @param string $contentId
      * @param bool $new
+     * @param string $action
      * @throws Exception
      */
-    public function setFieldEntries(array &$fieldArray, string $contentId = '0', bool $new = false, $action = '')
+    public function setFieldEntries(array &$fieldArray, string $contentId = '0', bool $new = false, string $action = ''): void
     {
+        if (
+            !$new
+            && isset($fieldArray['tx_gridelements_container'])
+            && (int)$fieldArray['tx_gridelements_container'] > 0
+            && MathUtility::canBeInterpretedAsInteger($contentId)
+            && (int)$contentId > 0
+            && ContainerCycleGuard::wouldCreateContainerCycle((int)$contentId, (int)$fieldArray['tx_gridelements_container'])
+        ) {
+            $this->flashContainerError('tx_gridelements_cannot_create_container_cycle');
+            unset($fieldArray['tx_gridelements_container'], $fieldArray['colPos'], $fieldArray['tx_gridelements_columns']);
+        }
+
+        $this->preventShortcutAncestorReference($fieldArray, $contentId, $new);
+
         $containerUpdateArray = [];
         if (isset($fieldArray['tx_gridelements_container'])) {
             $originalElement = BackendUtility::getRecord(
@@ -298,9 +324,81 @@ class PreProcessFieldArray extends AbstractDataHandler
     }
 
     /**
+     * Rejects a shortcut element's 'records' field if it references a tt_content uid that
+     * is (or, after this save, would become) one of the shortcut's own ancestor containers,
+     * since rendering that shortcut would re-render the ancestor container's subtree, which
+     * contains the shortcut again -- an infinite rendering loop. Only 'tt_content_'
+     * references are relevant here.
+     *
+     * This is triggered whenever either 'records' or 'tx_gridelements_container' is part of
+     * this save -- a container-field edit that leaves an existing dangerous 'records' value
+     * untouched is just as dangerous as editing 'records' itself while the container stays put.
+     *
+     * @param array $fieldArray
+     * @param string $contentId
+     * @param bool $new
+     * @throws Exception
+     */
+    public function preventShortcutAncestorReference(array &$fieldArray, string $contentId, bool $new): void
+    {
+        if (!isset($fieldArray['records']) && !isset($fieldArray['tx_gridelements_container'])) {
+            return;
+        }
+
+        $effectiveCType = $fieldArray['CType'] ?? null;
+        $effectiveContainerUid = isset($fieldArray['tx_gridelements_container'])
+            ? (int)$fieldArray['tx_gridelements_container']
+            : null;
+        $effectiveRecords = $fieldArray['records'] ?? null;
+
+        if (
+            ($effectiveCType === null || $effectiveContainerUid === null || $effectiveRecords === null)
+            && !$new
+            && MathUtility::canBeInterpretedAsInteger($contentId)
+            && (int)$contentId > 0
+        ) {
+            $existingRecord = BackendUtility::getRecord('tt_content', (int)$contentId, 'CType,tx_gridelements_container,records');
+            if (!empty($existingRecord)) {
+                $effectiveCType ??= $existingRecord['CType'];
+                $effectiveContainerUid ??= (int)$existingRecord['tx_gridelements_container'];
+                $effectiveRecords ??= $existingRecord['records'];
+            }
+        }
+
+        if ($effectiveCType !== 'shortcut' || empty($effectiveContainerUid) || empty($effectiveRecords)) {
+            return;
+        }
+
+        $ancestorChain = ContainerCycleGuard::getContainerAncestorChain($effectiveContainerUid);
+        if (ContainerCycleGuard::shortcutReferencesForbiddenContainer((string)$effectiveRecords, $ancestorChain)) {
+            $this->flashContainerError('tx_gridelements_cannot_reference_ancestor_container');
+            unset($fieldArray['records'], $fieldArray['tx_gridelements_container'], $fieldArray['colPos'], $fieldArray['tx_gridelements_columns']);
+        }
+    }
+
+    /**
+     * Shows a flash message for the given language label, used for the container-recursion
+     * guards (self/ancestor cycles, shortcut elements referencing one of their own ancestor
+     * containers).
+     *
+     * @param string $labelKey
+     */
+    public function flashContainerError(string $labelKey): void
+    {
+        $message = LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:' . $labelKey);
+
+        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', ContextualFeedbackSeverity::ERROR, true);
+        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+        $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
+        $defaultFlashMessageQueue->enqueue($flashMessage);
+    }
+
+    /**
      * set/override entries to gridelements container
      *
      * @param array $fieldArray
+     * @param $action
+     * @throws Exception
      */
     public function setFieldEntriesForGridContainers(array &$fieldArray, $action): void
     {

@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\Backend\ItemsProcFuncs;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -44,21 +45,30 @@ class CTypeList implements SingletonInterface
      * ItemProcFunc for CType items
      *
      * @param array $params The array of parameters that is used to render the item list
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
-    public function itemsProcFunc(array &$params)
+    public function itemsProcFunc(array &$params): void
     {
+        $currentCType = $params['row']['CType'] ?? '';
+        $currentCType = is_array($currentCType) ? ($currentCType[0] ?? '') : $currentCType;
+
         if ((int)$params['row']['pid'] > 0) {
             if (isset($params['row']['colPos'])) {
                 $colPos = is_array($params['row']['colPos']) ? ($params['row']['colPos'][0] ?? 0) : $params['row']['colPos'];
             } else {
                 $colPos = 0;
             }
+            $container = $params['row']['tx_gridelements_container'] ?? 0;
+            $gridColumn = $params['row']['tx_gridelements_columns'] ?? 0;
             $this->checkForAllowedCTypes(
                 $params['items'],
                 (int)($params['row']['pid'] ?? 0),
                 (int)$colPos,
-                (int)($params['row']['tx_gridelements_container'] ?? 0),
-                (int)($params['row']['tx_gridelements_columns'] ?? 0)
+                is_array($container) ? (int)($container[0] ?? 0) : (int)$container,
+                is_array($gridColumn) ? (int)($gridColumn[0] ?? 0) : (int)$gridColumn,
+                $currentCType
             );
         } else {
             // negative uid_pid values indicate that the element has been inserted after an existing element
@@ -72,7 +82,8 @@ class CTypeList implements SingletonInterface
                     (int)($existingElement['pid'] ?? 0),
                     (int)($existingElement['colPos'] ?? 0),
                     (int)($existingElement['tx_gridelements_container'] ?? 0),
-                    (int)($existingElement['tx_gridelements_columns'] ?? 0)
+                    (int)($existingElement['tx_gridelements_columns'] ?? 0),
+                    $currentCType
                 );
             }
         }
@@ -86,8 +97,12 @@ class CTypeList implements SingletonInterface
      * @param int $pageColumn The page column the element is a child of
      * @param int $gridContainerId The ID of the current container
      * @param int $gridColumn The grid column the element is a child of
+     * @param string $currentCType The CType the element currently has — never removed so the dropdown stays valid
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
-    public function checkForAllowedCTypes(array &$items, int $pageId, int $pageColumn, int $gridContainerId, int $gridColumn)
+    public function checkForAllowedCTypes(array &$items, int $pageId, int $pageColumn, int $gridContainerId, int $gridColumn, string $currentCType = ''): void
     {
         if ($pageColumn >= 0 || $pageColumn === -2) {
             $column = $pageColumn ?: 0;
@@ -104,6 +119,9 @@ class CTypeList implements SingletonInterface
             $disallowed = $layout['disallowed'][$column]['CType'] ?? [];
             if (!empty($allowed) || !empty($disallowed)) {
                 foreach ($items as $key => $item) {
+                    if ($currentCType !== '' && $item[1] === $currentCType) {
+                        continue;
+                    }
                     if (
                         (
                             !empty($allowed)
@@ -128,8 +146,9 @@ class CTypeList implements SingletonInterface
      * initializes this class
      *
      * @param int $pageId
+     * @throws Exception
      */
-    public function init(int $pageId = 0)
+    public function init(int $pageId = 0): void
     {
         $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
     }
@@ -139,7 +158,7 @@ class CTypeList implements SingletonInterface
      *
      * @param LayoutSetup $layoutSetup
      */
-    public function injectLayoutSetup(LayoutSetup $layoutSetup)
+    public function injectLayoutSetup(LayoutSetup $layoutSetup): void
     {
         $this->layoutSetup = $layoutSetup;
     }

@@ -22,15 +22,15 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Backend\View\BackendLayout\BackendLayout;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -42,44 +42,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class AfterDatabaseOperations extends AbstractDataHandler
 {
-    /**
-     * Function to adjust colPos, container and grid column of an element
-     * after it has been moved out of or into a container during a workspace operation
-     *
-     * @param array $fieldArray The array of fields and values that have been saved to the datamap
-     * @param int $uid the ID of the record
-     * @param DataHandler $parentObj The parent object that triggered this hook
-     * @throws AspectNotFoundException
-     */
-    public function adjustValuesAfterWorkspaceOperations(array $fieldArray, int $uid, DataHandler $parentObj)
-    {
-        if (class_exists(Context::class)) {
-            /** @var Context $context */
-            $context = GeneralUtility::makeInstance(Context::class);
-            $workspaceId = $context->getPropertyFromAspect('workspace', 'id');
-        } else {
-            $workspaceId = $GLOBALS['BE_USER']->workspace;
-        }
-
-        if ($workspaceId && (isset($fieldArray['colPos']) || isset($fieldArray['tx_gridelements_container']) || isset($fieldArray['tx_gridelements_columns']))) {
-            $originalRecord = $parentObj->recordInfo('tt_content', $uid);
-            if ($originalRecord['t3ver_state'] === 4) {
-                $updateArray = [];
-                $movePlaceholder = BackendUtility::getWorkspaceVersionOfRecord($workspaceId, 'tt_content', $uid, 'uid');
-                if (isset($fieldArray['colPos'])) {
-                    $updateArray['colPos'] = (int)$fieldArray['colPos'];
-                }
-                if (isset($fieldArray['tx_gridelements_container'])) {
-                    $updateArray['tx_gridelements_container'] = (int)$fieldArray['tx_gridelements_container'];
-                }
-                if (isset($fieldArray['tx_gridelements_columns'])) {
-                    $updateArray['tx_gridelements_columns'] = (int)$fieldArray['tx_gridelements_columns'];
-                }
-                $parentObj->updateDB('tt_content', (int)$movePlaceholder['uid'], $updateArray);
-            }
-        }
-    }
-
     /**
      * Gets the current backend user.
      *
@@ -107,7 +69,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function execute_afterDatabaseOperations(array &$fieldArray, string $table, int $uid, DataHandler $parentObj)
+    public function execute_afterDatabaseOperations(array $fieldArray, string $table, int $uid, DataHandler $parentObj): void
     {
         if ($table === 'tt_content' || $table === 'pages') {
             $this->init($table, (string)$uid, $parentObj);
@@ -129,7 +91,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param array $changedFieldArray
      * @throws Exception
      */
-    public function saveCleanedUpFieldArray(array $changedFieldArray)
+    public function saveCleanedUpFieldArray(array $changedFieldArray): void
     {
         unset($changedFieldArray['pi_flexform']);
         if (isset($changedFieldArray['tx_gridelements_backend_layout']) && $this->getTable() === 'tt_content'
@@ -146,7 +108,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param array $fieldArray The array of fields and values that have been saved to the datamap
      * @throws Exception
      */
-    public function setUnusedElements(array &$fieldArray)
+    public function setUnusedElements(array $fieldArray): void
     {
         $changedGridElements = [];
         $changedElements = [];
@@ -167,11 +129,10 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder->createNamedParameter($this->getContentUid(), Connection::PARAM_INT)
                     ), $queryBuilder->expr()->notIn(
                         'tx_gridelements_columns',
-                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
                     )))->executeQuery();
-                $childElementsInUnavailableColumns = [];
                 while ($childElementInUnavailableColumns = $childElementsInUnavailableColumnsQuery->fetchAssociative()) {
-                    $childElementsInUnavailableColumns[] = $childElementInUnavailableColumns['uid'];
+                    $childElementsInUnavailableColumns[$childElementInUnavailableColumns['uid']] = $childElementInUnavailableColumns['uid'];
                 }
                 if (!empty($childElementsInUnavailableColumns)) {
                     $queryBuilder
@@ -181,12 +142,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $childElementsInUnavailableColumns,
-                                    Connection::PARAM_INT
+                                    ArrayParameterType::INTEGER
                                 )
                             )
                         )
                         ->set('colPos', -2)->set('backupColPos', -1)->executeStatement();
-                    array_flip($childElementsInUnavailableColumns);
                 }
 
                 $queryBuilder = $this->getQueryBuilder();
@@ -197,11 +157,10 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder->createNamedParameter($this->getContentUid(), Connection::PARAM_INT)
                     ), $queryBuilder->expr()->in(
                         'tx_gridelements_columns',
-                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
                     )))->executeQuery();
-                $childElementsInAvailableColumns = [];
                 while ($childElementInAvailableColumns = $childElementsInAvailableColumnsQuery->fetchAssociative()) {
-                    $childElementsInAvailableColumns[] = $childElementInAvailableColumns['uid'];
+                    $childElementsInAvailableColumns[$childElementInAvailableColumns['uid']] = $childElementInAvailableColumns['uid'];
                 }
                 if (!empty($childElementsInAvailableColumns)) {
                     $queryBuilder
@@ -211,12 +170,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $childElementsInAvailableColumns,
-                                    Connection::PARAM_INT
+                                    ArrayParameterType::INTEGER
                                 )
                             )
                         )
                         ->set('colPos', -1)->set('backupColPos', -2)->executeStatement();
-                    array_flip($childElementsInAvailableColumns);
                 }
             }
             $changedGridElements = $changedGridElements + $childElementsInUnavailableColumns + $childElementsInAvailableColumns;
@@ -228,7 +186,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
             $selectedBackendLayoutNextLevel = '';
             $rootline = BackendUtility::BEgetRootLine($this->getPageUid());
             for ($i = count($rootline); $i > 0; $i--) {
-                $uid = isset($rootline[$i]) && isset($rootline[$i]['uid']) ? (int)$rootline[$i]['uid'] : 0;
+                $uid = isset($rootline[$i]['uid']) ? (int)$rootline[$i]['uid'] : 0;
                 if ($uid > 0) {
                     $page = BackendUtility::getRecord(
                         'pages',
@@ -273,11 +231,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder->createNamedParameter($this->getPageUid(), Connection::PARAM_INT)
                     ), $queryBuilder->expr()->notIn(
                         'colPos',
-                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
                     )))->executeQuery();
                 $elementsInUnavailableColumns = [];
                 while ($elementInUnavailableColumns = $elementsInUnavailableColumnsQuery->fetchAssociative()) {
-                    $elementsInUnavailableColumns[] = $elementInUnavailableColumns['uid'];
+                    $elementsInUnavailableColumns[$elementInUnavailableColumns['uid']] = $elementInUnavailableColumns['uid'];
                 }
                 if (!empty($elementsInUnavailableColumns)) {
                     $queryBuilder
@@ -287,12 +245,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $elementsInUnavailableColumns,
-                                    Connection::PARAM_INT
+                                    ArrayParameterType::INTEGER
                                 )
                             )
                         )
                         ->set('backupColPos', $queryBuilder->quoteIdentifier('colPos'), false)->set('colPos', -2)->executeStatement();
-                    array_flip($elementsInUnavailableColumns);
                 }
 
                 $queryBuilder = $this->getQueryBuilder();
@@ -306,11 +263,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                         $queryBuilder->createNamedParameter(-2, Connection::PARAM_INT)
                     ), $queryBuilder->expr()->in(
                         'backupColPos',
-                        $queryBuilder->createNamedParameter($availableColumns, Connection::PARAM_INT_ARRAY)
+                        $queryBuilder->createNamedParameter($availableColumns, ArrayParameterType::INTEGER)
                     )))->executeQuery();
                 $elementsInAvailableColumns = [];
                 while ($elementInAvailableColumns = $elementsInAvailableColumnsQuery->fetchAssociative()) {
-                    $elementsInAvailableColumns[] = $elementInAvailableColumns['uid'];
+                    $elementsInAvailableColumns[$elementInAvailableColumns['uid']] = $elementInAvailableColumns['uid'];
                 }
                 if (!empty($elementsInAvailableColumns)) {
                     $queryBuilder
@@ -320,12 +277,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                 'uid',
                                 $queryBuilder->createNamedParameter(
                                     $elementsInAvailableColumns,
-                                    Connection::PARAM_INT
+                                    ArrayParameterType::INTEGER
                                 )
                             )
                         )
                         ->set('colPos', $queryBuilder->quoteIdentifier('backupColPos'), false)->set('backupColPos', -2)->executeStatement();
-                    array_flip($elementsInAvailableColumns);
                 }
                 $changedElements = $elementsInUnavailableColumns + $elementsInAvailableColumns;
             }
@@ -335,7 +291,6 @@ class AfterDatabaseOperations extends AbstractDataHandler
                 $subPages = [];
                 $this->getSubPagesRecursively($this->getPageUid(), $subPages);
                 if (!empty($subPages)) {
-                    $changedSubPageElements = [];
                     foreach ($subPages as $page) {
                         $availableColumns = $this->getAvailableColumns((string)$backendLayoutId, 'pages', $page['uid']);
                         $availableColumns = GeneralUtility::intExplode(',', $availableColumns);
@@ -348,13 +303,13 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             ), $queryBuilder->expr()->notIn(
                                 'colPos',
                                 $queryBuilder->createNamedParameter(
-                                    $availableColumns,
-                                    Connection::PARAM_INT_ARRAY
+                                        $availableColumns,
+                                        ArrayParameterType::INTEGER
                                 )
                             )))->executeQuery();
                         $subPageElementsInUnavailableColumns = [];
                         while ($subPageElementInUnavailableColumns = $subPageElementsInUnavailableColumnsQuery->fetchAssociative()) {
-                            $subPageElementsInUnavailableColumns[] = $subPageElementInUnavailableColumns['uid'];
+                            $subPageElementsInUnavailableColumns[$subPageElementInUnavailableColumns['uid']] = $subPageElementInUnavailableColumns['uid'];
                         }
                         if (!empty($subPageElementsInUnavailableColumns)) {
                             $queryBuilder
@@ -364,12 +319,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                         'uid',
                                         $queryBuilder->createNamedParameter(
                                             $subPageElementsInUnavailableColumns,
-                                            Connection::PARAM_INT
+                                            ArrayParameterType::INTEGER
                                         )
                                     )
                                 )
                                 ->set('backupColPos', $queryBuilder->quoteIdentifier('colPos'), false)->set('colPos', -2)->executeStatement();
-                            array_flip($subPageElementsInUnavailableColumns);
                         }
 
                         $queryBuilder = $this->getQueryBuilder();
@@ -384,13 +338,13 @@ class AfterDatabaseOperations extends AbstractDataHandler
                             ), $queryBuilder->expr()->in(
                                 'backupColPos',
                                 $queryBuilder->createNamedParameter(
-                                    $availableColumns,
-                                    Connection::PARAM_INT_ARRAY
+                                        $availableColumns,
+                                        ArrayParameterType::INTEGER
                                 )
                             )))->executeQuery();
                         $subPageElementsInAvailableColumns = [];
                         while ($subPageElementInAvailableColumns = $subPageElementsInAvailableColumnsQuery->fetchAssociative()) {
-                            $subPageElementsInAvailableColumns[] = $subPageElementInAvailableColumns['uid'];
+                            $subPageElementsInAvailableColumns[$subPageElementInAvailableColumns['uid']] = $subPageElementInAvailableColumns['uid'];
                         }
                         if (!empty($subPageElementsInAvailableColumns)) {
                             $queryBuilder
@@ -400,12 +354,11 @@ class AfterDatabaseOperations extends AbstractDataHandler
                                         'uid',
                                         $queryBuilder->createNamedParameter(
                                             $subPageElementsInAvailableColumns,
-                                            Connection::PARAM_INT
+                                            ArrayParameterType::INTEGER
                                         )
                                     )
                                 )
                                 ->set('colPos', $queryBuilder->quoteIdentifier('backupColPos'), false)->set('backupColPos', -2)->executeStatement();
-                            array_flip($subPageElementsInAvailableColumns);
                         }
 
                         $changedPageElements = $subPageElementsInUnavailableColumns + $subPageElementsInAvailableColumns;
@@ -444,11 +397,9 @@ class AfterDatabaseOperations extends AbstractDataHandler
             }
             $tcaColumns = '-2,-1,' . $CSV;
         } elseif ($table === 'pages') {
-            $tcaColumns = GeneralUtility::callUserFunction(
-                BackendLayoutView::class . '->getColPosListItemsParsed',
-                $id,
-                $this
-            );
+            $backendLayoutView = GeneralUtility::makeInstance(BackendLayoutView::class);
+            $backendLayout = $backendLayoutView->getBackendLayoutForPage($id);
+            $tcaColumns = $backendLayout->getStructure()['__items'] ?? [];
             $temp = [];
             foreach ($tcaColumns as $item) {
                 if (trim($item['value'] ?? '') !== '') {
@@ -468,7 +419,7 @@ class AfterDatabaseOperations extends AbstractDataHandler
      * @param array $subPages
      * @throws Exception
      */
-    public function getSubPagesRecursively(int $pageUid, array &$subPages)
+    public function getSubPagesRecursively(int $pageUid, array &$subPages): void
     {
         $queryBuilder = $this->getQueryBuilder('pages');
         $childPages = $queryBuilder

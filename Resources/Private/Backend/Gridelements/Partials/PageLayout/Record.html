@@ -1,7 +1,7 @@
 {f:if(condition: '{item.disabled} && {item.context.drawingConfiguration.showHidden} == 0', then: 'display: none;') -> f:variable(name: 'style')}
 <div class="t3-page-ce {item.wrapperClassName} t3js-page-ce t3js-page-ce-sortable"
      id="element-tt_content-{item.record.uid}"
-     data-table="tt_content" data-uid="{item.record.uid}" data-ctype="{item.record.CType}" data-language-uid="{item.record.sys_language_uid}"
+     data-table="tt_content" data-uid="{item.record.uid}" data-ctype="{item.record.CType}" data-list_type="{item.record.list_type}" data-language-uid="{item.record.sys_language_uid}"
      data-container="{item.record.tx_gridelements_container}" data-tx_gridelements_backend_layout="{item.record.tx_gridelements_backend_layout}"
      style="{style}">
     <div class="t3-page-ce-element t3-page-ce-dragitem" id="{item.uniqueId}">
@@ -26,7 +26,7 @@
         <div class="t3-page-ce-actions t3js-page-new-ce" id="colpos-{item.column.columnNumber}-page-{item.context.pageId}-{item.column.uniqueId}">
             <typo3-backend-new-content-element-wizard-button class="btn btn-default btn-sm" url="{item.newContentAfterUrlWithRestrictions}" title="{f:translate(key: 'LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:newContentElement')}">
                 <core:icon identifier="actions-plus" />
-                <f:translate key="LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:content" />
+                <f:translate key="LLL:EXT:backend/Resources/Private/Language/locallang_layout.xlf:createNewContent" />
             </typo3-backend-new-content-element-wizard-button>
         </div>
     </f:if>

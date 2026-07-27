@@ -26,7 +26,11 @@ use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\DataHandler\AfterDatabaseOperations;
 use GridElementsTeam\Gridelements\DataHandler\PreProcessFieldArray;
 use GridElementsTeam\Gridelements\DataHandler\ProcessCmdmap;
+use GridElementsTeam\Gridelements\Helper\ContainerCycleGuard;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\SingletonInterface;
@@ -64,7 +68,7 @@ class DataHandler implements SingletonInterface
         string $table,
         string $id,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
-    ) {
+    ): void {
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
             /** @var PreProcessFieldArray $hook */
             $hook = GeneralUtility::makeInstance(PreProcessFieldArray::class);
@@ -78,14 +82,17 @@ class DataHandler implements SingletonInterface
      * @param string $id : The uid of the page we are currently working on
      * @param array $fieldArray : The array of fields and values that have been saved to the datamap
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj : The parent object that triggered this hook
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function processDatamap_afterDatabaseOperations(
-        string &$status,
-        string &$table,
-        string &$id,
+        string $status,
+        string $table,
+        string $id,
         array &$fieldArray,
         \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj
-    ) {
+    ): void {
         // create a copy of $id which is passed by reference
         $recordUid = $id;
         if (($table === 'tt_content' || $table === 'pages') && !$parentObj->isImporting) {
@@ -93,10 +100,6 @@ class DataHandler implements SingletonInterface
             $hook = GeneralUtility::makeInstance(AfterDatabaseOperations::class);
             if (str_contains($recordUid, 'NEW')) {
                 $recordUid = $parentObj->substNEWwithIDs[$recordUid];
-            } else {
-                if ($table === 'tt_content' && $status === 'update') {
-                    $hook->adjustValuesAfterWorkspaceOperations($fieldArray, (int)$recordUid, $parentObj);
-                }
             }
             $hook->execute_afterDatabaseOperations($fieldArray, $table, (int)$recordUid, $parentObj);
         }
@@ -111,17 +114,18 @@ class DataHandler implements SingletonInterface
      * @param mixed $value The value that has been sent with the copy command
      * @param bool $commandIsProcessed A switch to tell the parent object, if the record has been copied
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj The parent object that triggered this hook
-     * @param array|bool $pasteUpdate Values to be updated after the record is pasted
+     * @param bool|array $pasteUpdate Values to be updated after the record is pasted
+     * @throws \Doctrine\DBAL\Exception
      */
     public function processCmdmap(
         string $command,
         string $table,
         int $id,
-        $value,
+        mixed $value,
         bool &$commandIsProcessed,
-        \TYPO3\CMS\Core\DataHandling\DataHandler &$parentObj,
-        $pasteUpdate
-    ) {
+        \TYPO3\CMS\Core\DataHandling\DataHandler $parentObj,
+        bool|array $pasteUpdate
+    ): void {
         if (!$parentObj->isImporting) {
             /** @var ProcessCmdmap $hook */
             $hook = GeneralUtility::makeInstance(ProcessCmdmap::class);
@@ -129,7 +133,11 @@ class DataHandler implements SingletonInterface
         }
     }
 
-    public function processCmdmap_beforeStart(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler)
+    /**
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function processCmdmap_beforeStart(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler): void
     {
         $cmdmap = $dataHandler->cmdmap;
         if (empty($cmdmap['tt_content']) || $dataHandler->bypassAccessCheckForRecords) {
@@ -144,6 +152,10 @@ class DataHandler implements SingletonInterface
 
                 $currentRecord = BackendUtility::getRecord('tt_content', $id);
 
+                if (empty($currentRecord)) {
+                    continue;
+                }
+
                 if (is_array($value)
                     && !empty($value['action'])
                     && $value['action'] === 'paste'
@@ -157,17 +169,19 @@ class DataHandler implements SingletonInterface
                     $colPos = (int)$value['update']['colPos'];
                     $gridContainer = (int)$value['update']['tx_gridelements_container'];
                     $gridColumn = (int)$value['update']['tx_gridelements_columns'];
-                    $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
                 } else {
                     $pageId = (int)$value;
                     $colPos = (int)$currentRecord['colPos'];
                     $gridContainer = (int)$currentRecord['tx_gridelements_container'];
                     $gridColumn = (int)$currentRecord['tx_gridelements_columns'];
-                    $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
                 }
+                $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
 
                 if ($pageId < 0) {
                     $targetRecord = BackendUtility::getRecordWSOL('tt_content', abs($pageId), 'pid,colPos,tx_gridelements_container,tx_gridelements_columns');
+                    if (empty($targetRecord)) {
+                        continue;
+                    }
                     $pageId = (int)$targetRecord['pid'];
                     $colPos = (int)$targetRecord['colPos'];
                     $gridContainer = (int)$targetRecord['tx_gridelements_container'];
@@ -175,7 +189,36 @@ class DataHandler implements SingletonInterface
                     $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
                 }
 
-                if ($colPos !== -1) {
+                if ($colPos !== -1 || empty($containerRecord)) {
+                    continue;
+                }
+
+                if ($currentRecord['CType'] === 'gridelements_pi1') {
+                    if (
+                        $command === 'move'
+                        && ContainerCycleGuard::wouldCreateContainerCycle((int)$currentRecord['uid'], $gridContainer)
+                    ) {
+                        $this->flashContainerError($dataHandler, $id, 'tx_gridelements_cannot_create_container_cycle');
+                        continue;
+                    }
+
+                    $forbiddenAncestorUids = ContainerCycleGuard::getContainerAncestorChain($gridContainer);
+                    if (ContainerCycleGuard::subtreeReferencesForbiddenContainer((int)$currentRecord['uid'], $forbiddenAncestorUids)) {
+                        $this->flashContainerError($dataHandler, $id, 'tx_gridelements_cannot_reference_ancestor_container');
+                        continue;
+                    }
+                } elseif (
+                    $currentRecord['CType'] === 'shortcut'
+                    && !empty($currentRecord['records'])
+                    && ContainerCycleGuard::shortcutReferencesForbiddenContainer(
+                        (string)$currentRecord['records'],
+                        ContainerCycleGuard::getContainerAncestorChain($gridContainer)
+                    )
+                ) {
+                    // the shortcut itself (not a container) is being moved/copied into a
+                    // column whose container is (or descends from) something it already
+                    // references -- would create an infinite rendering loop
+                    $this->flashContainerError($dataHandler, $id, 'tx_gridelements_cannot_reference_ancestor_container');
                     continue;
                 }
 
@@ -233,13 +276,35 @@ class DataHandler implements SingletonInterface
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
      * @param int|string $id
      * @param string $command
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws Exception
      */
     public function flashNotAllowedError(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler, int|string $id, string $command): void
     {
         unset($dataHandler->cmdmap['tt_content'][$id]);
 
-        $message = LocalizationUtility::translate(sprintf('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_cannot_%s_into_container', $command));
+        $message = LocalizationUtility::translate(sprintf('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:tx_gridelements_cannot_%s_into_container', $command));
+
+        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', ContextualFeedbackSeverity::ERROR, true);
+        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+        $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
+        $defaultFlashMessageQueue->enqueue($flashMessage);
+    }
+
+    /**
+     * Aborts the current command and shows a flash message for the given language label,
+     * used for the container-recursion guards (self/ancestor cycles, shortcut elements
+     * referencing one of their own ancestor containers).
+     *
+     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+     * @param int|string $id
+     * @param string $labelKey
+     * @throws Exception
+     */
+    public function flashContainerError(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler, int|string $id, string $labelKey): void
+    {
+        unset($dataHandler->cmdmap['tt_content'][$id]);
+
+        $message = LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:' . $labelKey);
 
         $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', ContextualFeedbackSeverity::ERROR, true);
         $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);

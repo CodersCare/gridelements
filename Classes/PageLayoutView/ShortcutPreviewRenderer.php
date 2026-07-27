@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace GridElementsTeam\Gridelements\PageLayoutView;
 
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection as ConnectionAlias;
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
 use TYPO3\CMS\Backend\Preview\PreviewRendererInterface;
@@ -53,6 +55,9 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
      *
      * @param GridColumnItem $item
      * @return string
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
@@ -71,7 +76,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
                         1582574553
                     );
                 }
-                $hookObject->preProcess($pageLayoutView, $drawItem, $previewHeader, $hookPreviewContent, $record);
+                $hookObject->preProcess($pageLayoutView, $drawItem, '', $hookPreviewContent, $record);
             }
             $item->setRecord($record);
         }
@@ -107,6 +112,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
     /**
      * @param GridColumnItem $gridColumnItem
      * @return array
+     * @throws Exception
      */
     protected function addShortcutRenderItems(GridColumnItem $gridColumnItem): array
     {
@@ -147,7 +153,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         return $renderItems;
     }
 
-    public function getTreeList($id, $depth, $begin = 0, $dontCheckEnableFields = false, $addSelectFields = '', $moreWhereClauses = '', array $prevId_array = [], $recursionLevel = 0)
+    public function getTreeList($id, $depth, $begin = 0, $dontCheckEnableFields = false, $addSelectFields = '', $moreWhereClauses = '', array $prevId_array = [], $recursionLevel = 0): string
     {
         $addCurrentPageId = false;
         $id = (int)$id;
@@ -189,7 +195,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         int $recursive = 0,
         int $parentUid = 0,
         int $language = 0
-    ) {
+    ): void {
         $itemList = str_replace('pages_', '', $shortcutItem);
         if ($recursive) {
             $itemList = $this->getTreeList($itemList, $recursive, 0, 1);
@@ -201,7 +207,6 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
         }
 
         $queryBuilder = $this->ttContentQueryBuilder;
-        $queryBuilder->resetQueryParts();
         $queryBuilder->resetRestrictions();
 
         $items = $queryBuilder
@@ -218,17 +223,17 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
                 ),
                 $queryBuilder->expr()->in(
                     'pid',
-                    $queryBuilder->createNamedParameter($itemList, Connection::PARAM_INT)
+                    $queryBuilder->createNamedParameter($itemList, ArrayParameterType::INTEGER)
                 ),
                 $queryBuilder->expr()->gte('colPos', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
                 $queryBuilder->expr()->in(
                     'sys_language_uid',
-                    $queryBuilder->createNamedParameter([0, -1], Connection::PARAM_INT_ARRAY)
+                    $queryBuilder->createNamedParameter([0, -1], ArrayParameterType::INTEGER)
                 )
             )
             ->orderBy('inSet')
             ->addOrderBy('colPos')->addOrderBy('sorting')
-            ->setParameter('itemList', $itemList, Connection::PARAM_INT)
+            ->setParameter('itemList', implode(',', $itemList))
             ->executeQuery()->fetchAllAssociative();
 
         $sortedItemList = array_flip($itemList);
@@ -272,18 +277,16 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
      * @param int $language : sys_language_uid of the referencing tt_content record
      * @throws Exception
      */
-    protected function collectContentData(string $shortcutItem, array &$collectedItems, int $parentUid, int $language)
+    protected function collectContentData(string $shortcutItem, array &$collectedItems, int $parentUid, int $language): void
     {
         $shortcutItem = str_replace('tt_content_', '', $shortcutItem);
         if ((int)$shortcutItem !== $parentUid) {
             $queryBuilder = $this->ttContentQueryBuilder;
-            $queryBuilder->resetQueryParts();
             $queryBuilder->resetRestrictions();
             if ($this->showHidden) {
                 $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
             }
 
-            $queryBuilder->resetQueryParts();
             $item = $queryBuilder
                 ->select('*')
                 ->from('tt_content')

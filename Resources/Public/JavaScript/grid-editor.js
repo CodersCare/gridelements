@@ -234,12 +234,12 @@ export class GridEditor {
                     + (n.name ? GridEditor.stripMarkup(n.name) : TYPO3.lang.grid_notSet)
                     + "<br><strong>" + TYPO3.lang.grid_column + ":</strong> "
                     + (void 0 === n.column || isNaN(n.column) ? TYPO3.lang.grid_notSet : parseInt(n.column, 10))
-                    + (n.allowed && n.allowed.CType ? "<br><strong>" + TYPO3.lang.grid_allowed + ":</strong> " + n.allowed.CType : "")
-                    + (n.allowed && n.allowed.list_type ? "<br><strong>" + TYPO3.lang.grid_allowedListTypes + ":</strong> " + n.allowed.list_type : "")
-                    + (n.allowed && n.allowed.tx_gridelements_backend_layout ? "<br><strong>" + TYPO3.lang.grid_allowedGridTypes + ":</strong> " + n.allowed.tx_gridelements_backend_layout : "")
-                    + (n.disallowed && n.disallowed.CType ? "<br><strong>" + TYPO3.lang.grid_disallowed + ":</strong> " + n.disallowed.CType : "")
-                    + (n.disallowed && n.disallowed.list_type ? "<br><strong>" + TYPO3.lang.grid_disallowedListTypes + ":</strong> " + n.disallowed.list_type : "")
-                    + (n.disallowed && n.disallowed.tx_gridelements_backend_layout ? "<br><strong>" + TYPO3.lang.grid_disallowedGridTypes + ":</strong> " + n.disallowed.tx_gridelements_backend_layout : "")
+                    + (n.allowed && n.allowed.CType ? "<br><strong>" + TYPO3.lang.grid_allowed + ":</strong> " + GridEditor.stripMarkup(n.allowed.CType) : "")
+                    + (n.allowed && n.allowed.list_type ? "<br><strong>" + TYPO3.lang.grid_allowedListTypes + ":</strong> " + GridEditor.stripMarkup(n.allowed.list_type) : "")
+                    + (n.allowed && n.allowed.tx_gridelements_backend_layout ? "<br><strong>" + TYPO3.lang.grid_allowedGridTypes + ":</strong> " + GridEditor.stripMarkup(n.allowed.tx_gridelements_backend_layout) : "")
+                    + (n.disallowed && n.disallowed.CType ? "<br><strong>" + TYPO3.lang.grid_disallowed + ":</strong> " + GridEditor.stripMarkup(n.disallowed.CType) : "")
+                    + (n.disallowed && n.disallowed.list_type ? "<br><strong>" + TYPO3.lang.grid_disallowedListTypes + ":</strong> " + GridEditor.stripMarkup(n.disallowed.list_type) : "")
+                    + (n.disallowed && n.disallowed.tx_gridelements_backend_layout ? "<br><strong>" + TYPO3.lang.grid_disallowedGridTypes + ":</strong> " + GridEditor.stripMarkup(n.disallowed.tx_gridelements_backend_layout) : "")
                     + (void 0 === n.maxitems || isNaN(n.maxitems) ? "" : "<br><strong>" + TYPO3.lang.grid_maxitems + ":</strong> " + parseInt(n.maxitems, 10))
                 )), t.append(i)
             }
@@ -364,23 +364,11 @@ export class GridEditor {
     }
 
     getTypeOptions (stCSV, aT) {
-        var aTO = [];
-
-        var sT = [];
-        if (stCSV) {
-            sT = stCSV.split(',');
-        }
-
-        for (var i = 0; i < aT.length; i++) {
-            var t = aT[i],
-                tK = String(t.key),
-                tL = t.label,
-                tS = $.inArray(tK, sT) !== -1;
-
-            aTO.push('<option value="' + tK + '" ' + (tS ? ' selected="selected"' : "") + '>' + tL + '</option>');
-        }
-
-        return aTO.join("");
+        var sT = stCSV ? stCSV.split(',') : [];
+        return aT.map(function(t) {
+            var tK = String(t.key);
+            return $('<option>').val(tK).text(t.label).prop('selected', $.inArray(tK, sT) !== -1)[0];
+        });
     }
 
 

@@ -17,6 +17,7 @@ namespace GridElementsTeam\Gridelements\DataProcessing;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\FlexFormTools;
 use TYPO3\CMS\Core\Service\FlexFormService;
@@ -33,17 +34,17 @@ class GridChildrenProcessor implements DataProcessorInterface
     /**
      * @var LayoutSetup
      */
-    protected $layoutSetup;
+    protected mixed $layoutSetup;
 
     /**
      * @var ContentDataProcessor
      */
-    protected $contentDataProcessor;
+    protected mixed $contentDataProcessor;
 
     /**
      * @var FlexFormTools
      */
-    protected $flexFormTools;
+    protected mixed $flexFormTools;
 
     /**
      * @var array
@@ -116,6 +117,9 @@ class GridChildrenProcessor implements DataProcessorInterface
      * @param array $processedData Key/value store of processed data (e.g. to be passed to a Fluid View)
      *
      * @return array the processed data as key/value store
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function process(
         ContentObjectRenderer $cObj,
@@ -205,8 +209,9 @@ class GridChildrenProcessor implements DataProcessorInterface
     /**
      * @param array $record
      * @param bool $isChild
+     * @throws Exception
      */
-    protected function checkOptions(array &$record, bool $isChild = false)
+    protected function checkOptions(array &$record, bool $isChild = false): void
     {
         if (
             (
@@ -242,7 +247,7 @@ class GridChildrenProcessor implements DataProcessorInterface
      * @param array $record
      * @param string $field Field name to convert
      */
-    public function initPluginFlexForm(array &$record, string $field = 'pi_flexform')
+    public function initPluginFlexForm(array &$record, string $field = 'pi_flexform'): void
     {
         // Converting flexform data into array:
         if (!empty($record)) {
@@ -263,7 +268,7 @@ class GridChildrenProcessor implements DataProcessorInterface
      * fetches values from the grid flexform and assigns them to virtual fields in the data array
      * @param array $record
      */
-    public function getPluginFlexFormData(array &$record)
+    public function getPluginFlexFormData(array &$record): void
     {
         if (!empty($record)) {
             $pluginFlexForm = $record['pi_flexform'] ?? [];
@@ -292,8 +297,11 @@ class GridChildrenProcessor implements DataProcessorInterface
      * Processes child records recursively to get other children into the same array
      *
      * @param array $record
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
-    protected function processChildRecord(array $record)
+    protected function processChildRecord(array $record): void
     {
         $id = (int)$record['uid'];
         $this->checkOptions($record, true);
@@ -312,7 +320,7 @@ class GridChildrenProcessor implements DataProcessorInterface
             }
             $childProcessorConfiguration['dataProcessing.']['0.'] = $this->processorConfiguration;
             $childProcessorConfiguration['dataProcessing.']['0.']['recursive'] = (int)$this->options['recursive'] - 1;
-            $childProcessorConfiguration['dataProcessing.']['0'] = \GridElementsTeam\Gridelements\DataProcessing\GridChildrenProcessor::class;
+            $childProcessorConfiguration['dataProcessing.']['0'] = GridChildrenProcessor::class;
             $this->processedRecordVariables[$id] = $this->contentDataProcessor->process(
                 $recordContentObjectRenderer,
                 $childProcessorConfiguration,

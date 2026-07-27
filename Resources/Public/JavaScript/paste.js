@@ -17,6 +17,7 @@ import {default as Modal} from "@typo3/backend/modal.js";
 import Severity from "@typo3/backend/severity.js";
 import "@typo3/backend/element/icon-element.js";
 import {SeverityEnum} from "@typo3/backend/enum/severity.js";
+import { getColumnRestriction, typeOk } from "./gridelements-column-restrictions.js";
 
 class Paste {
     constructor(t) {
@@ -65,42 +66,84 @@ class Paste {
             + '</button>';
     }
 
+    isTypeAllowed(allowedList, disallowedList, value) {
+        if (!value) {
+            return true;
+        }
+        return typeOk(allowedList, disallowedList, value);
+    }
+
+    getPasteState(gridCell) {
+        const restriction = getColumnRestriction(gridCell);
+
+        const clipBoardCType = TYPO3.settings?.gridelements?.clipBoardElementCType || '';
+        const clipBoardListType = TYPO3.settings?.gridelements?.clipBoardElementListType || '';
+        const clipBoardGridType = TYPO3.settings?.gridelements?.clipBoardElementTxGridelementsBackendLayout || '';
+        const pasteReferenceAllowed = TYPO3.settings?.gridelements?.pasteReferenceAllowed !== false;
+
+        const canPaste = this.isTypeAllowed(restriction.allowedCtype, restriction.disallowedCtype, clipBoardCType)
+            && this.isTypeAllowed(restriction.allowedListType, restriction.disallowedListType, clipBoardListType)
+            && this.isTypeAllowed(restriction.allowedGridType, restriction.disallowedGridType, clipBoardGridType);
+        const canPasteReference = pasteReferenceAllowed
+            && this.isTypeAllowed(restriction.allowedCtype, restriction.disallowedCtype, 'shortcut');
+
+        return {canPaste, canPasteReference};
+    }
+
     activatePasteIcons() {
-        this.pasteAfterLinkTemplate && this.pasteIntoLinkTemplate && document.querySelectorAll(".t3js-page-new-ce").forEach((t => {
-            const e = t.parentElement.dataset.page ? this.pasteIntoLinkTemplate : this.pasteAfterLinkTemplate;
-            t.append(document.createRange().createContextualFragment(e))
-        }))
+        if (!this.pasteAfterLinkTemplate || !this.pasteIntoLinkTemplate) {
+            return;
+        }
+
+        document.querySelectorAll(".t3js-page-new-ce").forEach((el) => {
+            const gridCell = el.closest('.t3-grid-cell') || el.closest('td');
+            const {canPaste, canPasteReference} = this.getPasteState(gridCell);
+
+            if (!canPaste && !canPasteReference) {
+                return;
+            }
+
+            const template = el.parentElement.dataset.page ? this.pasteIntoLinkTemplate : this.pasteAfterLinkTemplate;
+            el.append(document.createRange().createContextualFragment(template));
+        });
     }
 
     activatePasteModal($element) {
         const title = (TYPO3.lang['paste.modal.title.paste'] || 'Paste record') + ': "' + this.itemOnClipboardTitle + '"';
         const content = TYPO3.lang['paste.modal.paste'] || 'Do you want to paste the record to this position?';
 
+        const gridCell = $element[0].closest('.t3-grid-cell') || $element[0].closest('td');
+        const {canPaste, canPasteReference} = this.getPasteState(gridCell);
+
         let buttons = [];
-        buttons = [
-            {
-                text: TYPO3.lang['paste.modal.button.cancel'] || 'Cancel',
-                active: true,
-                btnClass: 'btn-default',
-                trigger: (e, modal) => modal.hideModal(),
-            },
-            {
+        buttons.push({
+            text: TYPO3.lang['paste.modal.button.cancel'] || 'Cancel',
+            active: true,
+            btnClass: 'btn-default',
+            trigger: (e, modal) => modal.hideModal(),
+        });
+
+        if (canPaste) {
+            buttons.push({
                 text: TYPO3.lang['paste.modal.button.paste'] || 'Paste',
                 btnClass: 'btn-' + Severity.getCssClass(SeverityEnum.warning),
                 trigger: (e, modal) => {
                     modal.hideModal();
                     this.execute($element);
                 },
-            },
-            {
+            });
+        }
+
+        if (canPasteReference) {
+            buttons.push({
                 text: TYPO3.lang['paste.modal.button.paste_reference'] || 'Paste Reference',
                 btnClass: 'btn-' + Severity.getCssClass(SeverityEnum.warning),
                 trigger: (e, modal) => {
                     modal.hideModal();
                     this.execute($element, true);
                 },
-            },
-        ];
+            });
+        }
 
         Modal.show(title, content, SeverityEnum.warning, buttons);
     }
@@ -113,8 +156,6 @@ class Paste {
             colPos = -1;
         }
         const closestElement = $element.closest(this.elementIdentifier);
-        console.log(colPos, gridContainer, gridColPos);
-
         const targetFound = closestElement.data('uid');
         let targetPid;
         if (typeof targetFound === 'undefined') {

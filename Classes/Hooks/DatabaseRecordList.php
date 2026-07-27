@@ -22,7 +22,6 @@ namespace GridElementsTeam\Gridelements\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList as DatabaseRecordListXclass;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -58,81 +57,21 @@ class DatabaseRecordList implements SingletonInterface
     }
 
     /**
-     * modifies Web>List clip icons (copy, cut, paste, etc.) of a displayed row
-     *
-     * @param string $table the current database table
-     * @param array $row the current record row
-     * @param array $cells the default clip-icons to get modified
-     * @param DatabaseRecordList $parentObject Instance of calling object (by ref due to interface)
-     *
-     * @return array the modified clip-icons
-     */
-    public function makeClip($table, $row, $cells, &$parentObject): array
-    {
-        return $cells;
-    }
-
-    /**
-     * modifies Web>List control icons of a displayed row
-     *
-     * @param string $table the current database table
-     * @param array $row the current record row
-     * @param array $cells the default control-icons to get modified
-     * @param DatabaseRecordList $parentObject Instance of calling object (by ref due to interface)
-     *
-     * @return array the modified control-icons
-     */
-    public function makeControl($table, $row, $cells, &$parentObject): array
-    {
-        return $cells;
-    }
-
-    /**
-     * modifies Web>List header row columns/cells
-     *
-     * @param string $table the current database table
-     * @param array $currentIdList Array of the currently displayed uids of the table
-     * @param array $headerColumns An array of rendered cells/columns
-     * @param DatabaseRecordList $parentObject Instance of calling object (by ref due to interface)
-     *
-     * @return array Array of modified cells/columns
-     */
-    public function renderListHeader($table, $currentIdList, $headerColumns, &$parentObject): array
-    {
-        return $headerColumns;
-    }
-
-    /**
-     * modifies Web>List header row clipboard/action icons
-     *
-     * @param string $table the current database table
-     * @param array $currentIdList Array of the currently displayed uids of the table
-     * @param array $cells An array of the current clipboard/action icons
-     * @param DatabaseRecordList $parentObject Instance of calling object (by ref due to interface)
-     *
-     * @return array Array of modified clipboard/action icons
-     */
-    public function renderListHeaderActions($table, $currentIdList, $cells, &$parentObject): array
-    {
-        return $cells;
-    }
-
-    /**
      * return content collapse icon
      *
      * @param array $data
      * @param string $sortField
      * @param int $level
      * @param string $contentCollapseIcon
-     * @param DatabaseRecordListXclass $parentObj
+     * @param \TYPO3\CMS\Backend\RecordList\DatabaseRecordList $parentObj
      */
     public function contentCollapseIcon(
-        array &$data,
+        array $data,
         string $sortField,
         int $level,
         string &$contentCollapseIcon,
-        DatabaseRecordListXclass $parentObj
-    ) {
+        \TYPO3\CMS\Backend\RecordList\DatabaseRecordList $parentObj
+    ): void {
         if (!empty($data['_EXPAND_TABLE_']) && $data['_EXPAND_TABLE_'] === 'tt_content') {
             $expandTitle = htmlspecialchars(LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.expandElement'));
             $collapseTitle = htmlspecialchars(LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xlf:list.collapseElement'));
@@ -178,7 +117,7 @@ class DatabaseRecordList implements SingletonInterface
      *
      * @param LanguageService $languageService
      */
-    public function setLanguageService(LanguageService $languageService)
+    public function setLanguageService(LanguageService $languageService): void
     {
         $this->languageService = $languageService;
     }

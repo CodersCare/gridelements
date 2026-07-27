@@ -15,12 +15,13 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\Grid;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridRow;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Configuration\BackendConfigurationManager;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class GridelementsPreviewRenderer extends StandardContentPreviewRenderer implements PreviewRendererInterface
@@ -28,7 +29,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
     /**
      * @var array
      */
-    protected $extentensionConfiguration;
+    protected mixed $extentensionConfiguration;
 
     /**
      * @var GridelementsHelper
@@ -38,7 +39,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
     /**
      * @var IconFactory
      */
-    protected $iconFactory;
+    protected mixed $iconFactory;
 
     /**
      * @var LanguageService
@@ -62,6 +63,10 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
      */
     protected string $backPath = '';
 
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     */
     public function __construct()
     {
         $this->extentensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('gridelements');
@@ -97,6 +102,7 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
      *
      * @param GridColumnItem $item
      * @return string
+     * @throws Exception
      */
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
@@ -177,12 +183,10 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
         }
 
         $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $configurationManager = GeneralUtility::makeInstance(BackendConfigurationManager::class);
-        $configuration = $configurationManager->getConfiguration('gridelements');
-        $view->setTemplate($configuration['backendContainer']['view']['defaultTemplate'] ?? 'BackendContainer');
-        $view->setLayoutRootPaths($configuration['backendContainer']['view']['layoutRootPaths'] ?? []);
-        $view->setTemplateRootPaths($configuration['backendContainer']['view']['templateRootPaths'] ?? []);
-        $view->setPartialRootPaths($configuration['backendContainer']['view']['partialRootPaths'] ?? []);
+        $view->setTemplate('BackendContainer');
+        $view->setLayoutRootPaths([0 => 'EXT:backend/Resources/Private/Layouts/', 100 => 'EXT:gridelements/Resources/Private/Backend/Gridelements/Layouts/']);
+        $view->setTemplateRootPaths([0 => 'EXT:backend/Resources/Private/Templates/', 100 => 'EXT:gridelements/Resources/Private/Backend/Gridelements/Templates/']);
+        $view->setPartialRootPaths([0 => 'EXT:backend/Resources/Private/Partials/', 100 => 'EXT:gridelements/Resources/Private/Backend/Gridelements/Partials/']);
 
         $view->assignMultiple([
             'context' => $context,

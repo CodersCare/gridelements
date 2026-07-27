@@ -25,6 +25,7 @@ namespace GridElementsTeam\Gridelements\DataHandler;
 
 use Doctrine\DBAL\Exception;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Http\ServerRequestFactory;
@@ -39,7 +40,9 @@ class ProcessCmdmap extends AbstractDataHandler
     public function __construct(
         protected ServerRequestInterface|null $request = null
     ) {
-        $this->request = $GLOBALS['TYPO3_REQUEST'] ?? ServerRequestFactory::fromGlobals();
+        if (!Environment::isCli()) {
+            $this->request = $GLOBALS['TYPO3_REQUEST'] ?? ServerRequestFactory::fromGlobals();
+        }
     }
 
     /**
@@ -51,18 +54,23 @@ class ProcessCmdmap extends AbstractDataHandler
      * @param mixed $value The value that has been sent with the copy command
      * @param bool $commandIsProcessed A switch to tell the parent object, if the record has been copied
      * @param DataHandler|null $parentObj The parent object that triggered this hook
-     * @param array|bool $pasteUpdate Values to be updated after the record is pasted
+     * @param bool|array $pasteUpdate Values to be updated after the record is pasted
      * @throws Exception
      */
     public function execute_processCmdmap(
         string $command,
         string $table,
         int $id,
-        $value,
+        mixed $value,
         bool &$commandIsProcessed,
-        DataHandler $parentObj = null,
-        $pasteUpdate = false
-    ) {
+        ?DataHandler $parentObj = null,
+        bool|array $pasteUpdate = false
+    ): void {
+
+        if (!($this->request instanceof ServerRequestInterface)) {
+            return;
+        }
+
         $this->init($table, (string)$id, $parentObj);
 
         $reference = (int)($this->request->getQueryParams()['reference'] ?? 0);
@@ -95,10 +103,9 @@ class ProcessCmdmap extends AbstractDataHandler
                 $this->getTceMain()->start($data, []);
                 $this->getTceMain()->process_datamap();
 
-                $parentObj->registerDBList = null;
-                $parentObj->remapStack = null;
+                $parentObj->registerDBList = [];
+                $parentObj->remapStack = [];
                 $commandIsProcessed = true;
-
             }
             $containerUpdateArray = [];
             if (!empty($pasteUpdate) && !empty($pasteUpdate['tx_gridelements_container'])) {
@@ -124,8 +131,5 @@ class ProcessCmdmap extends AbstractDataHandler
             }
         }
 
-        if ($table === 'tt_content') {
-            $this->cleanupWorkspacesAfterFinalizing();
-        }
     }
 }

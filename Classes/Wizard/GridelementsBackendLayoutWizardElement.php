@@ -22,9 +22,13 @@ namespace GridElementsTeam\Gridelements\Wizard;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
+use phpDocumentor\Reflection\Types\Parent_;
 use TYPO3\CMS\Backend\Form\Element\BackendLayoutWizardElement;
+use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\TypoScript\TypoScriptStringFactory;
@@ -36,6 +40,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
 {
+    /**
+     * @var IconFactory
+     */
+    protected $iconFactory;
+
     /**
      * @var array
      */
@@ -51,8 +60,16 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
      */
     protected int $rowCount = 0;
 
+    public function __construct(
+    ) {
+        parent::__construct(GeneralUtility::makeInstance(TypoScriptStringFactory::class));
+        $this->injectNodeFactory(GeneralUtility::makeInstance(NodeFactory::class));
+        $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+    }
+
     /**
      * @return array
+     * @throws Exception
      */
     public function render(): array
     {
@@ -127,8 +144,8 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         $html[] =                           ' id="editor"';
         $html[] =                           ' class="t3js-grideditor"';
         $html[] =                           ' data-data="' . htmlspecialchars($json) . '"';
-        $html[] =                           ' data-rowcount="' . (int)$this->rowCount . '"';
-        $html[] =                           ' data-colcount="' . (int)$this->colCount . '"';
+        $html[] =                           ' data-rowcount="' . $this->rowCount . '"';
+        $html[] =                           ' data-colcount="' . $this->colCount . '"';
         $html[] =                           ' data-readonly="' . ($readOnly ? '1' : '0') . '"';
         $html[] =                           ' data-field="' . htmlspecialchars($this->data['parameterArray']['itemFormElName']) . '"';
         $html[] =                       '></div>';
@@ -170,12 +187,12 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         $html[] = '</div>';
 
         $contentTypes = [];
-        if (is_array($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'])) {
+        if (!empty($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'])) {
             foreach ($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] as $item) {
                 $contentType = [];
                 if (!empty($item['value'])) {
                     $contentType['key'] = $item['value'];
-                    if (substr((string)$contentType['key'], 0, 2) !== '--') {
+                    if (!str_starts_with((string)$contentType['key'], '--')) {
                         $contentType['label'] = $lang->sL($item['label']);
                         $contentTypes[] = $contentType;
                     }
@@ -183,12 +200,12 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
             }
         }
         $listTypes = [];
-        if (is_array($GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'])) {
+        if (!empty($GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'])) {
             foreach ($GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] as $item) {
                 $listType = [];
                 if (!empty($item['value'])) {
                     $listType['key'] = $item['value'];
-                    if (substr((string)$listType['key'], 0, 2) !== '--') {
+                    if (!str_starts_with((string)$listType['key'], '--')) {
                         $listType['label'] = $lang->sL($item['label']);
                         $listTypes[] = $listType;
                     }
@@ -202,7 +219,7 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
                 $gridType = [];
                 if (!empty($key)) {
                     $gridType['key'] = $key;
-                    if (substr((string)$gridType['key'], 0, 2) !== '--') {
+                    if (!str_starts_with((string)$gridType['key'], '--')) {
                         $gridType['label'] = $lang->sL($item['title']);
                         $gridTypes[] = $gridType;
                     }
@@ -211,12 +228,14 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
         }
         $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
         $pageRenderer->addJsInlineCode(
-                'GridelementsBackendLayout',
-                'var Gridelements = Gridelements || {}; Gridelements.BackendLayout = Gridelements.BackendLayout || {}; ' .
-                ($contentTypes ? ' Gridelements.BackendLayout.availableCTypes = ' . json_encode($contentTypes) . '; ' : '') .
-                ($listTypes ? '  Gridelements.BackendLayout.availableListTypes = ' . json_encode($listTypes) . '; ' : '') .
-                ($gridTypes ? '  Gridelements.BackendLayout.availableGridTypes = ' . json_encode($gridTypes) . '; ' : ''),
-                true,false,true
+            'GridelementsBackendLayout',
+            'var Gridelements = Gridelements || {}; Gridelements.BackendLayout = Gridelements.BackendLayout || {}; ' .
+            ($contentTypes ? ' Gridelements.BackendLayout.availableCTypes = ' . json_encode($contentTypes) . '; ' : '') .
+            ($listTypes ? '  Gridelements.BackendLayout.availableListTypes = ' . json_encode($listTypes) . '; ' : '') .
+            ($gridTypes ? '  Gridelements.BackendLayout.availableGridTypes = ' . json_encode($gridTypes) . '; ' : ''),
+            true,
+            false,
+            true
         );
         $html = implode(LF, $html);
         $resultArray['html'] = $this->wrapWithFieldsetAndLegend($html);
@@ -233,8 +252,9 @@ class GridelementsBackendLayoutWizardElement extends BackendLayoutWizardElement
 
     /**
      * Initialize wizard
+     * @throws Exception
      */
-    protected function init()
+    protected function init(): void
     {
         if (empty($this->data['databaseRow']['config'])) {
             $rows = [[['colspan' => 1, 'rowspan' => 1, 'spanned' => 0, 'name' => '0x0']]];

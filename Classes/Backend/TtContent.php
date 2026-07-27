@@ -22,8 +22,7 @@ namespace GridElementsTeam\Gridelements\Backend;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use Exception;
-use TYPO3\CMS\Core\Database\Connection;
+use Doctrine\DBAL\ArrayParameterType;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
@@ -47,8 +46,11 @@ class TtContent
      * ItemProcFunc for columns items
      *
      * @param array $params An array containing the items and parameters for the list of items
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function columnsItemsProcFunc(array &$params)
+    public function columnsItemsProcFunc(array &$params): void
     {
         $this->init((int)$params['row']['pid']);
         $gridContainerId = 0;
@@ -59,16 +61,14 @@ class TtContent
                 : (int)$params['row']['tx_gridelements_container'];
         }
 
-        if ((new(Typo3Version::class))->getMajorVersion() >= 12) {
-            $params['items'][0]['label'] = '/';
-            $params['items'][0]['value'] = 0;
-        } else {
-            $params['items'][0][0] = '/';
-            $params['items'][0][1] = 0;
-        }
+        $params['items'][0]['label'] = '/';
+        $params['items'][0]['value'] = 0;
 
         if ($gridContainerId > 0) {
             $gridElement = $this->layoutSetup->cacheCurrentParent($gridContainerId, true);
+            if ($gridElement === null) {
+                return;
+            }
             $params['items'] = $this->layoutSetup->getLayoutColumnsSelectItems($gridElement['tx_gridelements_backend_layout']);
 
             $ContentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
@@ -88,8 +88,9 @@ class TtContent
      * initializes this class
      *
      * @param int $pageId
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function init(int $pageId)
+    public function init(int $pageId): void
     {
         $this->injectLayoutSetup(GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId));
     }
@@ -99,7 +100,7 @@ class TtContent
      *
      * @param LayoutSetup $layoutSetup
      */
-    public function injectLayoutSetup(LayoutSetup $layoutSetup)
+    public function injectLayoutSetup(LayoutSetup $layoutSetup): void
     {
         $this->layoutSetup = $layoutSetup;
     }
@@ -110,18 +111,15 @@ class TtContent
      * if the element itself already is a container
      *
      * @param array $params An array containing the items and parameters for the list of items
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function containerItemsProcFunc(array &$params)
+    public function containerItemsProcFunc(array &$params): void
     {
         $this->init((int)$params['row']['pid']);
         $possibleContainers = [];
         $this->removeItemsFromListOfSelectableContainers($params, $possibleContainers);
 
-        if ((new(Typo3Version::class))->getMajorVersion() >= 12) {
-            array_unshift($params['items'], ['label' => '/', 'value' => 0]);
-        } else {
-            array_unshift($params['items'], [0 => '/', 1 => 0]);
-        }
+        array_unshift($params['items'], ['label' => '/', 'value' => 0]);
 
         if (!empty($possibleContainers)) {
             $params['items'] = array_merge($params['items'], $possibleContainers);
@@ -129,11 +127,7 @@ class TtContent
         $itemUidList = '';
         if (count($params['items']) > 1) {
             foreach ($params['items'] as $container) {
-                if (!empty($container['value'])) {
-                    $itemUidList .= $itemUidList ? ',' . $container['value'] : $container['value'];
-                } else if (!empty($container[1])) {
-                    $itemUidList .= $itemUidList ? ',' . $container[1] : $container[1];
-                }
+                $itemUidList .= $itemUidList ? ',' . $container['value'] : $container['value'];
             }
         }
 
@@ -147,8 +141,9 @@ class TtContent
      *
      * @param array $params
      * @param array $possibleContainers
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function removeItemsFromListOfSelectableContainers(array &$params, array &$possibleContainers)
+    public function removeItemsFromListOfSelectableContainers(array &$params, array &$possibleContainers): void
     {
         if (!empty($params['row']['CType'])) {
             $contentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
@@ -173,22 +168,21 @@ class TtContent
      *
      * @param string $containerIds : A list determining containers that should be checked
      * @param array $possibleContainers : The result list containing the remaining containers after the check
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function lookForChildContainersRecursively(string $containerIds, array &$possibleContainers)
+    public function lookForChildContainersRecursively(string $containerIds, array &$possibleContainers): void
     {
         if (!$containerIds) {
             return;
         }
         $containerIds = GeneralUtility::intExplode(',', $containerIds);
         $queryBuilder = $this->getQueryBuilder();
-        $queryBuilder->resetQueryParts();
         $queryBuilder->resetRestrictions();
         $childrenOnNextLevel = $queryBuilder
             ->select('uid', 'tx_gridelements_container')
             ->from('tt_content')->where($queryBuilder->expr()->and($queryBuilder->expr()->eq('CType', $queryBuilder->createNamedParameter('gridelements_pi1')), $queryBuilder->expr()->in(
                 'tx_gridelements_container',
-                $queryBuilder->createNamedParameter($containerIds, Connection::PARAM_INT_ARRAY)
+                $queryBuilder->createNamedParameter($containerIds, ArrayParameterType::INTEGER)
             )))->executeQuery()
             ->fetchAllAssociative();
 
@@ -201,10 +195,10 @@ class TtContent
                 }
 
                 $containerIds .= $containerIds ? ',' . (int)$childOnNextLevel['uid'] : (int)$childOnNextLevel['uid'];
+            }
 
-                if ($containerIds !== '') {
-                    $this->lookForChildContainersRecursively($containerIds, $possibleContainers);
-                }
+            if ($containerIds !== '') {
+                $this->lookForChildContainersRecursively($containerIds, $possibleContainers);
             }
         }
     }
@@ -230,14 +224,14 @@ class TtContent
      *
      * @param array $params
      * @param string $itemUidList comma separated list of uids
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function deleteDisallowedContainers(array &$params, string $itemUidList = '')
+    public function deleteDisallowedContainers(array &$params, string $itemUidList = ''): void
     {
-        $contentType = is_array($params['row']['CType']) ? $params['row']['CType'][0] : $params['row']['CType'];
+        $contentType = is_array($params['row']['CType']) ? ($params['row']['CType'][0] ?? '') : $params['row']['CType'];
         $listType = '';
         if ($contentType === 'list') {
-            $listType = is_array($params['row']['list_type']) ? $params['row']['list_type'][0] : $params['row']['list_type'];
+            $listType = is_array($params['row']['list_type']) ? ($params['row']['list_type'][0] ?? '') : $params['row']['list_type'];
         }
         $layoutSetups = $this->layoutSetup->getLayoutSetup();
         if ($itemUidList) {
@@ -247,7 +241,7 @@ class TtContent
                 ->select('uid', 'tx_gridelements_backend_layout')
                 ->from('tt_content')->where($queryBuilder->expr()->in(
                     'uid',
-                    $queryBuilder->createNamedParameter($itemUidList, Connection::PARAM_INT_ARRAY)
+                    $queryBuilder->createNamedParameter($itemUidList, ArrayParameterType::INTEGER)
                 ))->executeQuery();
             $containers = [];
             while ($container = $containerQuery->fetchAssociative()) {
@@ -256,9 +250,11 @@ class TtContent
             foreach ($params['items'] as $key => $container) {
                 if (!empty($container['value'])) {
                     $backendLayout = $containers[$container['value']]['tx_gridelements_backend_layout'] ?? [];
-                } else if (!empty($container[1]))  {
+                } elseif (!empty($container[1])) {
                     $backendLayout = $containers[$container[1]]['tx_gridelements_backend_layout'] ?? [];
-                } else $backendLayout = false;
+                } else {
+                    $backendLayout = false;
+                }
 
                 $gridColumn = (string)$params['row']['tx_gridelements_columns'];
                 if ($backendLayout && $gridColumn) {
@@ -313,8 +309,11 @@ class TtContent
      * and items that are excluded for a certain branch or user
      *
      * @param array $params An array containing the items and parameters for the list of items
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function layoutItemsProcFunc(array &$params)
+    public function layoutItemsProcFunc(array &$params): void
     {
         $this->init((int)$params['row']['pid']);
         if (!empty($params['row']['colPos'])) {

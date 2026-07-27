@@ -22,6 +22,7 @@ namespace GridElementsTeam\Gridelements\DataHandler;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
@@ -77,8 +78,9 @@ abstract class AbstractDataHandler
      * @param string $table : The name of the table the data should be saved to
      * @param string $uidPid : The uid of the record or page we are currently working on
      * @param DataHandler $dataHandler
+     * @throws Exception
      */
-    public function init(string $table, string $uidPid, DataHandler $dataHandler)
+    public function init(string $table, string $uidPid, DataHandler $dataHandler): void
     {
         $this->setTable($table);
         if ($table === 'tt_content' && (int)$uidPid < 0) {
@@ -107,7 +109,7 @@ abstract class AbstractDataHandler
      *
      * @param int $contentUid
      */
-    public function setContentUid(int $contentUid)
+    public function setContentUid(int $contentUid): void
     {
         $this->contentUid = $contentUid;
     }
@@ -117,7 +119,7 @@ abstract class AbstractDataHandler
      *
      * @param DataHandler $dataHandler
      */
-    public function setTceMain(DataHandler $dataHandler)
+    public function setTceMain(DataHandler $dataHandler): void
     {
         $this->dataHandler = $dataHandler;
     }
@@ -127,7 +129,7 @@ abstract class AbstractDataHandler
      *
      * @param LayoutSetup $layoutSetup
      */
-    public function injectLayoutSetup(LayoutSetup $layoutSetup)
+    public function injectLayoutSetup(LayoutSetup $layoutSetup): void
     {
         $this->layoutSetup = $layoutSetup;
     }
@@ -147,30 +149,9 @@ abstract class AbstractDataHandler
      *
      * @param int $pageUid
      */
-    public function setPageUid(int $pageUid)
+    public function setPageUid(int $pageUid): void
     {
         $this->pageUid = $pageUid;
-    }
-
-    /**
-     * Function to remove any remains of versioned records after finalizing a workspace action
-     * via 'Discard' or 'Publish' commands
-     */
-    public function cleanupWorkspacesAfterFinalizing()
-    {
-        $queryBuilder = $this->getQueryBuilder();
-
-        $constraints = [
-            $queryBuilder->expr()->and($queryBuilder->expr()->eq(
-                'pid',
-                $queryBuilder->createNamedParameter(-1, Connection::PARAM_INT)
-            ), $queryBuilder->expr()->eq(
-                't3ver_wsid',
-                $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)
-            )),
-        ];
-
-        $queryBuilder->delete('tt_content')->where(...$constraints)->executeStatement();
     }
 
     /**
@@ -199,7 +180,7 @@ abstract class AbstractDataHandler
      * @param int $uid
      * @throws Exception
      */
-    public function checkAndUpdateTranslatedElements(int $uid)
+    public function checkAndUpdateTranslatedElements(int $uid): void
     {
         if ($uid <= 0) {
             return;
@@ -363,15 +344,22 @@ abstract class AbstractDataHandler
      * Function to handle record actions between different grid containers
      *
      * @param array $containerUpdateArray
+     * @param string $action
      * @throws Exception
      */
-    public function doGridContainerUpdate(array $containerUpdateArray = [], $action = ''): void
+    public function doGridContainerUpdate(array $containerUpdateArray = [], string $action = ''): void
     {
         if (is_array($containerUpdateArray) && !empty($containerUpdateArray)) {
             $queryBuilder = $this->getQueryBuilder();
             $currentContainers = $queryBuilder
                 ->select('uid', 'tx_gridelements_children')
-                ->from('tt_content')->where($queryBuilder->expr()->in('uid', implode(',', array_keys($containerUpdateArray))))->executeQuery()
+                ->from('tt_content')->where(
+                    $queryBuilder->expr()->in(
+                        'uid',
+                        $queryBuilder->createNamedParameter(array_keys($containerUpdateArray), ArrayParameterType::INTEGER)
+                    )
+                )
+                ->executeQuery()
                 ->fetchAllAssociative();
             if (!empty($currentContainers)) {
                 foreach ($currentContainers as $fieldArray) {
@@ -413,7 +401,7 @@ abstract class AbstractDataHandler
      *
      * @param string $table
      */
-    public function setTable(string $table)
+    public function setTable(string $table): void
     {
         $this->table = $table;
     }

@@ -39,7 +39,7 @@ class ColPosList implements SingletonInterface
      *
      * @param array $params The array of parameters that is used to render the item list
      */
-    public function itemsProcFunc(array &$params)
+    public function itemsProcFunc(array &$params): void
     {
         if ((int)$params['row']['pid'] > 0) {
             if (isset($params['row']['CType'])) {
@@ -113,18 +113,10 @@ class ColPosList implements SingletonInterface
                                 !isset($layout['allowed'][$column]['CType']['*'])
                             ) ||
                             (
-                                !empty($listType) &&
-                                isset($layout['allowed'][$column]) &&
-                                isset($layout['allowed'][$column]['list_type']) &&
-                                !isset($layout['allowed'][$column]['list_type'][$listType]) &&
-                                !isset($layout['allowed'][$column]['list_type']['*'])
+                                    isset($layout['allowed'][$column]['list_type']) && !empty($listType) && !isset($layout['allowed'][$column]['list_type'][$listType]) && !isset($layout['allowed'][$column]['list_type']['*'])
                             ) ||
                             (
-                                !empty($gridType) &&
-                                isset($layout['allowed'][$column]) &&
-                                isset($layout['allowed'][$column]['tx_gridelements_backend_layout']) &&
-                                !isset($layout['allowed'][$column]['tx_gridelements_backend_layout'][$gridType]) &&
-                                !isset($layout['allowed'][$column]['tx_gridelements_backend_layout']['*'])
+                                    isset($layout['allowed'][$column]['tx_gridelements_backend_layout']) && !empty($gridType) && !isset($layout['allowed'][$column]['tx_gridelements_backend_layout'][$gridType]) && !isset($layout['allowed'][$column]['tx_gridelements_backend_layout']['*'])
                             ) ||
                             (
                                 isset($layout['disallowed'][$column]) &&

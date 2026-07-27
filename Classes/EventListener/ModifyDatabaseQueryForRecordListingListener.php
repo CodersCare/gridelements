@@ -6,13 +6,13 @@ namespace GridElementsTeam\Gridelements\EventListener;
 
 use TYPO3\CMS\Backend\View\Event\ModifyDatabaseQueryForRecordListingEvent;
 
-class ModifyDatabaseQueryForRecordListingListener
+readonly class ModifyDatabaseQueryForRecordListingListener
 {
     /**
      * @param array $gridElementsExtensionConfiguration
      */
     public function __construct(
-        private readonly array $gridElementsExtensionConfiguration
+        private array $gridElementsExtensionConfiguration
     ) {
     }
 
@@ -23,7 +23,7 @@ class ModifyDatabaseQueryForRecordListingListener
      *
      * @param ModifyDatabaseQueryForRecordListingEvent $event
      */
-    public function __invoke(ModifyDatabaseQueryForRecordListingEvent $event)
+    public function __invoke(ModifyDatabaseQueryForRecordListingEvent $event): void
     {
         if (empty($this->gridElementsExtensionConfiguration['nestingInListModule'])) {
             return;

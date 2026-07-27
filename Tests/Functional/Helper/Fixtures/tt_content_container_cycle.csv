@@ -1,0 +1,13 @@
+tt_content,,,,,,,,,,,
+,uid,pid,CType,header,tx_gridelements_container,tx_gridelements_columns,colPos,records,sys_language_uid,deleted,hidden
+,1,1,gridelements_pi1,Root Ancestor,0,0,-1,,0,0,0
+,2,1,gridelements_pi1,Child Container,1,0,-1,,0,0,0
+,3,1,gridelements_pi1,Grandchild Container,2,0,-1,,0,0,0
+,4,1,shortcut,Dangerous Shortcut,3,0,-1,tt_content_1,0,0,0
+,5,1,shortcut,Safe Shortcut,3,0,-1,tt_content_99,0,0,0
+,6,1,gridelements_pi1,Unrelated Container,0,0,-1,,0,0,0
+,60,1,shortcut,Safe Nested Shortcut,6,0,-1,tt_content_99,0,0,0
+,7,1,gridelements_pi1,Nested Container,6,0,-1,,0,0,0
+,8,1,shortcut,Dangerous Nested Shortcut,7,0,-1,tt_content_1,0,0,0
+,9,1,gridelements_pi1,Safe Subtree Root,0,0,-1,,0,0,0
+,90,1,shortcut,Safe Subtree Shortcut,9,0,-1,tt_content_99,0,0,0

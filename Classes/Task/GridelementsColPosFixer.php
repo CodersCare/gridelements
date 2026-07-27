@@ -11,7 +11,6 @@ use TYPO3\CMS\Scheduler\Task\AbstractTask;
 
 class GridelementsColPosFixer extends AbstractTask
 {
-
     /**
      * Fixes Gridelements child records with broken colPos values
      * after falsely updating the DB during major core upgrades
@@ -37,8 +36,7 @@ class GridelementsColPosFixer extends AbstractTask
                     0
                 )
             )
-            ->execute();
+            ->executeStatement();
         return true;
     }
-
 }

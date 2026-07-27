@@ -1,0 +1,5 @@
+tt_content,,,,,,,,,,
+,uid,pid,CType,header,tx_gridelements_container,tx_gridelements_columns,colPos,sys_language_uid,deleted,hidden
+,1,1,gridelements_pi1,Grid Container,0,0,-1,0,0,0
+,10,1,text,In Available Column,1,0,0,0,0,0
+,11,1,text,In Unavailable Column,1,2,0,0,0,0

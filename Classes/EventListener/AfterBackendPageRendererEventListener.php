@@ -20,13 +20,13 @@ namespace GridElementsTeam\Gridelements\EventListener;
 use TYPO3\CMS\Backend\Controller\Event\AfterBackendPageRenderEvent;
 use TYPO3\CMS\Core\Page\PageRenderer;
 
-class AfterBackendPageRendererEventListener
+readonly class AfterBackendPageRendererEventListener
 {
     /**
      * @param PageRenderer|null $pageRenderer
      */
     public function __construct(
-        private readonly PageRenderer|null $pageRenderer = null
+        private PageRenderer|null $pageRenderer = null
     ) {
     }
 
@@ -37,8 +37,8 @@ class AfterBackendPageRendererEventListener
     {
         if (!empty($this->pageRenderer)) {
             $this->pageRenderer->addInlineLanguageLabelFile(
-                    'EXT:gridelements/Resources/Private/Language/locallang_db.xlf',
-                    'tx_gridelements_js'
+                'EXT:gridelements/Resources/Private/Language/locallang_db.xlf',
+                'tx_gridelements_js'
             );
         }
     }

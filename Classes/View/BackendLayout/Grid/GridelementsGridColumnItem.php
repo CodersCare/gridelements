@@ -27,21 +27,15 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class GridelementsGridColumnItem extends GridColumnItem
 {
     /**
-     * @var array
-     */
-    protected array $layoutColumns;
-
-    /**
      * @param PageLayoutContext $context
      * @param GridelementsGridColumn $column
      * @param array $record
      * @param string $table
      * @param array $layoutColumns
      */
-    public function __construct(PageLayoutContext $context, GridelementsGridColumn $column, array $record, string $table = 'tt_content', array $layoutColumns = [])
+    public function __construct(PageLayoutContext $context, GridelementsGridColumn $column, array $record, string $table = 'tt_content', protected array $layoutColumns = [])
     {
         parent::__construct($context, $column, $record, $table);
-        $this->layoutColumns = $layoutColumns;
     }
 
     /**
@@ -49,7 +43,9 @@ class GridelementsGridColumnItem extends GridColumnItem
      */
     public function getGridelementsColumn(): GridelementsGridColumn
     {
-        return $this->column;
+        /** @var GridelementsGridColumn $column */
+        $column = $this->column;
+        return $column;
     }
 
     /**
@@ -92,17 +88,11 @@ class GridelementsGridColumnItem extends GridColumnItem
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $pageId = $this->context->getPageId();
 
-        $specificIds = GridElementsHelper::getSpecificIds($this->record);
-        $allowed = base64_encode(json_encode($this->column->getAllowed()));
-        $disallowed = base64_encode(json_encode($this->column->getDisallowed()));
-
         $urlParameters = [
             'id' => $pageId,
             'sys_language_uid' => $this->context->getSiteLanguage()->getLanguageId(),
-            'tx_gridelements_allowed' => $allowed,
-            'tx_gridelements_disallowed' => $disallowed,
-            'tx_gridelements_container' => $this->column->getGridContainerId(),
-            'tx_gridelements_columns' => $this->column->getColumnNumber(),
+            'tx_gridelements_container' => $this->getGridelementsColumn()->getGridContainerId(),
+            'tx_gridelements_columns' => $this->getGridelementsColumn()->getColumnNumber(),
             'colPos' => -1,
             'uid_pid' => -$this->record['uid'],
             'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),

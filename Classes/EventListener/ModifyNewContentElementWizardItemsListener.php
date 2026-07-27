@@ -22,14 +22,15 @@ namespace GridElementsTeam\Gridelements\EventListener;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 
-use TYPO3\CMS\Backend\View\BackendLayoutView;
 use function str_ends_with;
 use function str_starts_with;
-
 use TYPO3\CMS\Backend\Controller\Event\ModifyNewContentElementWizardItemsEvent;
+
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider;
@@ -49,7 +50,7 @@ class ModifyNewContentElementWizardItemsListener
         private readonly array $gridElementsExtensionConfiguration,
         private LayoutSetup|null $layoutSetup = null
     ) {
-        if (empty($layouSetup)) {
+        if (empty($layoutSetup)) {
             $this->layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class);
         }
     }
@@ -66,6 +67,7 @@ class ModifyNewContentElementWizardItemsListener
 
     /**
      * @param ModifyNewContentElementWizardItemsEvent $event
+     * @throws Exception
      */
     public function __invoke(ModifyNewContentElementWizardItemsEvent $event): void
     {
@@ -76,6 +78,9 @@ class ModifyNewContentElementWizardItemsListener
         $this->layoutSetup->init($event->getUidPid());
 
         $requestArguments = $this->getRequestArguments();
+        if ($requestArguments === null) {
+            return;
+        }
 
         $wizardItems = $event->getWizardItems();
 
@@ -124,11 +129,13 @@ class ModifyNewContentElementWizardItemsListener
 
         if (isset($queryParams['colPos']) && (int)$queryParams['colPos'] > -1) {
             $restrictions = $this->getRestrictionsFromBackendLayout($queryParams, (int)$queryParams['colPos']);
+        } elseif (!empty($queryParams['tx_gridelements_container'])) {
+            $restrictions = $this->getRestrictionsFromGridContainer(
+                (int)$queryParams['tx_gridelements_container'],
+                (int)($queryParams['tx_gridelements_columns'] ?? 0)
+            );
         } else {
-            $restrictions = [
-                'allowed' => json_decode(base64_decode($queryParams['tx_gridelements_allowed'] ?? ''), true) ?: [],
-                'disallowed' => json_decode(base64_decode($queryParams['tx_gridelements_disallowed'] ?? ''), true) ?: []
-            ];
+            $restrictions = ['allowed' => [], 'disallowed' => []];
         }
 
         if (!empty($restrictions['allowed'])) {
@@ -164,11 +171,6 @@ class ModifyNewContentElementWizardItemsListener
     {
         $backendLayoutView = GeneralUtility::makeInstance(BackendLayoutView::class);
         $backendLayout = $backendLayoutView->getSelectedBackendLayout((int)$queryParams['id'] ?? 0);
-        if (empty($backendLayout)) {
-            $backendLayout = [
-                'config' => '',
-            ];
-        }
         $allowed = [];
         $disallowed = [];
         $configuration = [];
@@ -189,8 +191,7 @@ class ModifyNewContentElementWizardItemsListener
             $activatePlugins = false;
             $deactivatePlugins = false;
             if (!empty($configuration['disallowed.'])) {
-                $disallowed = [];
-                foreach($configuration['disallowed.'] as $key => $disallowedString) {
+                foreach ($configuration['disallowed.'] as $key => $disallowedString) {
                     if ($disallowedString === '*' && $key === 'Ctype') {
                         return [];
                     }
@@ -207,8 +208,7 @@ class ModifyNewContentElementWizardItemsListener
                 }
             }
             if (!empty($configuration['allowed.'])) {
-                $allowed = [];
-                foreach($configuration['allowed.'] as $key => $allowedString) {
+                foreach ($configuration['allowed.'] as $key => $allowedString) {
                     $allowed[$key] = array_flip(GeneralUtility::trimExplode(',', $allowedString));
                     if ($key === 'list_type' && !empty($allowedString) && !$deactivatePlugins) {
                         $activatePlugins = true;
@@ -228,6 +228,23 @@ class ModifyNewContentElementWizardItemsListener
         return [
             'allowed' => $allowed,
             'disallowed' => $disallowed
+        ];
+    }
+
+    /**
+     * Derive allowed/disallowed restrictions from the grid container record and its layout config.
+     */
+    protected function getRestrictionsFromGridContainer(int $containerId, int $columnNumber): array
+    {
+        $container = BackendUtility::getRecord('tt_content', $containerId, 'tx_gridelements_backend_layout,pid');
+        if (empty($container)) {
+            return ['allowed' => [], 'disallowed' => []];
+        }
+        $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init((int)$container['pid']);
+        $layoutColumns = $layoutSetup->getLayoutColumns((string)$container['tx_gridelements_backend_layout']);
+        return [
+            'allowed' => $layoutColumns['allowed'][$columnNumber] ?? [],
+            'disallowed' => $layoutColumns['disallowed'][$columnNumber] ?? [],
         ];
     }
 
@@ -259,7 +276,7 @@ class ModifyNewContentElementWizardItemsListener
      *
      * @return string
      */
-    public function getExcludeLayouts(int $container, int $pageId)
+    public function getExcludeLayouts(int $container, int $pageId): string
     {
         $excludeLayouts = 0;
         $excludeArray = [];
@@ -296,29 +313,30 @@ class ModifyNewContentElementWizardItemsListener
      * @param array $disallowed
      * @param array $wizardItems
      */
-    public function removeDisallowedWizardItems(array $allowed, array $disallowed, array &$wizardItems)
+    public function removeDisallowedWizardItems(array $allowed, array $disallowed, array &$wizardItems): void
     {
         foreach ($wizardItems as $key => $wizardItem) {
             if (empty($wizardItem['header'])) {
+                $values = $this->getWizardItemDefaultValues($wizardItem);
                 if (
                     (
                         !empty($allowed['CType'])
-                        && !isset($allowed['CType'][$wizardItem['tt_content_defValues']['CType']])
+                        && !isset($allowed['CType'][$values['CType'] ?? null])
                         && !isset($allowed['CType']['*'])
                     ) || (
                         !empty($disallowed) && (
-                            isset($disallowed['CType'][$wizardItem['tt_content_defValues']['CType']])
+                            isset($disallowed['CType'][$values['CType'] ?? null])
                             || isset($disallowed['CType']['*'])
                         )
                     ) || (
-                        isset($wizardItem['tt_content_defValues']['list_type'])
+                        isset($values['list_type'])
                         && !empty($allowed['list_type'])
-                        && !isset($allowed['list_type'][$wizardItem['tt_content_defValues']['list_type']])
+                        && !isset($allowed['list_type'][$values['list_type']])
                         && !isset($allowed['list_type']['*'])
                     ) || (
-                        isset($wizardItem['tt_content_defValues']['list_type'])
+                        isset($values['list_type'])
                         && !empty($disallowed) && (
-                            isset($disallowed['list_type'][$wizardItem['tt_content_defValues']['list_type']])
+                            isset($disallowed['list_type'][$values['list_type']])
                             || isset($disallowed['list_type']['*'])
                         )
                     )
@@ -346,31 +364,44 @@ class ModifyNewContentElementWizardItemsListener
      * @param int $container
      * @param int $column
      */
-    public function addGridValuesToWizardItems(array &$wizardItems, int $container, int $column)
+    public function addGridValuesToWizardItems(array &$wizardItems, int $container, int $column): void
     {
         foreach ($wizardItems as $key => $wizardItem) {
-            if (!isset($wizardItem['params'])) {
-                $wizardItems[$key]['params'] = '';
-            }
+            $values = $this->getWizardItemDefaultValues($wizardItem);
+            $changed = false;
+
             if (empty($wizardItem['header'])) {
                 if ($container !== 0) {
-                    if (!isset($wizardItem['tt_content_defValues'])) {
-                        $wizardItems[$key]['tt_content_defValues'] = [];
-                    }
-                    $wizardItems[$key]['tt_content_defValues']['tx_gridelements_container'] = $container;
-                    $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_container]=' . $container;
+                    $values['tx_gridelements_container'] = $container;
                 }
-                $wizardItems[$key]['tt_content_defValues']['tx_gridelements_columns'] = $column;
-                $wizardItems[$key]['params'] .= '&defVals[tt_content][tx_gridelements_columns]=' . $column;
+                $values['tx_gridelements_columns'] = $column;
+                $changed = true;
             }
-            if (isset($wizardItem['tt_content_defValues']['CType']) && $wizardItem['tt_content_defValues']['CType'] === 'table') {
-                $wizardItems[$key]['tt_content_defValues']['bodytext'] = '';
-                $wizardItems[$key]['params'] .= '&defVals[tt_content][bodytext]=';
+            if (($values['CType'] ?? null) === 'table') {
+                $values['bodytext'] = '';
+                $changed = true;
             }
-            if (empty($wizardItems[$key]['params'])) {
-                unset($wizardItems[$key]['params']);
+            if ($changed) {
+                $this->setWizardItemDefaultValues($wizardItems, $key, $values);
             }
         }
+    }
+
+    /**
+     * TYPO3 v12's NewContentElementController reads wizard item default values from
+     * 'tt_content_defValues', while TYPO3 v13's reads 'defaultValues'. Wizard items built
+     * by this listener (and by core, depending on which version is running) may carry
+     * either key, so read/write both to stay compatible with both major versions.
+     */
+    private function getWizardItemDefaultValues(array $wizardItem): array
+    {
+        return (array)($wizardItem['defaultValues'] ?? $wizardItem['tt_content_defValues'] ?? []);
+    }
+
+    private function setWizardItemDefaultValues(array &$wizardItems, string|int $key, array $values): void
+    {
+        $wizardItems[$key]['defaultValues'] = $values;
+        $wizardItems[$key]['tt_content_defValues'] = $values;
     }
 
     /**
@@ -379,7 +410,7 @@ class ModifyNewContentElementWizardItemsListener
      * @param array $gridItems
      * @param array $wizardItems
      */
-    public function addGridItemsToWizard(array &$gridItems, array &$wizardItems)
+    public function addGridItemsToWizard(array $gridItems, array &$wizardItems): void
     {
         if (empty($gridItems)) {
             return;
@@ -438,29 +469,22 @@ class ModifyNewContentElementWizardItemsListener
                 }
             }
 
-            // Traverse defVals
-            $defVals = '';
-
-            if (!empty($item['tt_content_defValues'])) {
-                foreach ($item['tt_content_defValues'] as $field => $value) {
-                    $defVals .= '&defVals[tt_content][' . $field . ']=' . $value;
-                }
+            // Traverse default values
+            $defaultValues = [
+                'CType' => 'gridelements_pi1',
+                'tx_gridelements_backend_layout' => $item['uid'],
+                'isTopLevelLayout' => $item['tll'] ?? '',
+                'largeIconImage' => $largeIcon ?? ''
+            ];
+            if (!empty($item['defaultValues'])) {
+                $defaultValues = array_merge($defaultValues, $item['defaultValues']);
             }
-
             $itemIdentifier = $item['alias'] ?? $item['uid'];
             $wizardItems['gridelements_' . $itemIdentifier] = [
                 'title' => $item['title'] ?? '',
                 'description' => $item['description'] ?? '',
-                'params' => ($largeIcon ? '&largeIconImage=' . $largeIcon : '')
-                    . '&defVals[tt_content][CType]=gridelements_pi1' . $defVals . '&defVals[tt_content][tx_gridelements_backend_layout]=' . $item['uid']
-                    . ($item['tll'] ? '&isTopLevelLayout' : ''),
-                'tt_content_defValues' => array_replace(
-                    is_array($item['tt_content_defValues']) ? $item['tt_content_defValues'] : [],
-                    [
-                        'CType' => 'gridelements_pi1',
-                        'tx_gridelements_backend_layout' => $item['uid'],
-                    ]
-                ),
+                'defaultValues' => $defaultValues,
+                'tt_content_defValues' => $defaultValues,
             ];
             $icon = '';
             if (!empty($item['iconIdentifier'])) {

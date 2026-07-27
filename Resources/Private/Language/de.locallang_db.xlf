@@ -247,6 +247,14 @@
 				<source>Moving the current element into the target container is not allowed.</source>
 				<target>Das Verschieben des aktuellen Elements in den Zielcontainer ist nicht erlaubt.</target>
 			</trans-unit>
+			<trans-unit id="tx_gridelements_cannot_create_container_cycle" resname="tx_gridelements_cannot_create_container_cycle">
+				<source>This action would make the container its own (direct or indirect) container and is not allowed.</source>
+				<target>Diese Aktion würde den Container zu seinem eigenen (direkten oder indirekten) Container machen und ist nicht erlaubt.</target>
+			</trans-unit>
+			<trans-unit id="tx_gridelements_cannot_reference_ancestor_container" resname="tx_gridelements_cannot_reference_ancestor_container">
+				<source>A shortcut cannot reference one of its own ancestor containers, since this would create an infinite rendering loop.</source>
+				<target>Ein Shortcut darf nicht auf einen seiner eigenen übergeordneten Container verweisen, da dies eine Endlosschleife beim Rendern erzeugen würde.</target>
+			</trans-unit>
 			<trans-unit id="editShownColumns" resname="editShownColumns">
 				<source>Edit shown columns</source>
 				<target>Angezeigte Spalten bearbeiten</target>

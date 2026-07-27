@@ -1,0 +1,5 @@
+tt_content,,,,,,,,,
+,uid,pid,CType,header,tx_gridelements_container,tx_gridelements_columns,sys_language_uid,deleted,hidden
+,1,1,gridelements_pi1,Top Container,0,0,0,0,0
+,2,1,gridelements_pi1,Child Container,1,0,0,0,0
+,3,1,gridelements_pi1,Grandchild Container,2,0,0,0,0

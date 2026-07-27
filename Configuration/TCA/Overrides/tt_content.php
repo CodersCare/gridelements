@@ -110,7 +110,22 @@ $GLOBALS['TCA']['tt_content']['columns']['colPos']['onChange'] = 'reload';
 $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['itemsProcFunc'] = \GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\CTypeList::class . '->itemsProcFunc';
 $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['itemsProcFunc'] = \GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\ListTypeList::class . '->itemsProcFunc';
 $GLOBALS['TCA']['tt_content']['columns']['sys_language_uid']['config']['itemsProcFunc'] = \GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\SysLanguageUidList::class . '->itemsProcFunc';
-$GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds']['*,gridelements_pi1'] = '';
+$GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config']['ds']['*,gridelements_pi1'] = '
+<T3DataStructure>
+<meta type="array">
+	<langDisable>1</langDisable>
+</meta>
+<ROOT type="array">
+	<el type="array">
+		<field_content type="array">
+			<config type="array">
+				<type>none</type>
+			</config>
+		</field_content>
+	</el>
+</ROOT>
+</T3DataStructure>
+';
 $GLOBALS['TCA']['tt_content']['columns']['records']['config']['allowed'] .= ',pages';
 
 $GLOBALS['TCA']['tt_content']['types']['gridelements_pi1']['showitem'] = '

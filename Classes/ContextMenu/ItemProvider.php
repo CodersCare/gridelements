@@ -19,6 +19,7 @@ namespace GridElementsTeam\Gridelements\ContextMenu;
 
 use TYPO3\CMS\Backend\ContextMenu\ItemProviders\ProviderInterface;
 use TYPO3\CMS\Backend\ContextMenu\ItemProviders\RecordProvider;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -37,6 +38,9 @@ class ItemProvider extends RecordProvider implements ProviderInterface
     /**
      * @param array $items
      * @return array
+     * @throws RouteNotFoundException
+     * @throws RouteNotFoundException
+     * @throws RouteNotFoundException
      */
     public function addItems(array $items): array
     {
@@ -58,6 +62,7 @@ class ItemProvider extends RecordProvider implements ProviderInterface
     /**
      * @param string $itemName
      * @return array
+     * @throws RouteNotFoundException
      */
     protected function getAdditionalAttributes(string $itemName): array
     {
@@ -121,8 +126,7 @@ class ItemProvider extends RecordProvider implements ProviderInterface
                 $canRender = $this->canBePastedAfter() && $this->clipboard->currentMode() === 'copy' && $this->backendUser->checkAuthMode(
                     'tt_content',
                     'CType',
-                    'shortcut',
-                    $GLOBALS['TYPO3_CONF_VARS']['BE']['explicitADmode'] ?? ''
+                    'shortcut'
                 );
             }
         }

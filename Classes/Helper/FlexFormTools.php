@@ -38,7 +38,7 @@ class FlexFormTools
      * @param string $sheet Sheet pointer, eg. "sDEF"
      * @param string $language Language pointer, eg. "lDEF"
      * @param string $value Value pointer, eg. "vDEF"
-     * @return string The content.
+     * @return array|string The content.
      */
     public function getFlexFormValue(
         array $T3FlexForm_array,
@@ -46,10 +46,10 @@ class FlexFormTools
         string $sheet = 'sDEF',
         string $language = 'lDEF',
         string $value = 'vDEF'
-    ) {
-        $sheetArray = is_array($T3FlexForm_array) ? $T3FlexForm_array['data'][$sheet][$language] : '';
+    ): array|string {
+        $sheetArray = !empty($T3FlexForm_array) ? $T3FlexForm_array['data'][$sheet][$language] : '';
         if (is_array($sheetArray)) {
-            return $this->getFlexFormValueFromSheetArray($sheetArray, explode('/', $fieldName), $value);
+            return $this->getFlexFormValueFromSheetArray($sheetArray, explode('/', $fieldName), $value) ?? '';
         }
         return '';
     }
@@ -63,10 +63,10 @@ class FlexFormTools
      * @return mixed The value, typ. string.
      * @see pi_getFlexFormValue()
      */
-    public function getFlexFormValueFromSheetArray(array $sheetArray, array $fieldNameArr, string $value)
+    public function getFlexFormValueFromSheetArray(array $sheetArray, array $fieldNameArr, string $value): mixed
     {
         $tempArr = $sheetArray;
-        foreach ($fieldNameArr as $k => $v) {
+        foreach ($fieldNameArr as $v) {
             $checkedValue = MathUtility::canBeInterpretedAsInteger($v);
             if ($checkedValue) {
                 if (is_array($tempArr)) {
@@ -80,7 +80,7 @@ class FlexFormTools
                     }
                 }
             } else {
-                $tempArr = $tempArr[$v];
+                $tempArr = $tempArr[$v] ?? null;
             }
         }
         if (is_array($tempArr)) {
@@ -107,7 +107,7 @@ class FlexFormTools
         foreach ($dataArr as $k => $el) {
             if (is_array($el) && isset($el['el']) && is_array($el['el'])) {
                 $out[$k] = $this->getFlexformSectionsRecursively($el['el']);
-            } elseif (is_array($el) && isset($el['data']) && isset($el['data']['el']) && is_array($el['data']['el'])) {
+            } elseif (isset($el['data']['el']) && is_array($el) && is_array($el['data']['el'])) {
                 $out[] = $this->getFlexformSectionsRecursively($el['data']['el']);
             } elseif (isset($el[$valueKey])) {
                 $out[$k] = $el[$valueKey];

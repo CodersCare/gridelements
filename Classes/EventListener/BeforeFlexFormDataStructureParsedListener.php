@@ -12,7 +12,7 @@ class BeforeFlexFormDataStructureParsedListener
     /**
      * @param BeforeFlexFormDataStructureParsedEvent $event
      */
-    public function __invoke(BeforeFlexFormDataStructureParsedEvent $event)
+    public function __invoke(BeforeFlexFormDataStructureParsedEvent $event): void
     {
         $identifier = $event->getIdentifier();
 

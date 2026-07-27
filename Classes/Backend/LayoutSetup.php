@@ -96,7 +96,7 @@ class LayoutSetup
     public function init(int $pageId, array $typoScriptSetup = []): LayoutSetup
     {
         $this->setLanguageService($GLOBALS['LANG'] ?? null);
-        $pageId = (strpos((string)$pageId, 'NEW') === 0) ? 0 : $pageId;
+        $pageId = (str_starts_with((string)$pageId, 'NEW')) ? 0 : $pageId;
         if ($pageId < 0) {
             $pageId = GridElementsHelper::getInstance()->getPidFromUid($pageId);
         }
@@ -126,7 +126,11 @@ class LayoutSetup
     {
         // Load page TSconfig.
         if (($GLOBALS['TYPO3_REQUEST'] ?? null) && ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
-            $pageTSconfig = $GLOBALS['TSFE']->getPagesTSconfig();
+            if ((new Typo3Version())->getMajorVersion() <= 12) {
+                $pageTSconfig = $GLOBALS['TSFE']->getPagesTSconfig();
+            } else {
+                $pageTSconfig = GridElementsHelper::getPageTSconfig($GLOBALS['TYPO3_REQUEST']);
+            }
         } else {
             $pageTSconfig = BackendUtility::getPagesTSconfig($pageId);
         }
@@ -196,12 +200,12 @@ class LayoutSetup
             ->select('*')
             ->from('tx_gridelements_backend_layout')
             ->where(
-                $queryBuilder->expr()->orX(
-                    $queryBuilder->expr()->andX(
+                $queryBuilder->expr()->or(
+                    $queryBuilder->expr()->and(
                         $queryBuilder->expr()->comparison($pageTSconfigId, '=', 0),
                         $queryBuilder->expr()->comparison($storagePid, '=', 0)
                     ),
-                    $queryBuilder->expr()->orX(
+                    $queryBuilder->expr()->or(
                         $queryBuilder->expr()->eq(
                             'pid',
                             $queryBuilder->createNamedParameter((int)$pageTSconfigId, Connection::PARAM_INT)
@@ -211,7 +215,7 @@ class LayoutSetup
                             $queryBuilder->createNamedParameter($storagePid, Connection::PARAM_INT)
                         )
                     ),
-                    $queryBuilder->expr()->andX(
+                    $queryBuilder->expr()->and(
                         $queryBuilder->expr()->comparison($pageTSconfigId, '=', 0),
                         $queryBuilder->expr()->eq(
                             'pid',
@@ -222,7 +226,7 @@ class LayoutSetup
             )
             ->orderBy('sorting', 'ASC');
 
-        $layoutItems = $layoutQuery->execute()->fetchAll();
+        $layoutItems = $layoutQuery->executeQuery()->fetchAllAssociative();
 
         $gridLayoutRecords = [];
 
@@ -602,12 +606,7 @@ class LayoutSetup
      */
     public function getLayoutSetup(string $layoutId = ''): array
     {
-        // Continue only if setup for given layout ID found.
-        if (isset($this->layoutSetup[$layoutId])) {
-            return $this->layoutSetup[$layoutId];
-        }
-
-        return $this->layoutSetup;
+        return $this->layoutSetup[$layoutId] ?? $this->layoutSetup;
     }
 
     /**
@@ -691,7 +690,11 @@ class LayoutSetup
                 'icon' => [$item['icon']],
                 'iconIdentifier' => $item['iconIdentifier'] ?? '',
                 'tll' => $item['top_level_layout'] ?? '',
-                'tt_content_defValues' => $item['tt_content_defValues.'] ?? '',
+                'defaultValues' => array_replace_recursive(
+                    $item['tt_content_defValues'] ?? [],
+                    $item['tt_content_defValues.'] ?? [],
+                    $item['defaultValues'] ?? []
+                ),
             ];
         }
 
@@ -750,7 +753,7 @@ class LayoutSetup
      *
      * @param LanguageService|null $languageService
      */
-    public function setLanguageService(LanguageService $languageService = null): void
+    public function setLanguageService(?LanguageService $languageService = null): void
     {
         if ($languageService instanceof LanguageService) {
             $this->languageService = $languageService;

@@ -1,0 +1,200 @@
+/*
+ * This file is part of the TYPO3 CMS project.
+ *
+ * It is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, either version 2
+ * of the License, or any later version.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE.txt file that was distributed with this source code.
+ *
+ * The TYPO3 project - inspiring people to share!
+ */
+
+#gridelements-drag-in-wizard,
+#gridelements-drag-in-wizard-clone {
+    --dragwizard-bg: var(--typo3-light-bg, var(--typo3-component-bg));
+    --dragwizard-color: var(--typo3-light-color, var(--typo3-component-color));
+    --dragwizard-border-color: var(--typo3-light-border-color, var(--typo3-component-border-color));
+    --dragwizard-hover-bg: var(--typo3-light-hover-bg, var(--typo3-component-hover-bg));
+    --dragwizard-hover-color: var(--typo3-light-hover-color, var(--typo3-component-color));
+    --dragwizard-secondary-color: var(--typo3-light-secondary-color, var(--typo3-component-color));
+}
+
+#gridelements-drag-in-wizard {
+    position: fixed;
+    top: 33px;
+    right: 205px;
+    z-index: 20000;
+    box-sizing: border-box;
+    max-width: 60vw;
+    background: var(--dragwizard-bg);
+    color: var(--dragwizard-color);
+    border: var(--typo3-component-border-width) solid var(--dragwizard-border-color);
+    border-radius: 0 0 var(--typo3-component-border-radius) var(--typo3-component-border-radius);
+    box-shadow: var(--typo3-component-box-shadow-flyout, var(--typo3-component-box-shadow-strong));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+
+#gridelements-drag-in-wizard img,
+#gridelements-drag-in-wizard svg {
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+#gridelements-drag-in-wizard.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.drag-in-wizard-tabs {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-bottom: var(--typo3-component-border-width) solid var(--dragwizard-border-color);
+    background: var(--typo3-surface-container-base, #ededed);
+}
+
+.drag-in-wizard-tab {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    color: var(--typo3-text-color-variant, var(--dragwizard-color));
+    cursor: pointer;
+    border: none;
+    border-right: var(--typo3-component-border-width) solid var(--dragwizard-border-color);
+    border-bottom: 2px solid transparent;
+    box-sizing: border-box;
+    background: transparent;
+    white-space: nowrap;
+    transition: background 0.1s, color 0.1s, border-bottom-color 0.1s;
+}
+
+.drag-in-wizard-tab:last-child {
+    border-right: none;
+}
+
+.drag-in-wizard-tab:hover {
+    background: var(--typo3-surface-container-high, #e0e0e0);
+    color: var(--dragwizard-hover-color);
+}
+
+.drag-in-wizard-tab.active {
+    background: var(--dragwizard-bg);
+    color: var(--typo3-text-color-base, var(--dragwizard-color));
+    border-bottom-color: var(--dragwizard-bg);
+    margin-bottom: -1px;
+}
+
+.drag-in-wizard-panels {
+    padding: 5px 10px 5px 7px;
+}
+
+.drag-in-wizard-panel {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 4px 6px;
+}
+
+.gridelements-drag-in-wizard-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    cursor: grab;
+    border-radius: 3px;
+    transition: background 0.1s;
+}
+
+.gridelements-drag-in-wizard-item:hover {
+    background: var(--dragwizard-hover-bg);
+}
+
+.drag-in-wizard-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.drag-in-wizard-item-icon svg,
+.drag-in-wizard-item-icon img {
+    width: 32px;
+    height: 32px;
+    display: block;
+}
+
+.drag-in-wizard-info {
+    display: none;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 10px 6px;
+    border-top: var(--typo3-component-border-width) solid var(--dragwizard-border-color);
+    background: var(--typo3-surface-container-base, #ededed);
+    border-radius: 0 0 var(--typo3-component-border-radius) var(--typo3-component-border-radius);
+    overflow: hidden;
+}
+
+.drag-in-wizard-info.visible {
+    display: block;
+}
+
+#gridelements-drag-in-wizard.dragged .drag-in-wizard-info {
+    display: none !important;
+}
+
+.drag-in-wizard-info-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--typo3-text-color-base, var(--dragwizard-color));
+    line-height: 1.3;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.drag-in-wizard-info-desc {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--typo3-text-color-secondary, var(--dragwizard-secondary-color));
+    line-height: 1.3;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+#gridelements-drag-in-wizard-clone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dragwizard-bg);
+    border: 2px solid var(--typo3-state-primary-border-color, #0078d4);
+    border-radius: 3px;
+    padding: 3px;
+    box-shadow: var(--typo3-component-box-shadow-strong);
+    width: 38px;
+    height: 38px;
+    cursor: grabbing;
+}
+
+#gridelements-drag-in-wizard-clone .drag-in-wizard-item-icon {
+    width: 32px;
+    height: 32px;
+}
+
+#gridelements-drag-in-wizard-clone .drag-in-wizard-item-icon svg,
+#gridelements-drag-in-wizard-clone .drag-in-wizard-item-icon img {
+    width: 32px;
+    height: 32px;
+}
