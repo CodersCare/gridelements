@@ -10,7 +10,7 @@
 
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Grid Elements',
-    'description' => 'Be part of the future of TYPO3! Support Gridelements now and unlock exclusive early access to Version 13! The well-established Gridelements Version 12 elevates TYPO3 by bringing grid-based layouts to content elements, with powerful features like advanced drag & drop and real references. Supercharge your backend workflow and make daily tasks easier. Join us in creating the next exciting version: https://coders.care/for/crowdfunding/gridelements',
+    'description' => 'Grid-based layouts for TYPO3 content elements - nested grids, real references, advanced drag & drop, a drag-in wizard, granular permissions. The original grid solution for TYPO3 and still the benchmark for power users and enterprise CMS features. v13 for TYPO3 12/13: free in the TER. v14 for TYPO3 13/14: via Priority Access.',
     'category' => 'be',
     'version' => '13.0.0',
     'state' => 'stable',
@@ -18,7 +18,7 @@ $EM_CONF[$_EXTKEY] = [
     'author_email' => 'info@cybercraft.de',
     'constraints' => [
         'depends' => [
-            'typo3' => '12.4.1-13.4.99',
+            'typo3' => '12.4.0-13.4.99',
         ],
         'conflicts' => [
             'templavoila' => '',

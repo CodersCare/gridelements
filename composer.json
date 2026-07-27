@@ -1,6 +1,6 @@
 {
 	"name": "gridelementsteam/gridelements",
-	"description": "Be part of the future of TYPO3! Support Gridelements now and unlock exclusive early access to Version 14! The well-established Gridelements Version 13 elevates TYPO3 by bringing grid-based layouts to content elements, with powerful features like advanced drag & drop, a drag in wizard and real references. Supercharge your backend workflow and make daily tasks easier. Join us in creating the next exciting version: https://coders.care/for/crowdfunding/gridelements",
+	"description": "Grid-based layouts for TYPO3 content elements - nested grids, real references, advanced drag & drop, a drag-in wizard, granular permissions. The original grid solution for TYPO3 and still the benchmark for power users and enterprise CMS features. v13 for TYPO3 12/13: free in the TER. v14 for TYPO3 13/14: via Priority Access.",
 	"license": "GPL-2.0-or-later",
 	"type": "typo3-cms-extension",
 	"version": "13.0.0",
