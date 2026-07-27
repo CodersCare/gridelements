@@ -10,7 +10,7 @@
 
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Grid Elements',
-    'description' => 'Grid-based layouts for TYPO3 content elements - nested grids, real references, advanced drag & drop, a drag-in wizard, granular permissions. The original grid solution for TYPO3 and still the benchmark for power users and enterprise CMS features. v13 for TYPO3 12/13: free in the TER. v14 for TYPO3 13/14: via Priority Access.',
+    'description' => 'Grid-based layouts for TYPO3 content elements - nested grids, real references, advanced drag & drop, a drag-in wizard, granular permissions. The original grid solution for TYPO3, benchmark for power users and enterprise CMS. v13 (TYPO3 12/13): free in TER. v14 (TYPO3 13/14): Priority Access.',
     'category' => 'be',
     'version' => '13.0.0',
     'state' => 'stable',
