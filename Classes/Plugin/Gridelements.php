@@ -436,7 +436,10 @@ class Gridelements extends ContentObjectRenderer implements LoggerAwareInterface
      */
     public function getTSFE(): TypoScriptFrontendController
     {
-        return $GLOBALS['TSFE'];
+        if ((new Typo3Version())->getMajorVersion() < 13) {
+            return $GLOBALS['TSFE'];
+        }
+        return $this->getRequest()->getAttribute('frontend.controller');
     }
 
     /**
