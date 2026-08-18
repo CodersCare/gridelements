@@ -1,0 +1,24 @@
+backend_layout,,,,
+,uid,pid,title,deleted,hidden,config
+,1,1,"CTG006 Page Layout",0,0,"backend_layout {
+	rows {
+		1 {
+			columns {
+				1 {
+					name = Restricted
+					colPos = 500
+					allowed.CType = header
+				}
+				2 {
+					name = Limited
+					colPos = 501
+					maxitems = 1
+				}
+			}
+		}
+	}
+}"
+
+pages,,,,,,,
+,uid,pid,title,deleted,hidden,backend_layout,backend_layout_next_level
+,1,0,Home,0,0,1,
