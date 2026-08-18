@@ -376,11 +376,30 @@ class PreProcessFieldArray extends AbstractDataHandler
      *
      * @param string $labelKey
      */
+    /**
+     * TYPO3\CMS\Core\Type\ContextualFeedbackSeverity only exists from TYPO3 12 onward;
+     * TYPO3 11.5's FlashMessage constructor still expects the plain int severity constant
+     * from AbstractMessage. Both are accepted positionally by FlashMessage's constructor
+     * on their respective core version, so resolving the right value at runtime (rather
+     * than a hard ContextualFeedbackSeverity::ERROR reference) keeps this class usable
+     * on both.
+     *
+     * @return \TYPO3\CMS\Core\Type\ContextualFeedbackSeverity|int
+     */
+    private function getErrorSeverity()
+    {
+        if (class_exists(ContextualFeedbackSeverity::class)) {
+            return ContextualFeedbackSeverity::ERROR;
+        }
+
+        return \TYPO3\CMS\Core\Messaging\AbstractMessage::ERROR;
+    }
+
     public function flashContainerError(string $labelKey): void
     {
         $message = LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:' . $labelKey);
 
-        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', ContextualFeedbackSeverity::ERROR, true);
+        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', $this->getErrorSeverity(), true);
         $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
         $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
         $defaultFlashMessageQueue->enqueue($flashMessage);

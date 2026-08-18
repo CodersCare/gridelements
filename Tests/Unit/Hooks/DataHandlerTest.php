@@ -124,6 +124,52 @@ class DataHandlerTest extends UnitTestCase
         self::assertFalse($commandIsProcessed);
     }
 
+    // --- resolveRestrictedFields ---
+
+    private function callResolveRestrictedFields(array $layout, int $column): array
+    {
+        $method = new \ReflectionMethod(DataHandler::class, 'resolveRestrictedFields');
+        $method->setAccessible(true);
+
+        return $method->invoke($this->hook, $layout, $column);
+    }
+
+    #[Test]
+    public function resolveRestrictedFieldsIncludesTheThreeBaseFieldsWithNoConfig(): void
+    {
+        self::assertSame(
+            ['CType', 'list_type', 'tx_gridelements_backend_layout'],
+            $this->callResolveRestrictedFields([], 300)
+        );
+    }
+
+    #[Test]
+    public function resolveRestrictedFieldsAddsCustomFieldsConfiguredOnTheColumn(): void
+    {
+        $layout = [
+            'allowed' => [300 => ['my_custom_field' => ['foo' => 0]]],
+            'disallowed' => [300 => ['another_field' => ['bar' => 0]]],
+        ];
+
+        self::assertSame(
+            ['CType', 'list_type', 'tx_gridelements_backend_layout', 'my_custom_field', 'another_field'],
+            $this->callResolveRestrictedFields($layout, 300)
+        );
+    }
+
+    #[Test]
+    public function resolveRestrictedFieldsIgnoresConfigForOtherColumns(): void
+    {
+        $layout = [
+            'allowed' => [301 => ['my_custom_field' => ['foo' => 0]]],
+        ];
+
+        self::assertSame(
+            ['CType', 'list_type', 'tx_gridelements_backend_layout'],
+            $this->callResolveRestrictedFields($layout, 300)
+        );
+    }
+
     // --- processCmdmap_beforeStart early returns ---
 
     #[Test]

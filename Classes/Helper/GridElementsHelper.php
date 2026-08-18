@@ -140,6 +140,13 @@ class GridElementsHelper implements SingletonInterface
                 if (!empty($allowedFields['tx_gridelements_backend_layout']) && !$csvValues) {
                     $allowedFields['tx_gridelements_backend_layout'] = array_flip(GeneralUtility::trimExplode(',', $allowedFields['tx_gridelements_backend_layout']));
                 }
+                if (!$csvValues) {
+                    foreach ($allowedFields as $field => $value) {
+                        if (!in_array($field, ['CType', 'list_type', 'tx_gridelements_backend_layout'], true) && !empty($value) && !is_array($value)) {
+                            $allowedFields[$field] = array_flip(GeneralUtility::trimExplode(',', $value));
+                        }
+                    }
+                }
             }
         }
         if (!empty($backendLayout['disallowed']) && !$csvValues) {
@@ -152,6 +159,11 @@ class GridElementsHelper implements SingletonInterface
                 }
                 if (!empty($disallowedFields['tx_gridelements_backend_layout'])) {
                     $disallowedFields['tx_gridelements_backend_layout'] = array_flip(GeneralUtility::trimExplode(',', $disallowedFields['tx_gridelements_backend_layout']));
+                }
+                foreach ($disallowedFields as $field => $value) {
+                    if (!in_array($field, ['CType', 'list_type', 'tx_gridelements_backend_layout'], true) && !empty($value) && !is_array($value)) {
+                        $disallowedFields[$field] = array_flip(GeneralUtility::trimExplode(',', $value));
+                    }
                 }
             }
         }

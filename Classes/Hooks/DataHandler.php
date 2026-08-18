@@ -27,12 +27,15 @@ use GridElementsTeam\Gridelements\DataHandler\AfterDatabaseOperations;
 use GridElementsTeam\Gridelements\DataHandler\PreProcessFieldArray;
 use GridElementsTeam\Gridelements\DataHandler\ProcessCmdmap;
 use GridElementsTeam\Gridelements\Helper\ContainerCycleGuard;
+use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
+use GridElementsTeam\Gridelements\Helper\RestrictionGuard;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 /**
@@ -42,8 +45,32 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
  */
 class DataHandler implements SingletonInterface
 {
+    /**
+     * Fields always checked for allowed/disallowed restrictions, in addition to
+     * maxitems. Any further field a column's 'allowed'/'disallowed' configuration
+     * mentions is checked too -- see resolveRestrictedFields() -- so a project-specific
+     * field (e.g. a custom select on tt_content) works the same way content_defender's
+     * field-agnostic allowed.<field>/disallowed.<field> does, without a config-format
+     * change.
+     */
+    protected const RESTRICTED_FIELDS = ['CType', 'list_type', 'tx_gridelements_backend_layout'];
+
     public function __construct()
     {
+    }
+
+    /**
+     * @param array $layout
+     * @param int $column
+     * @return string[]
+     */
+    protected function resolveRestrictedFields(array $layout, int $column): array
+    {
+        return array_unique(array_merge(
+            self::RESTRICTED_FIELDS,
+            array_keys($layout['allowed'][$column] ?? []),
+            array_keys($layout['disallowed'][$column] ?? [])
+        ));
     }
 
     /**
@@ -70,6 +97,95 @@ class DataHandler implements SingletonInterface
             /** @var PreProcessFieldArray $hook */
             $hook = GeneralUtility::makeInstance(PreProcessFieldArray::class);
             $hook->execute_preProcessFieldArray($fieldArray, $table, $id, $parentObj);
+        }
+    }
+
+    /**
+     * Rejects a datamap save for tt_content that violates the allowed/disallowed/maxitems
+     * restriction config of the target column -- either a grid container's own column
+     * (tx_gridelements_container > 0) or the target page's own backend-layout colPos.
+     * This covers the New Content Element wizard and direct FormEngine edits, which are
+     * otherwise only filtered by the (bypassable) backend-form item lists in
+     * Classes/Backend/ItemsProcFuncs -- see processCmdmap_beforeStart() for the equivalent
+     * check on copy/move/paste commands.
+     *
+     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+     */
+    public function processDatamap_beforeStart(\TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler)
+    {
+        $datamap = $dataHandler->datamap;
+        if (empty($datamap['tt_content']) || $dataHandler->bypassAccessCheckForRecords || $dataHandler->isImporting) {
+            return;
+        }
+
+        $pendingCounts = [];
+
+        foreach ($datamap['tt_content'] as $id => $incomingFieldArray) {
+            $isNew = !MathUtility::canBeInterpretedAsInteger($id);
+            $existingRecord = $isNew ? [] : (BackendUtility::getRecord('tt_content', (int)$id) ?: []);
+            $record = array_merge($existingRecord, $incomingFieldArray);
+
+            $pid = (int)($record['pid'] ?? 0);
+            if ($pid < 0) {
+                $previousRecord = BackendUtility::getRecord('tt_content', abs($pid), 'pid');
+                $pid = (int)($previousRecord['pid'] ?? 0);
+            }
+            if ($pid <= 0) {
+                continue;
+            }
+
+            $container = (int)($record['tx_gridelements_container'] ?? 0);
+            $colPos = (int)($record['colPos'] ?? 0);
+            $languageUid = (int)($record['sys_language_uid'] ?? 0);
+
+            if ($container > 0) {
+                $containerRecord = BackendUtility::getRecord('tt_content', $container, 'tx_gridelements_backend_layout');
+                if (empty($containerRecord)) {
+                    continue;
+                }
+                $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($pid);
+                $layout = $layoutSetup->getLayoutSetup($containerRecord['tx_gridelements_backend_layout']);
+                $column = (int)($record['tx_gridelements_columns'] ?? 0);
+                $scopeKey = 'c' . $container . '_' . $column . '_' . $languageUid;
+            } else {
+                $layout = GridElementsHelper::getSelectedBackendLayout($pid);
+                $column = $colPos;
+                $scopeKey = 'p' . $pid . '_' . $colPos . '_' . $languageUid;
+            }
+
+            if (empty($layout)) {
+                continue;
+            }
+
+            $violatedField = null;
+            foreach ($this->resolveRestrictedFields($layout, $column) as $field) {
+                if (empty($record[$field])) {
+                    continue;
+                }
+                $allowed = $layout['allowed'][$column][$field] ?? [];
+                $disallowed = $layout['disallowed'][$column][$field] ?? [];
+                if (RestrictionGuard::isValueDisallowed($allowed, $disallowed, (string)$record[$field])) {
+                    $violatedField = $field;
+                    break;
+                }
+            }
+
+            if ($violatedField !== null) {
+                $this->flashFieldValueNotAllowedError($dataHandler, $id, $violatedField, (string)$record[$violatedField], 'datamap');
+                continue;
+            }
+
+            $maxItems = isset($layout['maxitems'][$column]) ? (int)$layout['maxitems'][$column] : null;
+            if ($maxItems !== null && $maxItems > 0) {
+                $excludeUid = $isNew ? 0 : (int)$id;
+                $existingCount = RestrictionGuard::countExistingChildren($pid, $container, $colPos, $column, $languageUid, $excludeUid);
+                $existingCount += $pendingCounts[$scopeKey] ?? 0;
+                if (RestrictionGuard::isMaxItemsExceeded($maxItems, $existingCount)) {
+                    $this->flashMaxItemsReachedError($dataHandler, $id, $maxItems, 'datamap');
+                    continue;
+                }
+                $pendingCounts[$scopeKey] = ($pendingCounts[$scopeKey] ?? 0) + 1;
+            }
         }
     }
 
@@ -159,9 +275,9 @@ class DataHandler implements SingletonInterface
                     )
                 ) {
                     $pageId = (int)$value['target'];
-                    $colPos = (int)$value['update']['colPos'];
-                    $gridContainer = (int)$value['update']['tx_gridelements_container'];
-                    $gridColumn = (int)$value['update']['tx_gridelements_columns'];
+                    $colPos = (int)($value['update']['colPos'] ?? 0);
+                    $gridContainer = (int)($value['update']['tx_gridelements_container'] ?? 0);
+                    $gridColumn = (int)($value['update']['tx_gridelements_columns'] ?? 0);
                     $containerRecord = BackendUtility::getRecord('tt_content', $gridContainer);
                 } else {
                     $pageId = (int)$value;
@@ -184,6 +300,25 @@ class DataHandler implements SingletonInterface
                 }
 
                 if ($colPos !== -1 || empty($containerRecord)) {
+                    // not becoming a grid-container child -- still check the target page's
+                    // own backend-layout column restriction (mirrors the container-child
+                    // checks below, for ordinary page-level colPos placement)
+                    if ($pageId > 0 && $colPos >= 0) {
+                        $pageLayout = GridElementsHelper::getSelectedBackendLayout($pageId);
+                        if (!empty($pageLayout)) {
+                            $this->rejectIfRestrictedInColumn(
+                                $dataHandler,
+                                $id,
+                                $command,
+                                $pageLayout,
+                                $colPos,
+                                $currentRecord,
+                                $pageId,
+                                0,
+                                $colPos
+                            );
+                        }
+                    }
                     continue;
                 }
 
@@ -227,22 +362,78 @@ class DataHandler implements SingletonInterface
                 $layoutSetup = GeneralUtility::makeInstance(LayoutSetup::class)->init($pageId);
                 $layout = $layoutSetup->getLayoutSetup($containerRecord['tx_gridelements_backend_layout']);
 
-                $allowed = $layout['allowed'][$gridColumn]['CType'] ?? [];
-                $disallowed = $layout['disallowed'][$gridColumn]['CType'] ?? [];
-
-                if (empty($allowed) && empty($disallowed)) {
-                    continue;
-                }
-
-                if (
-                    !$this->isDisallowedContentElement($allowed, $disallowed, $currentRecord['CType'])
-                ) {
-                    continue;
-                }
-
-                $this->flashNotAllowedError($dataHandler, $id, $command);
+                $this->rejectIfRestrictedInColumn(
+                    $dataHandler,
+                    $id,
+                    $command,
+                    $layout,
+                    $gridColumn,
+                    $currentRecord,
+                    $pageId,
+                    $gridContainer,
+                    -1
+                );
             }
         }
+    }
+
+    /**
+     * Shared allowed/disallowed/maxitems check for both branches of processCmdmap_beforeStart()
+     * (grid-container child column and ordinary page-level colPos column). Rejects the command
+     * (unsets it from cmdmap and shows a flash message) on the first violation found.
+     *
+     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+     * @param int|string $id
+     * @param string $command
+     * @param array $layout
+     * @param int $column
+     * @param array $record
+     * @param int $pageId
+     * @param int $container
+     * @param int $colPos
+     * @return bool true if the command was rejected
+     */
+    protected function rejectIfRestrictedInColumn(
+        \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler,
+        int|string $id,
+        string $command,
+        array $layout,
+        int $column,
+        array $record,
+        int $pageId,
+        int $container,
+        int $colPos
+    ): bool {
+        foreach ($this->resolveRestrictedFields($layout, $column) as $field) {
+            if (empty($record[$field])) {
+                continue;
+            }
+            $allowed = $layout['allowed'][$column][$field] ?? [];
+            $disallowed = $layout['disallowed'][$column][$field] ?? [];
+            if (RestrictionGuard::isValueDisallowed($allowed, $disallowed, (string)$record[$field])) {
+                $this->flashNotAllowedError($dataHandler, $id, $command);
+                return true;
+            }
+        }
+
+        $maxItems = isset($layout['maxitems'][$column]) ? (int)$layout['maxitems'][$column] : null;
+        if ($maxItems !== null && $maxItems > 0) {
+            $languageUid = (int)($record['sys_language_uid'] ?? 0);
+            $existingCount = RestrictionGuard::countExistingChildren(
+                $pageId,
+                $container,
+                $colPos,
+                $column,
+                $languageUid,
+                (int)($record['uid'] ?? 0)
+            );
+            if (RestrictionGuard::isMaxItemsExceeded($maxItems, $existingCount)) {
+                $this->flashMaxItemsReachedError($dataHandler, $id, $maxItems, 'cmdmap');
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -253,17 +444,26 @@ class DataHandler implements SingletonInterface
      */
     public function isDisallowedContentElement(array $allowed, array $disallowed, string $CType): bool
     {
-        return (
-            !empty($allowed)
-            && !isset($allowed['*'])
-            && !isset($allowed[$CType])
-        ) || (
-            !empty($disallowed)
-            && (
-                isset($disallowed['*'])
-                || isset($disallowed[$CType])
-            )
-        );
+        return RestrictionGuard::isValueDisallowed($allowed, $disallowed, $CType);
+    }
+
+    /**
+     * TYPO3\CMS\Core\Type\ContextualFeedbackSeverity only exists from TYPO3 12 onward;
+     * TYPO3 11.5's FlashMessage constructor still expects the plain int severity constant
+     * from AbstractMessage. Both are accepted positionally by FlashMessage's constructor
+     * on their respective core version, so resolving the right value at runtime (rather
+     * than a hard ContextualFeedbackSeverity::ERROR reference) keeps this class usable
+     * on both.
+     *
+     * @return \TYPO3\CMS\Core\Type\ContextualFeedbackSeverity|int
+     */
+    private function getErrorSeverity()
+    {
+        if (class_exists(ContextualFeedbackSeverity::class)) {
+            return ContextualFeedbackSeverity::ERROR;
+        }
+
+        return \TYPO3\CMS\Core\Messaging\AbstractMessage::ERROR;
     }
 
     /**
@@ -278,7 +478,7 @@ class DataHandler implements SingletonInterface
 
         $message = LocalizationUtility::translate(sprintf('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_cannot_%s_into_container', $command));
 
-        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', ContextualFeedbackSeverity::ERROR, true);
+        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', $this->getErrorSeverity(), true);
         $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
         $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
         $defaultFlashMessageQueue->enqueue($flashMessage);
@@ -300,7 +500,74 @@ class DataHandler implements SingletonInterface
 
         $message = LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:' . $labelKey);
 
-        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', ContextualFeedbackSeverity::ERROR, true);
+        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', $this->getErrorSeverity(), true);
+        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+        $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
+        $defaultFlashMessageQueue->enqueue($flashMessage);
+    }
+
+    /**
+     * Aborts the current datamap/cmdmap entry and shows a flash message because $field's
+     * value is not allowed in the target column.
+     *
+     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+     * @param int|string $id
+     * @param string $field
+     * @param string $value
+     * @param string $map 'datamap' or 'cmdmap'
+     */
+    public function flashFieldValueNotAllowedError(
+        \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler,
+        int|string $id,
+        string $field,
+        string $value,
+        string $map
+    ): void {
+        if ($map === 'datamap') {
+            unset($dataHandler->datamap['tt_content'][$id]);
+        } else {
+            unset($dataHandler->cmdmap['tt_content'][$id]);
+        }
+
+        $message = sprintf(
+            LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_field_value_not_allowed_in_column'),
+            $value,
+            $field
+        );
+
+        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', $this->getErrorSeverity(), true);
+        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+        $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
+        $defaultFlashMessageQueue->enqueue($flashMessage);
+    }
+
+    /**
+     * Aborts the current datamap/cmdmap entry and shows a flash message because the target
+     * column's maxitems restriction has been reached.
+     *
+     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+     * @param int|string $id
+     * @param int $maxItems
+     * @param string $map 'datamap' or 'cmdmap'
+     */
+    public function flashMaxItemsReachedError(
+        \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler,
+        int|string $id,
+        int $maxItems,
+        string $map
+    ): void {
+        if ($map === 'datamap') {
+            unset($dataHandler->datamap['tt_content'][$id]);
+        } else {
+            unset($dataHandler->cmdmap['tt_content'][$id]);
+        }
+
+        $message = sprintf(
+            LocalizationUtility::translate('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_maxitems_reached_in_column'),
+            $maxItems
+        );
+
+        $flashMessage = GeneralUtility::makeInstance(FlashMessage::class, $message, '', $this->getErrorSeverity(), true);
         $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
         $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
         $defaultFlashMessageQueue->enqueue($flashMessage);
