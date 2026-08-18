@@ -1,0 +1,20 @@
+tx_gridelements_backend_layout,,,,,,
+,uid,pid,title,alias,sorting,deleted,hidden,config
+,1,0,"CTG006 Test Layout","ctg006_test",1,0,0,"backend_layout {
+	rows {
+		1 {
+			columns {
+				1 {
+					name = Allowed
+					colPos = 300
+					allowed.CType = header
+				}
+				2 {
+					name = Limited
+					colPos = 301
+					maxitems = 1
+				}
+			}
+		}
+	}
+}"

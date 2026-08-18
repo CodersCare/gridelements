@@ -1,0 +1,4 @@
+tt_content,,,,,,,,
+,uid,pid,CType,header,colPos,sorting,sys_language_uid,deleted,hidden
+,10,2,text,Child On Referenced Page,0,100,0,0,0
+,50,1,text,Directly Referenced Content,0,100,0,0,0

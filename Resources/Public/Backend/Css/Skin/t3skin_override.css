@@ -5,6 +5,7 @@
 }
 
 .t3-page-column {
+	position: relative;
 	max-width: initial;
 }
 
@@ -95,7 +96,8 @@
 /* A reference/shortcut preview renders a nested container's real grid markup
    read-only - its "new content" buttons and drop zones must not be interactive. */
 .reference .t3js-page-new-ce,
-.reference .t3js-page-ce-dropzone-available {
+.reference .t3js-page-ce-dropzone-available,
+.reference .t3-grid-cell-number-of-items {
 	display: none !important;
 }
 
@@ -282,7 +284,8 @@
 .t3-grid-cell-number-of-items {
 	display: block;
 	float: right;
-	right: 3rem;
+	top: 45px;
+	right: 15px;
 	height: 25px;
 	border: 1px solid #ccc;
 	border-radius: 2px;

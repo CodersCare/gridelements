@@ -1,0 +1,6 @@
+tt_content,,,,,,,,,,
+,uid,pid,CType,header,tx_gridelements_backend_layout,tx_gridelements_container,tx_gridelements_columns,colPos,sys_language_uid,deleted,hidden
+,1,1,gridelements_pi1,Container,ctg006_test,0,0,-1,0,0,0
+,2,1,text,Existing Child In Limited Column,,1,301,-1,0,0,0
+,3,1,header,Free Header Element,,0,0,0,0,0,0
+,4,1,text,Free Text Element,,0,0,0,0,0,0

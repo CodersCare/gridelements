@@ -206,7 +206,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
             return;
         }
 
-        $queryBuilder = $this->ttContentQueryBuilder;
+        $queryBuilder = clone $this->ttContentQueryBuilder;
         $queryBuilder->resetRestrictions();
 
         $items = $queryBuilder
@@ -281,7 +281,7 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
     {
         $shortcutItem = str_replace('tt_content_', '', $shortcutItem);
         if ((int)$shortcutItem !== $parentUid) {
-            $queryBuilder = $this->ttContentQueryBuilder;
+            $queryBuilder = clone $this->ttContentQueryBuilder;
             $queryBuilder->resetRestrictions();
             if ($this->showHidden) {
                 $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
