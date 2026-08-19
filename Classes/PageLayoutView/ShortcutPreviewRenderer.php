@@ -13,8 +13,12 @@ use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Backend\View\PageLayoutView;
 use TYPO3\CMS\Backend\View\PageLayoutViewDrawItemHookInterface;
 use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Information\Typo3Version;
@@ -155,22 +159,74 @@ class ShortcutPreviewRenderer extends StandardContentPreviewRenderer implements 
             $id = abs($id);
             $addCurrentPageId = true;
         }
-        $pageRepository = GeneralUtility::makeInstance(PageRepository::class);
-        if ($dontCheckEnableFields) {
-            /** @phpstan-ignore-next-line **/
-            $backupEnableFields = $pageRepository->where_hid_del;
-            /** @phpstan-ignore-next-line **/
-            $pageRepository->where_hid_del = '';
-        }
-        $result = $pageRepository->getDescendantPageIdsRecursive($id, (int)$depth, (int)$begin, [], (bool)$dontCheckEnableFields);
-        if ($dontCheckEnableFields) {
-            /** @phpstan-ignore-next-line **/
-            $pageRepository->where_hid_del = $backupEnableFields;
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            // getDescendantPageIdsRecursive() does not exist before TYPO3 12
+            $result = $this->getDescendantPageIdsRecursiveTypo3Eleven($id, (int)$depth, (int)$begin, (bool)$dontCheckEnableFields);
+        } else {
+            $pageRepository = GeneralUtility::makeInstance(PageRepository::class);
+            if ($dontCheckEnableFields) {
+                /** @phpstan-ignore-next-line **/
+                $backupEnableFields = $pageRepository->where_hid_del;
+                /** @phpstan-ignore-next-line **/
+                $pageRepository->where_hid_del = '';
+            }
+            $result = $pageRepository->getDescendantPageIdsRecursive($id, (int)$depth, (int)$begin, [], (bool)$dontCheckEnableFields);
+            if ($dontCheckEnableFields) {
+                /** @phpstan-ignore-next-line **/
+                $pageRepository->where_hid_del = $backupEnableFields;
+            }
         }
         if ($addCurrentPageId) {
             $result = array_merge([$id], $result);
         }
         return implode(',', $result);
+    }
+
+    /**
+     * TYPO3-11-native equivalent of PageRepository::getDescendantPageIdsRecursive().
+     *
+     * @return int[] descendant page uids, never including $id itself
+     */
+    protected function getDescendantPageIdsRecursiveTypo3Eleven(int $id, int $depth, int $begin, bool $dontCheckEnableFields): array
+    {
+        if (!$id || $depth <= 0) {
+            return [];
+        }
+
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
+        $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        if (!$dontCheckEnableFields) {
+            $queryBuilder->getRestrictions()
+                ->add(GeneralUtility::makeInstance(HiddenRestriction::class))
+                ->add(GeneralUtility::makeInstance(StartTimeRestriction::class))
+                ->add(GeneralUtility::makeInstance(EndTimeRestriction::class));
+        }
+
+        $rows = $queryBuilder->select('uid')
+            ->from('pages')
+            ->where(
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($id, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('sys_language_uid', 0)
+            )
+            ->orderBy('sorting')
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        $descendantPageIds = [];
+        foreach ($rows as $row) {
+            $childId = (int)$row['uid'];
+            if ($begin <= 0) {
+                $descendantPageIds[] = $childId;
+            }
+            if ($depth > 1) {
+                $descendantPageIds = array_merge(
+                    $descendantPageIds,
+                    $this->getDescendantPageIdsRecursiveTypo3Eleven($childId, $depth - 1, $begin - 1, $dontCheckEnableFields)
+                );
+            }
+        }
+
+        return $descendantPageIds;
     }
 
     /**
