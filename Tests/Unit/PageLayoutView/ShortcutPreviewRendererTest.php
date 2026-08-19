@@ -8,16 +8,29 @@ use GridElementsTeam\Gridelements\PageLayoutView\ShortcutPreviewRenderer;
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
- * Tests for ShortcutPreviewRenderer in CMS 13.
- *
+ * Covers ShortcutPreviewRenderer::getTreeList() on its TYPO3 12+ code path.
+ * TYPO3 11 uses getDescendantPageIdsRecursiveTypo3Eleven() instead, covered by
+ * Tests/Functional/PageLayoutView/ShortcutPreviewRendererTest.php.
  */
 class ShortcutPreviewRendererTest extends UnitTestCase
 {
     protected bool $resetSingletonInstances = true;
+
+    private function skipUnlessTypo3TwelvePlus(): void
+    {
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            self::markTestSkipped(
+                'getTreeList() only calls PageRepository::getDescendantPageIdsRecursive() from TYPO3 12 onward; '
+                . 'on TYPO3 11 it uses getDescendantPageIdsRecursiveTypo3Eleven() instead, covered by '
+                . 'Tests/Functional/PageLayoutView/ShortcutPreviewRendererTest.php.'
+            );
+        }
+    }
 
     private function makeRenderer(): ShortcutPreviewRenderer
     {
@@ -28,6 +41,8 @@ class ShortcutPreviewRendererTest extends UnitTestCase
     #[Test]
     public function getTreeListReturnsEmptyStringForPositiveIdWithNoDescendants(): void
     {
+        $this->skipUnlessTypo3TwelvePlus();
+
         $pageRepoStub = $this->createStub(PageRepository::class);
         $pageRepoStub->method('getDescendantPageIdsRecursive')->willReturn([]);
         GeneralUtility::addInstance(PageRepository::class, $pageRepoStub);
@@ -40,6 +55,8 @@ class ShortcutPreviewRendererTest extends UnitTestCase
     #[Test]
     public function getTreeListIncludesCurrentPageIdWhenNegativeId(): void
     {
+        $this->skipUnlessTypo3TwelvePlus();
+
         $pageRepoStub = $this->createStub(PageRepository::class);
         $pageRepoStub->method('getDescendantPageIdsRecursive')->willReturn([6, 7]);
         GeneralUtility::addInstance(PageRepository::class, $pageRepoStub);
@@ -52,6 +69,8 @@ class ShortcutPreviewRendererTest extends UnitTestCase
     #[Test]
     public function getTreeListReturnsDescendantsForPositiveId(): void
     {
+        $this->skipUnlessTypo3TwelvePlus();
+
         $pageRepoStub = $this->createStub(PageRepository::class);
         $pageRepoStub->method('getDescendantPageIdsRecursive')->willReturn([6, 7]);
         GeneralUtility::addInstance(PageRepository::class, $pageRepoStub);
@@ -77,6 +96,8 @@ class ShortcutPreviewRendererTest extends UnitTestCase
     #[Test]
     public function getTreeListPassesFalseBypassFlagByDefault(): void
     {
+        $this->skipUnlessTypo3TwelvePlus();
+
         $pageRepoMock = $this->createMock(PageRepository::class);
         $pageRepoMock->expects(self::once())
             ->method('getDescendantPageIdsRecursive')

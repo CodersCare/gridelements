@@ -6,12 +6,19 @@ namespace GridElementsTeam\Gridelements\Tests\Functional\Backend\ItemsProcFuncs;
 
 use GridElementsTeam\Gridelements\Backend\ItemsProcFuncs\ColPosList;
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 class ColPosListTest extends FunctionalTestCase
 {
     protected array $testExtensionsToLoad = ['gridelementsteam/gridelements'];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+    }
 
     #[Test]
     public function itemsProcFuncContainerBranchReturnsSingleGridElementItem(): void

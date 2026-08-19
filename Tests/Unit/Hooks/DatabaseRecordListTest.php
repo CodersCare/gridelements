@@ -7,11 +7,28 @@ namespace GridElementsTeam\Gridelements\Tests\Unit\Hooks;
 use GridElementsTeam\Gridelements\Hooks\DatabaseRecordList;
 use GridElementsTeam\Gridelements\Xclass\DatabaseRecordList as DatabaseRecordListXclass;
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
+/**
+ * Covers Hooks\DatabaseRecordList. contentCollapseIcon() type-hints the TYPO3 12+-only
+ * Xclass\DatabaseRecordList, so only its two tests are TYPO3 12+-only.
+ * See Tests/Unit/Hooks/DatabaseRecordList11Test.php for the TYPO3 11 counterpart.
+ */
 class DatabaseRecordListTest extends UnitTestCase
 {
+    private function skipUnlessTypo3TwelvePlus(): void
+    {
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            self::markTestSkipped(
+                'contentCollapseIcon() type-hints Xclass\DatabaseRecordList, which extends a core class '
+                . 'that only exists on TYPO3 12+; TYPO3 11 uses Hooks\DatabaseRecordList11 instead, '
+                . 'covered by Tests/Unit/Hooks/DatabaseRecordList11Test.php.'
+            );
+        }
+    }
+
     private function makeHook(): DatabaseRecordList
     {
         return (new \ReflectionClass(DatabaseRecordList::class))->newInstanceWithoutConstructor();
@@ -41,6 +58,8 @@ class DatabaseRecordListTest extends UnitTestCase
     #[Test]
     public function contentCollapseIconDoesNotModifyIconWhenExpandTableIsNotTtContent(): void
     {
+        $this->skipUnlessTypo3TwelvePlus();
+
         $hook = $this->makeHook();
         $parentObj = $this->createMock(DatabaseRecordListXclass::class);
         $icon = 'original-icon';
@@ -58,6 +77,8 @@ class DatabaseRecordListTest extends UnitTestCase
     #[Test]
     public function contentCollapseIconDoesNotModifyIconWhenExpandTableKeyMissing(): void
     {
+        $this->skipUnlessTypo3TwelvePlus();
+
         $hook = $this->makeHook();
         $parentObj = $this->createMock(DatabaseRecordListXclass::class);
         $icon = 'original-icon';

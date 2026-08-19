@@ -1,0 +1,7 @@
+pages,,,,,,
+,uid,pid,title,sorting,deleted,hidden
+,1,0,Root,0,0,0
+,2,1,Child A,128,0,0
+,3,1,Child B,256,0,0
+,4,3,Grandchild of B,128,0,0
+,5,1,Hidden Child,384,0,1

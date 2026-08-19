@@ -7,6 +7,7 @@ namespace GridElementsTeam\Gridelements\Tests\Functional\Backend;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use GridElementsTeam\Gridelements\Backend\TtContent;
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
@@ -73,9 +74,14 @@ class TtContentTest extends FunctionalTestCase
         ];
         $ttContent->containerItemsProcFunc($params);
 
-        // Non-grid CType → only the "/" root item is present
+        // Non-grid CType → only the "/" root item is present, associative on TYPO3 12+ and
+        // positional on TYPO3 11, matching containerItemsProcFunc()'s own Typo3Version branch.
         self::assertCount(1, $params['items']);
-        self::assertSame(0, $params['items'][0]['value']);
+        if ((new Typo3Version())->getMajorVersion() >= 12) {
+            self::assertSame(0, $params['items'][0]['value']);
+        } else {
+            self::assertSame(0, $params['items'][0][1]);
+        }
     }
 
     // --- deleteDisallowedContainers ---
