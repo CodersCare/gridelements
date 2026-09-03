@@ -68,4 +68,3 @@ configuration setting to define rules per grid element.
    :hidden:
 
    Sitemap
-   genindex

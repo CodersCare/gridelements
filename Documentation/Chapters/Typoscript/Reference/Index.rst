@@ -6,7 +6,7 @@ Reference
 .. ### BEGIN~OF~TABLE ###
 
 
-.. _typoscript:
+.. _typoscript-cobject-reference:
 
 TypoScript
 ^^^^^^^^^^

@@ -21,41 +21,29 @@ Thanks in advance for your support.
 How to support our efforts?
 ---------------------------
 
-.. |logo0| image:: ../../Images/Sponsoring/CodersCareLogo.png
-    :target: https://coders.care
-    :width: 300px
-    :align: middle
-.. |logo1| image:: ../../Images/Sponsoring/PatreonLogo.png
-    :target: https://www.patreon.com/cybercraft
-    :width: 200px
-    :align: middle
-.. |logo2| image:: ../../Images/Sponsoring/PaypalLogo.png
-    :target: https://www.paypal.me/cybercraftsponsoring/150
-    :width: 200px
-    :align: middle
-.. |logo3| image:: ../../Images/Sponsoring/AmazonLogo.png
-    :target: https://www.amazon.de/gp/registry/wishlist/2I80GX9ZSMYXX
-    :width: 200px
-    :align: middle
-.. |text0| replace:: Get yourself one of the Service Level Agreements we offer together with our fellow coders. This way you make sure Gridelements and other extensions live long and prosper and you will get a hotline with a defined response time in case of emergency.
-.. |text1| replace:: A Service which allows you to become one of our Patrons on a monthly basis. You might even get a shoutout on twitter, get mentioned personally in the next release or even make a feature request depending on the amount you pick.
-.. |text2| replace:: You don't want to sponsor monthly? Dont worry you can also support us via Paypal with any desired amount you find reasonable.
-.. |text3| replace:: Sometimes you want to give it a personal touch. When you want to thank Joey and Petra with a nice Single Malt you should take a look here. Slàinte mhath!
+.. list-table::
+   :widths: 20 80
 
-+-------+-------------------+
-+-------+-------------------+
-||logo0|||text0|            |
-+-------+-------------------+
-+-------+-------------------+
-||logo1|||text1|            |
-+-------+-------------------+
-+-------+-------------------+
-||logo2|||text2|            |
-+-------+-------------------+
-+-------+-------------------+
-||logo3|||text3|            |
-+-------+-------------------+
-+-------+-------------------+
+   * - .. image:: ../../Images/Sponsoring/CodersCareLogo.png
+          :target: https://coders.care
+          :width: 300px
+          :align: middle
+     - Get yourself one of the Service Level Agreements we offer together with our fellow coders. This way you make sure Gridelements and other extensions live long and prosper and you will get a hotline with a defined response time in case of emergency.
+   * - .. image:: ../../Images/Sponsoring/PatreonLogo.png
+          :target: https://www.patreon.com/cybercraft
+          :width: 200px
+          :align: middle
+     - A Service which allows you to become one of our Patrons on a monthly basis. You might even get a shoutout on twitter, get mentioned personally in the next release or even make a feature request depending on the amount you pick.
+   * - .. image:: ../../Images/Sponsoring/PaypalLogo.png
+          :target: https://www.paypal.me/cybercraftsponsoring/150
+          :width: 200px
+          :align: middle
+     - You don't want to sponsor monthly? Dont worry you can also support us via Paypal with any desired amount you find reasonable.
+   * - .. image:: ../../Images/Sponsoring/AmazonLogo.png
+          :target: https://www.amazon.de/gp/registry/wishlist/2I80GX9ZSMYXX
+          :width: 200px
+          :align: middle
+     - Sometimes you want to give it a personal touch. When you want to thank Joey and Petra with a nice Single Malt you should take a look here. Slàinte mhath!
 
 The Agreement
 -------------
