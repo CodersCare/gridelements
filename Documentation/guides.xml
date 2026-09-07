@@ -7,15 +7,15 @@
 >
     <project
         title="Grid Elements"
-        version="master (development)"
-        release="master (development)"
+        version="13.0 (stable)"
+        release="13.0 (stable)"
         copyright="since 2013 by Jo Hasenau &amp; Contributors"
     />
     <extension
         class="\T3Docs\Typo3DocsTheme\DependencyInjection\Typo3DocsThemeExtension"
         interlink-shortcode="gridelementsteam/gridelements"
         edit-on-github="CodersCare/gridelements"
-        edit-on-github-branch="master"
+        edit-on-github-branch="13-0"
         edit-on-github-directory="Documentation"
         project-home="https://extensions.typo3.org/extension/gridelements"
         project-contact="https://typo3.slack.com/archives/C037AHC38"
