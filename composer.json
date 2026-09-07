@@ -3,7 +3,7 @@
 	"description": "Grid-based layouts for TYPO3 content elements - nested grids, real references, advanced drag & drop, a drag-in wizard, granular permissions. The original grid solution for TYPO3, benchmark for power users and enterprise CMS. v13 (TYPO3 12/13): free in TER. v14 (TYPO3 13/14): Priority Access.",
 	"license": "GPL-2.0-or-later",
 	"type": "typo3-cms-extension",
-	"version": "13.0.1",
+	"version": "13.1.0",
 	"keywords": [
 		"TYPO3 CMS",
 		"Grids",

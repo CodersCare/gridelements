@@ -7,8 +7,8 @@
 >
     <project
         title="Grid Elements"
-        version="13.0 (stable)"
-        release="13.0 (stable)"
+        version="13.1 (stable)"
+        release="13.1 (stable)"
         copyright="since 2013 by Jo Hasenau &amp; Contributors"
     />
     <extension
