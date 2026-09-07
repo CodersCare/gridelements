@@ -1,105 +1,92 @@
 .. include:: /Includes.rst.txt
 
+.. _Introduction:
+
+============
 Introduction
-^^^^^^^^^^^^
+============
 
-Grid View
-"""""""""
+Grid Elements carries forward the structural authoring concept of TYPO3
+Backend Layouts from page level into content structures. A Grid
+Element is a content element that defines an explicit structural area
+in which editors place other content elements, including further Grid
+Elements. Grid definitions themselves are configured with TSconfig,
+the same configuration language used for Backend Layouts, which keeps
+them reusable, maintainable and suitable for version control alongside
+the rest of a project's configuration.
 
-Since version 4.5 the TYPO3 core offers the so called  **grid view**,
-a feature developed during the user experience week, that gives
-backend users some nice options to get a more  **user friendly backend
-layout**. You can create your own table based backend layout records,
-fill in as many columns as you like with either a wizard or a *TSconfig* like
-code and arrange these columns to match your desired
-layout, so backend users will easily recognize where to put their
-content. Each record can get an icon that will be used as with the
-layout selector box. Code can be stored and versioned in files as well.
+What it contains and organizes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+A Grid Element's children are ordinary ``tt_content`` records related
+to it through a dedicated parent-child relation, not through their
+position on the page, see :ref:`DataModel` for exactly how that is
+stored. Because a child can be any content element type, including
+another Grid Element, Grid Elements can be nested structurally across
+multiple levels without a separate setting being required to enable
+nesting, see :ref:`Nesting`.
 
-Grid Elements are pushing these features to the next level, namely content elements.
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+More than visual placement
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You will get pretty much the same backend layout records, again
-created with a wizard or by hand. By assigning such a layout to a Grid
-Element, you can enable a table based structure for this element,
-which is becoming a container this way. This container is offering
-different  **cells for your content elements** , which can of course
-be Grid Elements as well. Setting up  **nested structures is a
-breeze** this way. Each record can get a second icon that will be used
-for the detailed description within the new content element wizard.
-Additionally CE backend layouts can contain a  **flexform** to add
-lots of different features, like form based select boxes and switches
-to control the frontend output of a grid elements based on this layout
-later on.
+These structural areas can express hierarchy, grouping, functional
+roles, restrictions and context, not only visual arrangement. A cell
+can declare which content types belong there and how many, or whether
+a given layout may be nested inside another at all. These rules are
+applied by the backend authoring workflow when editors create, place
+and move content, see :ref:`Restrictions`. Structure therefore does
+more than determine where content appears; it can become part of what
+that content means and how it behaves. :ref:`CoreConcepts` describes
+this authoring model, Structure-first Authoring, in more depth.
 
-Another usability improvement of Grid Elements is the **drag and
-drop behavior** added to the page module. You can drag elements
-between different columns within the page or element grid. Drop an
-element to move it or make a copy by pressing the CTRL-key while
-dropping. You can drag in new content elements from a new content
-element wizard overlay, that can be activated by the  *add new content
-element* button on top of the page module. You can create references
-to content elements on the same or another page with icons appearing
-on top of each column as soon as an element is available from the
-normal clipboard. And of course you can have the so called  *unused
-elements* as well, by simply adding a column with colPos -2 to your
-page grid.
+Authoring in the backend
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The Grid Wizard is TYPO3 Core's visual tool for defining a page's
+Backend Layout structure. Grid Elements provides its own Grid Wizard,
+carrying that same structural-definition concept to content-element
+level and allowing a Grid Element's row and column structure to be
+defined visually.
 
-A short roundup of the features and advantages
-""""""""""""""""""""""""""""""""""""""""""""""
+Editors add content to that structure with drag and drop and TYPO3's
+New Content Element Wizard, or more directly with the sophisticated
+Drag-In Wizard. It exposes suitable elements right inside the page
+layout and combines their selection, creation and placement in a
+single drag-in interaction. Used consistently, the Drag-In Wizard
+covers that workflow directly without requiring the New Content
+Element Wizard to be opened separately, letting an editor build
+structure and content together in place. Existing content can also be
+referenced into a structure instead of duplicated, letting the same
+content participate in more than one structure while remaining a
+single record.
 
-- Completely TypoScript based backend layout
+Where Grid Elements comes from
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Allowed and (brandnew) disallowed content types, list types and grid types as well
-  as maximum items per column configurable via wizard or TypoScript
+Grid Elements continues a line of structural authoring work that
+began in 2009 with the Grid View, Grid Wizard and Backend Layout
+concepts. Part of that page-level approach entered TYPO3 Core with
+TYPO3 4.5, while Grid Elements carried the broader concept forward to
+content-element level. See :ref:`History` for that background, and
+the Coders.Care article
+`Grid Elements: The Idea <https://coders.care/blog/article/grid-elements-the-idea>`_
+for the fuller narrative.
 
-- Comfortable point and click wizard to create backend layout structures
-  and assign columns and allowed content types
+How Grid Elements relates to other extensions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Completely XML- and CSV-less normalized relations between containers
-  and elements
+Grid Elements is sometimes discussed as interchangeable with
+narrower, container-only extensions such as ``b13/container``
+(EXT:container). It is not: container behavior is one part of the
+broader Structure-first Authoring model described above, not the
+whole of it. See :ref:`GridElementsAndContainer` for a direct,
+technical comparison.
 
-- Flexforms used for configurational stuff only, can be derived from
-  existing data structures
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :hidden:
 
-- Original colPos and sorting fields still working
-
-- Grid and backend layout aware list module with top level sorting that
-  can list children of containers as nested list via AJAX
-
-- Top level layouts to exclude certain types of Grid Elements from being
-  used within other Grid Elements
-
-- Drag & drop move and copy actions for the page module
-
-- Get me a copy from another page icon so you won't have to switch pages
-  when fetching content
-
-- New content element wizard overlay to drag in new content elements
-
-- Paste icons for pasting copies and references into grid columns
-
-- References to complete pages can be used within the reference element
-
-- Referenced content visible in the preview section of the reference
-  element
-
-- Completely TypoScript or Fluid based frontend output
-
-- Flexform field values automatically added to the data set
-
-- Prerendered content and arrays added to the data set to be used even
-  with other templating engines like Smarty or Fluid
-
-- No need for HTML templates and mapping to get a backend layout and/or
-  frontend output
-
-- Completely based on hooks without XCLASSing (only exception is the
-  list module due to missing hooks)
-
-Some of you might be used to similar features of TemplaVoila and ask
-themselves why they should be using grid elements instead. If you want
-to know more details, check out the  **FAQ** section to find some
-answers
+   CoreConcepts/Index
+   History/Index
+   GridElementsAndContainer/Index
