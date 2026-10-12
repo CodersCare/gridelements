@@ -66,15 +66,17 @@ class ItemProvider extends RecordProvider implements ProviderInterface
      */
     protected function getAdditionalAttributes(string $itemName): array
     {
+        $container = (int)($this->record['tx_gridelements_container'] ?? 0);
         $urlParameters = [
             'prErr' => 1,
             'uPT' => 1,
             'CB[paste]' => $this->table . '|' . -$this->record['uid'],
             'CB[pad]' => 'normal',
             'CB[update]' => [
-                'colPos' => $this->record['colPos'],
-                'tx_gridelements_container' => (int)$this->record['tx_gridelements_container'],
-                'tx_gridelements_columns' => (int)$this->record['tx_gridelements_columns'],
+                'colPos' => $container > 0 ? -1 : (int)$this->record['colPos'],
+                'sys_language_uid' => (int)$this->record['sys_language_uid'],
+                'tx_gridelements_container' => $container,
+                'tx_gridelements_columns' => $container > 0 ? (int)$this->record['tx_gridelements_columns'] : 0,
             ],
         ];
         if ($itemName === 'pastereference') {
@@ -85,7 +87,7 @@ class ItemProvider extends RecordProvider implements ProviderInterface
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $attributes += [
             'data-callback-module' => '@gridelementsteam/gridelements/context-menu-actions',
-            'data-action-url' => htmlspecialchars((string)$uriBuilder->buildUriFromRoute('tce_db', $urlParameters)),
+            'data-action-url' => (string)$uriBuilder->buildUriFromRoute('tce_db', $urlParameters),
         ];
 
         return $attributes;

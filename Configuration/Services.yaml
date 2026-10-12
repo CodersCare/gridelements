@@ -87,6 +87,9 @@ services:
         description: 'Fixes Gridelements parent records with broken tx_gridelements_children value'
   GridElementsTeam\Gridelements\DataProcessing\GridChildrenProcessor:
     shared: false
+  GridElementsTeam\Gridelements\ContextMenu\ItemProvider:
+    tags:
+      - name: backend.contextmenu.itemprovider
 
   querybuilder.tt_content:
     class: 'TYPO3\CMS\Core\Database\Query\QueryBuilder'

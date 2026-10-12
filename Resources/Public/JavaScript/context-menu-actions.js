@@ -32,6 +32,17 @@ class ContextMenuActions {
     }
 
     /**
+     * Paste db record after another
+     *
+     * @param {string} table any db table except sys_file
+     * @param {number} uid uid of the record after which record from the clipboard will be pasted
+     * @param {DOMStringMap} dataset The data attributes of the invoked menu item
+     */
+    static pasteAfter(table, uid, dataset) {
+        ContextMenuActions.pasteInto(table, -uid, dataset);
+    }
+
+    /**
      * @returns {string}
      */
      static getReturnUrl() {
