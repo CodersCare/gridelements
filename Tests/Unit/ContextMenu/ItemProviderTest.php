@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GridElementsTeam\Gridelements\Tests\Unit\ContextMenu;
 
 use GridElementsTeam\Gridelements\ContextMenu\ItemProvider;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Backend\Clipboard\Clipboard;
 use TYPO3\CMS\Backend\ContextMenu\ItemProviders\AbstractProvider;
@@ -207,11 +208,36 @@ class ItemProviderTest extends UnitTestCase
             'tx_gridelements_columns' => 0,
         ]);
 
-        self::assertSame('@gridelementsteam/gridelements/context-menu-actions', $attributes['data-callback-module']);
         if ((new Typo3Version())->getMajorVersion() >= 12) {
             self::assertSame('/typo3/record/commit?token=abc&CB%5Bpad%5D=normal', $attributes['data-action-url']);
         } else {
             self::assertSame('/typo3/record/commit?token=abc&amp;CB%5Bpad%5D=normal', $attributes['data-action-url']);
         }
+    }
+
+    public static function pasteItemNameDataProvider(): \Generator
+    {
+        yield 'pasteAfter' => ['pasteAfter'];
+        yield 'pastereference' => ['pastereference'];
+    }
+
+    #[Test]
+    #[DataProvider('pasteItemNameDataProvider')]
+    public function callbackModuleIsAnEsModuleFromTypo3TwelveAndAnAmdModuleBelow(string $itemName): void
+    {
+        ['attributes' => $attributes] = $this->getAttributesForAnchor([
+            'uid' => 23,
+            'colPos' => 2,
+            'sys_language_uid' => 0,
+            'tx_gridelements_container' => 0,
+            'tx_gridelements_columns' => 0,
+        ], $itemName);
+
+        self::assertSame(
+            (new Typo3Version())->getMajorVersion() >= 12
+                ? '@gridelementsteam/gridelements/context-menu-actions'
+                : 'TYPO3/CMS/Gridelements/ContextMenuActions',
+            $attributes['data-callback-module']
+        );
     }
 }

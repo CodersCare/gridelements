@@ -19,6 +19,7 @@ use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
@@ -29,9 +30,6 @@ class ItemProviderTest extends FunctionalTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        if ((new Typo3Version())->getMajorVersion() < 12) {
-            self::markTestSkipped('TYPO3 11 registers the provider in TYPO3_CONF_VARS and has no ItemProvidersRegistry or import map.');
-        }
         $this->importCSVDataSet(__DIR__ . '/Fixtures/paste_after_destination.csv');
         $backendUser = $this->setUpBackendUser(1);
         $GLOBALS['LANG'] = $this->get(LanguageServiceFactory::class)->createFromUserPreferences($backendUser);
@@ -48,17 +46,34 @@ class ItemProviderTest extends FunctionalTestCase
         ]);
     }
 
+    private static function isTypo3Twelve(): bool
+    {
+        return (new Typo3Version())->getMajorVersion() >= 12;
+    }
+
     /**
      * @return array{item: array, query: array}
      */
-    private function pasteAfterItem(int $anchorUid): array
+    private function pasteAfterItem(int $anchorUid, string $itemName = 'pasteAfter'): array
     {
-        $items = $this->get(ContextMenu::class)->getItems('tt_content', (string)$anchorUid);
-        self::assertArrayHasKey('pasteAfter', $items);
-        $actionUrl = $items['pasteAfter']['additionalAttributes']['data-action-url'] ?? '';
+        $contextMenu = self::isTypo3Twelve() ? $this->get(ContextMenu::class) : GeneralUtility::makeInstance(ContextMenu::class);
+        $items = $contextMenu->getItems('tt_content', (string)$anchorUid);
+        self::assertArrayHasKey($itemName, $items);
+        $actionUrl = $items[$itemName]['additionalAttributes']['data-action-url'] ?? '';
+        if (!self::isTypo3Twelve()) {
+            // TYPO3 11 renders the attributes into an HTML string, which the browser decodes
+            $actionUrl = htmlspecialchars_decode($actionUrl);
+        }
         parse_str((string)parse_url($actionUrl, PHP_URL_QUERY), $query);
 
-        return ['item' => $items['pasteAfter'], 'query' => $query];
+        return ['item' => $items[$itemName], 'query' => $query];
+    }
+
+    private static function expectedCallbackModule(): string
+    {
+        return self::isTypo3Twelve()
+            ? '@gridelementsteam/gridelements/context-menu-actions'
+            : 'TYPO3/CMS/Gridelements/ContextMenuActions';
     }
 
     private function fetchContentRow(string $field, int $value): array
@@ -76,11 +91,25 @@ class ItemProviderTest extends FunctionalTestCase
     #[Test]
     public function itemProviderIsRegisteredOnlyOnceAndOnlyByTheContainer(): void
     {
+        if (!self::isTypo3Twelve()) {
+            self::markTestSkipped('TYPO3 11 has no ItemProvidersRegistry.');
+        }
         $providers = $this->get(ItemProvidersRegistry::class)->getItemProviders();
         $gridelementsProviders = array_filter($providers, static fn(object $provider): bool => $provider instanceof ItemProvider);
 
         self::assertCount(1, $gridelementsProviders);
         self::assertArrayNotHasKey(1487270751, $GLOBALS['TYPO3_CONF_VARS']['BE']['ContextMenu']['ItemProviders'] ?? []);
+    }
+
+    #[Test]
+    public function itemProviderIsRegisteredOnlyOnceInTheLegacyProviderListBelowTypo3Twelve(): void
+    {
+        if (self::isTypo3Twelve()) {
+            self::markTestSkipped('TYPO3 12 registers the provider by its DI tag.');
+        }
+        $providers = $GLOBALS['TYPO3_CONF_VARS']['BE']['ContextMenu']['ItemProviders'] ?? [];
+
+        self::assertSame([1487270751], array_keys($providers, ItemProvider::class, true));
     }
 
     public static function pasteAfterDestinationDataProvider(): \Generator
@@ -108,9 +137,23 @@ class ItemProviderTest extends FunctionalTestCase
         ['item' => $item, 'query' => $query] = $this->pasteAfterItem($anchorUid);
 
         self::assertSame('pasteAfter', $item['callbackAction']);
-        self::assertSame('@gridelementsteam/gridelements/context-menu-actions', $item['additionalAttributes']['data-callback-module']);
+        self::assertSame(self::expectedCallbackModule(), $item['additionalAttributes']['data-callback-module']);
         self::assertSame('tt_content|-' . $anchorUid, $query['CB']['paste']);
         self::assertSame($expectedUpdate, $query['CB']['update']);
+    }
+
+    #[Test]
+    public function pasteReferenceSharesTheCallbackModuleAndTheDestinationOfPasteAfter(): void
+    {
+        $this->putOnClipboard(24, 'copy');
+        ['query' => $pasteAfterQuery] = $this->pasteAfterItem(22);
+        ['item' => $item, 'query' => $query] = $this->pasteAfterItem(22, 'pastereference');
+
+        self::assertSame('pasteReference', $item['callbackAction']);
+        self::assertSame(self::expectedCallbackModule(), $item['additionalAttributes']['data-callback-module']);
+        self::assertSame('1', $query['reference']);
+        self::assertSame('tt_content|-22', $query['CB']['paste']);
+        self::assertSame($pasteAfterQuery['CB']['update'], $query['CB']['update']);
     }
 
     #[Test]
@@ -149,6 +192,9 @@ class ItemProviderTest extends FunctionalTestCase
     #[Test]
     public function actionUrlIsNotHtmlEncoded(): void
     {
+        if (!self::isTypo3Twelve()) {
+            self::markTestSkipped('TYPO3 11 renders the menu as HTML string.');
+        }
         $this->putOnClipboard(24, '');
         $actionUrl = $this->pasteAfterItem(22)['item']['additionalAttributes']['data-action-url'];
 
@@ -157,8 +203,55 @@ class ItemProviderTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function actionUrlIsHtmlEncodedBelowTypo3Twelve(): void
+    {
+        if (self::isTypo3Twelve()) {
+            self::markTestSkipped('TYPO3 12 sets the attributes via DOM.');
+        }
+        $this->putOnClipboard(24, '');
+        $contextMenu = GeneralUtility::makeInstance(ContextMenu::class);
+        $actionUrl = $contextMenu->getItems('tt_content', '22')['pasteAfter']['additionalAttributes']['data-action-url'];
+
+        self::assertStringContainsString('&amp;', $actionUrl);
+        self::assertSame($actionUrl, htmlspecialchars(htmlspecialchars_decode($actionUrl)));
+    }
+
+    #[Test]
+    public function callbackModuleIsResolvableByTheRequireJsConfigBelowTypo3Twelve(): void
+    {
+        if (self::isTypo3Twelve()) {
+            self::markTestSkipped('TYPO3 12 resolves the callback module by the import map.');
+        }
+        $this->putOnClipboard(24, '');
+        $moduleName = $this->pasteAfterItem(22)['item']['additionalAttributes']['data-callback-module'];
+
+        $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
+        $pageRenderer->loadRequireJs();
+        $paths = $pageRenderer->getRequireJsConfig(PageRenderer::REQUIREJS_SCOPE_RESOLVE)['paths'] ?? [];
+        $prefixes = array_filter(
+            array_keys($paths),
+            static fn(string $prefix): bool => str_starts_with($moduleName, $prefix . '/')
+        );
+        usort($prefixes, static fn(string $a, string $b): int => strlen($b) <=> strlen($a));
+        self::assertNotEmpty($prefixes, $moduleName . ' is not resolvable by the RequireJS paths');
+
+        $path = (string)parse_url($paths[$prefixes[0]] . substr($moduleName, strlen($prefixes[0])) . '.js', PHP_URL_PATH);
+        $sitePath = (string)GeneralUtility::getIndpEnv('TYPO3_SITE_PATH');
+        if (str_starts_with($path, $sitePath)) {
+            $path = substr($path, strlen($sitePath));
+        }
+        $file = realpath(Environment::getPublicPath() . '/' . ltrim($path, '/'));
+        self::assertNotFalse($file);
+        self::assertStringEndsWith('/Resources/Public/JavaScript/ContextMenuActions.js', $file);
+        self::assertGreaterThan(0, filesize($file));
+    }
+
+    #[Test]
     public function callbackModuleIsResolvableByTheImportMapOfTheBackendTopFrame(): void
     {
+        if (!self::isTypo3Twelve()) {
+            self::markTestSkipped('TYPO3 11 has no import map.');
+        }
         $this->putOnClipboard(24, '');
         // context-menu.js imports data-callback-module with an appended '.js'
         $specifier = $this->pasteAfterItem(22)['item']['additionalAttributes']['data-callback-module'] . '.js';

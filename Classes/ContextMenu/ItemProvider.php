@@ -81,9 +81,11 @@ class ItemProvider extends RecordProvider implements ProviderInterface
         $attributes = $this->getPasteAdditionalAttributes('after');
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $actionUrl = (string)$uriBuilder->buildUriFromRoute('tce_db', $urlParameters);
+        $isTypo3Twelve = (new Typo3Version())->getMajorVersion() >= 12;
         $attributes += [
-            'data-callback-module' => '@gridelementsteam/gridelements/context-menu-actions',
-            'data-action-url' => (new Typo3Version())->getMajorVersion() >= 12 ? $actionUrl : htmlspecialchars($actionUrl),
+            // TYPO3 11 loads callback modules via RequireJS
+            'data-callback-module' => $isTypo3Twelve ? '@gridelementsteam/gridelements/context-menu-actions' : 'TYPO3/CMS/Gridelements/ContextMenuActions',
+            'data-action-url' => $isTypo3Twelve ? $actionUrl : htmlspecialchars($actionUrl),
         ];
 
         return $attributes;
