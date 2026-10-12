@@ -1,0 +1,14 @@
+be_users,,,,,,,,
+,uid,pid,username,password,admin,disable,deleted,workspace_perms
+,1,0,admin,$1$tCrlLajZ$C0sikFQQ3SWaFAZ1Me0Z/1,1,0,0,1
+pages,,,,,,,,
+,uid,pid,title,deleted,hidden,perms_everybody,,
+,1,0,Home,0,0,31,,
+tt_content,,,,,,,,,,,,
+,uid,pid,sorting,CType,header,tx_gridelements_backend_layout,tx_gridelements_container,tx_gridelements_columns,colPos,sys_language_uid,deleted,hidden
+,21,1,256,gridelements_pi1,Container,two_columns,0,0,0,0,0,0
+,22,1,256,text,"Child in container column 5",,21,5,-1,0,0,0
+,23,1,512,header,"Page-level anchor with a stale column value",,0,3,2,0,0,0
+,24,1,768,text,"Page-level element",,0,0,0,0,0,0
+,25,1,512,text,"Child in container column 0",,21,0,-1,0,0,0
+,26,1,1024,text,"Page-level anchor in language 1",,0,0,0,1,0,0

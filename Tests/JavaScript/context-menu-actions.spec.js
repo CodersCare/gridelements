@@ -50,3 +50,44 @@ describe('pasteReference', () => {
         expect(Viewport.ContentContainer.setUrl).toHaveBeenCalledTimes(1);
     });
 });
+
+describe('pasteAfter', () => {
+    it('navigates to the prepared action URL, which keeps the negative anchor target and the destination', () => {
+        const actionUrl = '/typo3/record/commit?token=abc&CB%5Bpaste%5D=tt_content%7C-22&CB%5Bpad%5D=normal'
+            + '&CB%5Bupdate%5D%5BcolPos%5D=2&CB%5Bupdate%5D%5Bsys_language_uid%5D=0'
+            + '&CB%5Bupdate%5D%5Btx_gridelements_container%5D=0&CB%5Bupdate%5D%5Btx_gridelements_columns%5D=0';
+
+        ContextMenuActions.pasteAfter('tt_content', 22, { actionUrl });
+
+        expect(Viewport.ContentContainer.setUrl).toHaveBeenCalledTimes(1);
+        const calledWith = Viewport.ContentContainer.setUrl.mock.calls[0][0];
+        expect(calledWith.startsWith(actionUrl + '&redirect=')).toBe(true);
+        expect(calledWith).toContain('CB%5Bupdate%5D%5Btx_gridelements_container%5D=0');
+        expect(calledWith).toContain('CB%5Bupdate%5D%5Btx_gridelements_columns%5D=0');
+    });
+
+    it('delegates to pasteInto with the negated uid of the anchor record', () => {
+        const pasteInto = ContextMenuActions.pasteInto;
+        const calls = [];
+        ContextMenuActions.pasteInto = (...args) => calls.push(args);
+        try {
+            const dataset = { actionUrl: '/typo3/record/commit?CB%5Bpaste%5D=tt_content%7C-22' };
+            ContextMenuActions.pasteAfter('tt_content', 22, dataset);
+            expect(calls).toEqual([['tt_content', -22, dataset]]);
+        } finally {
+            ContextMenuActions.pasteInto = pasteInto;
+        }
+    });
+
+    it('asks for confirmation first when the menu item carries a confirmation title', () => {
+        ContextMenuActions.pasteAfter('tt_content', 22, {
+            actionUrl: '/typo3/record/commit?CB%5Bpaste%5D=tt_content%7C-22',
+            title: 'Paste',
+            message: 'Move after?',
+        });
+
+        expect(Viewport.ContentContainer.setUrl).not.toHaveBeenCalled();
+        Modal.currentModal.clickButton('ok');
+        expect(Viewport.ContentContainer.setUrl).toHaveBeenCalledTimes(1);
+    });
+});

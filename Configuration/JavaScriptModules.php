@@ -2,6 +2,7 @@
 
 return [
     'dependencies' => ['core', 'backend'],
+    'tags' => ['backend.contextmenu'],
     'imports' => [
         '@gridelementsteam/gridelements/' => 'EXT:gridelements/Resources/Public/JavaScript/',
         '@typo3/backend/layout-module/drag-drop.js' => 'EXT:gridelements/Resources/Public/JavaScript/drag-drop.js',
