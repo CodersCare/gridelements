@@ -118,8 +118,8 @@ class SvgIconSourceTest extends FunctionalTestCase
             ->newInstanceWithoutConstructor()
             ->addGridItemsToWizard($gridItems, $wizardItems);
 
-        self::assertSame('gridelements-webroot_layout', $wizardItems['gridelements_webroot_layout']['iconIdentifier']);
-        $this->assertSvgIconRenders('gridelements-webroot_layout');
+        self::assertSame('gridelements-layout-0-webroot_layout', $wizardItems['gridelements_webroot_layout']['iconIdentifier']);
+        $this->assertSvgIconRenders('gridelements-layout-0-webroot_layout');
         $this->assertSvgIconRenders('gridelements-large-webroot_layout');
     }
 
@@ -142,7 +142,7 @@ class SvgIconSourceTest extends FunctionalTestCase
         self::assertSame(SvgIconProvider::class, $extConfiguration['provider']);
         self::assertSame('EXT:gridelements/Resources/Public/Icons/gridelements.svg', $extConfiguration['options']['source']);
         $this->assertSvgIconRenders('gridelements-select-icon-ext_layout');
-        foreach (['gridelements-select-icon-bitmap_layout', 'gridelements-bitmap_layout', 'gridelements-large-bitmap_layout'] as $identifier) {
+        foreach (['gridelements-select-icon-bitmap_layout', 'gridelements-layout-0-bitmap_layout', 'gridelements-large-bitmap_layout'] as $identifier) {
             $bitmapConfiguration = $iconRegistry->getIconConfigurationByIdentifier($identifier);
             self::assertSame(BitmapIconProvider::class, $bitmapConfiguration['provider'], $identifier);
             self::assertSame(self::WEBROOT_PNG, $bitmapConfiguration['options']['source'], $identifier);
