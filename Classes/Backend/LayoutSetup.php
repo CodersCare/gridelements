@@ -24,6 +24,7 @@ namespace GridElementsTeam\Gridelements\Backend;
 
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Helper\GridElementsHelper;
+use GridElementsTeam\Gridelements\Helper\SvgIconSource;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\Connection;
@@ -518,7 +519,7 @@ class LayoutSetup
                     $iconRegistry = GeneralUtility::makeInstance(IconRegistry::class);
                     if (str_ends_with($source, '.svg')) {
                         $iconRegistry->registerIcon('gridelements-select-icon-' . $layoutId, SvgIconProvider::class, [
-                            'source' => $source,
+                            'source' => SvgIconSource::resolve($source),
                         ]);
                     } else {
                         $iconRegistry->registerIcon(
