@@ -1,6 +1,8 @@
 class FakeModal {
     constructor() {
         this._listeners = {};
+        // Like TYPO3's ModalElement, which exposes a userData object for callers to attach state to.
+        this.userData = {};
     }
 
     addEventListener(type, callback) {
