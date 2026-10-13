@@ -24,6 +24,7 @@ namespace GridElementsTeam\Gridelements\EventListener;
 
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
+use GridElementsTeam\Gridelements\Helper\SvgIconSource;
 
 use function str_ends_with;
 use function str_starts_with;
@@ -449,7 +450,7 @@ class ModifyNewContentElementWizardItemsListener
                     if (!empty($largeIcon)) {
                         if (str_ends_with($largeIcon, '.svg')) {
                             $iconRegistry->registerIcon($item['iconIdentifierLarge'], SvgIconProvider::class, [
-                                'source' => $largeIcon,
+                                'source' => SvgIconSource::resolve($largeIcon),
                             ]);
                         } else {
                             $iconRegistry->registerIcon(
@@ -504,7 +505,7 @@ class ModifyNewContentElementWizardItemsListener
                 }
                 if (str_ends_with($icon, '.svg')) {
                     $iconRegistry->registerIcon($item['iconIdentifier'], SvgIconProvider::class, [
-                        'source' => $icon,
+                        'source' => SvgIconSource::resolve($icon),
                     ]);
                 } else {
                     $iconRegistry->registerIcon($item['iconIdentifier'], BitmapIconProvider::class, [

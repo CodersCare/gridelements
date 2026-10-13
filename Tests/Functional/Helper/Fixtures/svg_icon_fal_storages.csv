@@ -1,0 +1,16 @@
+"sys_file_storage"
+,"uid","pid","name","driver","configuration","is_browsable","is_public","is_writable","is_online","is_default","processingfolder"
+,1,0,"fileadmin","Local","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?><T3FlexForms><data><sheet index=""sDEF""><language index=""lDEF""><field index=""basePath""><value index=""vDEF"">fileadmin/</value></field><field index=""pathType""><value index=""vDEF"">relative</value></field><field index=""caseSensitive""><value index=""vDEF"">1</value></field></language></sheet></data></T3FlexForms>",1,1,1,1,1,
+,2,0,"global","Local","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?><T3FlexForms><data><sheet index=""sDEF""><language index=""lDEF""><field index=""basePath""><value index=""vDEF"">home/global/</value></field><field index=""pathType""><value index=""vDEF"">relative</value></field><field index=""caseSensitive""><value index=""vDEF"">1</value></field></language></sheet></data></T3FlexForms>",1,1,1,1,0,
+"sys_file"
+,"uid","pid","storage","type","identifier","identifier_hash","folder_hash","name","extension","mime_type","size","missing"
+,1,0,2,2,"/design/gridelements/icon_benefits-country.svg","225355bf42e6af9fa4d33455aca0b3100671cd47","113ad87dc4ac0e711f905ec5dacd607b787f0e51","icon_benefits-country.svg","svg","image/svg+xml",95,0
+,2,0,1,2,"/gridelements-icon-test/icon_benefits-country.svg","6949739a99ce7b384fc12c4c3217b6a49593e2a8","4f71c5804db74bc2b06919b9dcfa6e08d874c26e","icon_benefits-country.svg","svg","image/svg+xml",95,0
+"sys_file_reference"
+,"uid","pid","uid_local","uid_foreign","tablenames","fieldname","sorting_foreign","deleted","hidden"
+,1,0,1,1,"tx_gridelements_backend_layout","icon",1,0,0
+,2,0,2,2,"tx_gridelements_backend_layout","icon",1,0,0
+"tx_gridelements_backend_layout"
+,"uid","pid","title","alias","icon","deleted","hidden","sorting"
+,1,0,"Global storage icon","global_icon",1,0,0,1
+,2,0,"Fileadmin icon","fileadmin_icon",1,0,0,2
