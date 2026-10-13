@@ -24,6 +24,7 @@ namespace GridElementsTeam\Gridelements\EventListener;
 
 use Doctrine\DBAL\Exception;
 use GridElementsTeam\Gridelements\Backend\LayoutSetup;
+use GridElementsTeam\Gridelements\Backend\LayoutWizardIcon;
 use GridElementsTeam\Gridelements\Helper\SvgIconSource;
 
 use function str_ends_with;
@@ -110,7 +111,7 @@ class ModifyNewContentElementWizardItemsListener
                 $allowedGridTypes,
                 $disallowedGridTypes
             );
-            $this->addGridItemsToWizard($gridItems, $wizardItems);
+            $this->addGridItemsToWizard($gridItems, $wizardItems, $this->layoutSetup->getRealPid());
         }
         $this->addGridValuesToWizardItems($wizardItems, (int)$requestArguments['container'], (int)$requestArguments['column']);
         $event->setWizardItems($wizardItems);
@@ -410,8 +411,9 @@ class ModifyNewContentElementWizardItemsListener
      *
      * @param array $gridItems
      * @param array $wizardItems
+     * @param int $pageId Page of the layout setup
      */
-    public function addGridItemsToWizard(array $gridItems, array &$wizardItems): void
+    public function addGridItemsToWizard(array $gridItems, array &$wizardItems, int $pageId = 0): void
     {
         if (empty($gridItems)) {
             return;
@@ -487,43 +489,13 @@ class ModifyNewContentElementWizardItemsListener
                 'defaultValues' => $defaultValues,
                 'tt_content_defValues' => $defaultValues,
             ];
-            $icon = '';
             if (!empty($item['iconIdentifier'])) {
                 $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = $item['iconIdentifier'];
-            } elseif (!empty($item['icon']) && is_array($item['icon']) && isset($item['icon'][0])) {
-                $item['iconIdentifier'] = 'gridelements-' . $key;
-                $icon = $item['icon'][0];
-                if (str_starts_with($icon, '../typo3conf/ext/')) {
-                    $icon = str_replace('../typo3conf/ext/', 'EXT:', $icon);
-                }
-                if (str_starts_with($icon, '../uploads/tx_gridelements/')) {
-                    $icon = str_replace('../', '', $icon);
-                } else {
-                    if (!str_starts_with($icon, 'EXT:') && str_contains($icon, '/')) {
-                        $icon = GeneralUtility::resolveBackPath($item['icon'][0]);
-                    }
-                }
-                if (str_ends_with($icon, '.svg')) {
-                    $iconRegistry->registerIcon($item['iconIdentifier'], SvgIconProvider::class, [
-                        'source' => SvgIconSource::resolve($icon),
-                    ]);
-                } else {
-                    $iconRegistry->registerIcon($item['iconIdentifier'], BitmapIconProvider::class, [
-                        'source' => $icon,
-                    ]);
-                }
             } else {
-                $item['iconIdentifier'] = 'gridelements-' . $key;
-                $iconRegistry->registerIcon($item['iconIdentifier'], SvgIconProvider::class, [
-                    'source' => 'EXT:gridelements/Resources/Public/Icons/gridelements.svg',
-                ]);
-            }
-            if ($icon && !isset($wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'])) {
-                $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = 'gridelements-' . $key;
-            } else {
-                if (!isset($wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'])) {
-                    $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = 'gridelements-default';
-                }
+                $iconIdentifier = LayoutWizardIcon::getIdentifier($pageId, $item['uid']);
+                $wizardItems['gridelements_' . $itemIdentifier]['iconIdentifier'] = LayoutWizardIcon::register($iconIdentifier, $item)
+                    ? $iconIdentifier
+                    : 'gridelements-default';
             }
         }
     }
