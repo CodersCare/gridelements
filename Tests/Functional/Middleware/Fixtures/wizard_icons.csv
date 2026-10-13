@@ -1,0 +1,66 @@
+pages,,,,,,,,,,,,
+,uid,pid,title,deleted,hidden,backend_layout,perms_userid,perms_groupid,perms_user,perms_group,perms_everybody,TSconfig
+,1,0,"Wizard icons",0,0,1,1,2,31,1,0,"tx_gridelements.setup {
+	ts_svg {
+		title = TS SVG
+		icon = EXT:gridelements/Resources/Public/Icons/Extension.svg
+	}
+	ts_bitmap {
+		title = TS Bitmap
+		icon = EXT:core/Resources/Public/Images/NotFound.png
+	}
+	ts_explicit {
+		title = TS explicit identifier
+		iconIdentifier = content-text
+		icon = EXT:gridelements/Resources/Public/Icons/Extension.svg
+	}
+	ts_without_icon {
+		title = TS without icon
+	}
+	ts_webroot {
+		title = TS SVG below the web root
+		icon = /fileadmin/gridelements-icon-test/icon_benefits-country.svg
+	}
+	global_icon {
+		title = TS layout with the alias of a record
+		icon = EXT:gridelements/Resources/Public/Icons/Extension.svg
+	}
+}"
+,2,0,"Page without TSconfig layouts",0,0,0,1,2,31,1,0,
+backend_layout,,,,,,
+,uid,pid,title,deleted,hidden,config
+,1,1,"Wizard Page Layout",0,0,"backend_layout {
+	rows {
+		1 {
+			columns {
+				1 {
+					name = Page free
+					colPos = 0
+				}
+				2 {
+					name = Page global_icon only
+					colPos = 1
+					allowed.tx_gridelements_backend_layout = global_icon
+				}
+			}
+		}
+	}
+}"
+sys_file_storage,,,,,,,,,,,
+,uid,pid,name,driver,configuration,is_browsable,is_public,is_writable,is_online,is_default,processingfolder
+,1,0,fileadmin,Local,"<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?><T3FlexForms><data><sheet index=""sDEF""><language index=""lDEF""><field index=""basePath""><value index=""vDEF"">fileadmin/</value></field><field index=""pathType""><value index=""vDEF"">relative</value></field><field index=""caseSensitive""><value index=""vDEF"">1</value></field></language></sheet></data></T3FlexForms>",1,1,1,1,1,
+,2,0,global,Local,"<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?><T3FlexForms><data><sheet index=""sDEF""><language index=""lDEF""><field index=""basePath""><value index=""vDEF"">home/global/</value></field><field index=""pathType""><value index=""vDEF"">relative</value></field><field index=""caseSensitive""><value index=""vDEF"">1</value></field></language></sheet></data></T3FlexForms>",1,1,1,1,0,
+sys_file,,,,,,,,,,,,
+,uid,pid,storage,type,identifier,identifier_hash,folder_hash,name,extension,mime_type,size,missing
+,1,0,2,2,/design/gridelements/icon_benefits-country.svg,225355bf42e6af9fa4d33455aca0b3100671cd47,113ad87dc4ac0e711f905ec5dacd607b787f0e51,icon_benefits-country.svg,svg,image/svg+xml,95,0
+,2,0,1,2,/gridelements-icon-test/icon_benefits-country.svg,6949739a99ce7b384fc12c4c3217b6a49593e2a8,4f71c5804db74bc2b06919b9dcfa6e08d874c26e,icon_benefits-country.svg,svg,image/svg+xml,95,0
+sys_file_reference,,,,,,,,,
+,uid,pid,uid_local,uid_foreign,tablenames,fieldname,sorting_foreign,deleted,hidden
+,1,0,1,1,tx_gridelements_backend_layout,icon,1,0,0
+,2,0,2,2,tx_gridelements_backend_layout,icon,1,0,0
+,3,0,1,3,tx_gridelements_backend_layout,icon,1,0,0
+tx_gridelements_backend_layout,,,,,,,,
+,uid,pid,title,alias,icon,deleted,hidden,sorting
+,1,0,"Global storage icon",global_icon,1,0,0,1
+,2,0,"Fileadmin icon",fileadmin_icon,1,0,0,2
+,3,0,"Record without alias",,1,0,0,3

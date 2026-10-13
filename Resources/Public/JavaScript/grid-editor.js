@@ -58,7 +58,7 @@ export class GridEditor {
             const e = t.target, o = t.currentTarget;
             "cancel" === e.name ? o.hideModal() : "ok" === e.name && (
                 this.setName(o.querySelector(".t3js-grideditor-field-name").value, o.userData.col, o.userData.row),
-                this.setColumn(parseInt(o.querySelector(".t3js-grideditor-field-colpos").value, 10), o.userData.col, o.userData.row),
+                this.setColumn(o.querySelector(".t3js-grideditor-field-colpos").value, o.userData.col, o.userData.row),
                 this.setMaxItems(parseInt(o.querySelector(".t3js-grideditor-field-maxitems").value, 10), o.userData.col, o.userData.row),
                 typeof this.aCT !== 'undefined' &&
                 this.setAllowed($(o).find(".t3js-grideditor-field-allowed").val().join(), o.userData.col, o.userData.row) &&
@@ -254,7 +254,8 @@ export class GridEditor {
 
     setColumn(t, e, o) {
         const n = this.getCell(e, o);
-        return !!n && (n.column = parseInt(t.toString(), 10), !0)
+        // Anything but an integer means "no content column", like defaultCell
+        return !!n && (n.column = /^\s*-?\d+\s*$/.test(String(t)) ? parseInt(t, 10) : void 0, !0)
     }
 
     setMaxItems(t, e, o) {
@@ -263,33 +264,33 @@ export class GridEditor {
     }
 
     setAllowed(t, e, o) {
-        const n = this.getCell(e, o);
-        return !!n && (n.allowed.CType = GridEditor.stripMarkup(t ? t : '*'))
+        return this.setRestriction("allowed", "CType", t ? t : '*', e, o)
     }
 
     setAllowedListTypes(t, e, o) {
-        const n = this.getCell(e, o);
-        return !!n && (n.allowed.list_type = GridEditor.stripMarkup(t))
+        return this.setRestriction("allowed", "list_type", t, e, o)
     }
 
     setAllowedGridTypes(t, e, o) {
-        const n = this.getCell(e, o);
-        return !!n && (n.allowed.tx_gridelements_backend_layout = GridEditor.stripMarkup(t))
+        return this.setRestriction("allowed", "tx_gridelements_backend_layout", t, e, o)
     }
 
     setDisallowed(t, e, o) {
-        const n = this.getCell(e, o);
-        return !!n && (n.disallowed.CType = GridEditor.stripMarkup(t))
+        return this.setRestriction("disallowed", "CType", t, e, o)
     }
 
     setDisallowedListTypes(t, e, o) {
-        const n = this.getCell(e, o);
-        return !!n && (n.disallowed.list_type = GridEditor.stripMarkup(t))
+        return this.setRestriction("disallowed", "list_type", t, e, o)
     }
 
     setDisallowedGridTypes(t, e, o) {
-        const n = this.getCell(e, o);
-        return !!n && (n.disallowed.tx_gridelements_backend_layout = GridEditor.stripMarkup(t))
+        return this.setRestriction("disallowed", "tx_gridelements_backend_layout", t, e, o)
+    }
+
+    // Fresh object per write: cells without colPos lack restrictions, new cells share defaultCell's objects
+    setRestriction(restriction, field, value, col, row) {
+        const n = this.getCell(col, row);
+        return !!n && (n[restriction] = $.extend({}, this.defaultCell[restriction], $.isPlainObject(n[restriction]) ? n[restriction] : {}, {[field]: GridEditor.stripMarkup(value)}), !0)
     }
 
     showOptions(t, e) {

@@ -465,10 +465,10 @@ function ($, Modal, Severity) {
         if (!cell) {
             return false;
         }
-        if (newColumn.trim() === '') {
-            cell.column = undefined;
-        } else {
+        if (/^\s*-?\d+\s*$/.test(String(newColumn))) {
             cell.column = parseInt(newColumn, 10);
+        } else {
+            cell.column = undefined;
         }
         return true;
     };
