@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import $ from 'jquery';
+import Modal from '@typo3/backend/modal.js';
 
 let GridEditor;
 
@@ -224,5 +225,239 @@ describe('export2LayoutRecord', () => {
         expect(output).toContain('allowed {');
         expect(output).toContain('CType = text,textmedia');
         expect(output).not.toContain('disallowed {');
+    });
+});
+
+const restrictionSetters = [
+    ['setAllowed', 'allowed', 'CType', 'text'],
+    ['setAllowedListTypes', 'allowed', 'list_type', 'news_pi1'],
+    ['setAllowedGridTypes', 'allowed', 'tx_gridelements_backend_layout', 'container'],
+    ['setDisallowed', 'disallowed', 'CType', 'text'],
+    ['setDisallowedListTypes', 'disallowed', 'list_type', 'news_pi1'],
+    ['setDisallowedGridTypes', 'disallowed', 'tx_gridelements_backend_layout', 'container'],
+];
+
+const emptyRestriction = { CType: '', list_type: '', tx_gridelements_backend_layout: '' };
+
+function createEditorWithCell(cell) {
+    return createEditor({ colCount: 1, rowCount: 1, data: [[cell]] });
+}
+
+// Opens the real cell dialog, selects the given values and clicks "ok". In TYPO3 the clicked button is the
+// event target and the modal element (which renders the content and carries userData) the currentTarget.
+function submitCellDialog(editor, col, row, selections) {
+    expect(editor.showOptions(col, row)).toBe(true);
+    const modal = Modal.currentModal;
+    const modalElement = document.createElement('div');
+    $(modalElement).append(modal.content);
+    modalElement.userData = modal.userData;
+    modalElement.hideModal = () => { modal.hidden = true; };
+    Object.entries(selections).forEach(([field, values]) => {
+        $(modalElement).find('.t3js-grideditor-field-' + field).val(values);
+    });
+    modal._listeners['button.clicked'].forEach(cb => cb({ target: { name: 'ok' }, currentTarget: modalElement }));
+    expect(modal.hidden).toBe(true);
+}
+
+describe('allowed/disallowed setters', () => {
+    describe.each(restrictionSetters)('%s', (setter, restriction, field, value) => {
+        it.each([
+            { label: 'a missing', invalid: undefined },
+            { label: 'a null', invalid: null },
+            { label: 'an empty string as', invalid: '' },
+            { label: 'a string as', invalid: 'text' },
+            { label: 'a number as', invalid: 42 },
+        ])('initializes $label structure and returns true', ({ invalid }) => {
+            const cell = makeCell();
+            if (invalid === undefined) {
+                delete cell[restriction];
+            } else {
+                cell[restriction] = invalid;
+            }
+            const editor = createEditorWithCell(cell);
+
+            expect(editor[setter](value, 0, 0)).toBe(true);
+            expect(editor.getCell(0, 0)[restriction]).toEqual({ ...emptyRestriction, [field]: value });
+        });
+
+        it('keeps the other options of an existing structure', () => {
+            const cell = makeCell({
+                allowed: { CType: 'textmedia', list_type: 'other_pi1', tx_gridelements_backend_layout: 'other', custom: 'keep' },
+                disallowed: { CType: 'header', list_type: 'other_pi2', tx_gridelements_backend_layout: 'other2', custom: 'keep' },
+            });
+            const untouched = restriction === 'allowed' ? 'disallowed' : 'allowed';
+            const expectedUntouched = { ...cell[untouched] };
+            const editor = createEditorWithCell(cell);
+
+            expect(editor[setter](value, 0, 0)).toBe(true);
+            expect(editor.getCell(0, 0)[restriction]).toEqual({ ...cell[restriction], [field]: value });
+            expect(editor.getCell(0, 0)[untouched]).toEqual(expectedUntouched);
+        });
+
+        it('accepts the empty array PHP sends for a column without restrictions', () => {
+            const editor = createEditorWithCell(makeCell({ allowed: [], disallowed: [] }));
+
+            expect(editor[setter](value, 0, 0)).toBe(true);
+            expect(editor.getCell(0, 0)[restriction][field]).toBe(value);
+            expect(editor.export2LayoutRecord()).toContain(restriction + ' {\n\t\t\t\t\t\t' + field + ' = ' + value + '\n');
+        });
+
+        it('returns true for an empty value', () => {
+            const editor = createEditorWithCell(makeCell());
+
+            expect(editor[setter]('', 0, 0)).toBe(true);
+            expect(editor.getCell(0, 0)[restriction][field]).toBe(setter === 'setAllowed' ? '*' : '');
+        });
+
+        it('strips markup from the stored value', () => {
+            const editor = createEditorWithCell(makeCell());
+
+            editor[setter]('<img src=x onerror=alert(1)>' + value, 0, 0);
+            expect(editor.getCell(0, 0)[restriction][field]).toBe(value);
+        });
+
+        it('keeps a wildcard', () => {
+            const editor = createEditorWithCell(makeCell());
+
+            expect(editor[setter]('*', 0, 0)).toBe(true);
+            expect(editor.getCell(0, 0)[restriction][field]).toBe('*');
+        });
+
+        it('returns false for a cell outside the grid and changes nothing', () => {
+            const editor = createEditorWithCell(makeCell());
+            const before = JSON.stringify(editor.data);
+
+            expect(editor[setter](value, 5, 5)).toBe(false);
+            expect(JSON.stringify(editor.data)).toBe(before);
+        });
+
+        it('does not leak into other new cells or the default cell', () => {
+            const editor = createEditor({ colCount: 1, rowCount: 1 });
+            editor.addColumn();
+            editor.addColumn();
+
+            editor[setter](value, 1, 0);
+
+            expect(editor.getCell(1, 0)[restriction][field]).toBe(value);
+            expect(editor.getCell(2, 0)[restriction][field]).toBe('');
+            expect(editor.defaultCell[restriction][field]).toBe('');
+        });
+    });
+});
+
+describe('cell dialog applies allowed and disallowed pairs', () => {
+    it('stores the disallowed list and grid types when the allowed ones are left empty', () => {
+        const editor = createEditorWithCell(makeCell({
+            column: 0,
+            allowed: { CType: 'text', list_type: 'news_pi1', tx_gridelements_backend_layout: 'container' },
+        }));
+
+        submitCellDialog(editor, 0, 0, {
+            'allowed': [],
+            'disallowed': ['gridelements_pi1'],
+            'allowed-list-types': [],
+            'disallowed-list-types': ['news_pi1'],
+            'allowed-grid-types': [],
+            'disallowed-grid-types': ['container'],
+        });
+
+        expect(editor.getCell(0, 0).allowed).toEqual({ CType: '*', list_type: '', tx_gridelements_backend_layout: '' });
+        expect(editor.getCell(0, 0).disallowed).toEqual({
+            CType: 'gridelements_pi1', list_type: 'news_pi1', tx_gridelements_backend_layout: 'container',
+        });
+        expect(editor.export2LayoutRecord()).toContain('disallowed {\n\t\t\t\t\t\tCType = gridelements_pi1\n\t\t\t\t\t\tlist_type = news_pi1\n\t\t\t\t\t\ttx_gridelements_backend_layout = container\n');
+    });
+
+    it('works on a cell without allowed/disallowed structure (column without colPos)', () => {
+        const cell = makeCell({ name: 'No colPos' });
+        delete cell.allowed;
+        delete cell.disallowed;
+        const editor = createEditorWithCell(cell);
+
+        submitCellDialog(editor, 0, 0, {
+            'allowed': ['text'],
+            'disallowed': [],
+            'allowed-list-types': ['news_pi1'],
+            'disallowed-list-types': [],
+            'allowed-grid-types': [],
+            'disallowed-grid-types': ['container'],
+        });
+
+        expect(editor.getCell(0, 0).allowed).toEqual({ CType: 'text', list_type: 'news_pi1', tx_gridelements_backend_layout: '' });
+        expect(editor.getCell(0, 0).disallowed).toEqual({ CType: '', list_type: '', tx_gridelements_backend_layout: 'container' });
+    });
+});
+
+describe('column (colPos) from the cell dialog', () => {
+    function exportedColPos(editor) {
+        const match = editor.export2LayoutRecord().match(/^\t+colPos = (.*)$/m);
+        return match ? match[1] : null;
+    }
+
+    function dialogColPos(editor) {
+        editor.showOptions(0, 0);
+        return $(Modal.currentModal.content).find('.t3js-grideditor-field-colpos').val();
+    }
+
+    beforeEach(() => {
+        globalThis.TYPO3.lang.grid_notSet = 'not set';
+    });
+
+    it('keeps a new cell without content column when the field is left empty', () => {
+        const editor = createEditor({ colCount: 1, rowCount: 1 });
+
+        submitCellDialog(editor, 0, 0, { 'colpos': '' });
+
+        expect(editor.getCell(0, 0).column).toBeUndefined();
+        expect(exportedColPos(editor)).toBeNull();
+        expect(document.querySelector('.grideditor-cell-info').textContent).toContain('not set');
+        expect(dialogColPos(editor)).toBe('');
+    });
+
+    it('removes the content column when an existing value is cleared', () => {
+        const editor = createEditorWithCell(makeCell({ column: 3 }));
+        expect(exportedColPos(editor)).toBe('3');
+
+        submitCellDialog(editor, 0, 0, { 'colpos': '' });
+
+        expect(editor.getCell(0, 0).column).toBeUndefined();
+        expect(exportedColPos(editor)).toBeNull();
+        expect(dialogColPos(editor)).toBe('');
+    });
+
+    it.each([
+        ['0', 0],
+        ['5', 5],
+        ['12', 12],
+        [' 7 ', 7],
+        ['-1', -1],
+    ])('stores the integer %j unchanged and round-trips it', (input, expected) => {
+        const editor = createEditor({ colCount: 1, rowCount: 1 });
+
+        submitCellDialog(editor, 0, 0, { 'colpos': input });
+
+        expect(editor.getCell(0, 0).column).toBe(expected);
+        expect(exportedColPos(editor)).toBe(String(expected));
+        expect(dialogColPos(editor)).toBe(String(expected));
+    });
+
+    it.each(['abc', '3abc', '1.5', '1e3', '-'])('does not export the invalid input %j as a column', (input) => {
+        const editor = createEditorWithCell(makeCell({ column: 3 }));
+
+        submitCellDialog(editor, 0, 0, { 'colpos': input });
+
+        expect(editor.getCell(0, 0).column).toBeUndefined();
+        expect(exportedColPos(editor)).toBeNull();
+        expect(editor.export2LayoutRecord()).not.toContain('NaN');
+    });
+
+    it('setColumn treats NaN as no content column and returns false outside the grid', () => {
+        const editor = createEditorWithCell(makeCell({ column: 3 }));
+
+        expect(editor.setColumn(NaN, 0, 0)).toBe(true);
+        expect(editor.getCell(0, 0).column).toBeUndefined();
+        expect(editor.setColumn(0, 0, 0)).toBe(true);
+        expect(editor.getCell(0, 0).column).toBe(0);
+        expect(editor.setColumn(1, 5, 5)).toBe(false);
     });
 });
