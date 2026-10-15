@@ -155,6 +155,13 @@ class GridelementsPreviewRenderer extends StandardContentPreviewRenderer impleme
             $children = $helper->getChildren('tt_content', $gridContainerId, $pageId, 'sorting', 0, '*');
             $childColumns = [];
             foreach ($children as $childRecord) {
+                if (GridElementsHelper::getBackendUser()->workspace > 0) {
+                    BackendUtility::workspaceOL(
+                        'tt_content',
+                        $childRecord,
+                        GridElementsHelper::getBackendUser()->workspace
+                    );
+                }
                 if (isset($childRecord['tx_gridelements_columns'])) {
                     $childColumns[$childRecord['tx_gridelements_columns']][] = $childRecord;
                 }
