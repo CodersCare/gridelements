@@ -318,17 +318,16 @@ class LayoutSetup
      */
     public function getLayoutColumns(string $layoutId): array
     {
-        if (!isset($this->layoutSetup[$layoutId])) {
+        if (empty($this->layoutSetup[$layoutId]['config']['rows.'])) {
             return [];
         }
 
-        if (empty($GLOBALS['tx_gridelements']['ceBackendLayoutData'][$layoutId])) {
-            if (!empty($this->layoutSetup[$layoutId]['config']['rows.'])) {
-                $GLOBALS['tx_gridelements']['ceBackendLayoutData'][$layoutId] = $this->checkAvailableColumns($this->layoutSetup[$layoutId]);
-            }
+        $rowsHash = md5(serialize($this->layoutSetup[$layoutId]['config']['rows.']));
+        if (!isset($GLOBALS['tx_gridelements']['ceBackendLayoutData'][$layoutId][$rowsHash])) {
+            $GLOBALS['tx_gridelements']['ceBackendLayoutData'][$layoutId][$rowsHash] = $this->checkAvailableColumns($this->layoutSetup[$layoutId]);
         }
 
-        return $GLOBALS['tx_gridelements']['ceBackendLayoutData'][$layoutId] ?? [];
+        return $GLOBALS['tx_gridelements']['ceBackendLayoutData'][$layoutId][$rowsHash];
     }
 
     /**
