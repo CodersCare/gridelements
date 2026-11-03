@@ -43,7 +43,8 @@ widget behaves, worth naming because they explain what an editor sees:
 * ``appearance.enabledControls`` disables the widget's own ``new`` and
   ``dragdrop`` controls. Children are not created by clicking "new"
   inside the container's form, they are created through the New
-  Content Element wizard or dragged in from the page module, both of
+  Content Element wizard or dragged in from the page module (Web > Page
+  on TYPO3 13, Content > Layout on TYPO3 14), both of
   which write ``tx_gridelements_container`` directly.
 * ``overrideChildTca`` defaults a newly inline-created child's
   ``colPos`` to ``-1``, matching the sentinel described on

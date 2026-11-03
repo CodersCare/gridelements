@@ -37,7 +37,8 @@ to date with either:
    vendor/bin/typo3 database:updateschema
 
 or the Install Tool's *Analyze Database Structure* function under
-*Admin Tools > Maintenance*. Review the proposed changes and apply
+*Admin Tools > Maintenance* (TYPO3 13) or *System > Maintenance*
+(TYPO3 14). Review the proposed changes and apply
 them.
 
 .. note::
@@ -55,8 +56,9 @@ them.
 Dependencies
 ^^^^^^^^^^^^
 
-The current Composer package requires PHP 8.2, 8.3 or 8.4, and
-TYPO3 12.4 LTS or 13.4 LTS (patch level 13.4.7 or later). It has no
+The current Composer package requires PHP 8.3, 8.4 or 8.5, and
+TYPO3 13.4 LTS (patch level 13.4.7 or later) or TYPO3 14 (version
+14.3 or later). It has no
 dependency on any other third-party extension. Consult
 ``composer.json`` in the package for the exact constraint, and the
 version matrix in the project's `README

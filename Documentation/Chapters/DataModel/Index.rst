@@ -122,7 +122,9 @@ If it ever drifts out of sync with the actual number of children, see
 ``colPos`` does not establish the Grid Elements parent-child relation.
 It is TYPO3 Core's own placement field, and Grid Elements keeps writing
 it for every content element, container children included, because
-Core and its Page module, list module, and workspace preview all group
+Core and its Page module (Web > Page on TYPO3 13, Content > Layout on
+TYPO3 14), list module (Web > List on TYPO3 13, Content > Records on
+TYPO3 14), and workspace preview all group
 ``tt_content`` by ``colPos`` and need a value there regardless of
 whether an element also happens to be a grid child. The field's
 underlying database column had to change from an unsigned integer to a

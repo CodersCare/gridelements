@@ -8,7 +8,8 @@ Drag-In Wizard
 
 The Drag-In Wizard is Grid Elements' own direct-authoring tool. It
 puts the same element types that the New Content Element Wizard offers
-directly inside the Page Module, as a panel an editor can drag items
+directly inside the Page Module (Web > Page on TYPO3 13,
+Content > Layout on TYPO3 14), as a panel an editor can drag items
 out of, and turns creating an element into a single motion: pick an
 item, drag it into the structural area it belongs in, and it exists
 there, already placed, the moment it is dropped.

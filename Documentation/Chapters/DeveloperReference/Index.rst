@@ -37,6 +37,7 @@ Where to go next
        remaining legacy hooks, and its one XCLASS.
    * - :ref:`DeveloperReferenceListModuleIntegration`
      - How Grid Elements optionally integrates with TYPO3's Web > List
+       (TYPO3 13) or Content > Records (TYPO3 14)
        module, and how that integration relates to (and stays
        distinct from) the Grid Elements parent-child relation and
        ``colPos``.

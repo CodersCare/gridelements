@@ -224,7 +224,7 @@ Renders individual child elements. If the child element itself is a container, t
            </f:then>
            <f:else>
                <f:if condition="{data.CType}">
-                   <f:cObject typoscriptObjectPath="tt_content.{data.CType}" data="{data}" table="tt_content" />
+                   <f:cObject typoscriptObjectPath="tt_content" data="{data}" table="tt_content" />
                </f:if>
            </f:else>
        </f:if>
@@ -233,7 +233,7 @@ Renders individual child elements. If the child element itself is a container, t
 This is the Fluid template recursion described in :ref:`Nesting`:
 when pre-fetched ``children`` data is present, ``Child.html`` renders
 straight back into the ``Container`` partial; otherwise the child is
-rendered through TYPO3's standard ``tt_content.{CType}`` dispatch,
+rendered through TYPO3's standard ``tt_content`` CASE dispatch on ``CType``,
 which re-enters this same processing chain from scratch if that child
 is itself a Grid Element. Either way, the structure renders completely
 regardless of how deep it nests.

@@ -57,6 +57,7 @@ Spanning, naming and assigning cells
 Click the triangle symbols beside a cell to have it span additional
 columns or rows. Spanning is only possible to the right and down,
 matching how cells are spanned in the HTML table the page module
+(Web > Page on TYPO3 13, Content > Layout on TYPO3 14)
 renders. Once a cell spans at least one extra column or row,
 additional triangles pointing left and up appear, letting you undo the
 spanning the same way.
@@ -75,7 +76,8 @@ Each cell still needs a **name** and, if it should hold content, a
 **column number**, which becomes that cell's ``colPos`` in the
 resulting Grid TS Syntax, see :ref:`GridTsSyntax` for what that value
 does and does not establish. This is also where you set the allowed
-and disallowed content, list and grid element types and the maximum
+and disallowed content, list (TYPO3 13 only) and grid element types
+and the maximum
 number of items for the cell, see :ref:`Restrictions` for how those
 values are enforced. A cell left without a column number stays a
 placeholder and cannot hold content later on. Click the pencil icon in

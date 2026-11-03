@@ -90,7 +90,8 @@ Each cell in a row's **columns** array accepts up to seven keys:
 **name**, **colPos**, **colspan**, **rowspan**, **allowed**,
 **disallowed** and **maxitems**. **name** is required. Without a value
 for **colPos**, the cell has no target column and stays inactive, a
-placeholder in the page module that cannot hold content.
+placeholder in the page module (Web > Page on TYPO3 13,
+Content > Layout on TYPO3 14) that cannot hold content.
 
 **colspan**, **rowspan**, **allowed**, **disallowed** and **maxitems**
 are all optional.
@@ -107,11 +108,14 @@ container and its children; that relation, and why a child's own
 content is permitted and how many elements a cell accepts. ``allowed``
 and ``disallowed`` take an array with **CType**, **list_type** and
 **tx_gridelements_backend_layout** as keys, restricting content
-element types, plugin types and nested grid element types
+element types, plugin types (TYPO3 13 only; on TYPO3 14, plugins are
+restricted through **CType**) and nested grid element types
 respectively; ``disallowed`` wins where the two overlap. This syntax
 matches the one used by the third-party content defender extension,
 so a project already using it does not need to change its
-configuration. ``maxitems`` caps how many elements the cell accepts; a
+configuration. On TYPO3 14, TYPO3 Core also reads this ``CType``
+syntax in page-level Backend Layouts, see :ref:`Restrictions`.
+``maxitems`` caps how many elements the cell accepts; a
 cell at or over its limit still shows existing elements and stays
 editable, it only stops offering more. This is definition-time
 configuration; how it is enforced and filtered at authoring time is

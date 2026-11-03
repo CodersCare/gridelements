@@ -65,7 +65,8 @@ Create the Grid Element
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 Reload the backend so the new layout is picked up, then open the Page
-Module on a page within reach of that TSconfig. Use the
+Module (Web > Page on TYPO3 13, Content > Layout on TYPO3 14) on a
+page within reach of that TSconfig. Use the
 :ref:`Drag-In Wizard <EditorGuideDragInWizard>`, the toggle button next
 to the Page Module's own *Create new content element* button, find
 **Two-column layout** among the Grid Elements offered there, and drag

@@ -121,6 +121,9 @@ column 0 instead, see the ``colPos`` sentinel note below.
 **A grid child's ``colPos`` looks wrong in the Page or List module,
 even though it is still shown as part of its Grid Element.**
 
+The Page and List modules are Web > Page and Web > List on TYPO3 13,
+and Content > Layout and Content > Records on TYPO3 14.
+
 This is the signed/unsigned ``colPos`` schema issue, most often seen
 after a TYPO3 Core version upgrade, see
 :ref:`UpgradingCompatibilityDataCompatibility`. It affects only
@@ -185,8 +188,9 @@ Wizard, and the ``itemsProcFunc`` implementations behind their form
 fields) determines only what looks convenient to pick and is not
 itself a security boundary, since its restriction data can be read
 from request parameters. What is actually accepted is decided
-separately, server side, by the ``DataHandler`` hooks and
-``RestrictionGuard``. See :ref:`Restrictions` for the full layer
+separately, server side, by Grid Elements' ``DataHandler`` hooks and
+``RestrictionGuard``; on TYPO3 14, page-column ``CType`` restrictions
+are checked by TYPO3 Core instead. See :ref:`Restrictions` for the full layer
 breakdown before assuming a restriction was bypassed.
 
 **A translated page's Grid Element children don't match the default

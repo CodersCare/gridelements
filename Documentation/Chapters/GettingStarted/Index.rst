@@ -17,7 +17,8 @@ Grid Element rendered in the frontend.
      - Get the extension into a project, activate it, and put the
        minimum configuration in place.
    * - :ref:`QuickStart`
-     - Define a small grid structure, create it in the Page Module,
+     - Define a small grid structure, create it in the Page Module
+       (Web > Page on TYPO3 13, Content > Layout on TYPO3 14),
        fill it with content and see it render.
 
 Both pages assume a working TYPO3 installation and a project

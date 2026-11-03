@@ -8,7 +8,8 @@ Upgrade Wizards
 
 Grid Elements does not register a TYPO3 Install Tool upgrade wizard
 (``UpgradeWizardInterface``) for its own data; there is no entry for
-it in Admin Tools > Upgrade. The mechanisms that exist for repairing
+it in Admin Tools > Upgrade (TYPO3 13) or System > Upgrade (TYPO3 14).
+The mechanisms that exist for repairing
 Grid Elements' own fields after something has gone wrong are the two
 data consistency tools documented in full at
 :ref:`DataConsistencyTools`: the Col Pos Fixer and the Number Of

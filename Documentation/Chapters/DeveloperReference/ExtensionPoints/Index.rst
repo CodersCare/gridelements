@@ -13,7 +13,7 @@ remain in use where Core does not yet offer an event for the relevant
 operation. XCLASSing is exceptional: exactly one core class is
 XCLASSed, and only when a project explicitly opts in. This page lists
 the actual current mechanisms by class and event name, and calls out
-the two places where an older registration has become dead code
+the one place where an older registration has become dead code
 rather than describing it as if it still ran.
 
 PSR-14 events Grid Elements listens to
@@ -28,7 +28,8 @@ PSR-14 events Grid Elements listens to
      - Purpose
    * - ``AfterTcaCompilationEvent``
      - ``EventListener\ExtTablesInclusionPostProcessing``
-     - Registers Grid Elements' Page Module preview renderers
+     - Registers Grid Elements' Page Module (Web > Page on TYPO3 13,
+       Content > Layout on TYPO3 14) preview renderers
        (``GridelementsPreviewRenderer``, ``ShortcutPreviewRenderer``)
        into the compiled TCA.
    * - ``BeforeFlexFormDataStructureIdentifierInitializedEvent``
@@ -41,8 +42,19 @@ PSR-14 events Grid Elements listens to
        a project-defined ``flexformDS``) for that identifier.
    * - ``TYPO3\CMS\Backend\View\Event\ModifyDatabaseQueryForRecordListingEvent``
      - ``EventListener\ModifyDatabaseQueryForRecordListingListener``
-     - Excludes grid children (``colPos = -1``) from the List module's
-       base query, see :ref:`DeveloperReferenceListModuleIntegration`.
+     - Excludes grid children (``colPos = -1``) from the base query of
+       the List module (Web > List on TYPO3 13, Content > Records on
+       TYPO3 14), see :ref:`DeveloperReferenceListModuleIntegration`.
+   * - ``TYPO3\CMS\Backend\View\Event\ManipulateBackendLayoutColPosConfigurationForPageEvent``
+       (TYPO3 14 only; declared ``@internal`` by TYPO3 Core)
+     - ``EventListener\ManipulateBackendLayoutColPosConfigurationListener``
+     - Merges the ``allowed.CType``/``disallowed.CType`` rules of the
+       page's Backend Layout into TYPO3 Core's ``allowedContentTypes``/
+       ``disallowedContentTypes`` column configuration. While the preview
+       of a grid child is rendered, it supplies the configuration of the
+       child's container column instead, see :ref:`Restrictions`. The
+       event does not exist on TYPO3 13, so the listener is not called
+       there.
    * - ``TYPO3\CMS\Backend\Controller\Event\ModifyNewContentElementWizardItemsEvent``
      - ``EventListener\ModifyNewContentElementWizardItemsListener``
      - Filters the New Content Element Wizard's item list against the
@@ -52,8 +64,8 @@ PSR-14 events Grid Elements listens to
      - ``EventListener\IsContentUsedOnPageLayoutListener``
      - Marks a grid child (``colPos = -1`` with a set
        ``tx_gridelements_container``) as used. This is the current,
-       functioning replacement for the ``record_is_used`` hook, see
-       below.
+       functioning replacement for the ``record_is_used`` hook, which
+       TYPO3 Core removed in TYPO3 12 (Breaking-98375).
    * - ``TYPO3\CMS\Backend\Controller\Event\AfterBackendPageRenderEvent``
      - ``EventListener\AfterBackendPageRendererEventListener``
      - Injects Grid Elements' JavaScript language labels into the
@@ -111,19 +123,10 @@ events for the operations they cover.
        ``processCmdmap_beforeStart()``, which do run on a
        drag-and-drop or cut/paste move.
 
-Two further hook registrations exist in ``ext_tables.php`` but no
-longer run, because the TYPO3 Core hook points they target have been
-removed in the versions this branch supports (``^12.4 || ^13.4.7``):
+One further hook registration exists in ``ext_tables.php`` but no
+longer runs, because the TYPO3 Core hook point it targets has been
+removed in the versions this branch supports (``^13.4.7 || ^14.3``):
 
-* **``cms/layout/class.tx_cms_layout.php`` ``record_is_used``**
-  (``Hooks\PageLayoutView``) is only registered for TYPO3 < 13, but
-  the ``record_is_used`` hook point it targets was already removed
-  from Core in TYPO3 12 (Breaking-98375), and the core class its
-  method type-hints was itself removed in TYPO3 13. The class and its
-  registration remain in the codebase as dead code across the whole
-  supported version range. ``IsContentUsedOnPageLayoutListener`` above
-  is the current, functioning mechanism; do not treat
-  ``Hooks\PageLayoutView`` as active.
 * **``typo3/class.db_list_extra.inc`` ``actions``**
   (``Hooks\DatabaseRecordList``, registered only when
   ``nestingInListModule`` is enabled) targets a hook point Core no
@@ -149,15 +152,15 @@ between them:
    * - TYPO3
      - Class
      - Notes
-   * - 13
+   * - 14
      - ``Xclass\DatabaseRecordList``
      - Marked ``@internal`` in its own docblock: it extends a Core
        class that is explicitly not part of Core's public API, and can
        change in a minor release. Do not XCLASS it further; extend
        Grid Elements' own event (above) instead where possible.
-   * - 12
-     - ``Xclass\DatabaseRecordList12``
-     - Same role, adapted to the TYPO3 12 version of the parent class.
+   * - 13
+     - ``Xclass\DatabaseRecordList13``
+     - Same role, adapted to the TYPO3 13 version of the parent class.
 
 See :ref:`DeveloperReferenceListModuleIntegration` for what this
 XCLASS actually renders and why an event alone was not enough for it.
@@ -173,8 +176,7 @@ Grid Elements uses a hook where it does not:
 * **FormEngine node registry**
   (``$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry']``)
   registers ``Wizard\GridelementsBackendLayoutWizardElement`` (TYPO3
-  13) or ``Wizard\GridelementsBackendLayoutWizardElement12`` (TYPO3
-  12) as the ``belayoutwizard`` FormEngine node, the Grid Wizard's
+  13 and 14) as the ``belayoutwizard`` FormEngine node, the Grid Wizard's
   backend rendering, see :ref:`GridWizard`.
 * **Context menu item providers**
   (``$GLOBALS['TYPO3_CONF_VARS']['BE']['ContextMenu']['ItemProviders']``)

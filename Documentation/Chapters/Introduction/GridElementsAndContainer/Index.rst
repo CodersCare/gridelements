@@ -16,8 +16,8 @@ popularity, so a reader evaluating either one can judge the actual
 difference in scope.
 
 Everything said here about EXT:container is based on its own
-``README.md`` and current source (``B13\Container\...``, inspected at
-the time of writing); everything said about Grid Elements is based on
+``README.md`` and source (``B13\Container\...``, tag ``4.1.1``, inspected
+at the time of writing); everything said about Grid Elements is based on
 this codebase, cross-referenced to the detailed pages linked
 throughout.
 
@@ -67,7 +67,8 @@ that share the same underlying structure:
        enable it, see :ref:`Nesting`.
    * - Restrictions and validation
      - ``allowed``/``disallowed``/``maxitems`` enforced server side by
-       Grid Elements itself, with no further extension required, see
+       Grid Elements itself (on TYPO3 14, page-column ``CType`` checks
+       are delegated to TYPO3 Core), with no further extension required, see
        :ref:`Restrictions`.
    * - References
      - "Paste as Reference" lets an existing record participate in
@@ -85,7 +86,8 @@ that share the same underlying structure:
        :ref:`Flexform`.
    * - List Module integration
      - Optional nested rendering of a container's children in TYPO3's
-       Web > List module, see :ref:`DeveloperReferenceListModuleIntegration`.
+       Web > List (TYPO3 13) or Content > Records (TYPO3 14) module, see
+       :ref:`DeveloperReferenceListModuleIntegration`.
    * - Structural context at rendering time
      - The relation, cell and layout information built during
        authoring is what rendering reads, see :ref:`RenderingArchitecture`.
@@ -95,19 +97,26 @@ that share the same underlying structure:
        pre-fetched), see :ref:`DataProcessing`.
 
 Two of these are worth naming concretely, because they are easy to
-assume are included in a "container extension" and are not, in
-EXT:container's own case:
+assume are included in a "container extension" and are not, or
+only partly, in EXT:container's own case:
 
 * **Restrictions.** EXT:container's own README states plainly:
   "Supports colPos-restrictions if EXT:content_defender is installed."
-  ``allowed``/``disallowed``/``maxitems`` enforcement is not part of
-  EXT:container itself; it depends on a separate third-party
+  On TYPO3 13, ``allowed``/``disallowed``/``maxitems`` enforcement is
+  not part of EXT:container itself; it depends on a separate third-party
   extension, ``EXT:content_defender``
   (``ichhabrecht/content-defender``, ``IchHabRecht\ContentDefender\...``,
   a different vendor from both b13 and Grid Elements Team) being
   installed alongside it. Grid Elements enforces the same kind of
-  restriction natively, as part of its own ``DataHandler`` logic, with
+  restriction natively, as part of its own ``DataHandler`` logic (on
+  TYPO3 14, page-column ``CType`` checks are delegated to TYPO3 Core), with
   no additional extension, see :ref:`Restrictions`.
+  On TYPO3 14, EXT:container itself enforces ``CType``
+  (``allowedContentTypes``/``disallowedContentTypes``) and ``maxitems``
+  per container column, through its own
+  ``ContentElementRestriction\DataHandlerHook``, which replaces TYPO3
+  Core's ``contentElementRestriction`` DataHandler hook; its README
+  still describes the content_defender requirement.
 * **References.** Neither EXT:container's ``README.md`` nor its
   current source contains a "paste as reference" or equivalent
   content-reference mechanism. Achieving that on an EXT:container-based
@@ -124,7 +133,8 @@ EXT:container's own case:
 
 Even combined, EXT:container, content_defender and paste_reference do
 not reach feature parity with Grid Elements: content_defender
-validates restrictions against an existing structure, and
+(or, on TYPO3 14, EXT:container itself) validates
+restrictions against an existing structure, and
 paste_reference creates reference records, but neither one materializes
 or authors structure. None of the three provides a Drag-In Wizard,
 Grid Elements' own structural row/column model, or recursive frontend
@@ -157,13 +167,22 @@ and any other TYPO3 extension use.
      - Three (``processDatamapClass``, ``processCmdmapClass``, an
        unused ``moveRecordClass`` registration), see
        :ref:`DeveloperReferenceExtensionPoints`.
-     - Six ``$GLOBALS`` hook registrations in ``ext_localconf.php``
-       (four ``processCmdmapClass``: ``CommandMapPostProcessingHook``,
+     - Eight ``$GLOBALS`` hook registrations in ``ext_localconf.php``
+       (five ``processCmdmapClass``: ``CommandMapPostProcessingHook``,
        ``CommandMapBeforeStartHook``, ``DeleteHook``,
-       ``CommandMapAfterFinishHook``; two ``processDatamapClass``:
-       ``DatamapBeforeStartHook``, ``DatamapPreProcessFieldArrayHook``).
+       ``CommandMapAfterFinishHook``,
+       ``ContentElementRestriction\DataHandlerHook``; three
+       ``processDatamapClass``: ``DatamapBeforeStartHook``,
+       ``DatamapPreProcessFieldArrayHook``,
+       ``ContentElementRestriction\DataHandlerHook``; both
+       ``ContentElementRestriction\DataHandlerHook`` entries use the key
+       ``contentElementRestriction``, replacing TYPO3 Core's own hook of
+       that name on TYPO3 14).
    * - PSR-14 event listeners
-     - Eight, registered in ``Configuration/Services.yaml``, see
+     - Nine on TYPO3 Core events (one of them on
+       ``ManipulateBackendLayoutColPosConfigurationForPageEvent``, an
+       event that exists on TYPO3 14 only) plus one on Grid Elements' own
+       event, registered in ``Configuration/Services.yaml``, see
        :ref:`DeveloperReferenceExtensionPoints`.
      - Nine, via ``#[AsEventListener]`` attributes in
        ``Classes/Listener/*``: ``BootCompleted``, ``ContentUsedOnPage``
@@ -311,6 +330,13 @@ structural object spanning several areas at once: it returns as many
 separate flat arrays as there are areas involved, not a matrix any of
 them are cells of.
 
+EXT:container additionally provides
+``B13\Container\DataProcessing\ContentAreaProcessor``, which requires
+TYPO3 14. It returns all of a container's areas as one
+``ContentAreaCollection`` of TYPO3 Core ``ContentArea`` objects
+(``content.<colPos>`` by default) for ``f:render.contentArea``; like
+ContainerProcessor, it fetches only the direct children of each area.
+
 ``GridElementsTeam\Gridelements\DataProcessing\GridChildrenProcessor``
 approximates that flat shape as one configuration among several of a
 substantially broader structural processing system. For one explicitly
@@ -452,9 +478,11 @@ When each fits
 EXT:container is a coherent choice when a project's need is exactly
 what it describes itself as solving: a small, fixed set of per-project
 container layouts, each its own ``CType``, rendered through
-ContainerProcessor's flat, area-based processing model, with no
+ContainerProcessor's flat, area-based processing model (or, on
+TYPO3 14, ContentAreaProcessor's Core ``ContentArea`` objects), with no
 requirement for reusable structural definitions, restrictions without
-an additional extension, references, unused-element handling, or
+an additional extension (EXT:container on TYPO3 14 covers only
+``CType`` and ``maxitems`` natively), references, unused-element handling, or
 one-motion drag-in authoring.
 Grid Elements fits when some or all of the broader capability list
 above is what a project actually needs; the two are not competing

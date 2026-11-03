@@ -35,7 +35,8 @@ What is actually referenced
 
 A reference is its own, small content record. It does not hold a copy
 of the referenced content; it holds a pointer to it. What an editor
-sees in the Page Module is the referenced content's own preview,
+sees in the Page Module (Web > Page on TYPO3 13, Content > Layout on
+TYPO3 14) is the referenced content's own preview,
 rendered in place and marked with a border so it reads clearly as a
 reference rather than as the content element itself. Editing the
 referenced content is done by opening the original record, wherever it

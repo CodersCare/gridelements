@@ -6,7 +6,8 @@
 Editor Guide
 ============
 
-The Page Module is where a Grid Element's structure becomes something
+The Page Module (Web > Page on TYPO3 13, Content > Layout on
+TYPO3 14) is where a Grid Element's structure becomes something
 an editor actually works with. Its rows, columns and cells show up as
 real areas on the page, and each one behaves like any other column an
 editor already knows how to use: content can be created in it, moved

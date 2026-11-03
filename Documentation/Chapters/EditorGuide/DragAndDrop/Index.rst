@@ -7,7 +7,8 @@ Drag and Drop
 =============
 
 Drag and drop moves an element that already exists. It is TYPO3's own
-Page Module mechanism: grab a content element by its header and drop
+Page Module (Web > Page on TYPO3 13, Content > Layout on TYPO3 14)
+mechanism: grab a content element by its header and drop
 it where it should go. Grid Elements extends this mechanism so it also
 works across a grid's own cells and into and out of nested structures,
 honoring the same restrictions that govern any other way of placing

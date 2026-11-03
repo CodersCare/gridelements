@@ -20,6 +20,9 @@ layout) can carry ``allowed``, ``disallowed`` and ``maxitems``
 configuration, defined in the layout's TSconfig (see the Grid TS
 Syntax reference). ``allowed``/``disallowed`` apply by default to
 ``CType``, ``list_type`` and ``tx_gridelements_backend_layout``.
+``list_type`` applies on TYPO3 13 only and is deprecated since 13.4.
+TYPO3 14 removed the field; plugins are restricted through their
+own ``CType`` instead.
 Server-side validation also automatically includes any further field
 mentioned by a column's own ``allowed`` or ``disallowed``
 configuration, so project-specific fields can be protected without
@@ -30,6 +33,15 @@ The column restrictions are used both to filter the normal authoring
 UI and to validate persisted changes server side. ``top_level_layout``
 is a separate layout-level nesting restriction whose enforcement path
 differs, as described below.
+
+On TYPO3 14, TYPO3 Core also reads column restrictions of page-level
+Backend Layouts: its own ``allowedContentTypes`` and
+``disallowedContentTypes`` keys and, mapped to those, the
+``allowed.CType``/``disallowed.CType`` syntax shown above. Core has no
+``maxitems`` and does not read Grid Element layouts. Grid Elements
+does not read Core's ``allowedContentTypes``/``disallowedContentTypes``
+keys; its own filtering and checks use the ``allowed``/``disallowed``
+syntax. TYPO3 13 has none of these Core keys.
 
 This configuration is the shared input to both layers below: what gets
 *offered* to an editor, and what actually gets *accepted*.
@@ -48,9 +60,14 @@ restrictions above:
   resolving the target column's restrictions either from the page's
   own backend layout or from the target grid container's layout,
   depending on where the wizard was opened.
-* The corresponding FormEngine select fields (``colPos``, ``CType``,
-  ``list_type``) use ``itemsProcFunc`` implementations that apply the
-  same filtering to their item lists.
+* The corresponding FormEngine select fields (``colPos``, ``CType``
+  and, on TYPO3 13, ``list_type``) use ``itemsProcFunc``
+  implementations that apply the same filtering to their item lists.
+* On TYPO3 14, TYPO3 Core additionally filters the New Content Element
+  Wizard and the ``CType`` and ``colPos`` select fields itself for
+  page-level Backend Layout columns, using that column configuration
+  including the ``CType`` rules Grid Elements merges into it, see
+  :ref:`DeveloperReferenceExtensionPoints`.
 
 This layer determines what is convenient to pick, not what is
 permitted. The listener above reads its restriction data
@@ -81,15 +98,24 @@ backed by ``Classes/Helper/RestrictionGuard.php``:
   container. It is not part of the generic
   ``allowed``/``disallowed``/``maxitems`` field-validation loop.
 
+On TYPO3 14, the ``CType`` restriction of a page-level column is
+delegated to TYPO3 Core's ``DataHandlerContentElementRestrictionHook``,
+with Grid Elements' rules merged into Core's column configuration.
+The remaining field checks, ``maxitems`` and restrictions inside Grid
+Element cells remain with the Grid Elements hooks described above.
+
 ``maxitems`` enforcement counts existing siblings in the exact target
 scope (container and column, or page and column, per language) and
 also accounts for other records being saved in the same request, so
 several new elements created together cannot collectively exceed the
 limit even though none of them exists in the database yet.
 
-A rejected save or command is not partially applied: the offending
-entry is removed from the datamap or cmdmap before TYPO3 processes it,
-and a flash message explains why. This makes ``allowed``/``disallowed``/``maxitems``
+A rejected save or command is not applied: the offending entry is
+excluded before it is stored or executed. Grid Elements' hooks enqueue
+a flash message explaining why. On TYPO3 14, a page-column ``CType``
+rejection is logged by TYPO3 Core's DataHandler hook; backend
+controllers that display DataHandler errors turn it into a message.
+This makes ``allowed``/``disallowed``/``maxitems``
 a real constraint on what ends up stored, not
 merely a convenience for what the wizard suggests. This document makes
 no claim about enforcement behavior in other maintained branches.
@@ -133,10 +159,14 @@ Summary
        shared input to both layers below
    * - Authoring-time filtering
      - What is offered to an editor
-     - Wizard item listener, ``itemsProcFunc`` implementations
+     - Wizard item listener, ``itemsProcFunc`` implementations; on
+       TYPO3 14, for page-level columns, also Core's wizard and
+       FormEngine filtering
    * - Server-side enforcement
      - What is actually accepted and stored
-     - ``DataHandler`` ``beforeStart`` hooks, ``RestrictionGuard``
+     - ``DataHandler`` ``beforeStart`` hooks, ``RestrictionGuard``; on
+       TYPO3 14, Core's ``DataHandlerContentElementRestrictionHook``
+       for page-column ``CType``
    * - Permissions / auth mode
      - Whether a user may use a given ``CType`` at all
      - TYPO3 Core ``checkAuthMode()``

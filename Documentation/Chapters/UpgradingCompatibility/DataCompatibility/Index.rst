@@ -42,7 +42,8 @@ up applied to the database.
 Which definition wins
 ^^^^^^^^^^^^^^^^^^^^^^
 
-TYPO3's schema migration (Admin Tools > Maintenance, ``typo3
+TYPO3's schema migration (Admin Tools > Maintenance on TYPO3 13 or
+System > Maintenance on TYPO3 14, ``typo3
 database:updateschema``, or equivalent deployment tooling) collects
 the ``ext_tables.sql`` of every currently active extension and
 combines them into the set of column definitions it compares the live
@@ -65,7 +66,9 @@ records incorrectly, typically as if they were ordinary page-level
 elements. The parent-child relation itself, stored in
 ``tx_gridelements_container``, is not affected by this and continues
 to identify each record as a child of its Grid Element; only what
-``colPos`` displays about it in the Page and List modules is wrong.
+``colPos`` displays about it in the Page and List modules (Web > Page
+and Web > List on TYPO3 13, Content > Layout and Content > Records on
+TYPO3 14) is wrong.
 This is exactly the scenario the Col Pos Fixer's own docblock
 describes, see :ref:`UpgradingCompatibilityUpgradeWizards`.
 
@@ -80,10 +83,10 @@ described above; it is not something a Core upgrade forces on a
 project. Each currently maintained Grid Elements version is built to
 support both the TYPO3 version it targets and that version's immediate
 predecessor at the same time. This branch's ``composer.json`` states
-that directly: ``"typo3/cms-core": "^12.4 || ^13.4.7"``. The same
+that directly: ``"typo3/cms-core": "^13.4.7 || ^14.3"``. The same
 installed Grid Elements version is already compatible before, during
 and after a project runs ``composer update`` to move its TYPO3 Core
-requirement from ``^12.4`` to ``^13.4.7``. There is consequently no
+requirement from ``^13.4.7`` to ``^14.3``. There is consequently no
 point in that upgrade where Grid Elements needs to be absent, and no
 reason for its ``ext_tables.sql`` to ever drop out of the combined
 schema definition set. Where this has gone wrong in practice, it has
@@ -111,6 +114,8 @@ problem, but the schema migration step itself deserves a general
 safety rule regardless, for ``colPos`` and every other field alike.
 TYPO3's schema migrator always groups its suggestions into distinct
 kinds, both in Admin Tools > Maintenance > Analyze Database Structure
+(TYPO3 13) or System > Maintenance > Analyze Database Structure
+(TYPO3 14)
 and in ``typo3 database:updateschema``: adding new tables, fields and
 indexes; changing existing ones; and removing ones no active extension
 declares anymore. Adding is always safe to apply without reviewing
@@ -132,7 +137,7 @@ upgrade.
 What is, and is not, version-specific here
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This branch supports TYPO3 ``^12.4 || ^13.4.7`` simultaneously, not
+This branch supports TYPO3 ``^13.4.7 || ^14.3`` simultaneously, not
 one or the other. Grid Elements' signed ``colPos`` schema definition
 and the ``DataHandler`` logic that depends on it are the same code for
 both supported versions; there is no version-specific ``colPos``

@@ -182,6 +182,7 @@ This key is not read by any current code path; setting it has no
 effect. The underlying problem it addressed is instead handled by the
 extension configuration option ``nestingInListModule``, which, once
 enabled, nests grid children under their container in the list module
+(Web > List on TYPO3 13, Content > Records on TYPO3 14)
 with per-user expand and collapse state rather than hiding them, see
 :ref:`DeveloperReferenceListModuleIntegration`. Remove this key from
 any project's TSconfig; it does nothing.

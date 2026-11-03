@@ -76,7 +76,7 @@ between two partials. ``Child.html`` checks whether pre-fetched
            <f:render partial="Container" arguments="{_all}" optional="true"/>
        </f:then>
        <f:else>
-           <f:cObject typoscriptObjectPath="tt_content.{data.CType}" data="{data}" table="tt_content" />
+           <f:cObject typoscriptObjectPath="tt_content" data="{data}" table="tt_content" />
        </f:else>
    </f:if>
 
@@ -86,7 +86,7 @@ scratch), the partial renders straight back into ``Container.html``,
 which walks down through ``Rows``/``Columns`` into ``Child`` again.
 
 If it was not pre-fetched, the child is instead rendered through
-TYPO3's standard ``tt_content.{CType}`` dispatch. For a nested
+TYPO3's standard ``tt_content`` CASE dispatch on ``CType``. For a nested
 ``gridelements_pi1`` record, that re-enters the container's own
 TypoScript rendering setup from scratch, including its own
 ``GridChildrenProcessor`` call for its own children. The structure

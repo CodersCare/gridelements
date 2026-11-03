@@ -6,7 +6,8 @@
 Working with Grid Elements in the Page Module
 ==============================================
 
-A Grid Element shows up in the Page Module as a block with its own
+A Grid Element shows up in the Page Module (Web > Page on TYPO3 13,
+Content > Layout on TYPO3 14) as a block with its own
 rows and columns, drawn the same way TYPO3 draws a page's own Backend
 Layout, only scoped to that one element instead of the whole page.
 Each cell of that block is a real, visible area: it shows the content
@@ -57,6 +58,13 @@ elements simply will not offer anything else. See :ref:`Restrictions`
 for the full picture, including how these rules are configured and
 enforced.
 
+On TYPO3 14, existing content whose type is not allowed in its column
+shows a warning instead of its preview, for example after the column's
+rules were changed. A Grid Element whose layout is not allowed shows a
+layout-specific warning instead of its rows and columns. Records
+displayed inside a reference are exempt; the column's rules apply to
+the reference element itself. TYPO3 13 does not show these warnings.
+
 Behind the placement: colPos and unused elements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -71,7 +79,8 @@ back. See :ref:`DataModel` for how this is actually stored.
 Grid Elements in the List Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Where an installation has opted into it, the List Module lists a Grid
+Where an installation has opted into it, the List Module (Web > List
+on TYPO3 13, Content > Records on TYPO3 14) lists a Grid
 Element's children nested underneath their container, with per-user
 expand and collapse state, instead of mixed into a flat list of the
 page's content. This is a per-installation setting, not something an

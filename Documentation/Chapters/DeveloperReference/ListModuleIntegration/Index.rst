@@ -6,7 +6,8 @@
 List Module Integration
 ===========================
 
-By default, TYPO3's Web > List module lists ``tt_content`` records the
+By default, TYPO3's Web > List (TYPO3 13) or Content > Records
+(TYPO3 14) module lists ``tt_content`` records the
 same way it lists any other table: a flat list per ``colPos``, with no
 awareness that some of those rows are Grid Element children. Grid
 Elements can instead nest a container's children under it in the List
@@ -51,7 +52,7 @@ own:
        ``tt_content``, so grid children do not also appear as their
        own top-level rows.
    * - ``Xclass\DatabaseRecordList`` /
-       ``Xclass\DatabaseRecordList12``
+       ``Xclass\DatabaseRecordList13``
      - Renders each ``gridelements_pi1`` container with an expand and
        collapse control (``contentCollapseIcon()``, implemented on
        ``Hooks\DatabaseRecordList`` and called directly, not through a
